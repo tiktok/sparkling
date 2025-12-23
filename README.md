@@ -1,4 +1,4 @@
-<img src="TikTok_Sparkling.png" alt="alt text" width="600" />
+<img align="center" src="TikTok_Sparkling.png" alt="alt text" />
 
 <p align="center">
   ❇️ Sparkling is the mobile cross-platform infrastructure used by TikTok
