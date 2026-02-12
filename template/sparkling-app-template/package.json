@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@lynx-js/react": "^0.116.2",
-    "sparkling-navigation": "^2.0.0-rc.8"
+    "sparkling-navigation": "^2.0.0-rc.9"
   },
   "devDependencies": {
     "@lynx-js/qrcode-rsbuild-plugin": "^0.4.4",
@@ -30,7 +30,7 @@
     "@vitest/coverage-v8": "^4.0.18",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
-    "sparkling-app-cli": "~2.0.0-rc.8",
+    "sparkling-app-cli": "~2.0.0-rc.9",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },
