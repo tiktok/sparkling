@@ -279,8 +279,8 @@ importers:
         specifier: ^0.116.2
         version: 0.116.2(@lynx-js/types@3.6.0)(@types/react@18.3.28)
       sparkling-navigation:
-        specifier: ^2.0.0-rc.9
-        version: 2.0.0-rc.9
+        specifier: ^2.0.1
+        version: 2.0.1
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.4.4
@@ -310,8 +310,8 @@ importers:
         specifier: ^3.8.1
         version: 3.8.1
       sparkling-app-cli:
-        specifier: ~2.0.0-rc.9
-        version: 2.0.0-rc.9(@rspack/core@1.7.5(@swc/helpers@0.5.18))(@types/node@25.2.3)(typescript@5.9.3)(webpack@5.105.0)
+        specifier: ~2.0.1
+        version: 2.0.1(@rspack/core@1.7.5(@swc/helpers@0.5.18))(@types/node@25.2.3)(typescript@5.9.3)(webpack@5.105.0)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -4503,16 +4503,16 @@ packages:
   space-separated-tokens@2.0.2:
     resolution: {integrity: sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==}
 
-  sparkling-app-cli@2.0.0-rc.9:
-    resolution: {integrity: sha512-nKrDkDU+tFTVZ6v7Tk/6o5dEW4ZDl7DO3s/I5BTu7iLZG/eEO19cDoVFAECnpwZIyMsG6NZqA3dqHQPFogKo3A==}
+  sparkling-app-cli@2.0.1:
+    resolution: {integrity: sha512-iViB2k4YMkfBJZrbHUF1/b74qOefqpaNmljVZ1xUPmZibw8k8KZTdJ2ixyqupF7awZiP5Onkm7PZC74oV+yioA==}
     engines: {node: ^22 || ^24}
     hasBin: true
 
-  sparkling-method@2.0.0-rc.9:
-    resolution: {integrity: sha512-GOwFYz8ikbxdbTVSY7iIHtH/CCiEIbgL/Q8VBPlqxEb7I9YgMiknLq683ejqe5X5fyWrVn9BnbgHwWFEimssKQ==}
+  sparkling-method@2.0.1:
+    resolution: {integrity: sha512-TXbCs5RhPB6Qz62jxrm3TvFMxWROFvpe8DmYDi1UcLMTKvJ5tTPZy2o8V/sQJ7FwhVevcDf51gvVIAuXUMVuzA==}
 
-  sparkling-navigation@2.0.0-rc.9:
-    resolution: {integrity: sha512-Jwq9oWAEctsOXCEl0kG/jrjxsuBhvGeGjLYPq6bZ0X9/Z8xw0rmOlzF7iF9PGjsIMUczqxz91I5BY9UfRIBBVQ==}
+  sparkling-navigation@2.0.1:
+    resolution: {integrity: sha512-W8Dgn/Om30wwqO1LMzXjJAW2Got437UM0+5gdQ8veEFnGlfQHuHcgCLd+PjyGIglLV20fvmUdnQulRZ8NhNUUQ==}
 
   sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
@@ -10570,7 +10570,7 @@ snapshots:
 
   space-separated-tokens@2.0.2: {}
 
-  sparkling-app-cli@2.0.0-rc.9(@rspack/core@1.7.5(@swc/helpers@0.5.18))(@types/node@25.2.3)(typescript@5.9.3)(webpack@5.105.0):
+  sparkling-app-cli@2.0.1(@rspack/core@1.7.5(@swc/helpers@0.5.18))(@types/node@25.2.3)(typescript@5.9.3)(webpack@5.105.0):
     dependencies:
       '@lynx-js/rspeedy': 0.13.3(@rspack/core@1.7.5(@swc/helpers@0.5.18))(typescript@5.9.3)(webpack@5.105.0)
       chalk: 4.1.2
@@ -10597,11 +10597,11 @@ snapshots:
       - utf-8-validate
       - webpack
 
-  sparkling-method@2.0.0-rc.9: {}
+  sparkling-method@2.0.1: {}
 
-  sparkling-navigation@2.0.0-rc.9:
+  sparkling-navigation@2.0.1:
     dependencies:
-      sparkling-method: 2.0.0-rc.9
+      sparkling-method: 2.0.1
 
   sprintf-js@1.0.3: {}
 

@@ -1,6 +1,6 @@
 {
   "name": "sparkling-app-template",
-  "version": "2.0.0-rc.9",
+  "version": "2.0.1",
   "description": "Brownfield Lynx app based on Sparkling",
   "homepage": "https://tiktok.github.io/sparkling/",
   "repository": {
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@lynx-js/react": "^0.116.2",
-    "sparkling-navigation": "^2.0.0-rc.9"
+    "sparkling-navigation": "^2.0.1"
   },
   "devDependencies": {
     "@lynx-js/qrcode-rsbuild-plugin": "^0.4.4",
@@ -30,7 +30,7 @@
     "@vitest/coverage-v8": "^4.0.18",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
-    "sparkling-app-cli": "~2.0.0-rc.9",
+    "sparkling-app-cli": "~2.0.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },

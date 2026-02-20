@@ -12,7 +12,7 @@ install! 'cocoapods',
 
 inhibit_all_warnings!
 
-SPARKLING_VERSION = '2.0.0-rc.5'
+SPARKLING_VERSION = '2.0.1'
 
 def sparkling_methods
   pod 'SparklingMethod', SPARKLING_VERSION, :subspecs => [
