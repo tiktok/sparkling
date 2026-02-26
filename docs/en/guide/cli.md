@@ -30,6 +30,23 @@ npx sparkling build
 
 By default, asset copying is skipped for faster iteration during development. Use `--copy` when you need the bundles inside the native projects (e.g. for a release build).
 
+### `sparkling dev`
+
+Start the Rspeedy dev server for hot-reload development. Instead of rebuilding and copying bundles manually, the dev server serves bundles over HTTP so changes are reflected instantly.
+
+```bash
+npx sparkling dev
+```
+
+| Option | Description |
+| --- | --- |
+| `--config <path>` | Path to `app.config.ts` (default: `app.config.ts`) |
+| `--port <number>` | Dev server port (default: `5969`) |
+
+The default port **5969** spells **LYNX** on a phone keypad (L=5, Y=9, N=6, X=9).
+
+Once the server is running, point your app to `http://<your-ip>:5969/main.lynx.bundle` (or whatever entry point you need). In the project template, **DEBUG** builds connect to the dev server automatically.
+
 ### `sparkling copy-assets`
 
 Copy compiled bundles into Android and iOS resource directories.
@@ -154,12 +171,15 @@ cd my-app
 # 2. Check your environment
 npx sparkling doctor
 
-# 3. Run on Android
+# 3. Start the dev server for hot-reload development
+npx sparkling dev
+
+# 4. Run on Android
 npx sparkling run:android
 
-# 4. Run on iOS
+# 5. Run on iOS
 npx sparkling run:ios
 
-# 5. Build bundles for release
+# 6. Build bundles for release
 npx sparkling build --copy
 ```

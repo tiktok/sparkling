@@ -30,6 +30,23 @@ npx sparkling build
 
 默认跳过资源复制以加快开发迭代速度。需要将 bundle 放入原生项目时（如发布构建），请使用 `--copy`。
 
+### `sparkling dev`
+
+启动 Rspeedy 开发服务器，支持热重载开发。无需手动重新构建和复制 bundle，开发服务器通过 HTTP 提供 bundle，修改即时生效。
+
+```bash
+npx sparkling dev
+```
+
+| 选项 | 说明 |
+| --- | --- |
+| `--config <path>` | `app.config.ts` 路径（默认：`app.config.ts`） |
+| `--port <number>` | 开发服务器端口（默认：`5969`） |
+
+默认端口 **5969** 对应手机九宫格键盘上的 **LYNX**（L=5, Y=9, N=6, X=9）。
+
+服务器启动后，将应用指向 `http://<你的IP>:5969/main.lynx.bundle`（或你需要的入口）。项目模板中，**DEBUG** 构建会自动连接开发服务器。
+
 ### `sparkling copy-assets`
 
 将编译好的 bundle 复制到 Android 和 iOS 资源目录。
@@ -154,12 +171,15 @@ cd my-app
 # 2. 检查环境
 npx sparkling doctor
 
-# 3. 在 Android 上运行
+# 3. 启动开发服务器，支持热重载
+npx sparkling dev
+
+# 4. 在 Android 上运行
 npx sparkling run:android
 
-# 4. 在 iOS 上运行
+# 5. 在 iOS 上运行
 npx sparkling run:ios
 
-# 5. 构建发布用 bundle
+# 6. 构建发布用 bundle
 npx sparkling build --copy
 ```
