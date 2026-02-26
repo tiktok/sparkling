@@ -51,6 +51,35 @@ function ensureTsNodeRegistered() {
   registeredTsNode = true;
 }
 
+export function createTempLynxConfig(cwd: string, appConfigPath: string): string {
+  const tempDir = path.resolve(cwd, '.sparkling');
+  fs.mkdirSync(tempDir, { recursive: true });
+  const tempConfigPath = path.join(tempDir, 'lynx.config.ts');
+  const rel = path.relative(tempDir, path.resolve(appConfigPath)).split(path.sep).join('/');
+  const content = [
+    `import cfgModule from '${rel.startsWith('.') ? rel : './' + rel}'`,
+    'const cfg: any = (cfgModule as any).default ?? cfgModule',
+    'export default (cfg.lynxConfig ?? cfg) as any',
+  ].join('\n');
+  fs.writeFileSync(tempConfigPath, content);
+  return tempConfigPath;
+}
+
+export function createDevLynxConfig(cwd: string, appConfigPath: string, port: number): string {
+  const tempDir = path.resolve(cwd, '.sparkling');
+  fs.mkdirSync(tempDir, { recursive: true });
+  const tempConfigPath = path.join(tempDir, 'lynx.config.ts');
+  const rel = path.relative(tempDir, path.resolve(appConfigPath)).split(path.sep).join('/');
+  const content = [
+    `import cfgModule from '${rel.startsWith('.') ? rel : './' + rel}'`,
+    'const cfg: any = (cfgModule as any).default ?? cfgModule',
+    'const lynxCfg = cfg.lynxConfig ?? cfg',
+    `export default { ...lynxCfg, server: { ...lynxCfg.server, port: ${port}, strictPort: true } } as any`,
+  ].join('\n');
+  fs.writeFileSync(tempConfigPath, content);
+  return tempConfigPath;
+}
+
 export async function loadAppConfig(cwd: string, configFile = 'app.config.ts'): Promise<{ config: AppConfig; configPath: string }> {
   const configPath = path.resolve(cwd, configFile);
   if (!fs.existsSync(configPath)) {

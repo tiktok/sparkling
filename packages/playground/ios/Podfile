@@ -72,3 +72,17 @@ end
 target 'SparklingGoUITests' do
   sparkling_kit
 end
+
+# Append Local.xcconfig (gitignored) to the Pods-generated xcconfigs so
+# developers can override build settings (e.g. DEVELOPMENT_TEAM) locally.
+post_install do |installer|
+  local_xcconfig = File.expand_path('Local.xcconfig', __dir__)
+  next unless File.exist?(local_xcconfig)
+
+  Dir.glob(File.join(__dir__, 'Pods/Target Support Files/Pods-SparklingGo/Pods-SparklingGo.*.xcconfig')) do |path|
+    content = File.read(path)
+    include_line = '#include? "../../../Local.xcconfig"'
+    next if content.include?(include_line)
+    File.open(path, 'a') { |f| f.puts "\n#{include_line}" }
+  end
+end

@@ -41,5 +41,11 @@ packages/common/test-utils/*.js.map
 packages/common/test-utils/*.d.ts
 packages/common/test-utils/*.d.ts.map
 
+# Build artifacts
+.temp-templates/
+
+# Local Xcode overrides (per-developer signing, etc.)
+**/Local.xcconfig
+
 # Python
 __pycache__/

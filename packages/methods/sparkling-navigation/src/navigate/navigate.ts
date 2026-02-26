@@ -4,6 +4,9 @@
 import { open } from '../open/open';
 import type { NavigateRequest, NavigateResponse, NavigateOptions, NavigateParamKey } from './navigate.d';
 
+declare const __DEV__: boolean;
+declare const __webpack_public_path__: string;
+
 const DEFAULT_ROUTER_SCHEME = 'hybrid://lynxview_page';
 const PROTOCOL_REGEX = /^[a-z][a-z0-9+.-]*:\/\//i;
 const ALLOWED_SCHEME_PARAMS = new Set<NavigateParamKey>([
@@ -37,10 +40,29 @@ function normalizePath(path: string): string {
     return normalized;
 }
 
+function getDevServerBaseURL(): string | undefined {
+    try {
+        if (typeof __DEV__ !== 'undefined' && __DEV__ && typeof __webpack_public_path__ === 'string' && __webpack_public_path__) {
+            return __webpack_public_path__;
+        }
+    } catch {
+        // __DEV__ or __webpack_public_path__ not available
+    }
+    return undefined;
+}
+
 function buildScheme(baseScheme: string, bundlePath: string, params?: NavigateOptions['params']): string {
     const sanitizedBase = (baseScheme || DEFAULT_ROUTER_SCHEME).trim().replace(/[?&]+$/, '') || DEFAULT_ROUTER_SCHEME;
     const searchParams = new URLSearchParams();
-    searchParams.set('bundle', bundlePath);
+
+    const devBaseURL = getDevServerBaseURL();
+    if (devBaseURL) {
+        // In dev mode, use url= to load bundles from the dev server
+        const fullURL = `${devBaseURL.replace(/\/+$/, '')}/${bundlePath}`;
+        searchParams.set('url', fullURL);
+    } else {
+        searchParams.set('bundle', bundlePath);
+    }
 
     if (params && typeof params === 'object') {
         for (const key of Object.keys(params) as NavigateParamKey[]) {

@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useState } from '@lynx-js/react'
+import { useCallback, useEffect, useState } from '@lynx-js/react';
 import SwitchButton from './components/SwitchButton.js';
 
-import './App.css'
-import sparklingLogo from './assets/sparkling_icon.png';
-import type { NavigateResponse } from 'sparkling-navigation';
+import * as media from 'sparkling-media';
+import type { NavigateResponse, OpenResponse } from 'sparkling-navigation';
 import * as router from 'sparkling-navigation';
 import * as storage from 'sparkling-storage';
-import * as media from 'sparkling-media';
+import './App.css';
+import sparklingLogo from './assets/sparkling_icon.png';
 import type { InputEvent } from './typing.js';
 
 export function App(props: {
@@ -43,19 +43,36 @@ export function App(props: {
     return params;
   }, [switchStates]);
 
+  const isHTTPURL = (path: string) => /^https?:\/\//i.test(path);
+
   const routerOpen = () => {
-    router.navigate(
-      {
-        path: bundlePath,
-        options: {
-          params: buildQueryParams(),
+    if (isHTTPURL(bundlePath)) {
+      // For HTTP URLs (e.g. dev server), use router.open() with a hybrid scheme
+      const encoded = encodeURIComponent(bundlePath);
+      const params = buildQueryParams();
+      const extra = Object.entries(params).map(([k, v]) => `&${k}=${v}`).join('');
+      const scheme = `hybrid://lynxview?url=${encoded}${extra}`;
+      router.open(
+        { scheme },
+        (v: OpenResponse) => {
+          console.log('v', v);
+          setApiResponse(`Router Open: ${JSON.stringify(v)}`);
+        }
+      );
+    } else {
+      router.navigate(
+        {
+          path: bundlePath,
+          options: {
+            params: buildQueryParams(),
+          },
         },
-      },
-      (v: NavigateResponse) => {
-        console.log('v', v);
-        setApiResponse(`Router Navigate: ${JSON.stringify(v)}`);
-      }
-    );
+        (v: NavigateResponse) => {
+          console.log('v', v);
+          setApiResponse(`Router Navigate: ${JSON.stringify(v)}`);
+        }
+      );
+    }
   };
 
   const setStorageItem = () => {
@@ -180,11 +197,11 @@ export function App(props: {
             </scroll-view>
           </view>
           <view className='input-card-url'>
-            <text className='bold-text'>Bundle Path</text>
+            <text className='bold-text'>Bundle Path / URL</text>
             <input
               className="input-box"
               bindinput={handleInput}
-              placeholder="Enter bundle path (e.g. second.lynx.bundle)"
+              placeholder="second.lynx.bundle or http://ip:3000/main.lynx.bundle"
               value={bundlePath}
               text-color='#000000'
             />

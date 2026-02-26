@@ -131,7 +131,12 @@ open class SPKResourceLoaderImpl: NSObject, SPKResourceLoaderProtocol {
         guard let url = url else {
             return nil
         }
-        
+
+        // Skip local bundle lookup for remote URLs (e.g. dev server)
+        if let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https" {
+            return nil
+        }
+
         var relativePath = url.path
         while relativePath.hasPrefix("./") {
             relativePath = String(relativePath.dropFirst(2))
