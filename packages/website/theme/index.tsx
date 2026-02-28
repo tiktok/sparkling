@@ -24,7 +24,7 @@ function HomeLayout() {
           target="_blank"
           rel="noreferrer"
         >
-          Sparkling Version ${__SPARKLING_VERSION__}
+          Public Beta · v${__SPARKLING_VERSION__}
         </a>
       `;
     }
