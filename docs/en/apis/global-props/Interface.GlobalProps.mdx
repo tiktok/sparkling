@@ -1,0 +1,390 @@
+# Interface: GlobalProps
+
+Global properties injected by the Sparkling native SDK into every Lynx
+container. Access these at runtime via `lynx.__globalProps`.
+
+The native layer (iOS / Android) populates these values before the Lynx
+bundle starts executing. Some fields are **stable** (set once on app
+launch) and some are **unstable** (may change per container or over time).
+
+## Properties
+
+### accessibleMode
+
+```ts
+accessibleMode: number;
+```
+
+Accessibility mode bitmask.
+- Bit 0 (`1`): VoiceOver (iOS) or TalkBack (Android) is active.
+
+***
+
+### appLanguage?
+
+```ts
+optional appLanguage: string;
+```
+
+App-level language setting.
+
+#### Platform
+
+Android
+
+***
+
+### appLocale?
+
+```ts
+optional appLocale: string;
+```
+
+App-level locale setting.
+
+#### Platform
+
+Android
+
+***
+
+### bottomHeight
+
+```ts
+bottomHeight: number;
+```
+
+Height of the bottom safe-area inset in logical points.
+Equivalent to `safeAreaInsets.bottom` on iOS.
+
+#### Platform
+
+iOS
+
+***
+
+### containerID
+
+```ts
+containerID: string;
+```
+
+Unique identifier for this Sparkling container instance.
+
+***
+
+### containerInitTime
+
+```ts
+containerInitTime: string;
+```
+
+Timestamp (as string) when the container was initialized.
+
+***
+
+### contentHeight
+
+```ts
+contentHeight: number;
+```
+
+Available content height, excluding top and bottom safe areas.
+Computed as `screenHeight - topHeight - bottomHeight`.
+
+#### Platform
+
+iOS
+
+***
+
+### deviceModel
+
+```ts
+deviceModel: string;
+```
+
+Device model identifier in lowercase (e.g. `"iphone15,2"`, `"pixel 8"`).
+
+***
+
+### isAppBackground
+
+```ts
+isAppBackground: boolean;
+```
+
+`true` if the app is currently in the background.
+
+***
+
+### isIPhoneX
+
+```ts
+isIPhoneX: number;
+```
+
+`1` if the device is an iPhone X-series (or later with notch / Dynamic Island),
+`0` otherwise. Always `0` on Android.
+
+#### Platform
+
+iOS
+
+***
+
+### isIPhoneXMax
+
+```ts
+isIPhoneXMax: number;
+```
+
+`1` if the device is an iPhone X-series (or later with notch / Dynamic Island),
+`0` otherwise. Always `0` on Android.
+
+#### Remarks
+
+Identical to [isIPhoneX](Interface.GlobalProps.mdx#isiphonex) in current implementations.
+
+#### Platform
+
+iOS
+
+***
+
+### isLowPowerMode
+
+```ts
+isLowPowerMode: number;
+```
+
+`1` if the device is in low-power / battery-saver mode, `0` otherwise.
+
+***
+
+### isNotchScreen
+
+```ts
+isNotchScreen: boolean;
+```
+
+Whether the device has a screen notch or cutout.
+
+***
+
+### isPad
+
+```ts
+isPad: number;
+```
+
+`1` if the device is a tablet (iPad / Android tablet), `0` otherwise.
+
+***
+
+### language
+
+```ts
+language: string;
+```
+
+Preferred language code from the OS (e.g. `"en-US"`, `"zh-Hans"`).
+
+***
+
+### lynxSdkVersion
+
+```ts
+lynxSdkVersion: string;
+```
+
+Version of the underlying Lynx SDK.
+
+#### Platform
+
+Android
+
+***
+
+### navigationBarHeight
+
+```ts
+navigationBarHeight: number;
+```
+
+Height of the system navigation bar in logical points.
+
+#### Platform
+
+Android
+
+***
+
+### orientation?
+
+```ts
+optional orientation: number;
+```
+
+Numeric orientation indicator.
+`0` = portrait, `1` = landscape.
+
+#### Platform
+
+Android
+
+***
+
+### os
+
+```ts
+os: string;
+```
+
+Operating system identifier.
+- `"ios"` on iOS
+- `"android"` on Android
+
+***
+
+### osVersion
+
+```ts
+osVersion: string;
+```
+
+OS version string (e.g. `"17.4"`, `"14"`).
+
+***
+
+### pixelRatio
+
+```ts
+pixelRatio: number;
+```
+
+Device pixel ratio (e.g. `2.0`, `3.0`).
+
+#### Platform
+
+Android
+
+***
+
+### preferredTheme?
+
+```ts
+optional preferredTheme: string;
+```
+
+User-preferred theme setting, if different from the current applied theme.
+May be `undefined` if no preference has been set.
+
+***
+
+### queryItems
+
+```ts
+queryItems: Record<string, string>;
+```
+
+Query parameters parsed from the container's scheme URL.
+Each key-value pair corresponds to a query parameter.
+
+#### Platform
+
+Android
+
+***
+
+### safeAreaHeight
+
+```ts
+safeAreaHeight: number;
+```
+
+Safe-area height. On iOS this equals `safeAreaInsets.top`;
+on Android it is derived from screen metrics.
+
+***
+
+### screenHeight
+
+```ts
+screenHeight: number;
+```
+
+Screen height in logical points (dp on Android, pt on iOS).
+
+***
+
+### screenOrientation
+
+```ts
+screenOrientation: string;
+```
+
+Current screen orientation as a string.
+
+Possible values: `"Portrait"`, `"PortraitUpsideDown"`, `"LandscapeLeft"`,
+`"LandscapeRight"`, `"Landscape"`, `"Unknown"`.
+
+***
+
+### screenWidth
+
+```ts
+screenWidth: number;
+```
+
+Screen width in logical points (dp on Android, pt on iOS).
+
+***
+
+### statusBarHeight
+
+```ts
+statusBarHeight: number;
+```
+
+Height of the system status bar in logical points.
+
+***
+
+### templateResData
+
+```ts
+templateResData: string;
+```
+
+Template resource data passed to the container.
+Contents depend on the app's template configuration.
+
+#### Platform
+
+Android
+
+***
+
+### theme
+
+```ts
+theme: string;
+```
+
+Current UI theme: `"dark"` or `"light"`.
+
+***
+
+### topHeight
+
+```ts
+topHeight: number;
+```
+
+Height of the top safe-area inset in logical points.
+Equivalent to `safeAreaInsets.top` on iOS.
+
+#### Platform
+
+iOS

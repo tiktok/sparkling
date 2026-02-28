@@ -1,0 +1,32 @@
+# API Overview
+
+## Sparkling Lynx
+
+APIs for Lynx bundles running inside Sparkling containers.
+
+| API | Description |
+| --- | --- |
+| [GlobalProps](/apis/global-props/Interface.GlobalProps) | Runtime globals injected by the native SDK (`lynx.__globalProps`) |
+| [Scheme](/apis/scheme) | The unified `hybrid://...` URL format for opening pages/containers |
+| [Navigation](/apis/sparkling-methods/sparkling-navigation) | Router helpers for opening/closing pages from Lynx/JS |
+| [Storage](/apis/sparkling-methods/sparkling-storage) | Key-value storage helpers for Lynx/JS |
+| [Media](/apis/sparkling-methods/sparkling-media) | Media helpers for choosing, uploading, downloading, and saving files |
+
+## Sparkling SDK
+
+Native SDK APIs for hosting Sparkling content in your app.
+
+| API | Description |
+| --- | --- |
+| [Android](/apis/sparkling-sdk-android) | Android SDK for initializing and hosting Sparkling containers |
+| [iOS](/apis/sparkling-sdk-ios) | iOS SDK for initializing and hosting Sparkling containers |
+
+## Sparkling Method SDK
+
+The native bridge layer that enables JS ↔ native method calls.
+
+| API | Description |
+| --- | --- |
+| [Android](/apis/sparkling-method-android) | Native bridge implementation for Android |
+| [iOS](/apis/sparkling-method-ios) | Native bridge implementation for iOS |
+| [TypeScript](/apis/sparkling-method-ts) | JS-side pipe that all method packages are built on |

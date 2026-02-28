@@ -1,0 +1,27 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/global-props.ts"],
+  "tsconfig": "tsconfig.typedoc.json",
+  "plugin": ["typedoc-plugin-markdown"],
+  "out": "../../docs/en/apis/global-props",
+  "readme": "none",
+  "flattenOutputFiles": true,
+  "fileExtension": ".mdx",
+  "useCodeBlocks": true,
+  "interfacePropertiesFormat": "list",
+  "hidePageHeader": true,
+  "hideBreadcrumbs": true,
+  "disableSources": true,
+  "blockTags": [
+    "@defaultValue",
+    "@deprecated",
+    "@example",
+    "@param",
+    "@platform",
+    "@remarks",
+    "@returns",
+    "@see",
+    "@throws",
+    "@typeParam"
+  ]
+}

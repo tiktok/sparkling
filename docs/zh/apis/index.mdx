@@ -1,0 +1,32 @@
+# API 概览
+
+## Sparkling Lynx
+
+运行在 Sparkling 容器内的 Lynx Bundle 可用的 API。
+
+| API | 说明 |
+| --- | --- |
+| [GlobalProps](/apis/global-props/Interface.GlobalProps) | 原生 SDK 注入的运行时全局属性（`lynx.__globalProps`） |
+| [Scheme](/apis/scheme) | 用于打开页面/容器的统一 `hybrid://...` URL 格式 |
+| [Navigation](/apis/sparkling-methods/sparkling-navigation) | 从 Lynx/JS 打开或关闭页面的路由辅助 API |
+| [Storage](/apis/sparkling-methods/sparkling-storage) | Lynx/JS 端的键值存储辅助 API |
+| [Media](/apis/sparkling-methods/sparkling-media) | 选择、上传、下载和保存媒体文件的辅助 API |
+
+## Sparkling SDK
+
+在宿主应用中承载 Sparkling 内容的原生 SDK。
+
+| API | 说明 |
+| --- | --- |
+| [Android](/apis/sparkling-sdk-android) | Android SDK：初始化并承载 Sparkling 容器 |
+| [iOS](/apis/sparkling-sdk-ios) | iOS SDK：初始化并承载 Sparkling 容器 |
+
+## Sparkling Method SDK
+
+JS ↔ 原生方法调用的桥接层。
+
+| API | 说明 |
+| --- | --- |
+| [Android](/apis/sparkling-method-android) | Android 端原生桥接实现 |
+| [iOS](/apis/sparkling-method-ios) | iOS 端原生桥接实现 |
+| [TypeScript](/apis/sparkling-method-ts) | 所有 Method 包的 JS 端基础管道 |

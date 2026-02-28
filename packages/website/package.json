@@ -6,12 +6,16 @@
   "scripts": {
     "dev": "rspress dev",
     "build": "rspress build",
-    "preview": "rspress preview"
+    "preview": "rspress preview",
+    "gen:api": "typedoc"
   },
   "devDependencies": {
     "@rspack/core": "2.0.0-alpha.1",
-    "@rspress/core": "^2.0.2",
-    "playwright": "^1.58.2"
+    "@rspress/core": "^2.0.3",
+    "@rspress/plugin-llms": "^2.0.3",
+    "playwright": "^1.58.2",
+    "typedoc": "^0.26.11",
+    "typedoc-plugin-markdown": "~4.2.10"
   },
   "engines": {
     "node": ">=20"

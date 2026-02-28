@@ -1,4 +1,5 @@
 import { defineConfig } from '@rspress/core';
+import { pluginLlms } from '@rspress/plugin-llms';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 
@@ -19,12 +20,12 @@ const githubSocialIcon = {
 
 const navEn = [
   { text: 'Guide', link: '/guide/get-started/create-new-app' },
-  { text: 'APIs', link: '/apis/sparkling-sdk-android' },
+  { text: 'APIs', link: '/apis/' },
 ];
 
 const navZh = [
   { text: '指南', link: '/guide/get-started/create-new-app' },
-  { text: 'APIs', link: '/apis/sparkling-sdk-android' },
+  { text: 'APIs', link: '/apis/' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -51,30 +52,22 @@ const sidebarEn = {
     { text: 'CLI', items: [{ text: 'CLI', link: '/guide/cli' }] },
   ],
   '/apis/': [
-    {
-      text: 'Sparkling SDK',
-      items: [
-        { text: 'Android', link: '/apis/sparkling-sdk-android' },
-        { text: 'iOS', link: '/apis/sparkling-sdk-ios' },
-      ],
-    },
-    {
-      text: 'Sparkling Method SDK',
-      items: [
-        { text: 'Android', link: '/apis/sparkling-method-android' },
-        { text: 'iOS', link: '/apis/sparkling-method-ios' },
-        { text: 'TypeScript', link: '/apis/sparkling-method-ts' },
-      ],
-    },
-    {
-      text: 'Sparkling Methods',
-      items: [
-        { text: 'Sparkling Navigation', link: '/apis/sparkling-methods/sparkling-navigation' },
-        { text: 'Sparkling Storage', link: '/apis/sparkling-methods/sparkling-storage' },
-        { text: 'Sparkling Media', link: '/apis/sparkling-methods/sparkling-media' },
-      ],
-    },
-    { text: 'Scheme', items: [{ text: 'Scheme', link: '/apis/scheme' }] },
+    { text: 'Overview', link: '/apis/' },
+    { sectionHeaderText: 'Sparkling Lynx' },
+    { text: 'GlobalProps', link: '/apis/global-props/Interface.GlobalProps' },
+    { text: 'Scheme', link: '/apis/scheme' },
+    { text: 'Navigation', link: '/apis/sparkling-methods/sparkling-navigation' },
+    { text: 'Storage', link: '/apis/sparkling-methods/sparkling-storage' },
+    { text: 'Media', link: '/apis/sparkling-methods/sparkling-media' },
+    { dividerType: 'solid' },
+    { sectionHeaderText: 'Sparkling SDK' },
+    { text: 'Android', link: '/apis/sparkling-sdk-android' },
+    { text: 'iOS', link: '/apis/sparkling-sdk-ios' },
+    { dividerType: 'solid' },
+    { sectionHeaderText: 'Sparkling Method SDK' },
+    { text: 'Android', link: '/apis/sparkling-method-android' },
+    { text: 'iOS', link: '/apis/sparkling-method-ios' },
+    { text: 'TypeScript', link: '/apis/sparkling-method-ts' },
   ],
 };
 
@@ -98,30 +91,22 @@ const sidebarZhBase = {
     { text: 'CLI', items: [{ text: 'CLI', link: '/guide/cli' }] },
   ],
   '/apis/': [
-    {
-      text: 'Sparkling SDK',
-      items: [
-        { text: 'Android', link: '/apis/sparkling-sdk-android' },
-        { text: 'iOS', link: '/apis/sparkling-sdk-ios' },
-      ],
-    },
-    {
-      text: 'Sparkling Method SDK',
-      items: [
-        { text: 'Android', link: '/apis/sparkling-method-android' },
-        { text: 'iOS', link: '/apis/sparkling-method-ios' },
-        { text: 'TypeScript', link: '/apis/sparkling-method-ts' },
-      ],
-    },
-    {
-      text: 'Sparkling Methods',
-      items: [
-        { text: 'Sparkling Navigation', link: '/apis/sparkling-methods/sparkling-navigation' },
-        { text: 'Sparkling Storage', link: '/apis/sparkling-methods/sparkling-storage' },
-        { text: 'Sparkling Media', link: '/apis/sparkling-methods/sparkling-media' },
-      ],
-    },
-    { text: 'Scheme', items: [{ text: 'Scheme', link: '/apis/scheme' }] },
+    { text: '概览', link: '/apis/' },
+    { sectionHeaderText: 'Sparkling Lynx' },
+    { text: 'GlobalProps', link: '/apis/global-props/Interface.GlobalProps' },
+    { text: 'Scheme', link: '/apis/scheme' },
+    { text: 'Navigation', link: '/apis/sparkling-methods/sparkling-navigation' },
+    { text: 'Storage', link: '/apis/sparkling-methods/sparkling-storage' },
+    { text: 'Media', link: '/apis/sparkling-methods/sparkling-media' },
+    { dividerType: 'solid' },
+    { sectionHeaderText: 'Sparkling SDK' },
+    { text: 'Android', link: '/apis/sparkling-sdk-android' },
+    { text: 'iOS', link: '/apis/sparkling-sdk-ios' },
+    { dividerType: 'solid' },
+    { sectionHeaderText: 'Sparkling Method SDK' },
+    { text: 'Android', link: '/apis/sparkling-method-android' },
+    { text: 'iOS', link: '/apis/sparkling-method-ios' },
+    { text: 'TypeScript', link: '/apis/sparkling-method-ts' },
   ],
 };
 
@@ -161,6 +146,7 @@ export default defineConfig({
   logoText: 'Sparkling',
   themeConfig: {
     darkMode: true,
+    llmsUI: true,
     nav: navEn,
     sidebar: sidebarEn,
     search: true,
@@ -196,7 +182,20 @@ export default defineConfig({
   },
   globalStyles: path.resolve('styles/index.css'),
   // Built-in plugins (container syntax, medium zoom, auto nav) are handled by Rspress core.
-  plugins: [],
+  plugins: [
+    pluginLlms([
+      {
+        llmsTxt: { name: 'llms.txt' },
+        llmsFullTxt: { name: 'llms-full.txt' },
+        include: ({ page }) => page.lang === 'en',
+      },
+      {
+        llmsTxt: { name: 'zh/llms.txt' },
+        llmsFullTxt: { name: 'zh/llms-full.txt' },
+        include: ({ page }) => page.lang === 'zh',
+      },
+    ]),
+  ],
   builderConfig: {
     source: {
       define: {
