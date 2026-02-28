@@ -178,8 +178,11 @@ body {
    Homepage
    ========================================================================== */
 
-/* Home background */
+/* Home background – isolation:isolate creates a local stacking context
+   so the video bg (z-index:0) stays behind content (z-index:2) without
+   needing a global z-index on #__rspress_root. */
 .rp-home-background {
+  isolation: isolate;
   background: var(--rp-home-background-bg) !important;
   filter: none;
 }
@@ -202,7 +205,7 @@ body {
   transform: translateX(-50%);
   width: 70%;
   max-width: 1200px;
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
   overflow: hidden;
 }
@@ -222,13 +225,6 @@ body {
     rgba(0, 0, 0, 1) 30%,
     rgba(0, 0, 0, 0) 100%
   );
-}
-
-/* Stacking context so z-index:-1 children stay behind siblings
-   but still visible above body bg */
-#__rspress_root {
-  position: relative;
-  z-index: 0;
 }
 
 /* Hero */
