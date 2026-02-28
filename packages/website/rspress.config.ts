@@ -53,7 +53,29 @@ const sidebarEn = {
   '/apis/': [
     { text: 'Overview', link: '/apis/' },
     { sectionHeaderText: 'Configuration' },
-    { text: 'AppConfig', link: '/apis/app-config/Interface.AppConfig' },
+    {
+      text: 'AppConfig',
+      link: '/apis/app-config/Interface.AppConfig',
+      collapsed: true,
+      items: [
+        {
+          text: 'PlatformConfig',
+          link: '/apis/app-config/Interface.PlatformConfig',
+        },
+        {
+          text: 'RouterConfig',
+          link: '/apis/app-config/Interface.RouterConfig',
+        },
+        {
+          text: 'PluginConfig',
+          link: '/apis/app-config/TypeAlias.PluginConfig',
+        },
+        {
+          text: 'SplashScreenPluginConfig',
+          link: '/apis/app-config/Interface.SplashScreenPluginConfig',
+        },
+      ],
+    },
     { dividerType: 'solid' },
     { sectionHeaderText: 'Sparkling Lynx' },
     { text: 'GlobalProps', link: '/apis/global-props/Interface.GlobalProps' },
@@ -97,7 +119,29 @@ const sidebarZhBase = {
   '/apis/': [
     { text: '概览', link: '/apis/' },
     { sectionHeaderText: 'Configuration' },
-    { text: 'AppConfig', link: '/apis/app-config/Interface.AppConfig' },
+    {
+      text: 'AppConfig',
+      link: '/apis/app-config/Interface.AppConfig',
+      collapsed: true,
+      items: [
+        {
+          text: 'PlatformConfig',
+          link: '/apis/app-config/Interface.PlatformConfig',
+        },
+        {
+          text: 'RouterConfig',
+          link: '/apis/app-config/Interface.RouterConfig',
+        },
+        {
+          text: 'PluginConfig',
+          link: '/apis/app-config/TypeAlias.PluginConfig',
+        },
+        {
+          text: 'SplashScreenPluginConfig',
+          link: '/apis/app-config/Interface.SplashScreenPluginConfig',
+        },
+      ],
+    },
     { dividerType: 'solid' },
     { sectionHeaderText: 'Sparkling Lynx' },
     { text: 'GlobalProps', link: '/apis/global-props/Interface.GlobalProps' },
