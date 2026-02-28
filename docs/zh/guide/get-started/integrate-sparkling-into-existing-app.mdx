@@ -1,0 +1,148 @@
+import { Steps } from '@theme';
+
+# 将 Sparkling 集成到现有应用
+
+本指南介绍如何将 Sparkling 容器嵌入已有的 Android/iOS 项目中，无需从模板重新生成应用。
+
+## Android
+
+<Steps>
+
+### 添加依赖
+
+1. **Sparkling SDK**
+
+核心容器与 Lynx 集成能力。添加已发布的 Maven 产物：
+
+```kotlin
+// app/build.gradle.kts
+dependencies {
+  implementation("com.tiktok.sparkling:sparkling:2.0.0")
+}
+```
+
+2. **Sparkling Method**
+
+Sparkling Method 提供类型化的 JS 与原生桥接模块，如 `router`、`storage`、`media` 等。每个模块通过生成的 pipe 接口，将原生能力（页面导航、持久化存储、相机/相册访问等）暴露给 Lynx 代码。你也可以[创建自定义 Method](/guide/get-started/create-custom-method) 来暴露自己的原生 API。
+
+在 JS 项目中安装 Method 包并运行 `npx sparkling autolink`——CLI 会自动更新 Gradle 配置并生成原生注册代码。
+
+### 初始化 HybridKit（Application.onCreate）
+
+宿主必须在打开任何容器之前初始化 HybridKit 并配置 Lynx。
+模板在 `SparklingApplication` 中完成此操作：
+
+```kotlin
+class SparklingApplication : Application() {
+  override fun onCreate() {
+    super.onCreate()
+    HybridKit.init(this)
+
+    val baseInfoConfig = BaseInfoConfig(isDebug = BuildConfig.DEBUG)
+    val lynxConfig = SparklingLynxConfig.build(this) {
+      // 可选：添加自定义 Lynx UI 组件和模板提供者
+    }
+    val hybridConfig = SparklingHybridConfig.build(baseInfoConfig) {
+      setLynxConfig(lynxConfig)
+    }
+
+    HybridKit.setHybridConfig(hybridConfig, this)
+    HybridKit.initLynxKit()
+
+    // 注册 Method 实现（如路由）
+    SparklingBridgeManager.registerIDLMethod(RouterOpenMethod::class.java)
+    SparklingBridgeManager.registerIDLMethod(RouterCloseMethod::class.java)
+    RouterProvider.hostRouterDepend = SparklingHostRouterDepend()
+  }
+}
+```
+
+### 提供 bundle 资源
+
+在 JS 项目中构建 Lynx bundle，然后将生成的 `.lynx.bundle` 文件复制到 Android 资源目录
+（通常为 `app/src/main/assets`）。`hybrid://...` Scheme 中的 `bundle=` 参数
+必须与复制到 App 中的资源路径/名称一致。
+
+### 打开页面
+
+Android SDK 提供了 `SparklingContext` 和 `Sparkling.build(...).navigate()`：
+
+```kotlin
+val context = SparklingContext()
+context.scheme = "hybrid://lynxview_page?bundle=main.lynx.bundle&title=Home&hide_nav_bar=1"
+context.withInitData("{\"initial_data\":{}}")
+
+Sparkling.build(this, context).navigate()
+```
+
+</Steps>
+
+## iOS
+
+<Steps>
+
+### 添加依赖
+
+1. **Sparkling SDK**
+
+核心容器与 Lynx 集成能力：
+
+```ruby
+pod 'Sparkling', '2.0.0'
+```
+
+2. **Sparkling Method**
+
+Sparkling Method 提供类型化的 JS 与原生桥接模块，如 `router`、`storage`、`media` 等。每个模块通过生成的 pipe 接口，将原生能力（页面导航、持久化存储、相机/相册访问等）暴露给 Lynx 代码。你也可以[创建自定义 Method](/guide/get-started/create-custom-method) 来暴露自己的原生 API。
+
+```ruby
+pod 'SparklingMethod', '2.0.0', :subspecs => ['Lynx', 'DIProvider', 'Debug']
+```
+
+然后执行 `pod install`（如果使用 Bundler 则执行 `bundle exec pod install`）。
+
+### 初始化服务（App 启动时）
+
+模板的 `AppDelegate` 注册服务和引导任务：
+
+```swift
+SPKServiceRegister.registerAll()
+SPKExecuteAllPrepareBootTask()
+```
+
+### 提供 bundle 资源
+
+在 JS 项目中构建 Lynx bundle，然后将生成的 `.lynx.bundle` 文件添加/复制到 Xcode
+Target 资源中，使其包含在最终的 App Bundle 内。`hybrid://...` URL 中的 `bundle=` 参数
+必须与打包的资源路径/名称一致。
+
+### 打开内容
+
+两种常见的承载方式：
+
+- **推送 Sparkling 容器控制器**（路由）：
+
+```swift
+let url = "hybrid://lynxview_page?bundle=main.lynx.bundle"
+let context = SPKContext()
+let vc = SPKRouter.create(withURL: url, context: context, frame: UIScreen.main.bounds)
+let naviVC = UINavigationController(rootViewController: vc)
+```
+
+- **嵌入容器视图**：
+
+```swift
+let view = SPKContainerView(frame: UIScreen.main.bounds)
+let context = SPKContext()
+view.load(withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle", context)
+```
+
+</Steps>
+
+## 验证与故障排查
+
+- 运行平台构建（`./gradlew assembleDebug`、`xcodebuild`），打开 `hybrid://` URL 确认
+  渲染和管道调用正常。
+- **白屏 / 加载失败**：确认 `bundle=` 名称存在于 App 资源中，且 Scheme 匹配正确的
+  host 类型（`lynxview_page`、`lynxview_card` 等）。详见 [Scheme](../../apis/scheme.md)。
+- **路由方法无响应**：确保已注册原生 IDL 方法，且 JS 端调用的方法名匹配（如 `router.open`）。

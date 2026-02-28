@@ -1,8 +1,12 @@
+import { Steps } from '@theme';
+
 # Create a Custom Sparkling Method
 
 A Sparkling Method is a typed JS ↔ native bridge package that works on both Android and iOS. You define the API in TypeScript, generate native code with the CLI, then implement business logic in Kotlin and Swift.
 
-## 1. Create a method package
+<Steps>
+
+### Create a method package
 
 Use the `sparkling-method-cli` to scaffold a new method module:
 
@@ -38,7 +42,7 @@ The `module.config.json` defines module metadata used by both codegen and autoli
 }
 ```
 
-## 2. Write TypeScript function declarations
+### Write TypeScript function declarations
 
 Edit the `.d.ts` file under `src/` to declare your method's API.
 You only write **function declarations** and **interfaces** — no implementation.
@@ -83,7 +87,7 @@ Key rules for declarations:
 - Literal union types (e.g. `'formal' | 'casual'`) become enum constants in native code
 - Interfaces can be nested — they'll generate nested model classes
 
-## 3. Run codegen
+### Run codegen
 
 Generate all platform code from your declarations:
 
@@ -105,12 +109,12 @@ This reads all `.d.ts` files under `src/` and generates:
 **Do NOT manually edit generated files.** If you need to change the API,
 update the `.d.ts` declarations and re-run codegen.
 
-## 4. Implement native business logic
+### Implement native business logic
 
 The generated native code contains abstract classes / stubs that handle parameter
 parsing and response serialization. You extend them with actual business logic.
 
-### Android (Kotlin)
+#### Android (Kotlin)
 
 Create a concrete implementation extending the generated abstract class:
 
@@ -139,7 +143,7 @@ class MyGreetingHelloMethod : AbsMyGreetingHelloMethodIDL() {
 }
 ```
 
-### iOS (Swift)
+#### iOS (Swift)
 
 Create a concrete implementation extending the generated class:
 
@@ -169,9 +173,9 @@ class MyGreetingHelloMethod: SPKMyGreetingHelloMethodIDL {
 }
 ```
 
-## 5. Build and test with autolink
+### Build and test with autolink
 
-### Build the package
+#### Build the package
 
 Compile the TypeScript:
 
@@ -179,7 +183,7 @@ Compile the TypeScript:
 npm run build
 ```
 
-### Integrate into your Sparkling app
+#### Integrate into your Sparkling app
 
 In your Sparkling app project, install the method package:
 
@@ -199,7 +203,7 @@ Autolink automatically:
 - **iOS**: updates the `Podfile` with the pod dependency, and generates
   `SparklingAutolink.swift` registry
 
-### Run and test
+#### Run and test
 
 ```bash
 npm run run:android
@@ -218,7 +222,7 @@ hello({ name: 'Sparkling', style: 'casual' }, (res) => {
 });
 ```
 
-## 6. Publish
+### Publish
 
 When the method is ready for distribution:
 
@@ -251,6 +255,8 @@ Consumers then install and autolink:
 npm install sparkling-my-greeting
 npx sparkling autolink
 ```
+
+</Steps>
 
 ## Best practices
 

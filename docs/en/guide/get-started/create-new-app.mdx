@@ -1,3 +1,5 @@
+import { Steps } from '@theme';
+
 # Create a new Sparkling app
 
 Create a Sparkling app using the official scaffolder, then use the bundled workflow CLI to build
@@ -7,14 +9,16 @@ Lynx bundles and run the native shells.
 
 If you want a runnable project in minutes:
 
-1) Create a new project:
+<Steps>
+
+### Create a new project
 
 ```bash
 npm create sparkling-app@latest my-app
 cd my-app
 ```
 
-2) Run native targets:
+### Run native targets
 
 ```bash
 # Android
@@ -24,18 +28,21 @@ npm run run:android
 npm run run:ios
 ```
 
-3) Add Sparkling methods as needed:
+### Add Sparkling methods as needed
 
 ```bash
 npm install sparkling-storage
 ```
 
-4) Build bundles for release (same command regardless of package manager):
+### Build bundles for release
+
+Same command regardless of package manager:
 
 ```bash
 npx sparkling build
 ```
 
+</Steps>
 
 ### What you get
 
@@ -58,4 +65,4 @@ Key folders/files created by the default template:
 - For running native shells:
   - Android Studio / Android SDK (Android) / JDK 11
   - Xcode 16+ + iOS Simulator (iOS)
-  - Ruby (>=2.7, <3.4) for iOS build
+  - Ruby (≥2.7, &lt;3.4) for iOS build

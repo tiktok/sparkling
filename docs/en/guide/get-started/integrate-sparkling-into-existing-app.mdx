@@ -1,0 +1,150 @@
+import { Steps } from '@theme';
+
+# Integrate Sparkling into an existing app
+
+This guide shows how to embed Sparkling containers into an existing Android/iOS project
+without regenerating your app from a template.
+
+## Android
+
+<Steps>
+
+### Add dependencies
+
+1. **Sparkling SDK**
+
+The core container and Lynx integration. Add the published Maven artifact:
+
+```kotlin
+// app/build.gradle.kts
+dependencies {
+  implementation("com.tiktok.sparkling:sparkling:2.0.0")
+}
+```
+
+2. **Sparkling Method**
+
+Sparkling Method provides typed JS ↔ native bridge modules such as `router`, `storage`, and `media`. Each module exposes native capabilities (page navigation, persistent storage, camera/album access, etc.) to your Lynx code via a generated pipe interface. You can also [create custom methods](/guide/get-started/create-custom-method) to expose your own native APIs.
+
+Add method packages to your JS project and run `npx sparkling autolink` — the CLI will update Gradle config and generate the native registry automatically.
+
+### Initialize HybridKit (Application.onCreate)
+
+The host must initialize HybridKit and configure Lynx before opening any containers.
+The template does this in `SparklingApplication`:
+
+```kotlin
+class SparklingApplication : Application() {
+  override fun onCreate() {
+    super.onCreate()
+    HybridKit.init(this)
+
+    val baseInfoConfig = BaseInfoConfig(isDebug = BuildConfig.DEBUG)
+    val lynxConfig = SparklingLynxConfig.build(this) {
+      // optional: add custom Lynx UI components and template provider
+    }
+    val hybridConfig = SparklingHybridConfig.build(baseInfoConfig) {
+      setLynxConfig(lynxConfig)
+    }
+
+    HybridKit.setHybridConfig(hybridConfig, this)
+    HybridKit.initLynxKit()
+
+    // Register method implementations (e.g. router)
+    SparklingBridgeManager.registerIDLMethod(RouterOpenMethod::class.java)
+    SparklingBridgeManager.registerIDLMethod(RouterCloseMethod::class.java)
+    RouterProvider.hostRouterDepend = SparklingHostRouterDepend()
+  }
+}
+```
+
+### Provide bundle assets
+
+Build your Lynx bundles in your JS project, then copy the generated `.lynx.bundle` files into your
+Android assets (commonly `app/src/main/assets`). The `bundle=` parameter in your `hybrid://...`
+scheme must match the asset path/name you copy into the app.
+
+### Open a page
+
+The Android SDK provides `SparklingContext` and `Sparkling.build(...).navigate()`:
+
+```kotlin
+val context = SparklingContext()
+context.scheme = "hybrid://lynxview_page?bundle=main.lynx.bundle&title=Home&hide_nav_bar=1"
+context.withInitData("{\"initial_data\":{}}")
+
+Sparkling.build(this, context).navigate()
+```
+
+</Steps>
+
+## iOS
+
+<Steps>
+
+### Add dependencies
+
+1. **Sparkling SDK**
+
+The core container and Lynx integration:
+
+```ruby
+pod 'Sparkling', '2.0.0'
+```
+
+2. **Sparkling Method**
+
+Sparkling Method provides typed JS ↔ native bridge modules such as `router`, `storage`, and `media`. Each module exposes native capabilities (page navigation, persistent storage, camera/album access, etc.) to your Lynx code via a generated pipe interface. You can also [create custom methods](/guide/get-started/create-custom-method) to expose your own native APIs.
+
+```ruby
+pod 'SparklingMethod', '2.0.0', :subspecs => ['Lynx', 'DIProvider', 'Debug']
+```
+
+Then run `pod install` (or `bundle exec pod install` if you use Bundler).
+
+### Initialize services (App startup)
+
+The template's `AppDelegate` registers services and boot tasks:
+
+```swift
+SPKServiceRegister.registerAll()
+SPKExecuteAllPrepareBootTask()
+```
+
+### Provide bundle assets
+
+Build your Lynx bundles in your JS project, then add/copy the generated `.lynx.bundle` files into
+your Xcode target resources so they're included in the final app bundle. The `bundle=` parameter in
+your `hybrid://...` URL must match the bundled resource path/name.
+
+### Open content
+
+Two common hosting styles:
+
+- **Push a Sparkling container controller** (router):
+
+```swift
+let url = "hybrid://lynxview_page?bundle=main.lynx.bundle"
+let context = SPKContext()
+let vc = SPKRouter.create(withURL: url, context: context, frame: UIScreen.main.bounds)
+let naviVC = UINavigationController(rootViewController: vc)
+```
+
+- **Embed a container view**:
+
+```swift
+let view = SPKContainerView(frame: UIScreen.main.bounds)
+let context = SPKContext()
+view.load(withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle", context)
+```
+
+</Steps>
+
+## Verify & troubleshoot
+
+- Build platform artifacts (`./gradlew assembleDebug`, `xcodebuild`) and open a `hybrid://` URL to
+  confirm rendering and pipe calls.
+- **Blank screen / failed to load**: verify the `bundle=` name exists in app assets and your scheme
+  matches the host type (`lynxview_page`, `lynxview_card`, etc.). See [Scheme](../../apis/scheme.md) for details.
+- **Router methods do nothing**: ensure you registered the native IDL methods and that the JS side
+  calls match the same method names (e.g. `router.open`).
