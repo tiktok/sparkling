@@ -166,7 +166,6 @@ export interface GlobalProps {
 
   /**
    * Version of the underlying Lynx SDK.
-   * @platform Android
    */
   lynxSdkVersion: string;
 
@@ -180,7 +179,6 @@ export interface GlobalProps {
   /**
    * Query parameters parsed from the container's scheme URL.
    * Each key-value pair corresponds to a query parameter.
-   * @platform Android
    */
   queryItems: Record<string, string>;
 }

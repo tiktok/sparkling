@@ -65,12 +65,8 @@ function buildScheme(baseScheme: string, bundlePath: string, params?: NavigateOp
     }
 
     if (params && typeof params === 'object') {
-        for (const key of Object.keys(params) as NavigateParamKey[]) {
-            if (!ALLOWED_SCHEME_PARAMS.has(key)) {
-                continue;
-            }
-
-            const value = params[key];
+        for (const key of Object.keys(params)) {
+            const value = (params as Record<string, unknown>)[key];
 
             if (value === undefined || value === null) {
                 continue;

@@ -26,7 +26,7 @@ export type NavigateParamKey =
     | 'hide_error'
     | 'force_theme_style';
 
-export type NavigateParams = Partial<Record<NavigateParamKey, string | number | boolean>>;
+export type NavigateParams = Partial<Record<NavigateParamKey, string | number | boolean>> & Record<string, string | number | boolean | undefined>;
 
 export type NavigateOptions = OpenOptions & {
     params?: NavigateParams;

@@ -1,0 +1,19 @@
+# Interface: RouterConfig
+
+Route configuration mapping.
+
+Keys are route names and values are [RouterEntry](Interface.RouterEntry.mdx) objects.
+
+## Indexable
+
+ \[`name`: `string`\]: [`RouterEntry`](Interface.RouterEntry.mdx) \| `undefined`
+
+## Properties
+
+### main?
+
+```ts
+optional main: RouterEntry;
+```
+
+The main (initial) route of the application.
