@@ -14,6 +14,7 @@
     "@rspress/core": "^2.0.3",
     "@rspress/plugin-llms": "^2.0.3",
     "playwright": "^1.58.2",
+    "sparkling-types": "workspace:*",
     "typedoc": "^0.26.11",
     "typedoc-plugin-markdown": "~4.2.10"
   },

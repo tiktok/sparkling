@@ -26,6 +26,7 @@
     "@lynx-js/react-rsbuild-plugin": "^0.12.7",
     "@lynx-js/rspeedy": "^0.13.3",
     "@lynx-js/types": "^3.6.0",
+    "sparkling-types": "workspace:*",
     "@rsbuild/core": "1.7.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@types/react": "^18.3.20",

@@ -1,0 +1,24 @@
+{
+  "name": "sparkling-types",
+  "version": "2.0.1",
+  "description": "GlobalProps type definitions for Sparkling Lynx apps",
+  "homepage": "https://tiktok.github.io/sparkling/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tiktok/sparkling",
+    "directory": "packages/sparkling-types"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "@lynx-js/types": ">=3.0.0"
+  },
+  "devDependencies": {
+    "@lynx-js/types": "3.6.0",
+    "typescript": "^5.8.3"
+  },
+  "license": "Apache-2.0"
+}

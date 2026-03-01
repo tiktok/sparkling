@@ -148,6 +148,9 @@ importers:
       prettier:
         specifier: ^3.5.3
         version: 3.8.1
+      sparkling-types:
+        specifier: workspace:*
+        version: link:../sparkling-types
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -261,6 +264,15 @@ importers:
 
   packages/sparkling-sdk: {}
 
+  packages/sparkling-types:
+    devDependencies:
+      '@lynx-js/types':
+        specifier: 3.6.0
+        version: 3.6.0
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
   packages/website:
     devDependencies:
       '@rspack/core':
@@ -275,6 +287,9 @@ importers:
       playwright:
         specifier: ^1.58.2
         version: 1.58.2
+      sparkling-types:
+        specifier: workspace:*
+        version: link:../sparkling-types
       typedoc:
         specifier: ^0.26.11
         version: 0.26.11(typescript@5.9.3)
@@ -321,6 +336,9 @@ importers:
       sparkling-app-cli:
         specifier: ~2.0.1
         version: 2.0.1(@rspack/core@1.7.5(@swc/helpers@0.5.18))(@types/node@25.2.3)(typescript@5.9.3)(webpack@5.105.0)
+      sparkling-types:
+        specifier: ~2.0.1
+        version: link:../../packages/sparkling-types
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

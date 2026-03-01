@@ -107,6 +107,7 @@ declare -a TYPESCRIPT_FILES=(
     "package.json"
     "packages/sparkling-sdk/package.json"
     "packages/sparkling-method/package.json"
+    "packages/sparkling-types/package.json"
     "template/sparkling-app-template/package.json"
 )
 
