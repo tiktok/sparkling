@@ -7,6 +7,10 @@ The native layer (iOS / Android) populates these values before the Lynx
 bundle starts executing. Some fields are **stable** (set once on app
 launch) and some are **unstable** (may change per container or over time).
 
+## See
+
+[Full documentation](https://tiktok.github.io/sparkling/apis/global-props/GlobalProps)
+
 ## Properties
 
 ### accessibleMode
@@ -26,11 +30,8 @@ Accessibility mode bitmask.
 optional appLanguage: string;
 ```
 
-App-level language setting.
-
-#### Platform
-
-Android
+App-level language setting. Not set by the SDK by default;
+available for host apps to inject via `setStableProps()`.
 
 ***
 
@@ -40,11 +41,8 @@ Android
 optional appLocale: string;
 ```
 
-App-level locale setting.
-
-#### Platform
-
-Android
+App-level locale setting. Not set by the SDK by default;
+available for host apps to inject via `setStableProps()`.
 
 ***
 
@@ -115,6 +113,10 @@ isAppBackground: boolean;
 ```
 
 `true` if the app is currently in the background.
+
+#### Platform
+
+iOS
 
 ***
 
@@ -199,10 +201,6 @@ lynxSdkVersion: string;
 ```
 
 Version of the underlying Lynx SDK.
-
-#### Platform
-
-Android
 
 ***
 
@@ -291,10 +289,6 @@ queryItems: Record<string, string>;
 Query parameters parsed from the container's scheme URL.
 Each key-value pair corresponds to a query parameter.
 
-#### Platform
-
-Android
-
 ***
 
 ### safeAreaHeight
@@ -373,6 +367,10 @@ theme: string;
 ```
 
 Current UI theme: `"dark"` or `"light"`.
+
+#### Platform
+
+Android
 
 ***
 
