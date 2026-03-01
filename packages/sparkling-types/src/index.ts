@@ -102,7 +102,10 @@ declare module '@lynx-js/types' {
     /** `1` if the device is in low-power / battery-saver mode, `0` otherwise. */
     isLowPowerMode: number;
 
-    /** `true` if the app is currently in the background. */
+    /**
+     * `true` if the app is currently in the background.
+     * @platform iOS
+     */
     isAppBackground: boolean;
 
     /**
@@ -117,14 +120,14 @@ declare module '@lynx-js/types' {
     language: string;
 
     /**
-     * App-level language setting.
-     * @platform Android
+     * App-level language setting. Not set by the SDK by default;
+     * available for host apps to inject via `setStableProps()`.
      */
     appLanguage?: string;
 
     /**
-     * App-level locale setting.
-     * @platform Android
+     * App-level locale setting. Not set by the SDK by default;
+     * available for host apps to inject via `setStableProps()`.
      */
     appLocale?: string;
 
@@ -145,7 +148,10 @@ declare module '@lynx-js/types' {
      */
     orientation?: number;
 
-    /** Current UI theme: `"dark"` or `"light"`. */
+    /**
+     * Current UI theme: `"dark"` or `"light"`.
+     * @platform Android
+     */
     theme: string;
 
     /**
@@ -167,10 +173,7 @@ declare module '@lynx-js/types' {
     /** Timestamp (as string) when the container was initialized. */
     containerInitTime: string;
 
-    /**
-     * Version of the underlying Lynx SDK.
-     * @platform Android
-     */
+    /** Version of the underlying Lynx SDK. */
     lynxSdkVersion: string;
 
     /**
@@ -183,7 +186,6 @@ declare module '@lynx-js/types' {
     /**
      * Query parameters parsed from the container's scheme URL.
      * Each key-value pair corresponds to a query parameter.
-     * @platform Android
      */
     queryItems: Record<string, string>;
   }
