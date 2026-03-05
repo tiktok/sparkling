@@ -13,6 +13,8 @@ import {
   checkXcode,
   checkCocoaPods,
   checkSimulator,
+  checkWebCore,
+  checkWebShell,
 } from './checks';
 import type { CheckResult } from './types';
 
@@ -59,7 +61,7 @@ function buildAgentPrompt(failed: CheckResult[]): string {
 }
 
 export interface DoctorOptions {
-  platform: 'android' | 'ios' | 'all';
+  platform: 'android' | 'ios' | 'web' | 'all';
 }
 
 export async function doctor(opts: DoctorOptions): Promise<void> {
@@ -104,7 +106,19 @@ export async function doctor(opts: DoctorOptions): Promise<void> {
     }
   }
 
-  const allResults = [...generalResults, ...androidResults, ...iosResults];
+  const webResults: CheckResult[] = [];
+  if (platform === 'web' || platform === 'all') {
+    webResults.push(checkWebCore());
+    webResults.push(checkWebShell());
+
+    console.log('');
+    console.log(ui.info('Web:'));
+    for (const r of webResults) {
+      console.log(formatCheckLine(r));
+    }
+  }
+
+  const allResults = [...generalResults, ...androidResults, ...iosResults, ...webResults];
   const failed = allResults.filter((r) => r.status === 'fail');
   const warned = allResults.filter((r) => r.status === 'warn');
 

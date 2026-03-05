@@ -8,7 +8,7 @@ export interface CheckResult {
   /** Display name of the check (e.g. "Node.js", "JDK") */
   name: string;
   /** Category for grouping in output */
-  category: 'general' | 'android' | 'ios';
+  category: 'general' | 'android' | 'ios' | 'web';
   /** Whether the check passed */
   status: CheckStatus;
   /** Detected version string, if applicable */

@@ -348,6 +348,58 @@ export function checkCocoaPods(): CheckResult {
   return { ...base, status: 'pass', version };
 }
 
+export function checkWebCore(): CheckResult {
+  const base: Omit<CheckResult, 'status'> = {
+    name: '@lynx-js/web-core',
+    category: 'web',
+  };
+
+  try {
+    require.resolve('@lynx-js/web-core', { paths: [process.cwd()] });
+    return { ...base, status: 'pass', message: 'Installed' };
+  } catch {
+    return {
+      ...base,
+      status: 'fail',
+      message: '@lynx-js/web-core is not installed',
+      fixHint:
+        '@lynx-js/web-core is not installed. Install it with: pnpm add -D @lynx-js/web-core @lynx-js/web-elements',
+    };
+  }
+}
+
+export function checkWebShell(): CheckResult {
+  const base: Omit<CheckResult, 'status'> = {
+    name: 'sparkling-web-shell',
+    category: 'web',
+  };
+
+  try {
+    require.resolve('sparkling-web-shell/package.json', { paths: [process.cwd()] });
+    return { ...base, status: 'pass', message: 'Installed' };
+  } catch {
+    // Also check common workspace sibling locations
+    const cwd = process.cwd();
+    const candidates = [
+      path.join(cwd, '../sparkling-web-shell/package.json'),
+      path.join(cwd, '../../packages/sparkling-web-shell/package.json'),
+    ];
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) {
+        return { ...base, status: 'pass', message: 'Found in workspace' };
+      }
+    }
+
+    return {
+      ...base,
+      status: 'fail',
+      message: 'sparkling-web-shell is not installed or found in workspace',
+      fixHint:
+        'sparkling-web-shell is not found. Install it with: pnpm add -D sparkling-web-shell',
+    };
+  }
+}
+
 export function checkSimulator(): CheckResult {
   const base: Omit<CheckResult, 'status'> = {
     name: 'iOS Simulator',

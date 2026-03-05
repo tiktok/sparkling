@@ -7,3 +7,9 @@
  * 5969 = "LYNX" on a phone keypad (L=5, Y=9, N=6, X=9).
  */
 export const DEV_SERVER_PORT = 5969;
+
+/**
+ * Default port for the web shell preview server.
+ * Matches the default in sparkling-web-shell/rsbuild.config.ts.
+ */
+export const WEB_SHELL_PORT = 4200;

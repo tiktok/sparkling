@@ -12,6 +12,9 @@ export interface PlatformConfig {
     bundleIdentifier?: string;
     simulator?: string;
   };
+  web?: {
+    port?: number;
+  };
 }
 
 export type LynxConfig = unknown;
@@ -46,6 +49,7 @@ export interface AppConfig {
   paths?: {
     androidAssets?: string;
     iosAssets?: string;
+    webAssets?: string;
   };
   appIcon?: string;
   router?: RouterConfig;
@@ -55,6 +59,7 @@ export interface AppConfig {
 export interface MethodModuleConfig {
   name: string;
   root: string;
+  platforms?: string[];
   android?: {
     packageName?: string;
     className?: string;
@@ -65,5 +70,9 @@ export interface MethodModuleConfig {
     moduleName?: string;
     className?: string;
     podspecPath?: string;
+  };
+  web?: {
+    entryPoint?: string;
+    subpath?: string;
   };
 }

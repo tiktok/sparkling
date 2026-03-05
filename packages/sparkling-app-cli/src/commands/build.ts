@@ -8,36 +8,52 @@ import { ui } from '../utils/ui';
 import { isVerboseEnabled, verboseLog } from '../utils/verbose';
 import { copyAssets } from './copy-assets';
 
+export type BuildPlatform = 'android' | 'ios' | 'web' | 'native' | 'all';
+
 export interface BuildOptions {
   cwd: string;
   configFile?: string;
   skipCopy?: boolean;
+  platform?: BuildPlatform;
 }
 
 export async function buildProject(options: BuildOptions): Promise<void> {
   const configPath = path.resolve(options.cwd, options.configFile ?? 'app.config.ts');
   const tempConfigPath = createTempLynxConfig(options.cwd, configPath);
-  const rspeedyBin = 'rspeedy';
+  const platform = options.platform ?? 'all';
 
   if (isVerboseEnabled()) {
     verboseLog(`App config path: ${configPath}`);
     verboseLog(`Temp Lynx config: ${tempConfigPath}`);
-    verboseLog(`rspeedy binary: ${rspeedyBin}`);
+    verboseLog(`Build platform: ${platform}`);
   }
 
-  console.log(ui.headline(`Building Lynx bundle with config from ${path.relative(options.cwd, configPath)}`));
-  await runCommand(rspeedyBin, ['build', '--config', tempConfigPath], { cwd: options.cwd });
+  const rspeedyArgs = ['build', '--config', tempConfigPath];
 
-  const shouldCopy = options.skipCopy !== true; // default to no copy
+  if (platform === 'web') {
+    rspeedyArgs.push('--environment', 'web');
+  } else if (platform === 'android' || platform === 'ios' || platform === 'native') {
+    rspeedyArgs.push('--environment', 'lynx');
+  }
+  // platform === 'all' → no --environment flag → builds all environments
+
+  console.log(ui.headline(`Building ${platform} bundle(s) with config from ${path.relative(options.cwd, configPath)}`));
+  await runCommand('rspeedy', rspeedyArgs, { cwd: options.cwd });
+
+  // Skip asset copy for web-only builds
+  const shouldCopy = platform !== 'web' && options.skipCopy !== true;
   if (shouldCopy) {
-    // Read AppConfig to locate platform asset destinations if provided
     const { config } = await loadAppConfig(options.cwd, options.configFile ?? 'app.config.ts');
     await copyAssets({
       cwd: options.cwd,
       androidDest: config.paths?.androidAssets ?? 'android/app/src/main/assets',
       iosDest: config.paths?.iosAssets ?? 'ios/LynxResources/Assets',
+      // When building all environments, exclude the web/ subdirectory from native copies
+      excludeDirs: platform === 'all' ? ['web'] : undefined,
     });
   } else if (isVerboseEnabled()) {
-    verboseLog('Skipping asset copy because --skip-copy is in effect.');
+    verboseLog(platform === 'web'
+      ? 'Skipping asset copy for web-only build.'
+      : 'Skipping asset copy because --skip-copy is in effect.');
   }
 }

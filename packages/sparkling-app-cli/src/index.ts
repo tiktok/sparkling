@@ -6,11 +6,14 @@ import { Command } from 'commander';
 import path from 'node:path';
 import { autolink } from './commands/autolink';
 import { buildProject } from './commands/build';
+import type { BuildPlatform } from './commands/build';
 import { copyAssets } from './commands/copy-assets';
 import { devProject } from './commands/dev';
+import type { DevPlatform } from './commands/dev';
 import { doctor } from './commands/doctor';
 import { runAndroid } from './commands/run-android';
 import { runIos } from './commands/run-ios';
+import { runWeb } from './commands/run-web';
 import { ui } from './utils/ui';
 import { enableVerboseLogging, isVerboseEnabled, verboseLog } from './utils/verbose';
 import type { AppConfig } from './types';
@@ -40,26 +43,43 @@ function resolveSkipCopy(opts: { copy?: boolean; skipCopy?: boolean }): boolean 
   return true;
 }
 
+const BUILD_PLATFORMS = ['android', 'ios', 'web', 'native', 'all'];
+const DEV_PLATFORMS = ['web', 'native', 'all'];
+const AUTOLINK_PLATFORMS = ['android', 'ios', 'web', 'all'];
+const DOCTOR_PLATFORMS = ['android', 'ios', 'web', 'all'];
+
 program
   .command('build')
   .description('Build Lynx bundle using app.config.ts (no-copy by default)')
   .option('--config <path>', 'Path to app.config.ts', 'app.config.ts')
+  .option('--platform <platform>', 'Target platform: android|ios|web|native|all', 'all')
   .option('--copy', 'Copy assets to native shells')
   .option('--skip-copy', 'Skip copying assets to native shells')
   .action(async opts => {
     const cwd = process.cwd();
     const skipCopy = resolveSkipCopy(opts);
-    await buildProject({ cwd, configFile: opts.config, skipCopy });
+    const raw = String(opts.platform ?? 'all').toLowerCase();
+    const platform = (BUILD_PLATFORMS.includes(raw) ? raw : 'all') as BuildPlatform;
+    if (!BUILD_PLATFORMS.includes(raw)) {
+      console.warn(ui.warn(`Unknown platform "${opts.platform}", defaulting to 'all'.`));
+    }
+    await buildProject({ cwd, configFile: opts.config, skipCopy, platform });
   });
 
 program
   .command('dev')
   .description('Start Rspeedy dev server using app.config.ts')
   .option('--config <path>', 'Path to app.config.ts', 'app.config.ts')
+  .option('--platform <platform>', 'Target platform: web|native|all', 'all')
   .option('--port <number>', 'Dev server port (default: 5969)', '5969')
   .action(async opts => {
     const cwd = process.cwd();
-    await devProject({ cwd, configFile: opts.config, port: Number(opts.port) });
+    const raw = String(opts.platform ?? 'all').toLowerCase();
+    const platform = (DEV_PLATFORMS.includes(raw) ? raw : 'all') as DevPlatform;
+    if (!DEV_PLATFORMS.includes(raw)) {
+      console.warn(ui.warn(`Unknown platform "${opts.platform}", defaulting to 'all'.`));
+    }
+    await devProject({ cwd, configFile: opts.config, port: Number(opts.port), platform });
   });
 
 program
@@ -68,6 +88,7 @@ program
   .option('--source <path>', 'Path to compiled assets', 'dist')
   .option('--android-dest <path>', 'Android asset destination', 'android/app/src/main/assets')
   .option('--ios-dest <path>', 'iOS asset destination', 'ios/LynxResources/Assets')
+  .option('--exclude-web', 'Exclude web/ subdirectory from native copies')
   .action(async opts => {
     const cwd = process.cwd();
     await copyAssets({
@@ -75,19 +96,19 @@ program
       source: opts.source,
       androidDest: opts.androidDest,
       iosDest: opts.iosDest,
+      excludeDirs: opts.excludeWeb ? ['web'] : undefined,
     });
   });
 
 program
   .command('autolink')
-  .description('Autolink Sparkling method modules for Android and iOS')
-  .option('--platform <platform>', 'Platform to autolink: android|ios|all', 'all')
+  .description('Autolink Sparkling method modules for Android, iOS, and Web')
+  .option('--platform <platform>', 'Platform to autolink: android|ios|web|all', 'all')
   .action(async (opts) => {
     const cwd = process.cwd();
     const raw = String(opts.platform ?? 'all').toLowerCase();
-    const allowed = ['android', 'ios', 'all'];
-    const platform = (allowed.includes(raw) ? raw : 'all') as 'android' | 'ios' | 'all';
-    if (!allowed.includes(raw)) {
+    const platform = (AUTOLINK_PLATFORMS.includes(raw) ? raw : 'all') as 'android' | 'ios' | 'web' | 'all';
+    if (!AUTOLINK_PLATFORMS.includes(raw)) {
       console.warn(ui.warn(`Unknown platform "${opts.platform}", defaulting to 'all'.`));
     }
     await autolink({ cwd, platform });
@@ -123,14 +144,29 @@ program
   });
 
 program
+  .command('run:web')
+  .description('Build web bundles and launch in browser')
+  .option('--config <path>', 'Path to app.config.ts', 'app.config.ts')
+  .option('--port <number>', 'Web server port (default: 4200)', '4200')
+  .option('--no-open', 'Do not auto-open browser')
+  .action(async (opts) => {
+    const cwd = process.cwd();
+    await runWeb({
+      cwd,
+      configFile: opts.config,
+      port: Number(opts.port),
+      open: opts.open,
+    });
+  });
+
+program
   .command('doctor')
   .description('Check if your environment is ready to build a Sparkling app')
-  .option('--platform <platform>', 'Platform to check: android|ios|all', 'all')
+  .option('--platform <platform>', 'Platform to check: android|ios|web|all', 'all')
   .action(async (opts) => {
     const raw = String(opts.platform ?? 'all').toLowerCase();
-    const allowed = ['android', 'ios', 'all'];
-    const platform = (allowed.includes(raw) ? raw : 'all') as 'android' | 'ios' | 'all';
-    if (!allowed.includes(raw)) {
+    const platform = (DOCTOR_PLATFORMS.includes(raw) ? raw : 'all') as 'android' | 'ios' | 'web' | 'all';
+    if (!DOCTOR_PLATFORMS.includes(raw)) {
       console.warn(ui.warn(`Unknown platform "${opts.platform}", defaulting to 'all'.`));
     }
     await doctor({ platform });
