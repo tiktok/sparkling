@@ -42,3 +42,13 @@ export type MethodMap = string | {
  * Pipe event callback
  */
 export type EventCallback = (event: unknown) => void;
+
+/**
+ * Handler function for a web method implementation.
+ * Receives the same envelope that native modules receive and must
+ * invoke the callback with a `{ code, msg, data? }` response.
+ */
+export type WebMethodHandler = (
+    params: { containerID: string; protocolVersion: string; data: unknown },
+    callback: (response: { code: number; msg: string; data?: unknown }) => void,
+) => void;

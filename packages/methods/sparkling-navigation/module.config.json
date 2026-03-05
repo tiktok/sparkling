@@ -1,6 +1,6 @@
 {
   "name": "sparkling-navigation",
-  "platforms": ["android", "ios"],
+  "platforms": ["android", "ios", "web"],
   "version": "1.0.0",
   "description": "Router methods for navigation and page management in Sparkling apps",
   "methods": {

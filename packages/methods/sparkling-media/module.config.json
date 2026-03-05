@@ -1,6 +1,40 @@
 {
+  "name": "sparkling-media",
+  "platforms": ["android", "ios", "web"],
+  "version": "1.0.0",
+  "description": "Media methods for choosing, uploading, and downloading media files in Sparkling apps",
   "packageName": "com.tiktok.sparkling.method",
   "moduleName": "Media",
   "androidDsl": "kts",
-  "projectName": "sparkling-media"
+  "projectName": "sparkling-media",
+  "methods": {
+    "chooseMedia": {
+      "description": "Choose media from album or camera"
+    },
+    "downloadFile": {
+      "description": "Download a file from server"
+    },
+    "uploadFile": {
+      "description": "Upload a file to server"
+    },
+    "uploadImage": {
+      "description": "Upload an image to server"
+    },
+    "saveDataURL": {
+      "description": "Save base64 data URL to local file"
+    }
+  },
+  "android": {
+    "packageName": "com.tiktok.sparkling.method.media",
+    "className": "MediaMethod",
+    "buildGradle": "android/build.gradle.kts"
+  },
+  "ios": {
+    "moduleName": "Media",
+    "className": "MediaMethod"
+  },
+  "web": {
+    "entryPoint": "index.ts",
+    "bundleName": "media.bundle"
+  }
 }

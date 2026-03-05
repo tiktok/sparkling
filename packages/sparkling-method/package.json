@@ -9,6 +9,21 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./web-registry": {
+      "types": "./dist/web-registry.d.ts",
+      "default": "./dist/web-registry.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "web-registry": ["dist/web-registry.d.ts"]
+    }
+  },
   "scripts": {
     "build": "tsc && node -e \"require('fs').copyFileSync('src/typing.d.ts', 'dist/typing.d.ts')\""
   },

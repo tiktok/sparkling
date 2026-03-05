@@ -9,6 +9,21 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./web": {
+      "types": "./dist/src/web/index.d.ts",
+      "default": "./dist/src/web/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "web": ["dist/src/web/index.d.ts"]
+    }
+  },
   "files": [
     "index.ts",
     "src",
