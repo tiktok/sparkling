@@ -1,0 +1,29 @@
+{
+  "name": "sparkling-web-shell",
+  "version": "2.0.0-rc.6",
+  "private": true,
+  "type": "module",
+  "description": "Minimal web host for rendering Lynx web bundles in a browser",
+  "homepage": "https://tiktok.github.io/sparkling/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nichenqin/sparkling",
+    "directory": "packages/sparkling-web-shell"
+  },
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@lynx-js/web-core": "0.19.8",
+    "@lynx-js/web-elements": "0.11.3"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "1.7.2",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": "^22 || ^24"
+  }
+}

@@ -7,7 +7,7 @@ import { defineConfig } from '@lynx-js/rspeedy'
 import { pluginQRCode } from '@lynx-js/qrcode-rsbuild-plugin'
 import { pluginReactLynx } from '@lynx-js/react-rsbuild-plugin'
 
-function copyDir(src: string, dest: string) {
+function copyDir(src: string, dest: string, filter?: (name: string) => boolean) {
   if (!fs.existsSync(src)) {
     console.warn(`Source directory ${src} does not exist, skipping copy`)
     return
@@ -17,11 +17,15 @@ function copyDir(src: string, dest: string) {
   const entries = fs.readdirSync(src, { withFileTypes: true })
 
   for (const entry of entries) {
+    if (filter && !filter(entry.name)) {
+      continue
+    }
+
     const srcPath = path.join(src, entry.name)
     const destPath = path.join(dest, entry.name)
 
     if (entry.isDirectory()) {
-      copyDir(srcPath, destPath)
+      copyDir(srcPath, destPath, filter)
     } else {
       fs.copyFileSync(srcPath, destPath)
     }
@@ -38,9 +42,23 @@ export default defineConfig({
     },
   },
   output: {
-    assetPrefix: 'asset:///',
     filename: {
       bundle: '[name].lynx.bundle',
+    },
+  },
+  environments: {
+    web: {
+      output: {
+        assetPrefix: '/',
+        distPath: {
+          root: 'dist/web',
+        },
+      },
+    },
+    lynx: {
+      output: {
+        assetPrefix: 'asset:///',
+      },
     },
   },
   plugins: [
@@ -59,11 +77,14 @@ export default defineConfig({
           const androidDest = 'android/app/src/main/assets'
           const iosDest = 'ios/LynxResources'
 
+          // Skip the web subdirectory when copying to native asset dirs
+          const nativeFilter = (name: string) => name !== 'web'
+
           console.log(`Copying ${sourceDir} to Android (${androidDest})...`)
-          copyDir(sourceDir, androidDest)
+          copyDir(sourceDir, androidDest, nativeFilter)
 
           console.log(`Copying ${sourceDir} to iOS (${iosDest})...`)
-          copyDir(sourceDir, iosDest)
+          copyDir(sourceDir, iosDest, nativeFilter)
 
           console.log('Assets copied successfully!')
         })

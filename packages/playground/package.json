@@ -11,7 +11,9 @@
   },
   "scripts": {
     "build": "pnpm -C ../.. --filter sparkling-method --filter sparkling-navigation --filter sparkling-storage --filter sparkling-media build && rspeedy build",
+    "build:web": "pnpm -C ../.. --filter sparkling-method --filter sparkling-navigation --filter sparkling-storage --filter sparkling-media build && rspeedy build --environment web",
     "dev": "rspeedy dev",
+    "dev:web": "rspeedy build --environment web && pnpm --filter sparkling-web-shell dev",
     "format": "prettier --write .",
     "preview": "rspeedy preview"
   },

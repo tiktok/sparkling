@@ -12,9 +12,23 @@ const lynxConfig = defineConfig({
     },
   },
   output: {
-    assetPrefix: 'asset:///',
     filename: {
-      bundle: '[name].lynx.bundle'
+      bundle: '[name].lynx.bundle',
+    },
+  },
+  environments: {
+    web: {
+      output: {
+        assetPrefix: '/',
+        distPath: {
+          root: 'dist/web',
+        },
+      },
+    },
+    lynx: {
+      output: {
+        assetPrefix: 'asset:///',
+      },
     },
   },
   plugins: [
