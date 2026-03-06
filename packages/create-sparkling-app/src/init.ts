@@ -22,7 +22,9 @@ function parseFlags(argv: string[]): { name?: string; flags: CreateAppFlags } {
     .option('--no-git', 'Skip git initialization')
     .option('--namespace <namespace>', 'Android package / iOS bundle id')
     .option('--app-id <id>', 'Alias for namespace')
-    .option('-v, --verbose', 'Enable verbose logging');
+    .option('-v, --verbose', 'Enable verbose logging')
+    .option('--web', 'Include web platform support (default: true)')
+    .option('--no-web', 'Exclude web platform support');
 
   const parsed = program.parse(argv, { from: 'user' });
   const opts = parsed.opts<{
@@ -36,6 +38,7 @@ function parseFlags(argv: string[]): { name?: string; flags: CreateAppFlags } {
     namespace?: string;
     appId?: string;
     verbose?: boolean;
+    web?: boolean;
   }>();
 
   const [name] = parsed.args as string[];
@@ -51,6 +54,7 @@ function parseFlags(argv: string[]): { name?: string; flags: CreateAppFlags } {
     'app-id': opts.appId,
     templateVersion: opts.templateVersion,
     verbose: opts.verbose,
+    web: opts.web,
   };
 
   return { name, flags };

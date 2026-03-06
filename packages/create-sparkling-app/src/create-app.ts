@@ -46,6 +46,7 @@ import {
   askNamespace,
   askProjectName,
   askTemplate,
+  askWebPlatform,
   confirmInitGit,
   confirmInstall,
   confirmRemoveExistingDir,
@@ -71,6 +72,45 @@ function ensureExecutable(filePath: string): void {
     console.warn(
       `Warning: failed to set executable on ${filePath}: ${(error as Error).message}`
     );
+  }
+}
+
+function removeWebSupport(projectDir: string): void {
+  // Remove web-related scripts and dependencies from package.json
+  const packageJsonPath = path.join(projectDir, "package.json");
+  if (fs.existsSync(packageJsonPath)) {
+    const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8")) as Record<string, unknown>;
+
+    const scripts = (pkg.scripts ?? {}) as Record<string, string>;
+    delete scripts["dev:web"];
+    delete scripts["build:web"];
+    delete scripts["run:web"];
+
+    const devDeps = (pkg.devDependencies ?? {}) as Record<string, string>;
+    delete devDeps["sparkling-web-shell"];
+    delete devDeps["@lynx-js/web-core"];
+    delete devDeps["@lynx-js/web-elements"];
+
+    fs.writeFileSync(packageJsonPath, `${JSON.stringify(pkg, null, 2)}\n`);
+  }
+
+  // Remove environments config from app.config.ts, restoring flat assetPrefix
+  const appConfigPath = path.join(projectDir, "app.config.ts");
+  if (fs.existsSync(appConfigPath)) {
+    let content = fs.readFileSync(appConfigPath, "utf8");
+    // Remove the environments block and restore assetPrefix at top level
+    content = content.replace(
+      /\s*environments:\s*\{[\s\S]*?\n\s*\},\n/,
+      "\n"
+    );
+    // Add assetPrefix back to output if not present
+    if (!content.includes("assetPrefix")) {
+      content = content.replace(
+        /output:\s*\{/,
+        "output: {\n    assetPrefix: 'asset:///',",
+      );
+    }
+    fs.writeFileSync(appConfigPath, content);
   }
 }
 
@@ -194,6 +234,8 @@ export async function createSparklingApp(
 
   const additionalTools = await askAdditionalTools(flags);
 
+  const enableWeb = await askWebPlatform(flags);
+
   const defaultNamespace = deriveDefaultNamespace(packageName);
   const packageNamespace = await askNamespace(defaultNamespace, flags);
 
@@ -277,6 +319,9 @@ export async function createSparklingApp(
       });
       applyPackageNamespace(config.targetDir, packageNamespace);
       ensureExecutable(path.join(config.targetDir, "android", "gradlew"));
+      if (!enableWeb) {
+        removeWebSupport(config.targetDir);
+      }
     },
   });
 
@@ -332,5 +377,5 @@ export async function createSparklingApp(
     await initializeGitRepo(distFolder);
   }
 
-  showCompletionNotes(targetDir, packageManager, didInstall);
+  showCompletionNotes(targetDir, packageManager, didInstall, enableWeb);
 }

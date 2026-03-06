@@ -111,7 +111,7 @@ export function detectPackageManager(): string {
   }
 }
 
-export function showCompletionNotes(targetDir: string, packageManager?: string, didInstall = false): void {
+export function showCompletionNotes(targetDir: string, packageManager?: string, didInstall = false, enableWeb = true): void {
   console.log(ui.success(`✔ Project created at ${targetDir}`));
 
   const formatScriptCommand = (script: string) => {
@@ -129,6 +129,9 @@ export function showCompletionNotes(targetDir: string, packageManager?: string, 
 
   nextSteps.push(formatScriptCommand('run:ios'));
   nextSteps.push(formatScriptCommand('run:android'));
+  if (enableWeb) {
+    nextSteps.push(formatScriptCommand('run:web'));
+  }
 
   console.log(ui.headline('Next steps'));
   nextSteps.forEach(step => console.log(ui.headline(step)));
@@ -137,6 +140,9 @@ export function showCompletionNotes(targetDir: string, packageManager?: string, 
     'iOS: ensure Xcode Command Line Tools are installed.',
     'Android: ensure ANDROID_HOME and SDK platforms are set.',
   ];
+  if (enableWeb) {
+    tips.push('Web: run `run:web` to preview your app in the browser.');
+  }
   tips.forEach(tip => {
     console.log(ui.tip(tip));
   });

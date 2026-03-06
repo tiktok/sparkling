@@ -17,25 +17,27 @@ registerWebMethod('router.open', (params, callback) => {
         const bundleParam = url.searchParams.get('bundle');
         const urlParam = url.searchParams.get('url');
 
-        let webBundlePath: string;
+        // Extract page name (without extension).
+        // Web shell constructs the full URL as /${page}.lynx.bundle
+        let pageName: string;
         if (urlParam) {
-            // Dev mode: url param points to dev server, swap .lynx.bundle → .web.bundle
-            webBundlePath = urlParam.replace(/\.lynx\.bundle$/, '.web.bundle');
+            // Dev mode: url param is a full URL, extract the basename
+            const urlPath = new URL(urlParam).pathname;
+            pageName = urlPath.replace(/^\//, '').replace(/\.lynx\.bundle$/, '');
         } else if (bundleParam) {
-            // Production: swap extension
-            webBundlePath = bundleParam.replace(/\.lynx\.bundle$/, '.web.bundle');
+            pageName = bundleParam.replace(/\.lynx\.bundle$/, '');
         } else {
             callback({ code: 0, msg: 'No bundle or url param in scheme' });
             return;
         }
 
         // Push browser history state
-        const state = { bundle: webBundlePath, scheme };
-        window.history.pushState(state, '', `?page=${encodeURIComponent(webBundlePath)}`);
+        const state = { page: pageName, scheme };
+        window.history.pushState(state, '', `?page=${encodeURIComponent(pageName)}`);
 
         // Dispatch custom event for web shell to swap <lynx-view>
         window.dispatchEvent(new CustomEvent('sparkling:navigate', {
-            detail: { url: webBundlePath, state },
+            detail: { page: pageName, state },
         }));
 
         callback({ code: 1, msg: 'ok' });

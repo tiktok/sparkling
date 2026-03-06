@@ -152,6 +152,26 @@ export async function askAdditionalTools(flags: { yes?: boolean }): Promise<stri
   return [];
 }
 
+export async function askWebPlatform(flags: { yes?: boolean; web?: boolean }): Promise<boolean> {
+  if (flags.web !== undefined) return flags.web;
+  if (!flags.yes) {
+    try {
+      const { enableWeb } = await inquirer.prompt<{ enableWeb: boolean }>([
+        {
+          type: 'confirm',
+          name: 'enableWeb',
+          message: ui.prompt('Enable web platform support? (preview in browser)'),
+          default: true,
+        },
+      ]);
+      return checkCancel(enableWeb);
+    } catch (error) {
+      handlePromptError(error);
+    }
+  }
+  return true;
+}
+
 export async function askNamespace(defaultNamespace: string, flags: { yes?: boolean; namespace?: string; ['app-id']?: string }): Promise<string> {
   const provided = flags.namespace ?? flags['app-id'];
   if (provided) return provided;

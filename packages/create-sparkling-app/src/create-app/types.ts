@@ -18,6 +18,7 @@ export interface CreateAppFlags {
   namespace?: string;
   'app-id'?: string;
   verbose?: boolean;
+  web?: boolean;
 }
 
 export interface CreateSparklingAppOptions {

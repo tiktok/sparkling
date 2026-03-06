@@ -49,6 +49,14 @@ const sidebarEn = {
         },
       ],
     },
+    {
+      text: 'Web Platform',
+      items: [
+        { text: 'Web Platform Guide', link: '/guide/web-platform' },
+        { text: 'Web Methods', link: '/guide/web-method-implementations' },
+        { text: 'Limitations', link: '/guide/web-limitations' },
+      ],
+    },
     { text: 'CLI', items: [{ text: 'CLI', link: '/guide/cli' }] },
   ],
   '/apis/': [
@@ -86,6 +94,14 @@ const sidebarZhBase = {
           link: '/guide/get-started/integrate-sparkling-into-existing-app',
         },
         { text: '创建自定义 Method', link: '/guide/get-started/create-custom-method' },
+      ],
+    },
+    {
+      text: 'Web 平台',
+      items: [
+        { text: 'Web 平台指南', link: '/guide/web-platform' },
+        { text: 'Web Methods', link: '/guide/web-method-implementations' },
+        { text: '限制', link: '/guide/web-limitations' },
       ],
     },
     { text: 'CLI', items: [{ text: 'CLI', link: '/guide/cli' }] },

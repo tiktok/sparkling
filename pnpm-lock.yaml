@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      playwright:
+        specifier: ^1.58.2
+        version: 1.58.2
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -57,10 +60,10 @@ importers:
         version: 29.5.14
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.9)(ts-node@10.9.2(@types/node@22.19.9)(typescript@5.8.3))
+        version: 29.7.0(@types/node@25.2.3)(ts-node@10.9.2(@types/node@25.2.3)(typescript@5.8.3))
       ts-jest:
         specifier: ^29.1.2
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest-util@29.7.0)(jest@29.7.0(@types/node@22.19.9)(ts-node@10.9.2(@types/node@22.19.9)(typescript@5.8.3)))(typescript@5.8.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest-util@29.7.0)(jest@29.7.0(@types/node@25.2.3)(ts-node@10.9.2(@types/node@25.2.3)(typescript@5.8.3)))(typescript@5.8.3)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -269,6 +272,18 @@ importers:
       '@lynx-js/web-elements':
         specifier: 0.11.3
         version: 0.11.3(tslib@2.8.1)
+      sparkling-media:
+        specifier: workspace:*
+        version: link:../methods/sparkling-media
+      sparkling-method:
+        specifier: workspace:*
+        version: link:../sparkling-method
+      sparkling-navigation:
+        specifier: workspace:*
+        version: link:../methods/sparkling-navigation
+      sparkling-storage:
+        specifier: workspace:*
+        version: link:../methods/sparkling-storage
     devDependencies:
       '@rsbuild/core':
         specifier: 1.7.2
@@ -319,6 +334,12 @@ importers:
       '@lynx-js/types':
         specifier: ^3.6.0
         version: 3.6.0
+      '@lynx-js/web-core':
+        specifier: ^0.7.0
+        version: 0.7.1(@lynx-js/lynx-core@0.1.3)(@lynx-js/web-elements@0.7.7(tslib@2.8.1))
+      '@lynx-js/web-elements':
+        specifier: ^0.7.0
+        version: 0.7.7(tslib@2.8.1)
       '@testing-library/jest-dom':
         specifier: ^6.9.1
         version: 6.9.1
@@ -337,6 +358,9 @@ importers:
       sparkling-app-cli:
         specifier: ~2.0.1
         version: 2.0.1(@rspack/core@1.7.5(@swc/helpers@0.5.18))(@types/node@25.2.3)(typescript@5.9.3)(webpack@5.105.0)
+      sparkling-web-shell:
+        specifier: ~2.0.1
+        version: link:../../packages/sparkling-web-shell
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -990,30 +1014,64 @@ packages:
   '@lynx-js/web-constants@0.19.8':
     resolution: {integrity: sha512-aOk2wmwNu0jJ4ERqU+FBva20uZsQi3Uw1uRwOw8pv3fnetNhW5BlExuGdUzv6XTHbOEd1Jfm4jiOwjrzgXr0PQ==}
 
+  '@lynx-js/web-constants@0.7.1':
+    resolution: {integrity: sha512-W8JmHKBwb2BGNnY8ZJBLKbKqP6cd9oUbo6ElezwFUuznDcIasxf43HSccSBpHxwghD1sdF5WrP1PFF5giIBazg==}
+
   '@lynx-js/web-core@0.19.8':
     resolution: {integrity: sha512-8J+T7lZYraWcJNEWWLeVWjeUhRaIRPS7XL6l1x5A+5SC8QCNIezUl1fSYIJiRRQLZjph2xXvBn2K5vzQ3PJREw==}
     peerDependencies:
       '@lynx-js/lynx-core': 0.1.3
       '@lynx-js/web-elements': '>0.7.7'
 
+  '@lynx-js/web-core@0.7.1':
+    resolution: {integrity: sha512-Vn6rmp0EWetm2mQMThcs9yQFRd1SxPy3+AmaapgYQLS+RIfRlQqHQmQBxWIJlUGCcq9iLFM03xw0H/YVYN3kHg==}
+    peerDependencies:
+      '@lynx-js/lynx-core': 0.1.0
+      '@lynx-js/web-elements': '>=0.1.0'
+
+  '@lynx-js/web-elements-reactive@0.2.2':
+    resolution: {integrity: sha512-IVZJaD4IDtVMaFG14vwhavPH6RJPU+VgxN3NLgcRB+2DO+0Ks1/0hYAJuk/QskGF6A7haGsG9TW/EQ7mk1s/sg==}
+
+  '@lynx-js/web-elements-template@0.7.7':
+    resolution: {integrity: sha512-i/Aavm6Ijk8hs7BiBxu4fjatwzkKU0s1Vbj5wdH7lo18FvCbOJZsWUuzNTwXR41D49F8oPI4hQvs0OkKv8ZUJQ==}
+
   '@lynx-js/web-elements@0.11.3':
     resolution: {integrity: sha512-GmfJ1pyvIyR2BpFaWYlH/zlVujVMuCUj+rK20vxlza1wQdSsc5wOeBHbbY3DGq73DvtkhPEczKqIncRUQGZaMA==}
+    peerDependencies:
+      tslib: ^2.5.0
+
+  '@lynx-js/web-elements@0.7.7':
+    resolution: {integrity: sha512-8DjHNinJqQNJ2Ues7VAaf2HHGxmg7EQEiKsZ0f/u/avy0X+RNrACt42sY7VUI0+r9asC7VcRkD/QILUd9VCkNQ==}
     peerDependencies:
       tslib: ^2.5.0
 
   '@lynx-js/web-mainthread-apis@0.19.8':
     resolution: {integrity: sha512-Ze6u1wg5VZO1htXG6AVRB6CSf1qDcMrxtyl22BMmQhRvm9ut4Ck8k1+e5MIaUCTST1q1j0s59bsKsSstZ/Xlng==}
 
+  '@lynx-js/web-mainthread-apis@0.7.1':
+    resolution: {integrity: sha512-xeBYM8DoVCiAN70gsq4EQs4all++zdkIWSflIkbJHMdiCWNWFeb+UNBjDLTYBfP4NwNZosnKhLArofMSne85cw==}
+
   '@lynx-js/web-rsbuild-server-middleware@0.19.7':
     resolution: {integrity: sha512-5WDKvLatbn7D8cN/iuWkuuZYBPaedpe+TSfrvSSHbLD56VKclMWy6kf4qV7G5XP0f/lwj0caIMvsIuWihFB1Kw==}
 
+  '@lynx-js/web-style-transformer@0.2.2':
+    resolution: {integrity: sha512-b/6HCg7pHzmBapr4FFZqzchZwyw9kfjCOuwKFJZp2Xn4ABCUHEbPfBfO3EPEO+mm1CjiN48/YcXG1IxHME7b7w==}
+
   '@lynx-js/web-worker-rpc@0.19.8':
     resolution: {integrity: sha512-POkpPZQjU+a0V/LGWNkaqy+/E6B2WEDYnbh+0FtRNLXcNOBOcgvZNg0fo6VVbw3UInmTwO0v+2g/kMjotizwkg==}
+
+  '@lynx-js/web-worker-rpc@0.7.1':
+    resolution: {integrity: sha512-5aKeVfElE+duqBFWiOaiBBZiC2B7aTDJI88jY7ROrikD5suftmANbMRme8YC46UmJBOo2a5SyLaoZcW54SjL5Q==}
 
   '@lynx-js/web-worker-runtime@0.19.8':
     resolution: {integrity: sha512-lZHnEWQ0QrNIHRGUzYBS22d4ckwyUM+1Gee8D2pCYSAdyqr4aRaNJrUEp8sO8YTh91kohN3c09YQcgRZ8sIstQ==}
     peerDependencies:
       '@lynx-js/lynx-core': 0.1.3
+
+  '@lynx-js/web-worker-runtime@0.7.1':
+    resolution: {integrity: sha512-zqxmqBb77E54VHTo92wMmenRyqIuM9mUON8F+sJKPq0eBa8F2GG4y/fewaXvFU+6pfQUMawGU8wsAUqEiTJwrA==}
+    peerDependencies:
+      '@lynx-js/lynx-core': 0.1.0
 
   '@lynx-js/webpack-dev-transport@0.2.0':
     resolution: {integrity: sha512-RSy02FSoMsavEn2wna4khSJwT2uGW4XeLduKH8UDT3aCsBNM/rXndUyG6PbwMcywXCeyb8UofkhaQDtJvNJklA==}
@@ -6204,6 +6262,10 @@ snapshots:
     dependencies:
       '@lynx-js/web-worker-rpc': 0.19.8
 
+  '@lynx-js/web-constants@0.7.1':
+    dependencies:
+      '@lynx-js/web-worker-rpc': 0.7.1
+
   '@lynx-js/web-core@0.19.8(@lynx-js/lynx-core@0.1.3)(@lynx-js/web-elements@0.11.3(tslib@2.8.1))':
     dependencies:
       '@lynx-js/lynx-core': 0.1.3
@@ -6214,8 +6276,26 @@ snapshots:
       '@lynx-js/web-worker-rpc': 0.19.8
       '@lynx-js/web-worker-runtime': 0.19.8(@lynx-js/lynx-core@0.1.3)
 
+  '@lynx-js/web-core@0.7.1(@lynx-js/lynx-core@0.1.3)(@lynx-js/web-elements@0.7.7(tslib@2.8.1))':
+    dependencies:
+      '@lynx-js/lynx-core': 0.1.3
+      '@lynx-js/web-constants': 0.7.1
+      '@lynx-js/web-elements': 0.7.7(tslib@2.8.1)
+      '@lynx-js/web-worker-rpc': 0.7.1
+      '@lynx-js/web-worker-runtime': 0.7.1(@lynx-js/lynx-core@0.1.3)
+
+  '@lynx-js/web-elements-reactive@0.2.2': {}
+
+  '@lynx-js/web-elements-template@0.7.7': {}
+
   '@lynx-js/web-elements@0.11.3(tslib@2.8.1)':
     dependencies:
+      tslib: 2.8.1
+
+  '@lynx-js/web-elements@0.7.7(tslib@2.8.1)':
+    dependencies:
+      '@lynx-js/web-elements-reactive': 0.2.2
+      '@lynx-js/web-elements-template': 0.7.7
       tslib: 2.8.1
 
   '@lynx-js/web-mainthread-apis@0.19.8':
@@ -6224,9 +6304,20 @@ snapshots:
       hyphenate-style-name: 1.1.0
       wasm-feature-detect: 1.8.0
 
+  '@lynx-js/web-mainthread-apis@0.7.1':
+    dependencies:
+      '@lynx-js/web-constants': 0.7.1
+      '@lynx-js/web-style-transformer': 0.2.2
+      css-tree: 3.1.0
+      hyphenate-style-name: 1.1.0
+
   '@lynx-js/web-rsbuild-server-middleware@0.19.7': {}
 
+  '@lynx-js/web-style-transformer@0.2.2': {}
+
   '@lynx-js/web-worker-rpc@0.19.8': {}
+
+  '@lynx-js/web-worker-rpc@0.7.1': {}
 
   '@lynx-js/web-worker-runtime@0.19.8(@lynx-js/lynx-core@0.1.3)':
     dependencies:
@@ -6235,6 +6326,13 @@ snapshots:
       '@lynx-js/web-constants': 0.19.8
       '@lynx-js/web-mainthread-apis': 0.19.8
       '@lynx-js/web-worker-rpc': 0.19.8
+
+  '@lynx-js/web-worker-runtime@0.7.1(@lynx-js/lynx-core@0.1.3)':
+    dependencies:
+      '@lynx-js/lynx-core': 0.1.3
+      '@lynx-js/web-constants': 0.7.1
+      '@lynx-js/web-mainthread-apis': 0.7.1
+      '@lynx-js/web-worker-rpc': 0.7.1
 
   '@lynx-js/webpack-dev-transport@0.2.0': {}
 

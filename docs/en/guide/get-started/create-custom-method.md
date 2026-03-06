@@ -252,6 +252,17 @@ npm install sparkling-my-greeting
 npx sparkling autolink
 ```
 
+## 7. Add web support (optional)
+
+You can add a web implementation so your method works in the browser. See the full guide at [Web Method Implementations](/guide/web-method-implementations).
+
+In brief:
+
+1. Create `src/web/index.ts` with `registerWebMethod()` calls
+2. Add `"./web"` subpath export to `package.json`
+3. Add `"web"` to `platforms` in `module.config.json`
+4. Run `npx sparkling autolink`
+
 ## Best practices
 
 - **Naming convention**: package name should follow `sparkling-<module>` format.

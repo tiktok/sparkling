@@ -39,7 +39,11 @@ export function hasWebMethod(methodName: string): boolean {
 /**
  * Detect whether the current environment is a web browser
  * (as opposed to the Lynx native runtime).
+ *
+ * Note: We check for `document` rather than the absence of `NativeModules`
+ * because `@lynx-js/web-core` defines a `NativeModules` stub in the browser.
+ * Native Lynx does not provide a `document` global.
  */
 export function isWebEnvironment(): boolean {
-    return typeof window !== 'undefined' && typeof NativeModules === 'undefined';
+    return typeof document !== 'undefined';
 }

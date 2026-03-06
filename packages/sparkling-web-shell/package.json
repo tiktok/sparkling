@@ -17,7 +17,11 @@
   },
   "dependencies": {
     "@lynx-js/web-core": "0.19.8",
-    "@lynx-js/web-elements": "0.11.3"
+    "@lynx-js/web-elements": "0.11.3",
+    "sparkling-method": "workspace:*",
+    "sparkling-navigation": "workspace:*",
+    "sparkling-storage": "workspace:*",
+    "sparkling-media": "workspace:*"
   },
   "devDependencies": {
     "@rsbuild/core": "1.7.2",

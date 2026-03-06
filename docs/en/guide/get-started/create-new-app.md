@@ -14,7 +14,7 @@ npm create sparkling-app@latest my-app
 cd my-app
 ```
 
-2) Run native targets:
+2) Run on any platform:
 
 ```bash
 # Android
@@ -22,6 +22,9 @@ npm run run:android
 
 # iOS
 npm run run:ios
+
+# Web (browser preview)
+npm run run:web
 ```
 
 3) Add Sparkling methods as needed:
@@ -41,6 +44,7 @@ npx sparkling build
 
 - A Lynx app project (based on the default template)
 - Android and iOS native shells already wired for Sparkling
+- Web platform support for browser previews (enabled by default)
 - A working JS ↔ native pipe method example (router)
 - Developer workflow commands (build / autolink / run)
 
@@ -49,7 +53,7 @@ Key folders/files created by the default template:
 - `src/`: Lynx/React entry points and assets
 - `android/`, `ios/`: native shells wired to Sparkling SDK
 - `app.config.ts`: build + routing config consumed by `sparkling-app-cli`
-- `package.json`: scripts (`dev`, `build`, `run:android`, `run:ios`)
+- `package.json`: scripts (`dev`, `build`, `run:android`, `run:ios`, `run:web`)
 
 ### Prerequisites
 

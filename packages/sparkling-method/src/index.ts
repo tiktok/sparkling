@@ -5,7 +5,7 @@
 /// <reference path="typing.d.ts" />
 
 import type { PipeResponse, PipeErrorResponse, PipeCallOptions, MethodMap, EventCallback, WebMethodHandler } from './types';
-import { isWebEnvironment, getWebMethodHandler } from './web-registry';
+import { getWebMethodHandler } from './web-registry';
 
 export type {
     PipeResponse,
@@ -93,29 +93,25 @@ const LynxPipe = {
             return;
         }
 
-        // Web environment dispatch — intercept before NativeModules check
-        if (isWebEnvironment()) {
-            const webHandler = getWebMethodHandler(method);
-            if (webHandler) {
-                try {
-                    webHandler(
-                        {
-                            containerID: getContainerID(),
-                            protocolVersion: '1.0.0',
-                            data: params ?? null,
-                        },
-                        callback
-                    );
-                } catch (error) {
-                    const errorMsg = error instanceof Error ? error.message : String(error);
-                    callback(createErrorResponse(-5, `Web pipe call failed: ${errorMsg}`));
-                }
-                return;
+        // Web handler dispatch — if a handler is registered, use it.
+        // On native the registry is empty (no /web imports), so this is a no-op.
+        // On web, @lynx-js/web-core provides a NativeModules stub without spkPipe,
+        // so we must dispatch here before the NativeModules checks below.
+        const webHandler = getWebMethodHandler(method);
+        if (webHandler) {
+            try {
+                webHandler(
+                    {
+                        containerID: getContainerID(),
+                        protocolVersion: '1.0.0',
+                        data: params ?? null,
+                    },
+                    callback
+                );
+            } catch (error) {
+                const errorMsg = error instanceof Error ? error.message : String(error);
+                callback(createErrorResponse(-5, `Web pipe call failed: ${errorMsg}`));
             }
-            callback(createErrorResponse(-2,
-                `No web handler registered for "${method}". ` +
-                `Import the method package's /web subpath to register handlers.`
-            ));
             return;
         }
 
