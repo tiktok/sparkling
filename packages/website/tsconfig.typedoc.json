@@ -8,5 +8,5 @@
     "declaration": true,
     "noEmit": true
   },
-  "include": ["src/global-props.ts"]
+  "include": ["src/global-props.ts", "src/app-config.ts"]
 }

@@ -1,0 +1,61 @@
+# Interface: SplashScreenPluginConfig
+
+Splash screen plugin configuration.
+
+Controls the native splash screen shown while the Lynx bundle loads.
+
+## Properties
+
+### backgroundColor?
+
+```ts
+optional backgroundColor: string;
+```
+
+Background color of the splash screen (hex string, e.g. `"#FFFFFF"`).
+
+***
+
+### dark?
+
+```ts
+optional dark: object;
+```
+
+Dark-mode overrides for the splash screen.
+
+#### backgroundColor?
+
+```ts
+optional backgroundColor: string;
+```
+
+Background color for dark mode.
+
+#### image?
+
+```ts
+optional image: string;
+```
+
+Splash image for dark mode.
+
+***
+
+### image?
+
+```ts
+optional image: string;
+```
+
+Path to the splash image, relative to the project root.
+
+***
+
+### imageWidth?
+
+```ts
+optional imageWidth: number;
+```
+
+Display width of the splash image in logical points.

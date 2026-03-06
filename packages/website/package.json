@@ -7,7 +7,7 @@
     "dev": "rspress dev",
     "build": "rspress build",
     "preview": "rspress preview",
-    "gen:api": "typedoc"
+    "gen:api": "typedoc && typedoc --options typedoc.app-config.json"
   },
   "devDependencies": {
     "@rspack/core": "2.0.0-alpha.1",

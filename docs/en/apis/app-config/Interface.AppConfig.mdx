@@ -1,0 +1,178 @@
+# Interface: AppConfig
+
+Configuration schema for `app.config.ts`, the top-level config file of a
+Sparkling application.
+
+`app.config.ts` is a **superset** of the Lynx build config. It wraps the
+standard Rspeedy / Lynx config (the same object you would export from a
+`lynx.config.ts`) and adds Sparkling-specific fields such as platform
+identifiers, asset paths, and native plugin settings.
+
+**Relationship to `lynx.config.ts`:**
+
+| | `app.config.ts` | `lynx.config.ts` |
+|---|---|---|
+| Used by | Sparkling CLI (`sparkling dev / build / run`) | Rspeedy directly |
+| Contains | `lynxConfig` + Sparkling fields | Rspeedy build config only |
+| When to use | Full Sparkling app with native shell | Lynx-only project (e.g. Playground) |
+
+At build time the Sparkling CLI extracts the `lynxConfig` property and
+passes it to Rspeedy, so you never need a separate `lynx.config.ts` when
+using `app.config.ts`.
+
+## Example
+
+```ts
+import { defineConfig } from '@lynx-js/rspeedy';
+import type { AppConfig } from 'sparkling-app-cli';
+
+const lynxConfig = defineConfig({
+  source: {
+    entry: {
+      main: './src/pages/main/index.tsx',
+      detail: './src/pages/detail/index.tsx',
+    },
+  },
+  output: {
+    assetPrefix: 'asset:///',
+    filename: { bundle: '[name].lynx.bundle' },
+  },
+  plugins: [ ... ],
+});
+
+const config: AppConfig = {
+  lynxConfig,
+  appName: 'MyApp',
+  platform: {
+    android: { packageName: 'com.example.myapp' },
+    ios: { bundleIdentifier: 'com.example.myapp' },
+  },
+};
+
+export default config;
+```
+
+## Properties
+
+### appIcon?
+
+```ts
+optional appIcon: string;
+```
+
+Path to the app icon image, relative to the project root.
+
+***
+
+### appName?
+
+```ts
+optional appName: string;
+```
+
+Display name of the application.
+
+Used by the Sparkling CLI when scaffolding or displaying the app.
+
+***
+
+### lynxConfig
+
+```ts
+lynxConfig: unknown;
+```
+
+The Rspeedy / Lynx build configuration — the same object returned by
+`defineConfig()` from `@lynx-js/rspeedy`.
+
+This is the **only required field**. The Sparkling CLI extracts it at
+build time and passes it to Rspeedy, so you do not need a separate
+`lynx.config.ts` file.
+
+#### Remarks
+
+Configure build entries, output settings, and Rspeedy plugins here.
+See the [Rspeedy documentation](https://rspeedy.dev/) for the
+full set of options.
+
+***
+
+### paths?
+
+```ts
+optional paths: object;
+```
+
+Paths where built bundles are copied into the native projects.
+
+After `sparkling build`, the CLI copies the output bundles to these
+directories so the native apps can load them as local assets.
+
+#### androidAssets?
+
+```ts
+optional androidAssets: string;
+```
+
+Path to the Android assets directory relative to the project root.
+
+#### iosAssets?
+
+```ts
+optional iosAssets: string;
+```
+
+Path to the iOS assets directory relative to the project root.
+
+#### Default Value
+
+`{ androidAssets: 'android/app/src/main/assets', iosAssets: 'ios/LynxResources/Assets' }`
+
+***
+
+### platform?
+
+```ts
+optional platform: PlatformConfig;
+```
+
+Platform-specific identifiers for Android and iOS builds.
+
+***
+
+### plugin?
+
+```ts
+optional plugin: PluginConfig[];
+```
+
+Native plugin configurations.
+
+Each entry is a tuple of `[pluginName, pluginOptions]`. The Sparkling
+CLI and native SDKs read these to configure native-side features.
+
+#### Example
+
+```ts
+plugin: [
+  ['splash-screen', {
+    backgroundColor: '#232323',
+    image: './resource/icon.png',
+    imageWidth: 200,
+  }],
+]
+```
+
+***
+
+### router?
+
+```ts
+optional router: RouterConfig;
+```
+
+Static route entry mapping.
+
+Maps named routes to their bundle paths. This is available for metadata
+purposes; at runtime, navigation is performed via the `navigate()`
+function from `sparkling-navigation`.

@@ -1,3 +1,5 @@
+import { Steps } from '@theme';
+
 # 创建新的 Sparkling 应用
 
 使用官方脚手架创建 Sparkling 应用，然后使用内置的工作流 CLI 构建 Lynx bundle 并运行原生 Shell。
@@ -6,14 +8,16 @@
 
 如果你想在几分钟内拥有一个可运行的项目：
 
-1) 创建项目：
+<Steps>
+
+### 创建项目
 
 ```bash
 npm create sparkling-app@latest my-app
 cd my-app
 ```
 
-2) 运行原生目标：
+### 运行原生目标
 
 ```bash
 # Android
@@ -23,18 +27,21 @@ npm run run:android
 npm run run:ios
 ```
 
-3) 根据需要添加 Sparkling 方法：
+### 根据需要添加 Sparkling 方法
 
 ```bash
 npm install sparkling-storage
 ```
 
-4) 构建发布用 bundle（不论使用哪个包管理器，命令相同）：
+### 构建发布用 bundle
+
+不论使用哪个包管理器，命令相同：
 
 ```bash
 npx sparkling build
 ```
 
+</Steps>
 
 ### 你将获得
 

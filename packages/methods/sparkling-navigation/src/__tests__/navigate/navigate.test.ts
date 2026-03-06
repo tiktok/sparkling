@@ -170,5 +170,29 @@ expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] navigate: c
         callback
       );
     });
+
+    it('should pass custom (non-predefined) params through to the scheme URL', () => {
+      const params: NavigateRequest = {
+        path: 'pages/detail.lynx.bundle',
+        options: {
+          params: {
+            title: 'Detail',
+            customParam: 'hello',
+            itemId: 42,
+          },
+        },
+      };
+      const callback = jest.fn();
+
+      navigate(params, callback);
+
+      expect(mockOpen).toHaveBeenCalledWith(
+        {
+          scheme: 'hybrid://lynxview_page?bundle=pages%2Fdetail.lynx.bundle&title=Detail&customParam=hello&itemId=42',
+          options: undefined,
+        },
+        callback
+      );
+    });
   });
 });

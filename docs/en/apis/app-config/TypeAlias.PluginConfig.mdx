@@ -1,0 +1,11 @@
+# Type Alias: PluginConfig
+
+```ts
+type PluginConfig: ["splash-screen", SplashScreenPluginConfig] | [string, Record<string, unknown>?];
+```
+
+Plugin configuration tuple.
+
+Each plugin is specified as `[name, options?]`. The built-in
+`"splash-screen"` plugin uses [SplashScreenPluginConfig](Interface.SplashScreenPluginConfig.mdx);
+custom plugins accept an arbitrary options object.

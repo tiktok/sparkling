@@ -4,7 +4,6 @@
   ❇️ The Cross-platform Infrastructure behind TikTok
 </p>
 
-
 ## Content
 - [About Sparkling](#about-sparkling)
 - [Documentation](#documentation)
@@ -13,7 +12,10 @@
 - [License](#license)
 
 ## About Sparkling
-Large-scale apps like TikTok are never built with a single technology. Sparkling is the cross-platform infrastructure we built to power the TikTok app. It unlocks [Lynx](https://lynxjs.org) at our scale, and we believe it can do the same for your app.
+> ⚠️ Sparkling is currently in public beta.
+> We're excited to open-source the underlying architecture that has been battle-tested inside TikTok, and we're still evolving its public-facing surface area, including rolling out more APIs and improving the documentation. Feedback and contributions are welcome!
+
+Large-scale apps like TikTok are never built with a single technology. Sparkling is the infrastructure we built to unlock [Lynx](https://lynxjs.org) [at TikTok's scale](https://lynxjs.org/next/blog/lynx-unlock-native-for-more#ship-native-at-scale-and-velocity), and we believe it can do the same for your app.
 
 - 📦 **Scaffold in minutes.** Create a Lynx app targeting Android & iOS with a single CLI command.
 - 🔀 **Scheme-driven navigation.** Route between Lynx pages and native screens with a unified URL scheme.

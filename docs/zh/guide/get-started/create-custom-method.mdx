@@ -1,8 +1,12 @@
+import { Steps } from '@theme';
+
 # 创建自定义 Sparkling Method
 
 Sparkling Method 是一个在 Android 和 iOS 上都能工作的类型化 JS 与原生桥接包。你在 TypeScript 中定义 API，使用 CLI 生成原生代码，然后在 Kotlin 和 Swift 中实现业务逻辑。
 
-## 1. 创建 Method 包
+<Steps>
+
+### 创建 Method 包
 
 使用 `sparkling-method-cli` 创建新的 Method 模块：
 
@@ -38,7 +42,7 @@ sparkling-my-greeting/
 }
 ```
 
-## 2. 编写 TypeScript 函数声明
+### 编写 TypeScript 函数声明
 
 编辑 `src/` 下的 `.d.ts` 文件来声明你的方法 API。
 你只需编写**函数声明**和**接口** —— 不需要写实现。
@@ -83,7 +87,7 @@ declare function hello(
 - 字面量联合类型（如 `'formal' | 'casual'`）在原生代码中会变为枚举常量
 - 接口可以嵌套 —— 它们会生成嵌套的模型类
 
-## 3. 运行代码生成
+### 运行代码生成
 
 从声明文件生成所有平台代码：
 
@@ -105,12 +109,12 @@ npx sparkling-method-cli codegen
 **不应手动编辑生成的文件。** 如果需要更改 API，
 请修改 `.d.ts` 声明文件并重新运行 codegen。
 
-## 4. 实现原生业务逻辑
+### 实现原生业务逻辑
 
 生成的原生代码包含抽象类/桩代码，已处理好参数解析和响应序列化。
 你需要继承它们并填写实际的业务逻辑。
 
-### Android（Kotlin）
+#### Android（Kotlin）
 
 创建继承生成的抽象类的具体实现：
 
@@ -139,7 +143,7 @@ class MyGreetingHelloMethod : AbsMyGreetingHelloMethodIDL() {
 }
 ```
 
-### iOS（Swift）
+#### iOS（Swift）
 
 创建继承生成类的具体实现：
 
@@ -169,9 +173,9 @@ class MyGreetingHelloMethod: SPKMyGreetingHelloMethodIDL {
 }
 ```
 
-## 5. 构建并通过 autolink 测试
+### 构建并通过 autolink 测试
 
-### 构建包
+#### 构建包
 
 编译 TypeScript：
 
@@ -179,7 +183,7 @@ class MyGreetingHelloMethod: SPKMyGreetingHelloMethodIDL {
 npm run build
 ```
 
-### 集成到你的 Sparkling 应用
+#### 集成到你的 Sparkling 应用
 
 在你的 Sparkling 应用项目中安装 Method 包：
 
@@ -199,7 +203,7 @@ autolink 会自动完成：
 - **iOS**：更新 `Podfile` 添加 Pod 依赖，并生成
   `SparklingAutolink.swift` 注册文件
 
-### 运行并测试
+#### 运行并测试
 
 ```bash
 npm run run:android
@@ -218,7 +222,7 @@ hello({ name: 'Sparkling', style: 'casual' }, (res) => {
 });
 ```
 
-## 6. 发布
+### 发布
 
 当 Method 准备好发布时：
 
@@ -251,6 +255,8 @@ npm publish
 npm install sparkling-my-greeting
 npx sparkling autolink
 ```
+
+</Steps>
 
 ## 最佳实践
 

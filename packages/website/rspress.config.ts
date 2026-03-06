@@ -35,24 +35,48 @@ const navZh = [
 // Rspress 2.0 requires sidebar items to be { text, link } objects (not plain strings).
 const sidebarEn = {
   '/guide/': [
+    { sectionHeaderText: 'Get Started' },
+    { text: 'Start a New App', link: '/guide/get-started/create-new-app' },
     {
-      text: 'Get Started',
-      items: [
-        { text: 'Create a New App', link: '/guide/get-started/create-new-app' },
-        {
-          text: 'Integrate into Existing App',
-          link: '/guide/get-started/integrate-sparkling-into-existing-app',
-        },
-        {
-          text: 'Create a Custom Method',
-          link: '/guide/get-started/create-custom-method',
-        },
-      ],
+      text: 'Integrate into Existing App',
+      link: '/guide/get-started/integrate-sparkling-into-existing-app',
     },
-    { text: 'CLI', items: [{ text: 'CLI', link: '/guide/cli' }] },
+    { dividerType: 'solid' },
+    { sectionHeaderText: 'Core' },
+    { text: 'CLI', link: '/guide/cli' },
+    { text: 'Scheme', link: '/guide/scheme' },
+    { text: 'Navigation', link: '/guide/multi-page-navigation' },
+    { dividerType: 'solid' },
+    { sectionHeaderText: 'Native Module' },
+    { text: 'Custom Methods', link: '/guide/get-started/create-custom-method' },
   ],
   '/apis/': [
     { text: 'Overview', link: '/apis/' },
+    { sectionHeaderText: 'Configuration' },
+    {
+      text: 'AppConfig',
+      link: '/apis/app-config/Interface.AppConfig',
+      collapsed: true,
+      items: [
+        {
+          text: 'PlatformConfig',
+          link: '/apis/app-config/Interface.PlatformConfig',
+        },
+        {
+          text: 'RouterConfig',
+          link: '/apis/app-config/Interface.RouterConfig',
+        },
+        {
+          text: 'PluginConfig',
+          link: '/apis/app-config/TypeAlias.PluginConfig',
+        },
+        {
+          text: 'SplashScreenPluginConfig',
+          link: '/apis/app-config/Interface.SplashScreenPluginConfig',
+        },
+      ],
+    },
+    { dividerType: 'solid' },
     { sectionHeaderText: 'Sparkling Lynx' },
     { text: 'GlobalProps', link: '/apis/global-props/Interface.GlobalProps' },
     { text: 'Scheme', link: '/apis/scheme' },
@@ -77,21 +101,48 @@ const sidebarEn = {
 
 const sidebarZhBase = {
   '/guide/': [
+    { sectionHeaderText: '快速开始' },
+    { text: '创建新应用', link: '/guide/get-started/create-new-app' },
     {
-      text: '快速开始',
-      items: [
-        { text: '创建新应用', link: '/guide/get-started/create-new-app' },
-        {
-          text: '接入已有应用',
-          link: '/guide/get-started/integrate-sparkling-into-existing-app',
-        },
-        { text: '创建自定义 Method', link: '/guide/get-started/create-custom-method' },
-      ],
+      text: '接入已有应用',
+      link: '/guide/get-started/integrate-sparkling-into-existing-app',
     },
-    { text: 'CLI', items: [{ text: 'CLI', link: '/guide/cli' }] },
+    { dividerType: 'solid' },
+    { sectionHeaderText: '核心' },
+    { text: 'CLI', link: '/guide/cli' },
+    { text: 'Scheme', link: '/guide/scheme' },
+    { text: '导航', link: '/guide/multi-page-navigation' },
+    { dividerType: 'solid' },
+    { sectionHeaderText: '原生模块' },
+    { text: '自定义 Method', link: '/guide/get-started/create-custom-method' },
   ],
   '/apis/': [
     { text: '概览', link: '/apis/' },
+    { sectionHeaderText: 'Configuration' },
+    {
+      text: 'AppConfig',
+      link: '/apis/app-config/Interface.AppConfig',
+      collapsed: true,
+      items: [
+        {
+          text: 'PlatformConfig',
+          link: '/apis/app-config/Interface.PlatformConfig',
+        },
+        {
+          text: 'RouterConfig',
+          link: '/apis/app-config/Interface.RouterConfig',
+        },
+        {
+          text: 'PluginConfig',
+          link: '/apis/app-config/TypeAlias.PluginConfig',
+        },
+        {
+          text: 'SplashScreenPluginConfig',
+          link: '/apis/app-config/Interface.SplashScreenPluginConfig',
+        },
+      ],
+    },
+    { dividerType: 'solid' },
     { sectionHeaderText: 'Sparkling Lynx' },
     { text: 'GlobalProps', link: '/apis/global-props/Interface.GlobalProps' },
     { text: 'Scheme', link: '/apis/scheme' },

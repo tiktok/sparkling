@@ -1,0 +1,53 @@
+# Interface: PlatformConfig
+
+Platform-specific identifiers and settings.
+
+## Properties
+
+### android?
+
+```ts
+optional android: object;
+```
+
+Android platform settings.
+
+#### packageName?
+
+```ts
+optional packageName: string;
+```
+
+Android application package name (e.g. `"com.example.myapp"`).
+
+Used by `sparkling autolink` to configure native dependencies.
+
+***
+
+### ios?
+
+```ts
+optional ios: object;
+```
+
+iOS platform settings.
+
+#### bundleIdentifier?
+
+```ts
+optional bundleIdentifier: string;
+```
+
+iOS bundle identifier (e.g. `"com.example.myapp"`).
+
+Used by `sparkling autolink` to configure native dependencies.
+
+#### simulator?
+
+```ts
+optional simulator: string;
+```
+
+iOS simulator identifier to use for `sparkling run:ios`.
+
+If not set, the CLI uses the default booted simulator.
