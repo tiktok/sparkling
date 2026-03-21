@@ -2,6 +2,7 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 import { execSync } from 'node:child_process';
+import * as p from '@clack/prompts';
 import { ui } from '../ui';
 import { createSpinner } from '../utils/spinner';
 import { isVerboseEnabled, verboseLog } from '../utils/verbose';
@@ -40,7 +41,7 @@ export async function installDependencies(distFolder: string, packageManager?: s
     if (isVerboseEnabled()) {
       verboseLog(`Install failed: ${error instanceof Error ? error.message : String(error)}`);
     }
-    console.warn(ui.warn(`Warning: Failed to install dependencies. Run '${packageManager} install' manually.`));
+    p.log.warn(`Failed to install dependencies. Run '${packageManager} install' manually.`);
     return false;
   }
 }
@@ -52,7 +53,7 @@ export async function initializeGitRepo(distFolder: string): Promise<void> {
     try {
       execSync('git --version', { stdio: stdioMode });
     } catch {
-      console.warn(ui.warn('Warning: Git is not installed or not in PATH. Skipping git initialization.'));
+      p.log.warn('Git is not installed or not in PATH. Skipping git initialization.');
       return;
     }
 
@@ -64,7 +65,7 @@ export async function initializeGitRepo(distFolder: string): Promise<void> {
     s.stop('Initialized git repository');
   } catch (error) {
     s.stop('Failed to initialize git repository');
-    console.warn(ui.warn('Warning: Failed to initialize git repository. Run "git init" manually.'));
+    p.log.warn('Failed to initialize git repository. Run "git init" manually.');
   }
 }
 
@@ -112,8 +113,6 @@ export function detectPackageManager(): string {
 }
 
 export function showCompletionNotes(targetDir: string, packageManager?: string, didInstall = false): void {
-  console.log(ui.success(`✔ Project created at ${targetDir}`));
-
   const formatScriptCommand = (script: string) => {
     const pm = packageManager ?? 'npm';
     return pm === 'npm' ? `${pm} run ${script}` : `${pm} ${script}`;
@@ -130,16 +129,13 @@ export function showCompletionNotes(targetDir: string, packageManager?: string, 
   nextSteps.push(formatScriptCommand('run:ios'));
   nextSteps.push(formatScriptCommand('run:android'));
 
-  console.log(ui.headline('Next steps'));
-  nextSteps.forEach(step => console.log(ui.headline(step)));
-
   const tips = [
     'iOS: ensure Xcode Command Line Tools are installed.',
     'Android: ensure ANDROID_HOME and SDK platforms are set.',
   ];
-  tips.forEach(tip => {
-    console.log(ui.tip(tip));
-  });
 
-  console.log(ui.success('Successfully created app project!'));
+  p.note(
+    [...nextSteps, '', ...tips.map(t => ui.tip(t))].join('\n'),
+    `✔ Project created at ${targetDir}`,
+  );
 }

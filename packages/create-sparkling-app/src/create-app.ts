@@ -2,6 +2,7 @@
 // Copyright (c) 2025 TikTok Pte. Ltd.
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
+import * as p from '@clack/prompts';
 import fs from "fs";
 import path from "path";
 
@@ -110,11 +111,7 @@ export async function createSparklingApp(
     ? `${version}${isWorkspaceBuild ? "-local" : ""}`
     : "0.0.0";
 
-  console.log(ui.headline(`create-sparkling-app  v${versionLabel}`));
-  console.log(ui.headline("┌──────────────────────────────────────────────────────────────┐"));
-  console.log(ui.headline("│ Welcome to Sparkling!                                        │"));
-  console.log(ui.headline("│ Create a Lynx app with various native abilities in minutes.  │"));
-  console.log(ui.headline("└──────────────────────────────────────────────────────────────┘"));
+  p.intro(ui.headline(`create-sparkling-app v${versionLabel}`));
 
   const projectName = args.name ?? (await askProjectName(flags));
 
@@ -328,9 +325,10 @@ export async function createSparklingApp(
   }
 
   if (shouldInitGit) {
-    console.log(ui.info('Setting up git repository, this may take a moment...'));
     await initializeGitRepo(distFolder);
   }
 
   showCompletionNotes(targetDir, packageManager, didInstall);
+
+  p.outro(ui.success('Happy hacking!'));
 }

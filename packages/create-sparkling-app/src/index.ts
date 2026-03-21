@@ -2,6 +2,7 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
+import * as p from '@clack/prompts';
 import help from './help';
 import init from './init';
 import { UserCancelledError } from './core/project-builder/template';
@@ -67,10 +68,12 @@ export async function main() {
 if (require.main === module || process.env.NODE_ENV !== 'test') {
   main().catch(error => {
     if (error instanceof UserCancelledError) {
+      p.cancel('Operation cancelled.');
       process.exit(0);
     }
 
-    console.error('An error occurred:', error);
+    p.cancel('An error occurred.');
+    console.error(error);
     if (isVerboseEnabled() && error instanceof Error && error.stack) {
       verboseLog(error.stack);
     }

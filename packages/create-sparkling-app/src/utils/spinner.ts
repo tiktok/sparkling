@@ -1,7 +1,7 @@
 // Copyright (c) 2025 TikTok Pte. Ltd.
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
-import { ui } from '../ui';
+import * as p from '@clack/prompts';
 
 export interface SimpleSpinner {
   message(message?: string): void;
@@ -10,26 +10,39 @@ export interface SimpleSpinner {
 }
 
 export function createSpinner(): SimpleSpinner {
-  let activeMessage: string | null = null;
+  // p.spinner() uses animated cursor output that requires a TTY.
+  // Fall back to simple console.log in non-TTY environments (CI, piped output).
+  if (!process.stdout.isTTY) {
+    let activeMessage: string | null = null;
+    return {
+      message(message?: string) {
+        if (message) console.log(message);
+      },
+      start(message?: string) {
+        activeMessage = message ?? null;
+        if (message) console.log(message);
+      },
+      stop(message?: string, _code?: number) {
+        const finalMessage = message ?? activeMessage;
+        if (finalMessage) console.log(finalMessage);
+        activeMessage = null;
+      },
+    };
+  }
+
+  const spin = p.spinner();
 
   return {
     message(message?: string) {
       if (message) {
-        console.log(ui.info(message));
+        spin.message(message);
       }
     },
     start(message?: string) {
-      activeMessage = message ?? null;
-      if (message) {
-        console.log(ui.info(message));
-      }
+      spin.start(message ?? '');
     },
     stop(message?: string, _code?: number) {
-      const finalMessage = message ?? activeMessage;
-      if (finalMessage) {
-        console.log(ui.info(finalMessage));
-      }
-      activeMessage = null;
+      spin.stop(message ?? '');
     },
   };
 }
