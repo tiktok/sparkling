@@ -156,13 +156,11 @@ open class SPKResourceLoaderImpl: NSObject, SPKResourceLoaderProtocol {
         let nsPath = relativePath as NSString
         let pathExtension = nsPath.pathExtension
         let resourceName = nsPath.deletingPathExtension
-        
-        if let bundlePath = Bundle.main.path(forResource: resourceName, ofType: pathExtension) {
-            if let data = try? Data(contentsOf: URL(fileURLWithPath: bundlePath)) {
-                return SPKResourceProvider(resourceData: data)
-            }
-        }
-        
+
+        // Search known subdirectories first so that bundles copied by
+        // `sparkling-app-cli build --copy` (into LynxResources/) take
+        // precedence over stale copies that may exist elsewhere in the
+        // app bundle.
         if let bundleRoot = Bundle.main.resourceURL {
             let searchPrefixes = ["LynxResources", "", "Assets"]
             for prefix in searchPrefixes {
@@ -178,7 +176,14 @@ open class SPKResourceLoaderImpl: NSObject, SPKResourceLoaderProtocol {
                 }
             }
         }
-        
+
+        // Fallback: let iOS search the entire app bundle.
+        if let bundlePath = Bundle.main.path(forResource: resourceName, ofType: pathExtension) {
+            if let data = try? Data(contentsOf: URL(fileURLWithPath: bundlePath)) {
+                return SPKResourceProvider(resourceData: data)
+            }
+        }
+
         return nil
     }
     
