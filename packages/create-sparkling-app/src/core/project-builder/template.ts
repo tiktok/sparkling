@@ -1,7 +1,7 @@
 // Copyright (c) 2025 TikTok Pte. Ltd.
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
-import inquirer from 'inquirer';
+import * as p from '@clack/prompts';
 import deepmerge from 'deepmerge';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,7 +16,10 @@ export class UserCancelledError extends Error {
   }
 }
 
-export function checkCancel<T>(value: unknown): T {
+export function checkCancel<T>(value: T | symbol): T {
+  if (p.isCancel(value)) {
+    throw new UserCancelledError();
+  }
   return value as T;
 }
 
@@ -126,23 +129,14 @@ export async function copyTemplateWithVariables({
   version?: Record<string, string> | string;
 }): Promise<void> {
   if (checkEmpty && !override && fs.existsSync(to) && !isEmptyDir(to)) {
-    let option: string;
-    try {
-      const answer = await inquirer.prompt<{ choice: string }>([
-        {
-          type: 'list',
-          name: 'choice',
-          message: `"${path.basename(to)}" is not empty, please choose:`,
-          choices: [
-            { name: 'Continue and override files', value: 'yes' },
-            { name: 'Cancel operation', value: 'no' },
-          ],
-        },
-      ]);
-      option = checkCancel(answer.choice);
-    } catch (error) {
-      throw new UserCancelledError((error as Error).message);
-    }
+    const option = await p.select({
+      message: `"${path.basename(to)}" is not empty, please choose:`,
+      options: [
+        { label: 'Continue and override files', value: 'yes' },
+        { label: 'Cancel operation', value: 'no' },
+      ],
+    });
+    checkCancel(option);
 
     if (option === 'no') {
       throw new UserCancelledError();

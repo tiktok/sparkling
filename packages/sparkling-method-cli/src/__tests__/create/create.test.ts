@@ -1,12 +1,16 @@
 import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
-import inquirer from 'inquirer';
+import * as p from '@clack/prompts';
 import { runInit } from '../../create';
 import type { InitOptions } from '../../create/types';
 
-jest.mock('inquirer', () => ({
-  prompt: jest.fn()
+jest.mock('@clack/prompts', () => ({
+  text: jest.fn(),
+  select: jest.fn(),
+  confirm: jest.fn(),
+  multiselect: jest.fn(),
+  isCancel: jest.fn(() => false),
 }));
 
 jest.mock('chalk', () => ({
@@ -23,7 +27,12 @@ jest.mock('chalk', () => ({
   blue: jest.fn((str) => str)
 }));
 
-const mockedPrompt = inquirer.prompt as jest.MockedFunction<typeof inquirer.prompt>;
+function mockModuleInfoPrompts(packageName: string, moduleName: string, androidDsl: string = 'kts') {
+  (p.text as jest.Mock)
+    .mockResolvedValueOnce(packageName)
+    .mockResolvedValueOnce(moduleName);
+  (p.select as jest.Mock).mockResolvedValueOnce(androidDsl);
+}
 
 async function withTempDir(fn: (dir: string) => Promise<void>): Promise<void> {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'create-test-'));
@@ -68,11 +77,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.example.test',
-          moduleName: 'TestModule',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('com.example.test', 'TestModule', 'kts');
 
         await runInit('test-project', options);
 
@@ -99,17 +104,16 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt
-          .mockResolvedValueOnce({ projectName: 'prompted-project' })
-          .mockResolvedValueOnce({
-            packageName: 'com.example.prompted',
-            moduleName: 'PromptedModule',
-            androidDsl: 'kts'
-          });
+        // First text call is for promptProjectName, then two more for promptModuleInfo
+        (p.text as jest.Mock)
+          .mockResolvedValueOnce('prompted-project')
+          .mockResolvedValueOnce('com.example.prompted')
+          .mockResolvedValueOnce('PromptedModule');
+        (p.select as jest.Mock).mockResolvedValueOnce('kts');
 
         await runInit(undefined, options);
 
-        expect(mockedPrompt).toHaveBeenCalledTimes(2);
+        expect(p.text).toHaveBeenCalledTimes(3);
 
         const projectDir = path.join(tmpDir, 'prompted-project');
         expect(await fs.pathExists(projectDir)).toBe(true);
@@ -124,11 +128,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.example.trimmed',
-          moduleName: 'TrimmedModule',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('com.example.trimmed', 'TrimmedModule', 'kts');
 
         await runInit('  trimmed-project  ', options);
 
@@ -147,11 +147,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.example.copy',
-          moduleName: 'CopyModule',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('com.example.copy', 'CopyModule', 'kts');
 
         await runInit('copy-test', options);
 
@@ -189,11 +185,7 @@ describe('Project Creation (runInit)', () => {
 
         const options: InitOptions = {};
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.example.default',
-          moduleName: 'DefaultModule',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('com.example.default', 'DefaultModule', 'kts');
 
         await runInit('default-template-test', options);
 
@@ -209,11 +201,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.custom.package',
-          moduleName: 'CustomModule',
-          androidDsl: 'groovy'
-        });
+        mockModuleInfoPrompts('com.custom.package', 'CustomModule', 'groovy');
 
         await runInit('config-test', options);
 
@@ -231,17 +219,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        // The prompt should receive a default moduleName based on project name
-        mockedPrompt.mockImplementation(async (questions: any) => {
-          if (questions.name === 'moduleName') {
-            expect(questions.default).toBe('ToastModule'); // PascalCase of 'toast-module'
-          }
-          return {
-            packageName: 'com.example.toast',
-            moduleName: 'ToastModule',
-            androidDsl: 'kts'
-          };
-        });
+        mockModuleInfoPrompts('com.example.toast', 'ToastModule', 'kts');
 
         await runInit('toast-module', options);
 
@@ -258,11 +236,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.example.android',
-          moduleName: 'AndroidModule',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('com.example.android', 'AndroidModule', 'kts');
 
         await runInit('android-test', options);
 
@@ -280,11 +254,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.example.ios',
-          moduleName: 'IosModule',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('com.example.ios', 'IosModule', 'kts');
 
         await runInit('ios-test', options);
 
@@ -310,11 +280,7 @@ describe('Project Creation (runInit)', () => {
 
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.example.conflict',
-          moduleName: 'ConflictModule',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('com.example.conflict', 'ConflictModule', 'kts');
 
         // Without force option, should handle existing directory
         await expect(runInit('conflict-project', options)).rejects.toThrow();
@@ -326,11 +292,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: '', // Invalid empty package name
-          moduleName: 'TestModule',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('', 'TestModule', 'kts');
 
         // Should still create project but with potentially invalid config
         await runInit('invalid-package', options);
@@ -346,7 +308,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockRejectedValueOnce(new Error('User cancelled'));
+        (p.text as jest.Mock).mockRejectedValueOnce(new Error('User cancelled'));
 
         await expect(runInit('cancelled-project', options)).rejects.toThrow('User cancelled');
       });
@@ -359,11 +321,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.example.output',
-          moduleName: 'OutputModule',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('com.example.output', 'OutputModule', 'kts');
 
         await runInit('output-test', options);
 
@@ -390,11 +348,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.example.path',
-          moduleName: 'PathModule',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('com.example.path', 'PathModule', 'kts');
 
         await runInit('path-test', options);
 
@@ -412,11 +366,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.integration.test',
-          moduleName: 'IntegrationModule',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('com.integration.test', 'IntegrationModule', 'kts');
 
         await runInit('integration-test', options);
 
@@ -442,11 +392,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.complex.package.name.with.many.parts',
-          moduleName: 'VeryLongModuleNameWithCamelCase',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('com.complex.package.name.with.many.parts', 'VeryLongModuleNameWithCamelCase', 'kts');
 
         await runInit('complex-names-test', options);
 
@@ -480,7 +426,8 @@ describe('Project Creation (runInit)', () => {
         await runInit('non-interactive-test', options);
 
         // Prompts should NOT have been called
-        expect(mockedPrompt).not.toHaveBeenCalled();
+        expect(p.text).not.toHaveBeenCalled();
+        expect(p.select).not.toHaveBeenCalled();
 
         const projectDir = path.join(tmpDir, 'non-interactive-test');
         expect(await fs.pathExists(projectDir)).toBe(true);
@@ -510,7 +457,8 @@ describe('Project Creation (runInit)', () => {
 
         await runInit('groovy-test', options);
 
-        expect(mockedPrompt).not.toHaveBeenCalled();
+        expect(p.text).not.toHaveBeenCalled();
+        expect(p.select).not.toHaveBeenCalled();
 
         const config = await fs.readJson(path.join(tmpDir, 'groovy-test', 'module.config.json'));
         expect(config.androidDsl).toBe('groovy');
@@ -533,7 +481,8 @@ describe('Project Creation (runInit)', () => {
 
         await runInit('default-dsl-test', options);
 
-        expect(mockedPrompt).not.toHaveBeenCalled();
+        expect(p.text).not.toHaveBeenCalled();
+        expect(p.select).not.toHaveBeenCalled();
 
         const config = await fs.readJson(path.join(tmpDir, 'default-dsl-test', 'module.config.json'));
         expect(config.androidDsl).toBe('kts');
@@ -589,16 +538,12 @@ describe('Project Creation (runInit)', () => {
           // moduleName intentionally omitted
         };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.partial.test',
-          moduleName: 'PartialModule',
-          androidDsl: 'kts',
-        });
+        mockModuleInfoPrompts('com.partial.test', 'PartialModule', 'kts');
 
         await runInit('partial-test', options);
 
         // Prompts should have been called because moduleName was missing
-        expect(mockedPrompt).toHaveBeenCalled();
+        expect(p.text).toHaveBeenCalled();
       });
     });
 
@@ -611,16 +556,12 @@ describe('Project Creation (runInit)', () => {
           // packageName intentionally omitted
         };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'org.sparkling',
-          moduleName: 'OnlyModule',
-          androidDsl: 'kts',
-        });
+        mockModuleInfoPrompts('org.sparkling', 'OnlyModule', 'kts');
 
         await runInit('only-module-test', options);
 
         // Prompts should have been called because packageName was missing
-        expect(mockedPrompt).toHaveBeenCalled();
+        expect(p.text).toHaveBeenCalled();
       });
     });
 
@@ -636,7 +577,8 @@ describe('Project Creation (runInit)', () => {
 
         await runInit('whitespace-test', options);
 
-        expect(mockedPrompt).not.toHaveBeenCalled();
+        expect(p.text).not.toHaveBeenCalled();
+        expect(p.select).not.toHaveBeenCalled();
 
         const config = await fs.readJson(path.join(tmpDir, 'whitespace-test', 'module.config.json'));
         expect(config.packageName).toBe('com.whitespace.test');
@@ -663,7 +605,8 @@ describe('Project Creation (runInit)', () => {
 
         await runInit('force-test', options);
 
-        expect(mockedPrompt).not.toHaveBeenCalled();
+        expect(p.text).not.toHaveBeenCalled();
+        expect(p.select).not.toHaveBeenCalled();
 
         // Old file should be gone, new project should exist
         expect(await fs.pathExists(path.join(existingDir, 'old-file.txt'))).toBe(false);
@@ -678,11 +621,7 @@ describe('Project Creation (runInit)', () => {
         const templateDir = await createMockTemplate(tmpDir);
         const options: InitOptions = { template: templateDir };
 
-        mockedPrompt.mockResolvedValueOnce({
-          packageName: 'com.snapshot.test',
-          moduleName: 'SnapshotModule',
-          androidDsl: 'kts'
-        });
+        mockModuleInfoPrompts('com.snapshot.test', 'SnapshotModule', 'kts');
 
         await runInit('snapshot-test', options);
 

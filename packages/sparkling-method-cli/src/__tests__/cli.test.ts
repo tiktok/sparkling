@@ -4,18 +4,20 @@
 import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
-import inquirer from 'inquirer';
+import * as p from '@clack/prompts';
 import { runInit } from '../create';
 import { runCodegen } from '../codegen';
 
-jest.mock('inquirer', () => ({
-  prompt: jest.fn()
+jest.mock('@clack/prompts', () => ({
+  text: jest.fn(),
+  select: jest.fn(),
+  confirm: jest.fn(),
+  multiselect: jest.fn(),
+  isCancel: jest.fn(() => false),
 }));
 
-const mockedPrompt = inquirer.prompt as jest.MockedFunction<typeof inquirer.prompt>;
-
 beforeEach(() => {
-  mockedPrompt.mockReset();
+  jest.clearAllMocks();
 });
 
 async function withTempDir(fn: (dir: string) => Promise<void>): Promise<void> {
@@ -37,7 +39,10 @@ describe('sparkling-method cli', () => {
       await fs.ensureDir(path.join(templateDir, 'src'));
       await fs.writeFile(path.join(templateDir, 'src', 'method.d.ts'), '// placeholder');
 
-      mockedPrompt.mockResolvedValueOnce({ packageName: 'com.example.toast', moduleName: 'Demo', androidDsl: 'kts' });
+      (p.text as jest.Mock)
+        .mockResolvedValueOnce('com.example.toast')
+        .mockResolvedValueOnce('Demo');
+      (p.select as jest.Mock).mockResolvedValueOnce('kts');
 
       await runInit('toast-module', { template: templateDir });
 
@@ -63,8 +68,12 @@ describe('sparkling-method cli', () => {
       await fs.ensureDir(path.join(templateDir, 'src'));
       await fs.writeFile(path.join(templateDir, 'src', 'method.d.ts'), '// placeholder');
 
-      mockedPrompt.mockResolvedValueOnce({ projectName: 'toast-module' });
-      mockedPrompt.mockResolvedValueOnce({ packageName: 'com.example.toast', moduleName: 'Demo', androidDsl: 'kts' });
+      // promptProjectName calls text once, then promptModuleInfo calls text twice + select once
+      (p.text as jest.Mock)
+        .mockResolvedValueOnce('toast-module')
+        .mockResolvedValueOnce('com.example.toast')
+        .mockResolvedValueOnce('Demo');
+      (p.select as jest.Mock).mockResolvedValueOnce('kts');
 
       await runInit(undefined, { template: templateDir });
 

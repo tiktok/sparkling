@@ -1,63 +1,60 @@
 // Copyright (c) 2025 TikTok Pte. Ltd.
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
-import inquirer, { type QuestionCollection } from 'inquirer';
-import { ui } from '../ui';
+import * as p from '@clack/prompts';
 
 import type { ModuleConfig } from './types';
 import { normalizePackageName } from './utils';
 
-export async function promptProjectName(): Promise<string> {
-  const answers = await inquirer.prompt<{ projectName: string }>([
-    {
-      type: 'input',
-      name: 'projectName',
-      message: ui.prompt('Project name (directory / package name):'),
-      default: 'sparkling-method-module',
-      validate: (input: string) => !!input.trim() || 'Project name is required.',
-      filter: (input: string) => input.trim(),
-    },
-  ] as QuestionCollection);
+function checkCancel<T>(value: T | symbol): T {
+  if (p.isCancel(value)) {
+    process.exit(0);
+  }
+  return value as T;
+}
 
-  return normalizePackageName(answers.projectName);
+export async function promptProjectName(): Promise<string> {
+  const projectName = await p.text({
+    message: 'Project name (directory / package name):',
+    defaultValue: 'sparkling-method-module',
+    placeholder: 'sparkling-method-module',
+    validate: (input) => (!input.trim() ? 'Project name is required.' : undefined),
+  });
+
+  return normalizePackageName(checkCancel(projectName));
 }
 
 export async function promptModuleInfo(
   defaults: { packageName: string; moduleName: string },
 ): Promise<Omit<ModuleConfig, 'projectName'>> {
-  const questions: QuestionCollection[] = [
-    {
-      type: 'input',
-      name: 'packageName',
-      message: ui.prompt('Namespace / bundle identifier (e.g. com.example):'),
-      default: defaults.packageName,
-      validate: (input: string) => !!input.trim() || 'Package name is required.',
-    },
-    {
-      type: 'input',
-      name: 'moduleName',
-      message: ui.prompt('Module name (PascalCase, e.g. Storage):'),
-      default: defaults.moduleName,
-      validate: (input: string) => /[A-Za-z]/.test(input) || 'Module name must contain letters.',
-    },
-  ];
+  const packageName = await p.text({
+    message: 'Namespace / bundle identifier (e.g. com.example):',
+    defaultValue: defaults.packageName,
+    placeholder: defaults.packageName,
+    validate: (input) => (!input.trim() ? 'Package name is required.' : undefined),
+  });
+  checkCancel(packageName);
 
-  questions.push({
-    type: 'list',
-    name: 'androidDsl',
-    message: ui.prompt('Android Gradle DSL:'),
-    default: 'kts',
-    choices: [
-      { name: 'Kotlin (.gradle.kts)', value: 'kts' },
-      { name: 'Groovy (.gradle)', value: 'groovy' },
+  const moduleName = await p.text({
+    message: 'Module name (PascalCase, e.g. Storage):',
+    defaultValue: defaults.moduleName,
+    placeholder: defaults.moduleName,
+    validate: (input) => (!/[A-Za-z]/.test(input) ? 'Module name must contain letters.' : undefined),
+  });
+  checkCancel(moduleName);
+
+  const androidDsl = await p.select({
+    message: 'Android Gradle DSL:',
+    options: [
+      { value: 'kts' as const, label: 'Kotlin (.gradle.kts)' },
+      { value: 'groovy' as const, label: 'Groovy (.gradle)' },
     ],
   });
-
-  const answers = await inquirer.prompt<{ packageName: string; moduleName: string; androidDsl: 'kts' | 'groovy' }>(questions as QuestionCollection);
+  checkCancel(androidDsl);
 
   return {
-    packageName: answers.packageName.trim(),
-    moduleName: answers.moduleName.trim(),
-    androidDsl: answers.androidDsl ?? 'kts',
+    packageName: (packageName as string).trim(),
+    moduleName: (moduleName as string).trim(),
+    androidDsl: (androidDsl as 'kts' | 'groovy') ?? 'kts',
   };
 }

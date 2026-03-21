@@ -1,7 +1,7 @@
 // Copyright (c) 2025 TikTok Pte. Ltd.
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
-import inquirer from 'inquirer';
+import * as p from '@clack/prompts';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -69,23 +69,14 @@ export class ProjectBuilder {
 
     const shouldCheckEmpty = this.config.checkEmpty ?? true;
     if (shouldCheckEmpty && !this.config.override && fs.existsSync(this.config.targetDir) && !isEmptyDir(this.config.targetDir)) {
-      let option: string;
-      try {
-        const answer = await inquirer.prompt<{ choice: string }>([
-          {
-            type: 'list',
-            name: 'choice',
-            message: `"${path.basename(this.config.targetDir)}" is not empty, please choose:`,
-            choices: [
-              { name: 'Continue and override files', value: 'yes' },
-              { name: 'Cancel operation', value: 'no' },
-            ],
-          },
-        ]);
-        option = checkCancel(answer.choice);
-      } catch (error) {
-        throw new UserCancelledError((error as Error).message);
-      }
+      const option = await p.select({
+        message: `"${path.basename(this.config.targetDir)}" is not empty, please choose:`,
+        options: [
+          { label: 'Continue and override files', value: 'yes' },
+          { label: 'Cancel operation', value: 'no' },
+        ],
+      });
+      checkCancel(option);
 
       if (option === 'no') {
         throw new UserCancelledError();
@@ -136,20 +127,11 @@ export class ProjectBuilder {
         const shouldCheckEmpty = config.checkEmpty ?? true;
 
         if (shouldCheckEmpty && !isEmptyDir(config.targetDir)) {
-          let shouldContinue = false;
-          try {
-            const answer = await inquirer.prompt<{ cont: boolean }>([
-              {
-                type: 'confirm',
-                name: 'cont',
-                message: `Target directory ${config.targetDir} is not empty. Continue?`,
-                default: false,
-              },
-            ]);
-            shouldContinue = checkCancel(answer.cont);
-          } catch (error) {
-            throw new UserCancelledError((error as Error).message);
-          }
+          const shouldContinue = await p.confirm({
+            message: `Target directory ${config.targetDir} is not empty. Continue?`,
+            initialValue: false,
+          });
+          checkCancel(shouldContinue);
 
           if (!shouldContinue) {
             throw new UserCancelledError();
@@ -176,20 +158,11 @@ export class ProjectBuilder {
       description: 'Ensure target directory is empty before scaffolding',
       async execute(): Promise<ActionResult<void>> {
         if (fs.existsSync(targetDir) && !isEmptyDir(targetDir)) {
-          let shouldContinue = false;
-          try {
-            const answer = await inquirer.prompt<{ cont: boolean }>([
-              {
-                type: 'confirm',
-                name: 'cont',
-                message: `Target directory ${targetDir} is not empty. Continue?`,
-                default: false,
-              },
-            ]);
-            shouldContinue = checkCancel(answer.cont);
-          } catch (error) {
-            throw new UserCancelledError((error as Error).message);
-          }
+          const shouldContinue = await p.confirm({
+            message: `Target directory ${targetDir} is not empty. Continue?`,
+            initialValue: false,
+          });
+          checkCancel(shouldContinue);
 
           if (!shouldContinue) {
             throw new UserCancelledError();
