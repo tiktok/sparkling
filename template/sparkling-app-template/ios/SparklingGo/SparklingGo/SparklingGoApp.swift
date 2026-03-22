@@ -11,12 +11,12 @@ import SparklingMethod
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     var window: UIWindow?
-    
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
         let webPCoder = SDImageWebPCoder.shared
         SDImageCodersManager.shared.addCoder(webPCoder)
-        
+
         SPKServiceRegister.registerAll()
         SPKExecuteAllPrepareBootTask()
         SPKKit.DIContainer.register(SPKTrackerService.self, scope: ServiceScope.transient) {
@@ -31,7 +31,11 @@ struct SparklingGoApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     var body: some Scene {
         WindowGroup {
-            DemoVC()
+            ZStack {
+                Color.black
+                    .ignoresSafeArea()
+                DemoVC()
+            }
         }
     }
 }

@@ -353,7 +353,14 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
         self.originNavigationBarIsHidden = self.navigationController?.navigationBar.isHidden ?? self.originNavigationBarIsHidden
         self.originalNavigationControllerDelegate = self.navigationController?.delegate
         self.navigationController?.delegate = self
-        
+
+        // Propagate container background color to the navigation controller
+        // so that safe area regions (status bar, home indicator) match.
+        if let navVC = self.navigationController {
+            let bgColor = config?.containerBgColor ?? self.view.backgroundColor ?? .white
+            navVC.view.backgroundColor = bgColor
+        }
+
         self.containerLifecycleDelegate?.containerViewWillAppear?(self)
     }
     
@@ -488,6 +495,7 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
         }
         if let containerBackgroundColor = context.containerBackgroundColor {
             self.view.backgroundColor = containerBackgroundColor
+            self.navigationController?.view.backgroundColor = containerBackgroundColor
         }
     }
     
@@ -682,13 +690,17 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     /// otherwise falls back to the default container background color from context
     /// or white as the final fallback.
     func setupBackgroundColor() {
+        let bgColor: UIColor
         if let config = self.config as? SPKSchemeParam {
-            self.view.backgroundColor = config.containerBgColor
+            bgColor = config.containerBgColor
         } else {
-            let context = self.context as? SPKContext
-            let bgColor = self.defaultConatinerBackgroundColor() ?? .white
-            self.view.backgroundColor = bgColor
+            bgColor = self.defaultConatinerBackgroundColor() ?? .white
         }
+        self.view.backgroundColor = bgColor
+        // Propagate to the navigation controller so that the status bar
+        // region and home-indicator area match the container background
+        // instead of showing the default white.
+        self.navigationController?.view.backgroundColor = bgColor
     }
     
     /// Returns the default container background color from context.
