@@ -131,6 +131,13 @@ open class SPKSchemeParam: SPKHybridSchemeParam, SPKSchemeParamProtocol {
     public var transStatusBar: Bool = false
     
     public var hideBackButton: Bool = false
+
+    /// Controls whether the container runs in full-screen mode.
+    ///
+    /// When true, the Lynx content extends edge-to-edge (from screen origin)
+    /// and the navigation bar and status bar are hidden.
+    /// Defaults to false.
+    public var fullScreen: Bool = false
     
     /// Updates the scheme parameters with values from a dictionary.
     /// 
@@ -172,7 +179,13 @@ open class SPKSchemeParam: SPKHybridSchemeParam, SPKSchemeParamProtocol {
         self.hideStatusBar = dict.spk.bool(forKey: "hide_status_bar", default: self.hideStatusBar)
         
         self.transStatusBar = dict.spk.bool(forKey: "trans_status_bar", default: self.transStatusBar)
-        
+
+        self.fullScreen = dict.spk.bool(forKey: "fullscreen", default: self.fullScreen)
+        if self.fullScreen {
+            self.hideNavBar = true
+            self.hideStatusBar = true
+        }
+
         self.title = dict.spk.string(forKey: "title", default: self.title)
         
         self.titleColor = self.themedColor(withDict: dict ?? [:], forKey: "title_color", context: context) ?? self.titleColor

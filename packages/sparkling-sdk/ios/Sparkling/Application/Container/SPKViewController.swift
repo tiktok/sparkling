@@ -31,17 +31,16 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     /// - Device type (iPhone X series considerations)
     var topOffset: CGFloat {
         get {
-            var offset = 0.0
             let config = self.config as? SPKSchemeParam
-            if config?.transStatusBar == true {
-                offset = 0.0
-            } else {
-                if config?.hideNavBar == false {
-                    offset += LayoutConstants.navigationBarHeight
-                }
-                if config?.hideStatusBar == false || ((UIDevice.spk.isIPhoneXSeries && config?.hideNavBar == false) && CGRectGetWidth(self.view.frame) < CGRectGetHeight(self.view.frame)) {
-                    offset += self.topSafeAreaHeight
-                }
+            if config?.fullScreen == true || config?.transStatusBar == true {
+                return 0.0
+            }
+            var offset = 0.0
+            if config?.hideNavBar == false {
+                offset += LayoutConstants.navigationBarHeight
+            }
+            if config?.hideStatusBar == false || ((UIDevice.spk.isIPhoneXSeries && config?.hideNavBar == false) && CGRectGetWidth(self.view.frame) < CGRectGetHeight(self.view.frame)) {
+                offset += self.topSafeAreaHeight
             }
             return offset
         }
