@@ -76,6 +76,7 @@ android {
         listOf(
             project(":sparkling-navigation")
         ).forEach { dep -> add("implementation", dep) }
+        debugImplementation(project(":sparkling-debug-tool"))
         // END SPARKLING AUTOLINK
     }
 }

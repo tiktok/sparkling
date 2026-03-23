@@ -10,6 +10,7 @@
   },
   "type": "module",
   "scripts": {
+    "dev": "sparkling-app-cli dev",
     "build": "sparkling-app-cli build --copy",
     "autolink": "sparkling-app-cli autolink",
     "test": "vitest run --passWithNoTests",
@@ -18,6 +19,7 @@
   },
   "dependencies": {
     "@lynx-js/react": "^0.116.2",
+    "sparkling-debug-tool": "~2.0.0-rc.9",
     "sparkling-navigation": "^2.0.0-rc.9"
   },
   "devDependencies": {

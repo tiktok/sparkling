@@ -30,6 +30,7 @@ const lynxConfig = defineConfig({
 
 const config: AppConfig = {
   lynxConfig,
+  devtool: true,
   appName: '{{appName}}',
   platform: {
     android: {
