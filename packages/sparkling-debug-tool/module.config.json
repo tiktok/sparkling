@@ -1,0 +1,17 @@
+{
+  "name": "sparkling-debug-tool",
+  "platforms": ["android", "ios"],
+  "version": "1.0.0",
+  "description": "Sparkling debug tool SDK",
+  "devtool": true,
+  "android": {
+    "packageName": "com.tiktok.sparkling.debugtool",
+    "className": "SparklingDebugTool",
+    "buildGradle": "android/build.gradle.kts"
+  },
+  "ios": {
+    "moduleName": "DebugTool",
+    "className": "SparklingDebugTool",
+    "podspecPath": "ios/Sparkling-DebugTool.podspec"
+  }
+}
