@@ -36,7 +36,7 @@ print_error() {
 show_usage() {
     echo "Usage: ./publish-maven-central.sh [version] [options]"
     echo ""
-    echo "Publish Sparkling Android SDK (sparkling-method and sparkling-sdk) to Maven Central."
+    echo "Publish Sparkling Android SDK (sparkling-method, sparkling-sdk, sparkling-debug-tool) to Maven Central."
     echo ""
     echo "Options:"
     echo "  version       The version number to publish (e.g., 2.0.0 or 2.0.0-rc.6)"
@@ -191,6 +191,7 @@ if [ "$DRY_RUN" = true ]; then
     print_info "Would publish version: $VERSION"
     print_info "sparkling-method artifact: com.tiktok.sparkling:sparkling-method:$VERSION"
     print_info "sparkling artifact: com.tiktok.sparkling:sparkling:$VERSION"
+    print_info "sparkling-debug-tool artifact: com.tiktok.sparkling:sparkling-debug-tool:$VERSION"
     exit 0
 fi
 
@@ -232,13 +233,26 @@ print_info "Publishing sparkling-sdk to Maven Central..."
 
 print_success "sparkling-sdk published successfully!"
 
+# Build and publish sparkling-debug-tool
+print_info "========================================"
+print_info "Step 3: Building sparkling-debug-tool"
+print_info "========================================"
+
+print_info "Building sparkling-debug-tool..."
+./gradlew $GRADLE_VERSION_PROP :sparkling-debug-tool:clean :sparkling-debug-tool:assembleRelease
+
+print_info "Publishing sparkling-debug-tool to Maven Central..."
+./gradlew $GRADLE_VERSION_PROP :sparkling-debug-tool:publishReleasePublicationToMavenCentralRepository
+
+print_success "sparkling-debug-tool published successfully!"
+
 # Finalize deployment on Central Portal
 # When using Gradle's maven-publish plugin (a "Maven-API-like" plugin), the staging API
 # does NOT automatically transfer artifacts to the Central Portal. We must explicitly
 # call the manual upload endpoint to make the deployment visible and trigger release.
 # See: https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/
 print_info "========================================"
-print_info "Step 3: Finalizing deployment on Central Portal"
+print_info "Step 4: Finalizing deployment on Central Portal"
 print_info "========================================"
 
 NAMESPACE=${SPARKLING_PUBLISHING_GROUP_ID:-"com.tiktok.sparkling"}
@@ -280,6 +294,7 @@ print_info ""
 print_info "Published artifacts:"
 print_info "  - com.tiktok.sparkling:sparkling-method:$VERSION"
 print_info "  - com.tiktok.sparkling:sparkling:$VERSION"
+print_info "  - com.tiktok.sparkling:sparkling-debug-tool:$VERSION"
 print_info ""
 print_info "Next steps:"
 print_info "1. Login to https://central.sonatype.com/"
@@ -301,3 +316,4 @@ print_info ""
 print_info "Verify at:"
 print_info "  - https://repo1.maven.org/maven2/com/tiktok/sparkling/sparkling-method/$VERSION/"
 print_info "  - https://repo1.maven.org/maven2/com/tiktok/sparkling/sparkling/$VERSION/"
+print_info "  - https://repo1.maven.org/maven2/com/tiktok/sparkling/sparkling-debug-tool/$VERSION/"

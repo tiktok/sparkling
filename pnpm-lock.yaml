@@ -148,6 +148,9 @@ importers:
       sparkling-types:
         specifier: workspace:*
         version: link:../sparkling-types
+      sparkling-debug-tool:
+        specifier: workspace:*
+        version: link:../sparkling-debug-tool
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -200,6 +203,8 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
+
+  packages/sparkling-debug-tool: {}
 
   packages/sparkling-method:
     devDependencies:
@@ -296,6 +301,9 @@ importers:
       '@lynx-js/react':
         specifier: ^0.116.2
         version: 0.116.2(@lynx-js/types@3.6.0)(@types/react@18.3.28)
+      sparkling-debug-tool:
+        specifier: ~2.0.0-rc.9
+        version: link:../../packages/sparkling-debug-tool
       sparkling-navigation:
         specifier: ^2.0.1
         version: 2.0.1

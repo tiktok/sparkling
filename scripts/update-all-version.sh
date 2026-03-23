@@ -105,6 +105,7 @@ print_info "Project root: $PROJECT_ROOT"
 # Files to update
 declare -a TYPESCRIPT_FILES=(
     "package.json"
+    "packages/sparkling-debug-tool/package.json"
     "packages/sparkling-sdk/package.json"
     "packages/sparkling-method/package.json"
     "packages/sparkling-types/package.json"
