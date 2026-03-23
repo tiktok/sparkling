@@ -11,6 +11,7 @@ import { devProject } from './commands/dev';
 import { doctor } from './commands/doctor';
 import { runAndroid } from './commands/run-android';
 import { runIos } from './commands/run-ios';
+import { DEV_SERVER_PORT } from './constants';
 import { ui } from './utils/ui';
 import { enableVerboseLogging, isVerboseEnabled, verboseLog } from './utils/verbose';
 import type { AppConfig } from './types';
@@ -54,12 +55,17 @@ program
 
 program
   .command('dev')
-  .description('Start Rspeedy dev server using app.config.ts')
+  .description('Start Lynx dev server with HMR using app.config.ts')
   .option('--config <path>', 'Path to app.config.ts', 'app.config.ts')
-  .option('--port <number>', 'Dev server port (default: 5969)', '5969')
+  .option('--port <number>', `Dev server port (default: ${DEV_SERVER_PORT})`, String(DEV_SERVER_PORT))
   .action(async opts => {
     const cwd = process.cwd();
-    await devProject({ cwd, configFile: opts.config, port: Number(opts.port) });
+    const port = Number.parseInt(String(opts.port), 10);
+    await devProject({
+      cwd,
+      configFile: opts.config,
+      port: Number.isFinite(port) ? port : undefined,
+    });
   });
 
 program
