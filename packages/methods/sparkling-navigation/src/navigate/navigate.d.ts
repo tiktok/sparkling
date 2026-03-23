@@ -20,13 +20,24 @@ export type NavigateParamKey =
     | 'screen_orientation'
     | 'hide_status_bar'
     | 'trans_status_bar'
+    | 'show_nav_bar_in_trans_status_bar'
     | 'hide_loading'
     | 'loading_bg_color'
     | 'container_bg_color'
     | 'hide_error'
     | 'force_theme_style';
 
-export type NavigateParams = Partial<Record<NavigateParamKey, string | number | boolean>>;
+type ThemedColorKey =
+    | 'title_color_light'
+    | 'title_color_dark'
+    | 'nav_bar_color_light'
+    | 'nav_bar_color_dark'
+    | 'loading_bg_color_light'
+    | 'loading_bg_color_dark'
+    | 'container_bg_color_light'
+    | 'container_bg_color_dark';
+
+export type NavigateParams = Partial<Record<NavigateParamKey | ThemedColorKey, string | number | boolean>>;
 
 export type NavigateOptions = OpenOptions & {
     params?: NavigateParams;

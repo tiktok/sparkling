@@ -34,6 +34,7 @@ object SchemeConstants {
         const val HIDE_LOADING = "hide_loading"
         const val LOADING_BG_COLOR = "loading_bg_color"
         const val CONTAINER_BG_COLOR = "container_bg_color"
+        const val SHOW_NAV_BAR_IN_TRANS_STATUS_BAR = "show_nav_bar_in_trans_status_bar"
         const val HIDE_ERROR = "hide_error"
         const val FORCE_THEME_STYLE = "force_theme_style"
     }

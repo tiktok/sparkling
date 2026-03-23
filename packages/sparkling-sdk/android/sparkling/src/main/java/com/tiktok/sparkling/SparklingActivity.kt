@@ -9,17 +9,38 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.tiktok.sparkling.Sparkling.Companion.SPARKLING_CONTEXT_CONTAINER_ID
+import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 
 class SparklingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sparkling)
         val containerId = intent.getStringExtra(SPARKLING_CONTEXT_CONTAINER_ID)
         val sparklingContext = SparklingContextTransferStation.getSparklingContext(containerId)
+        initStatusBar(sparklingContext)
+        setContentView(R.layout.activity_sparkling)
         initToolBar(sparklingContext)
         initSparklingFragment(sparklingContext)
+    }
+
+    private fun initStatusBar(sparklingContext: SparklingContext?) {
+        val param = sparklingContext?.hybridSchemeParam ?: return
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        when {
+            param.hideStatusBar -> {
+                controller.hide(WindowInsetsCompat.Type.statusBars())
+                controller.systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+            param.transStatusBar -> {
+                WindowCompat.setDecorFitsSystemWindows(window, false)
+                window.statusBarColor = Color.TRANSPARENT
+            }
+        }
     }
 
     fun initToolBar(sparklingContext: SparklingContext?) {
@@ -50,7 +71,15 @@ class SparklingActivity : AppCompatActivity() {
             } catch (e: IllegalArgumentException) {
             }
         }
-        
+
+        val navBarColorStr = sparklingContext?.hybridSchemeParam?.navBarColor
+        if (!navBarColorStr.isNullOrEmpty()) {
+            val navBarColor = ColorUtil.parseColorSafely(navBarColorStr)
+            val activeToolbar = sparklingContext?.sparklingUIProvider?.getToolBar(this)
+                ?: findViewById<Toolbar>(R.id.toolbar)
+            activeToolbar?.setBackgroundColor(navBarColor)
+        }
+
         ((supportActionBar?.customView ?: findViewById<Toolbar>(R.id.toolbar)) as Toolbar).setNavigationOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
@@ -58,7 +87,7 @@ class SparklingActivity : AppCompatActivity() {
 
     fun initSparklingFragment(sparklingContext: SparklingContext?) {
         sparklingContext?.hybridSchemeParam?.let {
-            if (it.hideNavBar) {
+            if (it.hideNavBar || (it.transStatusBar && !it.showNavBarInTransStatusBar)) {
                 supportActionBar?.hide()
             }
             requestedOrientation = when (it.screenOrientation) {

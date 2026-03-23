@@ -12,6 +12,7 @@ import com.tiktok.sparkling.hybridkit.base.HybridLoadSession
 import com.tiktok.sparkling.hybridkit.base.Theme
 import com.tiktok.sparkling.hybridkit.config.RuntimeInfo
 import com.tiktok.sparkling.hybridkit.scheme.SparklingUriParser
+import androidx.core.net.toUri
 import java.util.concurrent.ConcurrentHashMap
 
 
@@ -101,6 +102,14 @@ class GlobalPropsUtils {
 
     fun init(hybridContext: HybridContext, context: Context) {
         val containerID = hybridContext.containerId
+
+        hybridContext.scheme?.let { scheme ->
+            runCatching {
+                val uri = scheme.toUri()
+                val queryMap = SparklingUriParser.parseQueryMap(uri)
+                SparklingUriParser.saveUriAndQueries(containerID, queryMap)
+            }
+        }
 
         if (reGenerateCheck()) {
             HybridEnvironment.instance.baseInfoConfig?.let {

@@ -23,6 +23,7 @@ open class HybridSchemeParam(
     var hideLoading: Boolean = false,
     var loadingBgColor: String? = null,
     var containerBgColor: String? = null,
+    var showNavBarInTransStatusBar: Boolean = false,
     var hideError: Boolean = false,
 //    var fallbackUrl: String? = null,
     var forceThemeStyle: String? = null
@@ -42,6 +43,7 @@ open class HybridSchemeParam(
         parcel.readByte() != 0.toByte(),
         parcel.readString(),
         parcel.readString(),
+        parcel.readByte() != 0.toByte(),
         parcel.readByte() != 0.toByte()
     )
 
@@ -59,6 +61,7 @@ open class HybridSchemeParam(
         parcel.writeByte(if (hideLoading) 1 else 0)
         parcel.writeString(loadingBgColor)
         parcel.writeString(containerBgColor)
+        parcel.writeByte(if (showNavBarInTransStatusBar) 1 else 0)
         parcel.writeByte(if (hideError) 1 else 0)
 //        parcel.writeString(fallbackUrl)
         parcel.writeString(forceThemeStyle)

@@ -32,10 +32,12 @@ class SparklingView(
     private var loadingView: View? = null
     private var errorView: View? = null
     private var loadingViewBgColor: Int? = null
+    private var hideLoading: Boolean = false
+    private var hideError: Boolean = false
     private var kitViewDelegate: IKitView? = null
     var sparklingContext: SparklingContext? = null
     // private var debugInfoTag: TextView? = null
-    
+
     private var loadStatus = IPerformanceView.LoadStatus.INIT
     private var isReleased = false
 
@@ -60,10 +62,6 @@ class SparklingView(
                 layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             }
         }
-        loadingViewBgColor?.let { color ->
-            loadingView?.setBackgroundColor(color)
-        }
-
         val hybridSchemeParam = sparklingContext.hybridSchemeParam
         if (hybridSchemeParam == null) {
             errorView?.let {
@@ -76,6 +74,15 @@ class SparklingView(
             return
         }
 
+        hideLoading = hybridSchemeParam.hideLoading
+        hideError = hybridSchemeParam.hideError
+        hybridSchemeParam.loadingBgColor?.let {
+            loadingViewBgColor = ColorUtil.parseColorSafely(it)
+        }
+        loadingViewBgColor?.let { color ->
+            loadingView?.setBackgroundColor(color)
+        }
+
 
         val kitView = HybridKit.createKitView(
             hybridSchemeParam,
@@ -84,7 +91,6 @@ class SparklingView(
             object : IHybridKitLifeCycle() {
                 override fun onLoadStart(view: IKitView, url: String) {
                     super.onLoadStart(view, url)
-
                     if (Looper.myLooper() != Looper.getMainLooper()) {
                         post {
                             showLoadingView()
@@ -232,15 +238,20 @@ class SparklingView(
     
 
     fun showLoadingView() {
+        if (hideLoading) return
         loadingView?.let {
             if (it.parent == null) {
                 addView(it)
             }
             it.visibility = View.VISIBLE
+            loadingViewBgColor?.let { color ->
+                it.setBackgroundColor(color)
+            }
         }
     }
 
     fun showErrorView() {
+        if (hideError) return
         errorView?.let {
             if (it.parent == null) {
                 addView(it)
