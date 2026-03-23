@@ -29,6 +29,10 @@ sparkling-method-cli codegen
 
 Run `sparkling-method-cli --help` to see all available commands and options.
 
+## Local testing
+
+When developing inside the Sparkling monorepo, see [LOCAL_TESTING.md](./LOCAL_TESTING.md) for building this CLI, running it from the workspace, and pointing `init` at `src/create/template` or the bundled `dist/create/template`.
+
 ## Workflow
 
 1. Create method module: `sparkling-method-cli init my-method`

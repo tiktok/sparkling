@@ -50,11 +50,15 @@ export interface AppConfig {
   appIcon?: string;
   router?: RouterConfig;
   plugin?: PluginConfig[];
+  /** Enable sparkling-debug-tool integration. Defaults to true. Set to false to exclude the debug-tool module from all builds. */
+  devtool?: boolean;
 }
 
 export interface MethodModuleConfig {
   name: string;
   root: string;
+  /** When true, the module is a devtool module: linked with debugImplementation on Android and excluded from release on iOS. */
+  devtool?: boolean;
   android?: {
     packageName?: string;
     className?: string;
