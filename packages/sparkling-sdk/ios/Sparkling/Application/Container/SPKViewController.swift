@@ -370,7 +370,7 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
         self.navigationController?.interactivePopGestureRecognizer?.delegate = self
         self.originControllerPopGestureRecongnizerEnabled = self.navigationController?.interactivePopGestureRecognizer?.isEnabled ?? self.originControllerPopGestureRecongnizerEnabled
         
-        self.originStatusBarStyle = UIApplication.shared.statusBarStyle
+        self.originStatusBarStyle = self.statusBarStyle
         self.updateStatusBarStatus()
         self.navigationController?.setNavigationBarHidden(true, animated: animated)
         
@@ -438,7 +438,8 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     /// this view controller appeared, and cleans up any custom status bar
     /// background views on iOS 13 and later.
     func resetStatusBarStyle() {
-        UIApplication.shared.setStatusBarStyle(self.originStatusBarStyle ?? UIApplication.shared.statusBarStyle, animated: true)
+        self.statusBarStyle = self.originStatusBarStyle ?? self.statusBarStyle
+        self.setNeedsStatusBarAppearanceUpdate()
         if #available(iOS 13.0, *) {
             self.statusBarBackgroundView?.removeFromSuperview()
             self.statusBarBackgroundView = nil
@@ -473,8 +474,6 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     func updateStatusBarStatus() {
         let config = self.config as? SPKSchemeParam
         self.statusBarStyle = config?.statusFontMode ?? self.statusBarStyle
-        UIApplication.shared.setStatusBarStyle(self.statusBarStyle, animated: true)
-        UIApplication.shared.setStatusBarHidden(self.statusBarHiddenStatus, with: .none)
         self.setNeedsStatusBarAppearanceUpdate()
     }
 
@@ -525,7 +524,7 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
         guard let config = self.config as? SPKSchemeParam else {
             return
         }
-        if config.hideNavBar {
+        if config.hideNavBar || (config.transStatusBar && !config.showNavBarInTransStatusBar) {
             self.navigationBar?.isHidden = true
             return
         }

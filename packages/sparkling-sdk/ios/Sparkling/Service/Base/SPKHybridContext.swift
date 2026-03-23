@@ -48,10 +48,10 @@ open class SPKHybridContext: NSObject, NSCopying {
     /// system properties, device capabilities, and environment settings.
     public var globalProps: Any?
     
-    /// Query parameters extracted from the URL or provided externally.
-    /// 
-    /// Contains key-value pairs that configure the hybrid view behavior
-    /// and provide data to the rendered content.
+    /// extra query parameters
+    public var extra: [String: AnyHashable]?
+    
+    /// Legacy field kept for API compatibility
     public var queryItems: [String: AnyHashable]?
     
     /// Namespace for pipe method communication.
@@ -70,6 +70,9 @@ open class SPKHybridContext: NSObject, NSCopying {
     /// 
     /// Stores the source URL for reference and debugging purposes.
     public var originURL: String?
+    
+    /// Outer scheme string with missing merged query keys appended (Spark `getFullUrl` semantics). Filled when building Lynx params.
+    public var fullURL: String?
     
     /// Array of pipe method instances for JavaScript bridge communication.
     /// 
@@ -248,6 +251,14 @@ open class SPKHybridContext: NSObject, NSCopying {
         self.originURL = Self.merge(withProp: context.originURL,
                                     to: self.originURL,
                                     isOverride: isOverride) as? String
+        
+        self.fullURL = Self.merge(withProp: context.fullURL,
+                                  to: self.fullURL,
+                                  isOverride: isOverride) as? String
+        
+        self.extra = Self.merge(withProp: context.extra,
+                                to: self.extra,
+                                isOverride: isOverride) as? [String: AnyHashable]
         
         self.queryItems = Self.merge(withProp: context.queryItems,
                                      to: self.queryItems,

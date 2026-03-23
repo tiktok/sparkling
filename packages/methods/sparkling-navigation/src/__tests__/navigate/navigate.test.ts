@@ -171,6 +171,24 @@ expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] navigate: c
       );
     });
 
+    it('should not forward extra to open (host extra is open-only)', () => {
+      const params = {
+        path: 'main.lynx.bundle',
+        options: { animated: true, extra: { foo: 'bar' } },
+      } as NavigateRequest;
+      const callback = jest.fn();
+
+      navigate(params, callback);
+
+      expect(mockOpen).toHaveBeenCalledWith(
+        {
+          scheme: 'hybrid://lynxview_page?bundle=main.lynx.bundle',
+          options: { animated: true },
+        },
+        callback
+      );
+    });
+
     it('should pass custom (non-predefined) params through to the scheme URL', () => {
       const params: NavigateRequest = {
         path: 'pages/detail.lynx.bundle',

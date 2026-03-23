@@ -13,7 +13,7 @@ export interface OpenOptions {
   useSysBrowser?: boolean;
   animated?: boolean;
   interceptor?: string; // Custom router interceptor
-  extra?: object;
+  extra?: Record<string, unknown>;
 }
 
 export interface OpenResponse {

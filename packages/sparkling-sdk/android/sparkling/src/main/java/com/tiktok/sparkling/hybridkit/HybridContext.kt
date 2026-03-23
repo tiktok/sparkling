@@ -5,6 +5,7 @@ package com.tiktok.sparkling.hybridkit
 
 import android.content.Context
 import android.content.res.Configuration
+import android.os.Bundle
 import com.tiktok.sparkling.hybridkit.base.IKitInitParam
 import com.tiktok.sparkling.hybridkit.base.IKitView
 import com.tiktok.sparkling.hybridkit.base.Theme
@@ -21,6 +22,12 @@ import java.util.concurrent.atomic.AtomicReference
 open class HybridContext {
     var containerId = generateID()
     var scheme: String? = null
+
+    var extra: Map<String, String>? = null
+
+    var bundle: Bundle? = null
+
+    var fullScheme: String? = null
     var templateResData: JSONObject = JSONObject()
     var runtimeInfo: RuntimeInfo = RuntimeInfo()
     var hybridSchemeParam: HybridSchemeParam? = null
@@ -51,6 +58,18 @@ open class HybridContext {
         this.lynxViewConfig = lynxViewConfig
         return this
     }
+
+    fun withExtra(extra: Map<String, String>?): HybridContext {
+        this.extra = extra
+        return this
+    }
+
+    fun withBundle(bundle: Bundle?): HybridContext {
+        this.bundle = bundle
+        return this
+    }
+
+    fun getFullUrl(): String? = fullScheme ?: scheme
 
     fun withSendEventListener(sendEventListener: SendEventListener?): HybridContext {
         this.sendEventListener = sendEventListener

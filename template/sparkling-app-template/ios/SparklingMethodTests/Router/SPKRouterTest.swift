@@ -78,14 +78,15 @@ class SPKRouterTest: XCTestCase {
         paramModel.useSysBrowser = true
         paramModel.animated = true
         paramModel.interceptor = "test-interceptor"
-        paramModel.extra = "{\"key\": \"value\"}"
-        
+        let extraDict = NSDictionary(dictionary: ["key": "value"])
+        paramModel.extra = extraDict
+
         XCTAssertEqual(paramModel.scheme, "test-scheme")
         XCTAssertTrue(paramModel.replace)
         XCTAssertEqual(paramModel.replaceType, "all")
         XCTAssertTrue(paramModel.useSysBrowser)
         XCTAssertTrue(paramModel.animated)
         XCTAssertEqual(paramModel.interceptor, "test-interceptor")
-        XCTAssertEqual(paramModel.extra, "{\"key\": \"value\"}")
+        XCTAssertEqual(paramModel.extra, extraDict)
     }
 }

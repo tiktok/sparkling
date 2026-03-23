@@ -99,10 +99,13 @@ object HybridLynxKit {
 
         lifeCycle?.onPreKitCreate()
 
-        var kitInitParams: LynxKitInitParams? = hybridContext.hybridParams as? LynxKitInitParams
-            ?: LynxKitInitParams(loadUri = hybridContext.scheme?.toUri())
-
         GlobalPropsUtils.instance.init(hybridContext, context)
+
+        var kitInitParams: LynxKitInitParams = (hybridContext.hybridParams as? LynxKitInitParams)
+            ?: LynxKitInitParams(loadUri = null)
+        if (kitInitParams.loadUri == null) {
+            kitInitParams.loadUri = hybridContext.effectiveScheme()?.toUri()
+        }
 
         val viewBuilder = LynxViewBuilder()
         val bridge = SparklingBridge()

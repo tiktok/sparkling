@@ -87,6 +87,26 @@ object SparklingUriParser {
         parsedUriMap[containerId] = queryMap
     }
 
+    /**
+     * Appends query keys from [mergedParams] that are not already present on [originUri].
+     */
+    @JvmStatic
+    fun appendExtraQueryToUri(originUri: Uri, mergedParams: Map<String, String>): Uri {
+        val existingNames = originUri.queryParameterNames
+        val builder = originUri.buildUpon().clearQuery()
+        for (name in originUri.queryParameterNames) {
+            for (value in originUri.getQueryParameters(name)) {
+                builder.appendQueryParameter(name, value)
+            }
+        }
+        for ((key, value) in mergedParams) {
+            if (!existingNames.contains(key)) {
+                builder.appendQueryParameter(key, value)
+            }
+        }
+        return builder.build()
+    }
+
 
     inline fun <reified T : BaseSchemeParam> T.applyEngine(uri: Uri) {
         this.apply {

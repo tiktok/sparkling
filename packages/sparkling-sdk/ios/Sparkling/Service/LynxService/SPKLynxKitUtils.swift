@@ -52,7 +52,9 @@ open class SPKLynxKitUtils: SPKKitUtils {
             initialProps.merge(dict) { _, new in new }
         }
         lynxKitParams.initialProperties = initialProps
-        lynxKitParams.queryItems = context?.schemeParams?.extra
+        let mergedQuery = Self.mergedLynxQueryStringMap(for: context)
+        lynxKitParams.queryItems = mergedQuery
+        context?.fullURL = Self.fullURLString(origin: context?.originURL, mergedQuery: mergedQuery)
         return lynxKitParams
     }
     
@@ -104,19 +106,59 @@ open class SPKLynxKitUtils: SPKKitUtils {
     /// - Returns: Dictionary containing default global properties with Lynx-specific additions.
     private static func defaultGlobalProps(withParams params: SPKLynxKitParams) -> [AnyHashable: Any]? {
         var globalPropos = SPKGlobalPropsUtils.defaultGlobalProps()
-        var queryItems = params.queryItems ?? [:]
-        let customQueryItem = params.context?.queryItems
-        
-        if let customQueryItem = customQueryItem,
-            customQueryItem.count > 0 {
-            queryItems.merge(customQueryItem) { _, new in new }
-        }
+        let queryItems = params.queryItems ?? [:]
         
         globalPropos.updateValue(LynxVersion.versionString() ?? "", forKey: "lynxSdkVersion")
-        globalPropos.updateValue(queryItems ?? [:], forKey: "queryItems")
-        globalPropos.updateValue(params.context?.originURL ?? "" ?? [:], forKey: "originUrl")
+        globalPropos.updateValue(queryItems, forKey: "queryItems")
+        globalPropos.updateValue(params.context?.originURL ?? "", forKey: "originUrl")
+        globalPropos.updateValue(params.context?.fullURL ?? params.context?.originURL ?? "", forKey: "fullUrl")
 
         return globalPropos
+    }
+    
+    /// Merge priority aligned with Android `parseQueryMap` (no iOS `Bundle` layer): `extra` then URL (`schemeParams.extra`). `context.queryItems` is ignored here.
+    private static func mergedLynxQueryStringMap(for context: SPKHybridContext?) -> [String: Any] {
+        var merged = stringStringMap(fromAnyHashable: context?.extra)
+        merged.merge(stringStringMap(fromSchemeExtra: context?.schemeParams?.extra)) { _, new in new }
+        return merged as [String: Any]
+    }
+    
+    private static func stringStringMap(fromAnyHashable source: [String: AnyHashable]?) -> [String: String] {
+        guard let source = source else { return [:] }
+        var out: [String: String] = [:]
+        for (k, v) in source {
+            out[String(describing: k)] = "\(v)"
+        }
+        return out
+    }
+    
+    private static func stringStringMap(fromSchemeExtra source: [String: Any]?) -> [String: String] {
+        guard let source = source else { return [:] }
+        var out: [String: String] = [:]
+        for (k, v) in source {
+            out[k] = "\(v)"
+        }
+        return out
+    }
+    
+    /// Appends only keys missing on the origin URL query (Spark `getFullUrl`).
+    private static func fullURLString(origin: String?, mergedQuery: [String: Any]) -> String? {
+        var merged: [String: String] = [:]
+        for (k, v) in mergedQuery {
+            merged[k] = "\(v)"
+        }
+        guard let originStr = origin, !originStr.isEmpty, let u = URL(string: originStr) else {
+            return origin
+        }
+        let existingKeys = Set(u.spk.decodedQueryItems?.keys ?? [])
+        var toAppend: [String: String] = [:]
+        for (k, v) in merged where !existingKeys.contains(k) {
+            toAppend[k] = v
+        }
+        if toAppend.isEmpty {
+            return originStr
+        }
+        return u.spk.merging(queries: toAppend, encode: true).absoluteString
     }
     
 }

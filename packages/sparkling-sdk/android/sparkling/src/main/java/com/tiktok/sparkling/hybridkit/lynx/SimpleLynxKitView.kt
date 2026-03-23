@@ -196,7 +196,7 @@ class SimpleLynxKitView : LynxView, IKitView {
     }
 
     override fun getScheme(): String? {
-        return hybridContext.scheme
+        return hybridContext.effectiveScheme()
     }
 
     override fun onLoadSuccess() {

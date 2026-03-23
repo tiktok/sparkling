@@ -124,6 +124,15 @@ class SparklingUriParserTest {
     }
 
     @Test
+    fun testAppendMissingQueryToUri_preservesExistingAndAddsMissing() {
+        val uri = Uri.parse("https://example.com?a=1")
+        val merged = mapOf("a" to "fromMerged", "b" to "2")
+        val out = SparklingUriParser.appendMissingQueryToUri(uri, merged)
+        assertEquals("1", out.getQueryParameter("a"))
+        assertEquals("2", out.getQueryParameter("b"))
+    }
+
+    @Test
     fun testBundleToMap() {
         val bundle = Bundle().apply {
             putString("string_key", "string_value")

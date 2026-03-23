@@ -187,8 +187,6 @@ open class SPKHybridSchemeParam: NSObject {
         param.resolvedURL = resolvedScheme
         param.originURL = orignalURL
         context?.originURL = orignalURL?.absoluteString
-        
-        param.extra = orignalURL?.absoluteString.spk.queryDict(isEscapes: true) ?? [:]
         return param
     }
     

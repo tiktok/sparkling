@@ -13,7 +13,6 @@ import com.tiktok.sparkling.method.registry.core.model.idl.CompletionBlock
 import com.tiktok.sparkling.method.registry.core.utils.createXModel
 import com.tiktok.sparkling.method.router.utils.IHostRouterDepend
 import com.tiktok.sparkling.method.router.utils.RouterProvider
-import java.net.URLDecoder
 
 
 /**
@@ -23,7 +22,6 @@ import java.net.URLDecoder
 class RouterOpenMethod : AbsRouterOpenMethodIDL() {
 
     companion object {
-        const val KEY_POST_URL_CONFIG = "__post_url_config"
         private const val TAG = "RouterOpenMethod"
     }
 
@@ -85,20 +83,6 @@ class RouterOpenMethod : AbsRouterOpenMethodIDL() {
             "useSysBrowser" to useSysBrowser,
             "extra" to (extra ?: emptyMap<Any, Any>())
         )
-
-        // Handle POST request configuration
-        if (params.usePost == true) {
-            val decodeBody = try {
-                URLDecoder.decode(params.postBody ?: "", "UTF-8")
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to decode postBody: ${e.message}")
-                params.postBody ?: ""
-            }
-            extraInfo[KEY_POST_URL_CONFIG] = mutableMapOf<String, String>(
-                "postBody" to decodeBody,
-                "postHeader" to (params.postHeader?.toString() ?: ""),
-            )
-        }
 
         // Handle non-replace open
         if (!replace) {

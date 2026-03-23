@@ -100,14 +100,25 @@ class SPKRouterTest: XCTestCase {
         paramModel.useSysBrowser = true
         paramModel.animated = true
         paramModel.interceptor = "test-interceptor"
-        paramModel.extra = "{\"key\": \"value\"}"
-        
+        let extraDict = NSDictionary(dictionary: ["key": "value"])
+        paramModel.extra = extraDict
+
         XCTAssertEqual(paramModel.scheme, "test-scheme")
         XCTAssertTrue(paramModel.replace)
         XCTAssertEqual(paramModel.replaceType, "all")
         XCTAssertTrue(paramModel.useSysBrowser)
         XCTAssertTrue(paramModel.animated)
         XCTAssertEqual(paramModel.interceptor, "test-interceptor")
-        XCTAssertEqual(paramModel.extra, "{\"key\": \"value\"}")
+        XCTAssertEqual(paramModel.extra, extraDict)
+    }
+
+    func testOpenMethodParamModelFromDictParsesExtraObject() throws {
+        let dict: [String: Any] = [
+            "scheme": "hybrid://lynxview_page?bundle=a.lynx.bundle",
+            "extra": ["foo": "bar"],
+        ]
+        let model = try XCTUnwrap(try OpenMethodParamModel.from(dict: dict))
+        XCTAssertNotNil(model.extra)
+        XCTAssertEqual(model.extra?["foo"] as? String, "bar")
     }
 }

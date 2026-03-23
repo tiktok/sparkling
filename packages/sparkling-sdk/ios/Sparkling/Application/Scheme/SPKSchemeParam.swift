@@ -40,6 +40,12 @@ public protocol SPKSchemeParamProtocol {
     /// 
     /// When true, the status bar background becomes transparent.
     var transStatusBar: Bool {set get}
+    
+    /// Controls whether the navigation bar remains visible when transStatusBar is true.
+    /// 
+    /// When transStatusBar is true, the navigation bar is hidden by default.
+    /// Set this to true to keep the navigation bar visible.
+    var showNavBarInTransStatusBar: Bool {set get}
 }
 
 /// A comprehensive parameter class for configuring SPK container appearance and behavior.
@@ -132,6 +138,8 @@ open class SPKSchemeParam: SPKHybridSchemeParam, SPKSchemeParamProtocol {
     
     public var hideBackButton: Bool = false
     
+    public var showNavBarInTransStatusBar: Bool = false
+    
     /// Updates the scheme parameters with values from a dictionary.
     /// 
     /// This method processes a dictionary of parameters and updates the instance properties
@@ -172,6 +180,8 @@ open class SPKSchemeParam: SPKHybridSchemeParam, SPKSchemeParamProtocol {
         self.hideStatusBar = dict.spk.bool(forKey: "hide_status_bar", default: self.hideStatusBar)
         
         self.transStatusBar = dict.spk.bool(forKey: "trans_status_bar", default: self.transStatusBar)
+        
+        self.showNavBarInTransStatusBar = dict.spk.bool(forKey: "show_nav_bar_in_trans_status_bar", default: self.showNavBarInTransStatusBar)
         
         self.title = dict.spk.string(forKey: "title", default: self.title)
         

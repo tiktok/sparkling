@@ -2,29 +2,18 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 import { open } from '../open/open';
-import type { NavigateRequest, NavigateResponse, NavigateOptions, NavigateParamKey } from './navigate.d';
+import type {
+    NavigateRequest,
+    NavigateResponse,
+    NavigateOptions,
+    NavigateParams,
+} from './navigate.d';
 
 declare const __DEV__: boolean;
 declare const __webpack_public_path__: string;
 
 const DEFAULT_ROUTER_SCHEME = 'hybrid://lynxview_page';
 const PROTOCOL_REGEX = /^[a-z][a-z0-9+.-]*:\/\//i;
-const ALLOWED_SCHEME_PARAMS = new Set<NavigateParamKey>([
-    'bundle',
-    'title',
-    'fallback_url',
-    'title_color',
-    'hide_nav_bar',
-    'nav_bar_color',
-    'screen_orientation',
-    'hide_status_bar',
-    'trans_status_bar',
-    'hide_loading',
-    'loading_bg_color',
-    'container_bg_color',
-    'hide_error',
-    'force_theme_style',
-]);
 
 function createErrorResponse(msg: string): NavigateResponse {
     return {
@@ -66,6 +55,14 @@ function buildScheme(baseScheme: string, bundlePath: string, params?: NavigateOp
 
     if (params && typeof params === 'object') {
         for (const key of Object.keys(params)) {
+            if (devBaseURL) {
+                if (key === 'url' || key === 'bundle') {
+                    continue;
+                }
+            } else if (key === 'bundle' || key === 'url') {
+                continue;
+            }
+
             const value = (params as Record<string, unknown>)[key];
 
             if (value === undefined || value === null) {
@@ -111,6 +108,7 @@ export function navigate(params: NavigateRequest, callback: (result: NavigateRes
 
     const bundlePath = normalizePath(params.path);
     const { params: schemeParams, ...restOptions } = params.options ?? {};
+    delete (restOptions as Record<string, unknown>).extra;
 
     if (!bundlePath) {
         callback(createErrorResponse('Invalid params: path must resolve to a bundle name'));

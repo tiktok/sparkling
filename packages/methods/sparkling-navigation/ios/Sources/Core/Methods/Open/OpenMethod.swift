@@ -38,8 +38,8 @@ public class OpenMethodParamModel: SPKMethodModel {
     @objc public var useSysBrowser: Bool = false
     @objc public var animated: Bool = false
     @objc public var interceptor: String?
-    @objc public var extra: String?
-    
+    @objc public var extra: NSDictionary?
+
     public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "scheme": "scheme",
