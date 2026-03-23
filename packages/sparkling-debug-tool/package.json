@@ -1,0 +1,26 @@
+{
+  "name": "sparkling-debug-tool",
+  "version": "2.1.0",
+  "description": "Sparkling debug tool SDK",
+  "homepage": "https://tiktok.github.io/sparkling/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tiktok/sparkling",
+    "directory": "packages/sparkling-debug-tool"
+  },
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "files": [
+    "src",
+    "android/src",
+    "android/build.gradle.kts",
+    "android/consumer-rules.pro",
+    "android/proguard-rules.pro",
+    "ios",
+    "module.config.json"
+  ],
+  "license": "Apache-2.0",
+  "engines": {
+    "node": "^22 || ^24"
+  }
+}
