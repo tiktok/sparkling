@@ -1,6 +1,6 @@
 :root {
-  background-color: #fff;
-  --color-text: #000;
+  background-color: #000;
+  --color-text: #fff;
 }
 
 .Background {
@@ -136,5 +136,5 @@ text {
 .GlobalProps {
   font-size: 12px;
   margin: 5px;
-  color: #000;
+  color: #fff;
 }

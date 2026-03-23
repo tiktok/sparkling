@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from '@lynx-js/react'
 
 import './App.css'
 
+import { SafeAreaView } from '../../components/SafeAreaView.js'
 import { close } from 'sparkling-navigation';
 import * as storage from 'sparkling-storage';
 
@@ -45,7 +46,8 @@ export function App(props: {
 
 
   return (
-    <view>
+    // Top inset is applied by native SPKNavigationBar; only pad bottom (e.g. home indicator).
+    <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
       <view className='App'>
         <view className='Banner'>
           <text className='Title'>This is the second page</text>
@@ -66,6 +68,6 @@ export function App(props: {
           </scroll-view>
         </view>
       </view>
-    </view>
+    </SafeAreaView>
   )
 }

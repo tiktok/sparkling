@@ -27,7 +27,10 @@ test('App', async () => {
   `)
   expect(elementTree.root).toMatchInlineSnapshot(`
     <page>
-      <view>
+      <view
+        class=""
+        style="box-sizing: border-box; width: 100%; padding-top: 0px; padding-bottom: 0px; flex: 1 1 0%;"
+      >
         <view
           class="App"
         >
@@ -54,13 +57,191 @@ test('App', async () => {
             <view
               class="custom-list-container"
             >
-              <list
-                list-type="single"
+              <scroll-view
                 scroll-orientation="vertical"
-                span-count="1"
-                style="width: 100%; height: 200px;"
-                update-list-info="[{"insertAction":[{"position":0,"type":"__Card__:__snapshot_ed605_test_3","item-key":"1"},{"position":1,"type":"__Card__:__snapshot_ed605_test_3","item-key":"2"},{"position":2,"type":"__Card__:__snapshot_ed605_test_3","item-key":"3"},{"position":3,"type":"__Card__:__snapshot_ed605_test_3","item-key":"4"},{"position":4,"type":"__Card__:__snapshot_ed605_test_3","item-key":"5"},{"position":5,"type":"__Card__:__snapshot_ed605_test_3","item-key":"6"},{"position":6,"type":"__Card__:__snapshot_ed605_test_3","item-key":"7"}],"removeAction":[],"updateAction":[]}]"
-              />
+                style="width:100%;height:240px"
+              >
+                <view
+                  style="padding:10px"
+                >
+                  <wrapper>
+                    <view
+                      class="custom-button"
+                    >
+                      <text
+                        style="color:#ffffff"
+                      >
+                        open
+                      </text>
+                    </view>
+                  </wrapper>
+                </view>
+                <view
+                  style="padding:10px"
+                >
+                  <wrapper>
+                    <view
+                      class="custom-button"
+                    >
+                      <text
+                        style="color:#ffffff"
+                      >
+                        setStorage
+                      </text>
+                    </view>
+                  </wrapper>
+                </view>
+                <view
+                  style="padding:10px"
+                >
+                  <wrapper>
+                    <view
+                      class="custom-button"
+                    >
+                      <text
+                        style="color:#ffffff"
+                      >
+                        getStorage
+                      </text>
+                    </view>
+                  </wrapper>
+                </view>
+                <view
+                  style="padding:10px"
+                >
+                  <wrapper>
+                    <view
+                      class="custom-button"
+                    >
+                      <text
+                        style="color:#ffffff"
+                      >
+                        cardView
+                      </text>
+                    </view>
+                  </wrapper>
+                </view>
+                <view
+                  style="padding:10px"
+                >
+                  <wrapper>
+                    <view
+                      class="custom-button"
+                    >
+                      <text
+                        style="color:#ffffff"
+                      >
+                        cardViewDemo
+                      </text>
+                    </view>
+                  </wrapper>
+                </view>
+                <view
+                  style="padding:10px"
+                >
+                  <wrapper>
+                    <view
+                      class="custom-button"
+                    >
+                      <text
+                        style="color:#ffffff"
+                      >
+                        debugToolSwitch
+                      </text>
+                    </view>
+                  </wrapper>
+                </view>
+                <view
+                  style="padding:10px"
+                >
+                  <wrapper>
+                    <view
+                      class="custom-button"
+                    >
+                      <text
+                        style="color:#ffffff"
+                      >
+                        mediaTest
+                      </text>
+                    </view>
+                  </wrapper>
+                </view>
+                <view
+                  style="padding:10px"
+                >
+                  <wrapper>
+                    <view
+                      class="custom-button"
+                    >
+                      <text
+                        style="color:#ffffff"
+                      >
+                        themedColor
+                      </text>
+                    </view>
+                  </wrapper>
+                </view>
+                <view
+                  style="padding:10px"
+                >
+                  <wrapper>
+                    <view
+                      class="custom-button"
+                    >
+                      <text
+                        style="color:#ffffff"
+                      >
+                        transStatusBar
+                      </text>
+                    </view>
+                  </wrapper>
+                </view>
+                <view
+                  style="padding:10px"
+                >
+                  <wrapper>
+                    <view
+                      class="custom-button"
+                    >
+                      <text
+                        style="color:#ffffff"
+                      >
+                        chooseImage
+                      </text>
+                    </view>
+                  </wrapper>
+                </view>
+                <view
+                  style="padding:10px"
+                >
+                  <wrapper>
+                    <view
+                      class="custom-button"
+                    >
+                      <text
+                        style="color:#ffffff"
+                      >
+                        chooseVideo
+                      </text>
+                    </view>
+                  </wrapper>
+                </view>
+                <view
+                  style="padding:10px"
+                >
+                  <wrapper>
+                    <view
+                      class="custom-button"
+                    >
+                      <text
+                        style="color:#ffffff"
+                      >
+                        takePhoto
+                      </text>
+                    </view>
+                  </wrapper>
+                </view>
+              </scroll-view>
             </view>
             <view
               class="input-card-url"
@@ -73,7 +254,7 @@ test('App', async () => {
               <input
                 class="input-box"
                 placeholder="Enter bundle path (e.g. second.lynx.bundle)"
-                text-color="#000000"
+                text-color="#ffffff"
                 value="second.lynx.bundle"
               />
             </view>

@@ -1,6 +1,6 @@
 :root {
-  background-color: #fff;
-  --color-text: #000;
+  background-color: #000;
+  --color-text: #fff;
 }
 
 .Background {
@@ -134,7 +134,7 @@ text {
   height: 200px;
   justify-content: center;
   margin-bottom: 3%;
-  background: #FFF;
+  background: #000;
 }
 
 .input-box {
@@ -142,7 +142,7 @@ text {
   align-items: flex-start;
   margin: 0% 5% 5% 5%;
   border-width: 0px 0px 1px;
-  border-color: #0000000a;
+  border-color: #ffffff1a;
   height: 20%;
   width: 90%;
 }
@@ -173,7 +173,7 @@ text {
   margin-right: 5%;
   flex-direction: column;
   margin-bottom: 3%;
-  background: #FFF;
+  background: #000;
 }
 
 .custom-button {

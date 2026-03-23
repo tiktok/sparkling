@@ -48,6 +48,11 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     }
     
     var topSafeAreaHeight: CGFloat {
+        if self.isViewLoaded {
+            let fromWindow = self.view.window?.safeAreaInsets.top ?? 0
+            let fromView = self.view.safeAreaInsets.top
+            return max(fromWindow, fromView)
+        }
         return UIApplication.spk.mainWindow?.spk.safeAreaInsets.top ?? 0
     }
     
@@ -243,6 +248,9 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     weak var oldDelegate: UIGestureRecognizerDelegate?
     
     private var containerFrame: CGRect = UIScreen.main.bounds
+    
+    /// Used to refresh SnapKit constraints when safe-area insets become valid after the first layout (SwiftUI / multi-scene).
+    private var lastAppliedTopSafeAreaHeight: CGFloat = -1
     
     /// Initializes a new SPKViewController with the specified URL and configuration.
     /// 
@@ -614,6 +622,19 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
         })
         self.view.setNeedsLayout()
     }
+    
+    /// Updates navigation bar height and Lynx container top inset when `topSafeAreaHeight` becomes accurate.
+    private func refreshSafeAreaDependentLayoutIfNeeded() {
+        let top = self.topSafeAreaHeight
+        if abs(top - self.lastAppliedTopSafeAreaHeight) < 0.5, self.lastAppliedTopSafeAreaHeight >= 0 {
+            return
+        }
+        self.lastAppliedTopSafeAreaHeight = top
+        self.navigationBar?.snp.updateConstraints { make in
+            make.height.equalTo(self.navigationBarHeight)
+        }
+        self.updateViewContainerOffset(UIEdgeInsets(top: self.topOffset, left: 0, bottom: 0, right: 0))
+    }
 
     /// Handles the view did appear event for the hybrid content.
     /// 
@@ -914,6 +935,16 @@ extension SPKViewController: SPKContainerLifecycleProtocol {
                 make.top.leading.right.equalTo(self.view)
             })
         }
+    }
+    
+    open override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        self.refreshSafeAreaDependentLayoutIfNeeded()
+    }
+    
+    open override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.refreshSafeAreaDependentLayoutIfNeeded()
     }
     
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {

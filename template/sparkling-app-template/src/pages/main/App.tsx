@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from '@lynx-js/react'
 import * as router from 'sparkling-navigation'
 
+import { SafeAreaView } from '../../components/SafeAreaView.js'
+
 import './App.css'
 import sparklingLogo from '../../assets/sparkling_icon.png'
 
@@ -32,6 +34,7 @@ export function App(props: { onMounted?: () => void }) {
   }, [openWithScheme, secondPageScheme])
 
   return (
+    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
     <scroll-view className="page-scroll" scroll-orientation="vertical">
       <view className="app">
         <view className="hero">
@@ -54,5 +57,6 @@ export function App(props: { onMounted?: () => void }) {
       </view>
 
     </scroll-view>
+    </SafeAreaView>
   )
 }

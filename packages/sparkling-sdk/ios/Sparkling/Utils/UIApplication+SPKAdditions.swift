@@ -8,8 +8,16 @@ extension UIApplication: SPKKitCompatible {}
 
 public extension SPKKitWrapper where Base == UIApplication {
     static var mainWindow: UIWindow? {
-        var window: UIWindow? = nil
-        window = UIApplication.shared.delegate?.window ?? nil
+        if #available(iOS 13.0, *) {
+            let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            if let key = scenes.flatMap({ $0.windows }).first(where: { $0.isKeyWindow }) {
+                return key
+            }
+            if let any = scenes.flatMap({ $0.windows }).first {
+                return any
+            }
+        }
+        var window: UIWindow? = UIApplication.shared.delegate?.window ?? nil
         if !(window is UIView) {
             window = UIApplication.shared.keyWindow
         }
@@ -18,5 +26,4 @@ public extension SPKKitWrapper where Base == UIApplication {
         }
         return window
     }
-    
 }
