@@ -32,6 +32,18 @@
             android:screenOrientation="portrait"
             android:exported="false">
         </activity>
+        <activity
+            android:name="com.tiktok.sparkling.playground.CardViewDemoActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:screenOrientation="portrait"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name="com.tiktok.sparkling.playground.DebugToolSwitchActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:screenOrientation="portrait"
+            android:exported="false">
+        </activity>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

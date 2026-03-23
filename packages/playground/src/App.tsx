@@ -14,7 +14,7 @@ export function App(props: {
 }) {
 
   const [bundlePath, setBundlePath] = useState('second.lynx.bundle');
-  const [switchStates, setSwitchStates] = useState<Record<string, boolean>>({ hide_nav_bar: false, hide_status_bar: false, trans_status_bar: false, hide_loading: false, hide_error: false });
+  const [switchStates, setSwitchStates] = useState<Record<string, boolean>>({ hide_nav_bar: false, hide_status_bar: false, trans_status_bar: false, show_nav_bar_in_trans_status_bar: false, hide_loading: false, hide_error: false });
   const [isListExpanded, setIsListExpanded] = useState(false);
   const [apiResponse, setApiResponse] = useState<string>('TikTok Sparkling');
 
@@ -23,7 +23,7 @@ export function App(props: {
     props.onMounted?.()
   }, [])
 
-  const handleInput = (event: InputEvent) => {
+  const handleInput = (event: any) => {
     'background only';
     const currentValue = event.detail.value.trim();
     setBundlePath(currentValue);
@@ -111,6 +111,26 @@ export function App(props: {
     );
   };
 
+  const openCardViewDemo = () => {
+    router.open(
+      { scheme: 'hybrid://native_route=card_demo' },
+      (v: OpenResponse) => {
+        console.log('Card view demo opened:', v);
+        setApiResponse(`Card View Demo Opened: ${JSON.stringify(v)}`);
+      },
+    );
+  };
+
+  const openDebugToolSwitch = () => {
+    router.open(
+      { scheme: 'hybrid://native_route=debug_tool_switch' },
+      (v: OpenResponse) => {
+        console.log('Debug tool switch opened:', v);
+        setApiResponse(`Debug Tool Switch: ${JSON.stringify(v)}`);
+      },
+    );
+  };
+
   const openMediaTest = () => {
     router.navigate(
       {
@@ -120,6 +140,52 @@ export function App(props: {
       (v: router.NavigateResponse) => {
         console.log('Media test opened:', v);
         setApiResponse(`Media Test Opened: ${JSON.stringify(v)}`);
+      }
+    );
+  };
+
+  const openThemedColorDemo = () => {
+    router.navigate(
+      {
+        path: 'second.lynx.bundle',
+        options: {
+          params: {
+            title: 'Themed Color Demo',
+            nav_bar_color: '#888888',
+            nav_bar_color_light: '#FFFFFF',
+            nav_bar_color_dark: '#1A1A2E',
+            title_color: '#333333',
+            title_color_light: '#000000',
+            title_color_dark: '#E0E0E0',
+            container_bg_color: '#F5F5F5',
+            container_bg_color_light: '#FFFFFF',
+            container_bg_color_dark: '#16213E',
+          },
+        },
+      },
+      (v: NavigateResponse) => {
+        setApiResponse(`Themed Color: ${JSON.stringify(v)}`);
+      }
+    );
+  };
+
+  const openTransStatusBarDemo = () => {
+    router.navigate(
+      {
+        path: 'second.lynx.bundle',
+        options: {
+          params: {
+            title: 'Trans Status Bar',
+            trans_status_bar: '1',
+            show_nav_bar_in_trans_status_bar: '1',
+            nav_bar_color: '#80000000',
+            title_color: '#FFFFFF',
+            container_bg_color: '#0F3460',
+          },
+        },
+      },
+      (v: NavigateResponse) => {
+        setApiResponse(`Trans StatusBar: ${JSON.stringify(v)}`);
       }
     );
   };
@@ -160,10 +226,14 @@ export function App(props: {
     { id: 2, title: 'setStorage', api: setStorageItem},
     { id: 3, title: 'getStorage', api: getStorageItem },
     { id: 4, title: 'cardView', api: openCardView },
-    { id: 5, title: 'mediaTest', api: openMediaTest },
-    { id: 6, title: 'chooseImage', api: chooseImage },
-    { id: 7, title: 'chooseVideo', api: chooseVideo },
-    { id: 8, title: 'takePhoto', api: takePhoto },
+    { id: 5, title: 'cardViewDemo', api: openCardViewDemo },
+    { id: 12, title: 'debugToolSwitch', api: openDebugToolSwitch },
+    { id: 6, title: 'mediaTest', api: openMediaTest },
+    { id: 7, title: 'themedColor', api: openThemedColorDemo },
+    { id: 8, title: 'transStatusBar', api: openTransStatusBarDemo },
+    { id: 9, title: 'chooseImage', api: chooseImage },
+    { id: 10, title: 'chooseVideo', api: chooseVideo },
+    { id: 11, title: 'takePhoto', api: takePhoto },
   ];
 
   return (

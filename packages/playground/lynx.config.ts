@@ -35,6 +35,8 @@ export default defineConfig({
       second: './src/pages/second/index.tsx', // Second page entry
       'card-view': './src/pages/card-view/index.tsx', // Card view demo entry
       'media-test': './src/pages/media-test/index.tsx', // Media test page entry
+      'card-view-demo': './src/pages/card-view-demo/index.tsx', // Card view demo with native container
+      'debug-tool-switch': './src/pages/debug-tool-switch/index.tsx', // Lynx debug switches (native panel on device)
     },
   },
   output: {

@@ -23,6 +23,10 @@ pod 'Sparkling-Storage', :path => '../../methods/sparkling-storage/ios'
 pod 'Sparkling-Media', :path => '../../methods/sparkling-media/ios'
 end
 
+def sparkling_devtool
+  pod 'Sparkling-DebugTool', :path => '../../sparkling-debug-tool/ios'
+end
+
 def sparkling_kit
   pod 'Sparkling', :path => '../../sparkling-sdk/ios'
   
@@ -37,17 +41,11 @@ def sparkling_kit
   pod 'PrimJS', '3.6.1', :subspecs => ['quickjs', 'napi']
 
   pod 'LynxService', '3.6.0', :subspecs => [
-  'Image',
-  'Log',
-  'Http',
-  'Devtool'
+    'Image',
+    'Log',
+    'Http',
   ]
 
-  pod 'BaseDevtool'
-  pod 'LynxDevtool', '3.6.0', :subspecs => [
-   'Framework',
-  ]
-  
   pod 'SnapKit'
   pod 'Mantle', '~> 2.2.0'
   
@@ -59,6 +57,7 @@ end
 use_frameworks!
 target 'SparklingGo' do
   sparkling_kit
+  sparkling_devtool
 end
 
 target 'SparklingGoTests' do
@@ -73,16 +72,43 @@ target 'SparklingGoUITests' do
   sparkling_kit
 end
 
+# Strip debug-tool pods from Release builds so they are debug-only.
+devtool_frameworks = ['Sparkling_DebugTool']
+devtool_pod_names = ['Sparkling-DebugTool']
+
 # Append Local.xcconfig (gitignored) to the Pods-generated xcconfigs so
 # developers can override build settings (e.g. DEVELOPMENT_TEAM) locally.
 post_install do |installer|
   local_xcconfig = File.expand_path('Local.xcconfig', __dir__)
-  next unless File.exist?(local_xcconfig)
+  if File.exist?(local_xcconfig)
+    Dir.glob(File.join(__dir__, 'Pods/Target Support Files/Pods-SparklingGo/Pods-SparklingGo.*.xcconfig')) do |path|
+      content = File.read(path)
+      include_line = '#include? "../../../Local.xcconfig"'
+      unless content.include?(include_line)
+        File.open(path, 'a') { |f| f.puts "\n#{include_line}" }
+      end
+    end
+  end
 
-  Dir.glob(File.join(__dir__, 'Pods/Target Support Files/Pods-SparklingGo/Pods-SparklingGo.*.xcconfig')) do |path|
-    content = File.read(path)
-    include_line = '#include? "../../../Local.xcconfig"'
-    next if content.include?(include_line)
-    File.open(path, 'a') { |f| f.puts "\n#{include_line}" }
+  # 1. Exclude all source files from debug-tool pod targets in Release
+  installer.target_installation_results.pod_target_installation_results.each do |pod_name, result|
+    next unless devtool_pod_names.any? { |n| pod_name.to_s.include?(n) }
+    result.native_target.build_configurations.each do |config|
+      if config.name == 'Release'
+        config.build_settings['EXCLUDED_SOURCE_FILE_NAMES'] = '*'
+      end
+    end
+  end
+
+  # 2. Strip devtool framework references from app target linker flags in Release
+  installer.aggregate_targets.each do |aggregate_target|
+    aggregate_target.xcconfigs.each do |config_name, xcconfig|
+      next unless config_name == 'Release'
+      devtool_frameworks.each do |fw|
+        xcconfig.other_linker_flags[:frameworks].delete(fw)
+      end
+      xcconfig_path = aggregate_target.xcconfig_path(config_name)
+      xcconfig.save_as(xcconfig_path)
+    end
   end
 end

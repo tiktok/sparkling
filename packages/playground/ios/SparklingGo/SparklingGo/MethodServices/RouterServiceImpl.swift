@@ -3,6 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 
 import Foundation
+import UIKit
 import Sparkling
 import SparklingMethod
 import Sparkling_Router
@@ -21,6 +22,11 @@ class RouterServiceImpl: RouterService {
         let context = SPKContext()
         
         DispatchQueue.main.async {
+            if let urlString = urlString,
+               PlaygroundNativeRouteRegistry.shared.tryOpen(scheme: urlString, completion: completion) {
+                return
+            }
+
             func openWithRouter(completionHandler: ((Bool) -> Void)? = nil) {
                 if let (_, success) = SPKRouter.open(withURL: urlString, context: context), success {
                     completionHandler?(true)

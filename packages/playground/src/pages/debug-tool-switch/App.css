@@ -1,0 +1,44 @@
+.debug-tool-fallback {
+  flex: 1;
+  width: 100%;
+  min-height: 100%;
+  background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+
+.debug-tool-card {
+  width: 100%;
+  max-width: 360px;
+  background-color: rgba(255, 255, 255, 0.96);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.debug-tool-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 12px;
+}
+
+.debug-tool-body {
+  font-size: 14px;
+  line-height: 22px;
+  color: #444444;
+  margin-bottom: 20px;
+}
+
+.debug-tool-close {
+  align-self: flex-start;
+  background-color: #e53935;
+  padding: 12px 20px;
+  border-radius: 8px;
+}
+
+.debug-tool-close-label {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+}
