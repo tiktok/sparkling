@@ -38,6 +38,10 @@ sparkling run:ios
 
 Run `sparkling --help` to see all available commands and options.
 
+## Local testing
+
+When developing inside the Sparkling monorepo, see [LOCAL_TESTING.md](./LOCAL_TESTING.md) for building this CLI, running `sparkling` / `sparkling-app-cli` from the workspace, and trying commands from an app directory.
+
 ## Requirements
 
 - Node.js >= 18

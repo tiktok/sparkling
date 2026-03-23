@@ -30,6 +30,10 @@ npx create-sparkling-app@latest my-app --verbose
 
 Run `npx create-sparkling-app@latest --help` to see all available options.
 
+## Local testing
+
+When developing inside the Sparkling monorepo, see [LOCAL_TESTING.md](./LOCAL_TESTING.md) for building this CLI, running it from the workspace, and pointing `--template` at `template/sparkling-app-template`.
+
 ## What's Included
 
 The generated project includes:

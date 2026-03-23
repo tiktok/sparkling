@@ -267,6 +267,7 @@ async function discoverModules(cwd: string): Promise<MethodModuleConfig[]> {
       seen.set(name, {
         name,
         root: moduleRoot,
+        devtool: config.devtool === true,
         android: {
           packageName: typeof androidConfig?.packageName === 'string' ? androidConfig.packageName : undefined,
           className: typeof androidConfig?.className === 'string' ? androidConfig.className : undefined,
@@ -601,21 +602,42 @@ function injectAndroidDependencies(appGradlePath: string, modules: MethodModuleC
   const depIndent = depIndentMatch ? depIndentMatch[1] : '';
   const innerIndent = `${depIndent}    `;
 
-  const depLinesKts = modules.map(m => `${innerIndent}    project(":${m.name}")`).join(',\n');
+  const regularModules = modules.filter(m => !m.devtool);
+  const devtoolModules = modules.filter(m => m.devtool);
+
+  const ktsLines: string[] = [];
+  if (regularModules.length) {
+    const depLinesKts = regularModules.map(m => `${innerIndent}    project(":${m.name}")`).join(',\n');
+    ktsLines.push(
+      `${innerIndent}listOf(`,
+      depLinesKts,
+      `${innerIndent}).forEach { dep -> add("implementation", dep) }`,
+    );
+  }
+  for (const m of devtoolModules) {
+    ktsLines.push(`${innerIndent}debugImplementation(project(":${m.name}"))`);
+  }
   const ktsBlock = [
     `${innerIndent}// BEGIN SPARKLING AUTOLINK`,
-    `${innerIndent}listOf(`,
-    depLinesKts,
-    `${innerIndent}).forEach { dep -> add("implementation", dep) }`,
+    ...ktsLines,
     `${innerIndent}// END SPARKLING AUTOLINK`,
   ].join('\n');
 
-  const depLinesGroovy = modules.map(m => `${innerIndent}    project(":${m.name}")`).join(',\n');
+  const groovyLines: string[] = [];
+  if (regularModules.length) {
+    const depLinesGroovy = regularModules.map(m => `${innerIndent}    project(":${m.name}")`).join(',\n');
+    groovyLines.push(
+      `${innerIndent}[`,
+      depLinesGroovy,
+      `${innerIndent}].each { dep -> add("implementation", dep) }`,
+    );
+  }
+  for (const m of devtoolModules) {
+    groovyLines.push(`${innerIndent}debugImplementation project(":${m.name}")`);
+  }
   const groovyBlock = [
     `${innerIndent}// BEGIN SPARKLING AUTOLINK`,
-    `${innerIndent}[`,
-    depLinesGroovy,
-    `${innerIndent}].each { dep -> add("implementation", dep) }`,
+    ...groovyLines,
     `${innerIndent}// END SPARKLING AUTOLINK`,
   ].join('\n');
 
@@ -680,6 +702,22 @@ function resolvePodName(module: MethodModuleConfig): string {
   return module.ios?.moduleName ? `Sparkling-${module.ios.moduleName}` : module.name;
 }
 
+function buildPodLine(module: MethodModuleConfig, podfilePath: string): string {
+  const podspecDir = module.ios?.podspecPath ? path.dirname(module.ios.podspecPath) : module.root;
+  const rel = relativeTo(path.dirname(podfilePath), podspecDir);
+  const podName = resolvePodName(module);
+  return `  pod '${podName}', :path => '${toPosixPath(rel)}'`;
+}
+
+function replaceDefBlock(content: string, defName: string, newBody: string): string {
+  const start = content.indexOf(`def ${defName}`);
+  if (start === -1) return content;
+  const end = content.indexOf('\nend', start);
+  if (end === -1) return content;
+  const existing = content.slice(start, end + '\nend'.length);
+  return content.replace(existing, newBody);
+}
+
 function injectPodfile(podfilePath: string, modules: MethodModuleConfig[], projectDir: string) {
   if (!fs.existsSync(podfilePath)) {
     console.warn(ui.warn(`Podfile not found at ${podfilePath}, skipping iOS autolink`));
@@ -687,35 +725,49 @@ function injectPodfile(podfilePath: string, modules: MethodModuleConfig[], proje
   }
 
   let content = fs.readFileSync(podfilePath, 'utf8');
-  const start = content.indexOf('def sparkling_methods_dep');
-  if (start === -1) {
+
+  const regularModules = modules.filter(m => !m.devtool);
+  const devtoolModules = modules.filter(m => m.devtool);
+
+  // --- sparkling_methods_dep (regular method modules) ---
+  const hasMethodsDep = content.includes('def sparkling_methods_dep');
+  if (!hasMethodsDep) {
     console.warn(ui.warn('Podfile missing def sparkling_methods_dep, skipping iOS autolink'));
     return;
   }
 
-  const end = content.indexOf('\nend', start);
-  if (end === -1) {
-    console.warn(ui.warn('Podfile sparkling_methods_dep block malformed, skipping iOS autolink'));
-    return;
-  }
-
-  const podLines = modules.map(module => {
-    const podspecDir = module.ios?.podspecPath ? path.dirname(module.ios.podspecPath) : module.root;
-    const rel = relativeTo(path.dirname(podfilePath), podspecDir);
-    const podName = resolvePodName(module);
-    return `  pod '${podName}', :path => '${toPosixPath(rel)}'`;
-  }).join('\n');
-
-  const block = [
+  const podLines = regularModules.map(m => buildPodLine(m, podfilePath)).join('\n');
+  const methodsBlock = [
     'def sparkling_methods_dep',
     `  ${IOS_AUTOLINK_START}`,
     podLines || '  # No Sparkling methods found',
     `  ${IOS_AUTOLINK_END}`,
     'end',
   ].join('\n');
+  content = replaceDefBlock(content, 'sparkling_methods_dep', methodsBlock);
 
-  const existing = content.slice(start, end + '\nend'.length);
-  content = content.replace(existing, block);
+  // --- sparkling_devtool (devtool modules, debug only) ---
+  const devtoolPodLines = devtoolModules.map(m => buildPodLine(m, podfilePath)).join('\n');
+  const devtoolBlock = [
+    'def sparkling_devtool',
+    `  ${IOS_AUTOLINK_START}`,
+    devtoolPodLines || '  # No devtool modules',
+    `  ${IOS_AUTOLINK_END}`,
+    'end',
+  ].join('\n');
+
+  if (content.includes('def sparkling_devtool')) {
+    content = replaceDefBlock(content, 'sparkling_devtool', devtoolBlock);
+  } else {
+    // Insert sparkling_devtool block right after sparkling_methods_dep
+    const methodsEnd = content.indexOf('def sparkling_methods_dep');
+    const methodsBlockEnd = content.indexOf('\nend', methodsEnd);
+    if (methodsBlockEnd !== -1) {
+      const insertPos = methodsBlockEnd + '\nend'.length;
+      content = `${content.slice(0, insertPos)}\n\n${devtoolBlock}${content.slice(insertPos)}`;
+    }
+  }
+
   fs.writeFileSync(podfilePath, content);
 }
 
@@ -778,7 +830,7 @@ export async function autolink(options: AutolinkOptions): Promise<MethodModuleCo
   const platform = options.platform ?? 'all';
   const doAndroid = platform === 'android' || platform === 'all';
   const doIos = platform === 'ios' || platform === 'all';
-  const modules = await discoverModules(options.cwd);
+  let modules = await discoverModules(options.cwd);
   if (isVerboseEnabled()) {
     const moduleNames = modules.map(m => m.name).join(', ') || '(none)';
     verboseLog(`Autolink platforms -> android: ${doAndroid}, ios: ${doIos}`);
@@ -788,12 +840,9 @@ export async function autolink(options: AutolinkOptions): Promise<MethodModuleCo
   const defaultAndroidPackage = 'com.example.sparkling.go';
   const defaultIosBundle = 'com.example.sparkling.go';
 
-  if (!modules.length) {
-    console.log(ui.info('No Sparkling method modules found. Cleaning up stale autolink entries...'));
-  }
-
   let androidPackage = defaultAndroidPackage;
   let iosBundle = defaultIosBundle;
+  let devtoolEnabled = true;
   try {
     const { config } = await loadAppConfig(options.cwd, options.configFile ?? 'app.config.ts');
     if (doAndroid) {
@@ -802,11 +851,25 @@ export async function autolink(options: AutolinkOptions): Promise<MethodModuleCo
     if (doIos) {
       iosBundle = config.platform?.ios?.bundleIdentifier ?? defaultIosBundle;
     }
+    devtoolEnabled = config.devtool !== false;
     if (isVerboseEnabled()) {
       verboseLog(`Autolink bundle identifiers -> android: ${androidPackage}, ios: ${iosBundle}`);
+      verboseLog(`Autolink devtool enabled: ${devtoolEnabled}`);
     }
   } catch (error) {
     console.warn(ui.warn(`Failed to read app config for autolink, using defaults: ${String(error)}`));
+  }
+
+  if (!devtoolEnabled) {
+    const removed = modules.filter(m => m.devtool);
+    if (removed.length && isVerboseEnabled()) {
+      verboseLog(`Excluding devtool modules (devtool: false in config): ${removed.map(m => m.name).join(', ')}`);
+    }
+    modules = modules.filter(m => !m.devtool);
+  }
+
+  if (!modules.length) {
+    console.log(ui.info('No Sparkling method modules found. Cleaning up stale autolink entries...'));
   }
 
   if (doAndroid) {
@@ -835,13 +898,17 @@ export async function autolink(options: AutolinkOptions): Promise<MethodModuleCo
     injectPodfile(podfile, modules, path.dirname(podfile));
   }
 
+  // Registry files only contain regular method modules — devtool modules
+  // don't expose bridge methods and should not appear in the registry.
+  const registryModules = modules.filter(m => !m.devtool);
+
   // Always write registry files so stale entries from previously-linked
   // modules are cleaned up when all method modules are removed.
   if (doAndroid) {
-    writeAndroidRegistry(modules, androidPackage, options.cwd);
+    writeAndroidRegistry(registryModules, androidPackage, options.cwd);
   }
   if (doIos) {
-    writeIosRegistry(modules, iosBundle, options.cwd);
+    writeIosRegistry(registryModules, iosBundle, options.cwd);
   }
 
   const platformLabel = platform === 'all' ? 'Android & iOS' : platform.toUpperCase();
