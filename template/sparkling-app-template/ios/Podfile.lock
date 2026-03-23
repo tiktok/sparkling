@@ -133,12 +133,16 @@ PODS:
     - Sparkling/Application (= 2.0.0-rc.5)
     - Sparkling/Service (= 2.0.0-rc.5)
     - Sparkling/Utils (= 2.0.0-rc.5)
-  - Sparkling-Router (2.0.0-rc.6):
+  - Sparkling-DebugTool (2.1.0):
+    - Lynx (~> 3.6.0)
+    - LynxDevtool/Framework (~> 3.6.0)
+    - LynxService/Devtool (~> 3.6.0)
+  - Sparkling-Router (2.0.0-rc.9):
     - Mantle (~> 2.2.0)
-    - Sparkling-Router/Core (= 2.0.0-rc.6)
+    - Sparkling-Router/Core (= 2.0.0-rc.9)
     - SparklingMethod/Core
     - SparklingMethod/DIProvider
-  - Sparkling-Router/Core (2.0.0-rc.6):
+  - Sparkling-Router/Core (2.0.0-rc.9):
     - Mantle (~> 2.2.0)
     - SparklingMethod/Core
     - SparklingMethod/DIProvider
@@ -172,8 +176,6 @@ PODS:
 DEPENDENCIES:
   - Lynx/Framework (= 3.6.0)
   - Lynx/ReleaseResource (= 3.6.0)
-  - LynxDevtool/Framework (= 3.6.0)
-  - LynxService/Devtool (= 3.6.0)
   - LynxService/Http (= 3.6.0)
   - LynxService/Image (= 3.6.0)
   - LynxService/Log (= 3.6.0)
@@ -184,6 +186,7 @@ DEPENDENCIES:
   - SDWebImageWebPCoder (= 0.11.0)
   - SnapKit
   - Sparkling (= 2.0.0-rc.5)
+  - Sparkling-DebugTool (from `../node_modules/sparkling-debug-tool/ios`)
   - Sparkling-Router (from `../node_modules/sparkling-navigation/ios`)
   - SparklingMethod/Debug (= 2.0.0-rc.5)
   - SparklingMethod/DIProvider (= 2.0.0-rc.5)
@@ -209,6 +212,8 @@ SPEC REPOS:
     - SparklingMethod
 
 EXTERNAL SOURCES:
+  Sparkling-DebugTool:
+    :path: "../node_modules/sparkling-debug-tool/ios"
   Sparkling-Router:
     :path: "../node_modules/sparkling-navigation/ios"
 
@@ -228,9 +233,10 @@ SPEC CHECKSUMS:
   SnapKit: d612e99e678a2d3b95bf60b0705ed0a35c03484a
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Sparkling: ae45f50431fd6f904b3c8e3562894f19d50373ac
-  Sparkling-Router: 1db5d02861be0847b0049a404a1aca352a7fae53
+  Sparkling-DebugTool: 56a57b5e6b3aa31ac0505a4cb15ae195a640887e
+  Sparkling-Router: cdf63faef987804e9777758db7fe20cc8c832b1e
   SparklingMethod: 149844f0e241df45f7bb635ff6705b6e05a6233e
 
-PODFILE CHECKSUM: 99f1208e49ae13412618f31977d34b61383aa035
+PODFILE CHECKSUM: ba22d17a7d3da1a9db8b2d5d72b997d378a62811
 
 COCOAPODS: 1.16.2
