@@ -53,6 +53,27 @@ pnpm --filter create-sparkling-app exec create-sparkling-app my-app \
 
 The path must exist and be a directory. The CLI will copy from that folder and will not download the template package from npm.
 
+## Creating a project from another directory
+
+Your shell can be **anywhere** (for example `~/projects` or `/tmp`). The new app is created relative to **current working directory** (the `project-name` / target path is resolved from `cwd`), not relative to the Sparkling repo.
+
+1. Build the CLI once inside the clone (see [Prerequisites](#prerequisites)).
+2. Call the CLI with an **absolute path** to `bin/index.js` (workspace-only `pnpm --filter … exec` only works from the monorepo root).
+3. Pass an **absolute path** to `--template` pointing at `…/template/sparkling-app-template` in your clone. Relative `./template/...` only works if your `cwd` is the monorepo root.
+
+Example (replace `/path/to/sparkling` with your clone):
+
+```bash
+cd ~/projects
+node /path/to/sparkling/packages/create-sparkling-app/bin/index.js my-app \
+  --template /path/to/sparkling/template/sparkling-app-template \
+  -y
+```
+
+This creates `~/projects/my-app` using local CLI output and local template sources.
+
+Optional: after `pnpm build` in `packages/create-sparkling-app`, run `pnpm link` or `npm link` from that package directory, then run `create-sparkling-app` from your `PATH`—you still need the **absolute** `--template` path when not working from the repo.
+
 ## Environment variable: `SPK_TEMPLATE_SKIP_INSTALL`
 
 `SPK_TEMPLATE_SKIP_INSTALL=1` only affects resolution when the template is fetched **via npm** (it skips installing the npm package). It does **not** apply when you pass a **local directory** to `--template` as above.
@@ -62,3 +83,13 @@ The path must exist and be a directory. The CLI will copy from that folder and w
 Scaffolding copies the template and generates `package.json` from it. **Installing dependencies** in the new project (`npm install`, `pnpm install`, etc.) still resolves packages such as `sparkling-app-cli` from the registry according to semver in that template.
 
 If you also need those packages to point at **local workspace packages** in this monorepo, you must configure that separately (for example `file:` dependencies, `pnpm.overrides`, or `pnpm link`) after the project is created.
+
+## iOS `Pods` and `pod install`
+
+If your template directory contains `ios/Pods` (for example after running `pod install` while developing the template), **do not commit that tree** to git if you can avoid it—regenerate it in each new app with:
+
+```bash
+cd my-app/ios && pod install
+```
+
+The scaffold step **does not copy** `Pods` or `.gradle` vendor/cache folders into the new project; install native dependencies in the generated app instead. That avoids permission errors from trying to rewrite third-party headers under `Pods/`.

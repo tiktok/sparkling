@@ -149,7 +149,7 @@ export async function copyTemplateWithVariables({
     }
   }
 
-  const allSkipFiles = new Set(['dist', 'node_modules', ...skipFiles]);
+  const allSkipFiles = new Set(['dist', 'node_modules', 'Pods', '.gradle', ...skipFiles]);
 
   fs.mkdirSync(to, { recursive: true });
 
