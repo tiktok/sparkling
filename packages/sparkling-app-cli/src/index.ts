@@ -7,6 +7,7 @@ import path from 'node:path';
 import { autolink } from './commands/autolink';
 import { buildProject } from './commands/build';
 import { copyAssets } from './commands/copy-assets';
+import { devProject } from './commands/dev';
 import { doctor } from './commands/doctor';
 import { runAndroid } from './commands/run-android';
 import { runIos } from './commands/run-ios';
@@ -49,6 +50,15 @@ program
     const cwd = process.cwd();
     const skipCopy = resolveSkipCopy(opts);
     await buildProject({ cwd, configFile: opts.config, skipCopy });
+  });
+
+program
+  .command('dev')
+  .description('Start Lynx dev server with HMR using app.config.ts')
+  .option('--config <path>', 'Path to app.config.ts', 'app.config.ts')
+  .action(async opts => {
+    const cwd = process.cwd();
+    await devProject({ cwd, configFile: opts.config });
   });
 
 program
