@@ -20,14 +20,10 @@ class SparklingHostRouterDepend: IHostRouterDepend {
         platformType: BridgePlatformType,
         context: Context?
     ): Boolean {
-        // Check if this is a card view scheme
-        if (scheme.contains("card-view.lynx.bundle")) {
-            context?.let {
-                CardViewLauncher.launchCardViewWithData(it, extraParams)
-                return true
-            }
+        if (PlaygroundNativeRouteRegistry.openIfMatches(scheme, context)) {
+            return true
         }
-        
+
         val sparklingContext = SparklingContext()
         sparklingContext.scheme = scheme
         context?.let {  Sparkling.Companion.build(it, sparklingContext).navigate() }
