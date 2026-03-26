@@ -113,7 +113,7 @@ class GlobalPropsUtils {
                 )
                 SparklingUriParser.saveUriAndQueries(containerID, queryMap)
                 hybridContext.fullScheme =
-                    SparklingUriParser.appendMissingQueryToUri(uri, queryMap).toString()
+                    SparklingUriParser.appendExtraQueryToUri(uri, queryMap).toString()
             }
         }
 
