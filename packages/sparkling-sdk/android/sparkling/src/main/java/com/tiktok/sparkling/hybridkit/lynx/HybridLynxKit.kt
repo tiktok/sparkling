@@ -104,7 +104,7 @@ object HybridLynxKit {
         var kitInitParams: LynxKitInitParams = (hybridContext.hybridParams as? LynxKitInitParams)
             ?: LynxKitInitParams(loadUri = null)
         if (kitInitParams.loadUri == null) {
-            kitInitParams.loadUri = hybridContext.getFullScheme()?.toUri()
+            kitInitParams.loadUri = hybridContext.resolveFullScheme()?.toUri()
         }
 
         val viewBuilder = LynxViewBuilder()

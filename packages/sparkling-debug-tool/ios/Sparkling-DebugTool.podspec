@@ -15,7 +15,10 @@ Pod::Spec.new do |s|
   s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s }
   s.static_framework = true
 
-  s.source_files = 'Sources/**/*.{h,m,swift}'
+  s.source_files = [
+    'ios/Sources/**/*.{h,m,swift}',
+    'Sources/**/*.{h,m,swift}'
+  ]
 
   s.dependency 'Lynx', '~> 3.6.0'
   s.dependency 'LynxService/Devtool', '~> 3.6.0'

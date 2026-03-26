@@ -83,7 +83,7 @@ if [ "$DRY_RUN" = true ]; then
     print_warning "DRY RUN MODE - No publish will occur"
     if command -v pod >/dev/null 2>&1; then
         print_info "Running podspec validation in dry-run..."
-        if pod lib lint Sparkling-DebugTool.podspec --allow-warnings 2>&1; then
+        if pod spec lint Sparkling-DebugTool.podspec --allow-warnings 2>&1; then
             print_success "Dry-run validation passed"
         else
             print_warning "Dry-run validation reported issues"
@@ -96,7 +96,7 @@ if [ "$DRY_RUN" = true ]; then
 fi
 
 print_info "Validating Sparkling-DebugTool.podspec..."
-if pod lib lint Sparkling-DebugTool.podspec --allow-warnings 2>&1; then
+if pod spec lint Sparkling-DebugTool.podspec --allow-warnings 2>&1; then
     print_success "Sparkling-DebugTool validation passed"
 else
     print_warning "Sparkling-DebugTool validation has warnings or errors, trying to publish anyway..."

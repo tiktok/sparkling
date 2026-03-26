@@ -69,7 +69,7 @@ open class HybridContext {
         return this
     }
 
-    fun getFullScheme(): String? = fullScheme ?: scheme
+    fun resolveFullScheme(): String? = fullScheme ?: scheme
 
     fun withSendEventListener(sendEventListener: SendEventListener?): HybridContext {
         this.sendEventListener = sendEventListener
