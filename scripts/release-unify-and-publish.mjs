@@ -373,6 +373,15 @@ function parseVersionsJsonMaybe(stdout) {
   }
 }
 
+function npmPackageVersionExists({ name, version, registry }) {
+  const res = runCapture("npm", ["view", `${name}@${version}`, "version", "--registry", registry], {
+    stdio: "pipe",
+    timeout: NPM_CMD_TIMEOUT_MS,
+  });
+  if (!res.ok) return false;
+  return res.stdout.split(/\s+/).some((token) => token.trim() === version);
+}
+
 function nextRcVersion(baseVersion, publishedVersions) {
   // Accept only `x.y.z` base versions here (no prerelease).
   if (baseVersion.includes("-")) return null;
@@ -569,14 +578,32 @@ async function main() {
   if (args.dryRun) pnpmArgsBase.push("--dry-run");
   if (args.noGitChecks) pnpmArgsBase.push("--no-git-checks");
 
+  let publishedCount = 0;
+  let skippedExistingCount = 0;
   for (const p of finalOrder) {
+    const alreadyPublished = npmPackageVersionExists({
+      name: p.name,
+      version: targetVersion,
+      registry: args.registry,
+    });
+    if (alreadyPublished) {
+      process.stdout.write(`\n==> Skipping ${p.name}@${targetVersion} (already published)\n`);
+      skippedExistingCount += 1;
+      continue;
+    }
+
     if (publishLastSet.has(p.name)) {
       process.stdout.write(`\n==> Publishing ${p.name}@${targetVersion} (publish-last)\n`);
     } else {
       process.stdout.write(`\n==> Publishing ${p.name}@${targetVersion}\n`);
     }
     run("pnpm", pnpmArgsBase, { cwd: p.dir });
+    publishedCount += 1;
   }
+
+  process.stdout.write(
+    `\nPublish summary: published=${publishedCount}, skipped_already_published=${skippedExistingCount}\n`
+  );
 }
 
 main().catch((err) => {

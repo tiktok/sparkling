@@ -55,6 +55,91 @@ jobs:
   # different runners. The prepare job provides the version.
   # ──────────────────────────────────────────────────────────────
 
+  preflight-registry-auth:
+    name: Preflight npm + Maven auth
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Ensure latest npm
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      - name: Verify npm registry connectivity
+        run: |
+          echo "🔍 Verifying npm registry connectivity..."
+          npm ping --registry https://registry.npmjs.org
+          echo "✅ npm registry is reachable"
+
+      - name: Verify Maven Central credentials and API reachability
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        run: |
+          echo "🔍 Verifying Maven Central release secrets..."
+          MISSING=""
+          [ -z "$MAVEN_CENTRAL_USERNAME" ] && MISSING="$MISSING MAVEN_CENTRAL_USERNAME"
+          [ -z "$MAVEN_CENTRAL_PASSWORD" ] && MISSING="$MISSING MAVEN_CENTRAL_PASSWORD"
+          [ -z "$SIGNING_KEY_ID" ] && MISSING="$MISSING SIGNING_KEY_ID"
+          [ -z "$SIGNING_PASSWORD" ] && MISSING="$MISSING SIGNING_PASSWORD"
+          [ -z "$SIGNING_KEY" ] && MISSING="$MISSING SIGNING_KEY"
+          if [ -n "$MISSING" ]; then
+            echo "::error::Missing Maven Central secrets:$MISSING"
+            exit 1
+          fi
+
+          BEARER_TOKEN=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${BEARER_TOKEN}" \
+            "https://ossrh-staging-api.central.sonatype.com/manual/search/repositories?ip=any&profile_id=com.tiktok.sparkling")
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "::error::Maven Central API auth check failed (HTTP $HTTP_CODE)."
+            exit 1
+          fi
+          echo "✅ Maven Central auth looks valid"
+
+  preflight-cocoapods-auth:
+    name: Preflight CocoaPods auth
+    runs-on: macos-latest
+    needs: prepare
+    steps:
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+      - name: Install CocoaPods
+        run: |
+          gem install cocoapods
+          pod setup
+
+      - name: Verify CocoaPods trunk token
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        run: |
+          if [ -z "$COCOAPODS_TRUNK_TOKEN" ]; then
+            echo "::error::COCOAPODS_TRUNK_TOKEN secret is missing or empty."
+            exit 1
+          fi
+          COCOAPODS_TRUNK_TOKEN=$COCOAPODS_TRUNK_TOKEN pod trunk me >/tmp/pod_trunk_me.txt 2>&1 || {
+            cat /tmp/pod_trunk_me.txt
+            echo "::error::pod trunk me failed. Check COCOAPODS_TRUNK_TOKEN validity."
+            exit 1
+          }
+          echo "✅ CocoaPods trunk token is valid"
+
   # ──────────────────────────────────────────────────────────────
   # Step 2: Publish Android, iOS, and npm packages in parallel
   #         (playground, sparkling-sdk, sparkling-app-template
@@ -65,7 +150,7 @@ jobs:
   publish-typescript:
     name: Publish NPM Packages
     runs-on: ubuntu-latest
-    needs: prepare
+    needs: [prepare, preflight-registry-auth]
     environment:
       name: package releasement
       url: https://www.npmjs.com/package/sparkling-sdk
@@ -123,14 +208,70 @@ jobs:
         id: npm_check
         run: |
           VERSION="${{ needs.prepare.outputs.version }}"
-          echo "🔍 Checking if npm packages are already published at version $VERSION..."
-          # Check a representative package (sparkling-method is a core one)
-          if npm view "sparkling-method@$VERSION" version 2>/dev/null | grep -q "$VERSION"; then
-            echo "⚠️ sparkling-method@$VERSION already exists on npm — skipping publish"
-            echo "::warning::npm packages at version $VERSION already published. Skipping."
+          echo "🔍 Checking if all npm packages are already published at version $VERSION..."
+          mapfile -t PKGS < <(node - <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+
+          const repoRoot = process.cwd();
+          const excluded = new Set(["sparkling-playground", "sparkling-sdk", "sparkling-app-template"]);
+          const roots = [path.join(repoRoot, "packages"), path.join(repoRoot, "template")];
+
+          function readPackageJson(dir) {
+            const pj = path.join(dir, 'package.json');
+            if (!fs.existsSync(pj)) return null;
+            try {
+              return JSON.parse(fs.readFileSync(pj, 'utf8'));
+            } catch {
+              return null;
+            }
+          }
+
+          const out = [];
+          for (const root of roots) {
+            if (!fs.existsSync(root)) continue;
+            for (const name of fs.readdirSync(root)) {
+              const dir = path.join(root, name);
+              if (!fs.statSync(dir).isDirectory()) continue;
+              if (name === 'website') continue;
+              if (dir.includes(`${path.sep}test${path.sep}`)) continue;
+              const pkg = readPackageJson(dir);
+              if (!pkg || !pkg.name) continue;
+              if (pkg.private) continue;
+              if (excluded.has(pkg.name)) continue;
+              out.push(pkg.name);
+
+              if (root.endsWith(`${path.sep}packages`) && name === 'methods') {
+                for (const m of fs.readdirSync(dir)) {
+                  const sub = path.join(dir, m);
+                  if (!fs.statSync(sub).isDirectory()) continue;
+                  const subPkg = readPackageJson(sub);
+                  if (!subPkg || !subPkg.name || subPkg.private || excluded.has(subPkg.name)) continue;
+                  out.push(subPkg.name);
+                }
+              }
+            }
+          }
+
+          [...new Set(out)].sort().forEach((name) => console.log(name));
+          NODE
+          )
+
+          ALL_PUBLISHED=true
+          for pkg in "${PKGS[@]}"; do
+            if npm view "${pkg}@${VERSION}" version --registry https://registry.npmjs.org 2>/dev/null | grep -q "$VERSION"; then
+              echo "   ✅ ${pkg}@${VERSION} already exists"
+            else
+              echo "   ⏳ ${pkg}@${VERSION} not found yet"
+              ALL_PUBLISHED=false
+            fi
+          done
+
+          if [ "$ALL_PUBLISHED" = "true" ]; then
+            echo "⚠️ All npm packages at version $VERSION already exist — skipping publish"
             echo "already_published=true" >> $GITHUB_OUTPUT
           else
-            echo "✅ Version $VERSION not found on npm — proceeding with publish"
+            echo "✅ Some npm packages are missing at version $VERSION — publish will continue"
             echo "already_published=false" >> $GITHUB_OUTPUT
           fi
 
@@ -158,7 +299,7 @@ jobs:
   publish-android:
     name: Publish Android to Maven Central
     runs-on: ubuntu-latest
-    needs: prepare
+    needs: [prepare, preflight-registry-auth]
     environment:
       name: package releasement
       url: https://central.sonatype.com/artifact/com.tiktok.sparkling/sparkling
@@ -271,7 +412,7 @@ jobs:
   publish-ios-method:
     name: Publish iOS SparklingMethod
     runs-on: macos-latest
-    needs: prepare
+    needs: [prepare, preflight-cocoapods-auth]
     environment:
       name: package releasement
     steps:
@@ -354,7 +495,7 @@ jobs:
   publish-ios-sdk:
     name: Publish iOS Sparkling SDK
     runs-on: macos-latest
-    needs: [prepare, publish-ios-method]
+    needs: [prepare, preflight-cocoapods-auth, publish-ios-method]
     environment:
       name: package releasement
       url: https://cocoapods.org/pods/Sparkling
@@ -440,7 +581,7 @@ jobs:
   publish-ios-debug-tool:
     name: Publish iOS Sparkling-DebugTool
     runs-on: macos-latest
-    needs: [prepare, publish-ios-method]
+    needs: [prepare, preflight-cocoapods-auth, publish-ios-method]
     environment:
       name: package releasement
       url: https://cocoapods.org/pods/Sparkling-DebugTool
@@ -465,7 +606,7 @@ jobs:
 
       - name: Install CocoaPods
         run: |
-          echo "� Installing CocoaPods..."
+          echo "Installing CocoaPods..."
           gem install cocoapods
           pod setup
           echo "✅ CocoaPods version: $(pod --version)"
@@ -952,7 +1093,7 @@ jobs:
   notify-failure:
     name: Notify on Failure
     runs-on: ubuntu-latest
-    needs: [prepare, publish-typescript, publish-android, publish-ios-method, publish-ios-sdk, publish-ios-debug-tool, publish-template]
+    needs: [prepare, preflight-registry-auth, preflight-cocoapods-auth, publish-typescript, publish-android, publish-ios-method, publish-ios-sdk, publish-ios-debug-tool, publish-template]
     if: failure()
     steps:
       - name: Report failure details
@@ -965,6 +1106,8 @@ jobs:
           echo ""
           echo "  Job Results:"
           echo "    prepare:                ${{ needs.prepare.result }}"
+          echo "    preflight-registry:     ${{ needs.preflight-registry-auth.result }}"
+          echo "    preflight-cocoapods:    ${{ needs.preflight-cocoapods-auth.result }}"
           echo "    publish-typescript:     ${{ needs.publish-typescript.result }}"
           echo "    publish-android:        ${{ needs.publish-android.result }}"
           echo "    publish-ios-method:     ${{ needs.publish-ios-method.result }}"
