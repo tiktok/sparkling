@@ -106,6 +106,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: prepare
     if: ${{ github.event.inputs.publish_typescript == 'true' || github.event.inputs.publish_android == 'true' || github.event.inputs.publish_template == 'true' }}
+    environment:
+      name: package releasement
     steps:
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -156,6 +158,8 @@ jobs:
     runs-on: macos-latest
     needs: prepare
     if: ${{ github.event.inputs.publish_ios_method == 'true' || github.event.inputs.publish_ios_sdk == 'true' || github.event.inputs.publish_ios_debug_tool == 'true' || github.event.inputs.publish_template == 'true' }}
+    environment:
+      name: package releasement
     steps:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -186,6 +190,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [prepare, preflight-registry-auth]
     if: ${{ github.event.inputs.publish_typescript == 'true' }}
+    environment:
+      name: package releasement
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -232,6 +238,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [prepare, preflight-registry-auth]
     if: ${{ github.event.inputs.publish_android == 'true' }}
+    environment:
+      name: package releasement
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -283,6 +291,8 @@ jobs:
     runs-on: macos-latest
     needs: [prepare, preflight-cocoapods-auth]
     if: ${{ github.event.inputs.publish_ios_method == 'true' }}
+    environment:
+      name: package releasement
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -325,6 +335,8 @@ jobs:
     runs-on: macos-latest
     needs: [prepare, preflight-cocoapods-auth]
     if: ${{ github.event.inputs.publish_ios_sdk == 'true' }}
+    environment:
+      name: package releasement
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -379,6 +391,8 @@ jobs:
     runs-on: macos-latest
     needs: [prepare, preflight-cocoapods-auth]
     if: ${{ github.event.inputs.publish_ios_debug_tool == 'true' }}
+    environment:
+      name: package releasement
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -421,6 +435,8 @@ jobs:
     runs-on: macos-latest
     needs: [prepare, preflight-registry-auth, preflight-cocoapods-auth]
     if: ${{ github.event.inputs.publish_template == 'true' }}
+    environment:
+      name: package releasement
     steps:
       - name: Checkout
         uses: actions/checkout@v4

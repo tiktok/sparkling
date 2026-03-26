@@ -59,6 +59,8 @@ jobs:
     name: Preflight npm + Maven auth
     runs-on: ubuntu-latest
     needs: prepare
+    environment:
+      name: package releasement
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -114,6 +116,8 @@ jobs:
     name: Preflight CocoaPods auth
     runs-on: macos-latest
     needs: prepare
+    environment:
+      name: package releasement
     steps:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
