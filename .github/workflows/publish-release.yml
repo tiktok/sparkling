@@ -913,6 +913,7 @@ jobs:
       - name: Verify template versions before publish
         run: |
           VERSION="${{ needs.prepare.outputs.version }}"
+          export VERSION
           echo "🔎 Verifying template versions before publish..."
 
           node -e '
