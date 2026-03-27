@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
   source_root      = 'packages/sparkling-sdk/ios'
   source_globs     = ->(patterns) { patterns.flat_map { |pattern| [pattern, "#{source_root}/#{pattern}"] } }
   s.name           = 'Sparkling'
-  s.version        = "2.0.1"
+  s.version        = "2.1.0-rc.6"
   s.summary        = "iOS SDK for Sparkling Framework"
   s.description    = "Main iOS framework for Sparkling, including app container, services, and Lynx integration."
   s.license        = "Apache 2.0"
