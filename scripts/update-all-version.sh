@@ -45,7 +45,7 @@ show_usage() {
     echo "Usage: ./align-version.sh [version] [options]"
     echo ""
     echo "Align version numbers across all platforms (Android, iOS, TypeScript)."
-    echo "Updates version in package.json files and podspec files."
+    echo "Updates package versions, template dependency references, and podspec files."
     echo ""
     echo "Options:"
     echo "  version     The version number to set (e.g., 2.0.0 or 2.0.0-rc.6)"
@@ -117,6 +117,10 @@ declare -a IOS_PODSPEC_FILES=(
     "packages/sparkling-sdk/ios/Sparkling.podspec"
 )
 
+TEMPLATE_PACKAGE_FILE="template/sparkling-app-template/package.json"
+TEMPLATE_ANDROID_FILE="template/sparkling-app-template/android/app/build.gradle.kts"
+TEMPLATE_IOS_FILE="template/sparkling-app-template/ios/Podfile"
+
 # Function to update TypeScript package.json files
 update_typescript_versions() {
     print_info "========================================"
@@ -169,6 +173,59 @@ update_ios_versions() {
     done
 }
 
+# Function to update app template dependency references
+update_template_dependencies() {
+    print_info ""
+    print_info "========================================"
+    print_info "Updating template dependency references..."
+    print_info "========================================"
+
+    local template_pkg="$PROJECT_ROOT/$TEMPLATE_PACKAGE_FILE"
+    local template_android="$PROJECT_ROOT/$TEMPLATE_ANDROID_FILE"
+    local template_ios="$PROJECT_ROOT/$TEMPLATE_IOS_FILE"
+
+    if [ -f "$template_pkg" ]; then
+        if [ "$DRY_RUN" = true ]; then
+            print_info "[DRY RUN] Would update $TEMPLATE_PACKAGE_FILE dependencies:"
+            print_info "          sparkling-navigation -> ^$VERSION"
+            print_info "          sparkling-debug-tool -> ~$VERSION"
+            print_info "          sparkling-app-cli -> ~$VERSION"
+            print_info "          sparkling-types -> ~$VERSION"
+        else
+            sedi "s|\"sparkling-navigation\": *\"[^\"]*\"|\"sparkling-navigation\": \"^${VERSION}\"|" "$template_pkg"
+            sedi "s|\"sparkling-debug-tool\": *\"[^\"]*\"|\"sparkling-debug-tool\": \"~${VERSION}\"|" "$template_pkg"
+            sedi "s|\"sparkling-app-cli\": *\"[^\"]*\"|\"sparkling-app-cli\": \"~${VERSION}\"|" "$template_pkg"
+            sedi "s|\"sparkling-types\": *\"[^\"]*\"|\"sparkling-types\": \"~${VERSION}\"|" "$template_pkg"
+            print_success "Updated template npm dependencies in $TEMPLATE_PACKAGE_FILE"
+        fi
+    else
+        print_warning "File not found: $TEMPLATE_PACKAGE_FILE"
+    fi
+
+    if [ -f "$template_android" ]; then
+        if [ "$DRY_RUN" = true ]; then
+            print_info "[DRY RUN] Would update $TEMPLATE_ANDROID_FILE Sparkling deps to $VERSION"
+        else
+            sedi "s|com.tiktok.sparkling:sparkling:[^\"]*|com.tiktok.sparkling:sparkling:${VERSION}|" "$template_android"
+            sedi "s|com.tiktok.sparkling:sparkling-method:[^\"]*|com.tiktok.sparkling:sparkling-method:${VERSION}|" "$template_android"
+            print_success "Updated template Android dependencies in $TEMPLATE_ANDROID_FILE"
+        fi
+    else
+        print_warning "File not found: $TEMPLATE_ANDROID_FILE"
+    fi
+
+    if [ -f "$template_ios" ]; then
+        if [ "$DRY_RUN" = true ]; then
+            print_info "[DRY RUN] Would update $TEMPLATE_IOS_FILE SPARKLING_VERSION -> '$VERSION'"
+        else
+            sedi "s|SPARKLING_VERSION = '[^']*'|SPARKLING_VERSION = '${VERSION}'|" "$template_ios"
+            print_success "Updated template iOS dependency in $TEMPLATE_IOS_FILE"
+        fi
+    else
+        print_warning "File not found: $TEMPLATE_IOS_FILE"
+    fi
+}
+
 # Function to show Android info
 show_android_info() {
     print_info ""
@@ -177,7 +234,7 @@ show_android_info() {
     print_info "========================================"
     print_info "Android uses Gradle properties for versioning."
     print_info "Version is passed at publish time via SPARKLING_PUBLISHING_VERSION."
-    print_info "No file changes needed for Android."
+    print_info "Template Android dependency references are updated in build.gradle.kts."
     print_info ""
     print_info "To publish Android with version $VERSION, run:"
     print_info "  ./scripts/publish-android-maven.sh $VERSION"
@@ -227,6 +284,7 @@ main() {
     # Update versions
     update_typescript_versions
     update_ios_versions
+    update_template_dependencies
     show_android_info
 
     print_info ""
