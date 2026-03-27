@@ -10,6 +10,11 @@ permissions:
   pull-requests: write
   id-token: write
 
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '10.26.0'
+  NPM_REGISTRY_URL: 'https://registry.npmjs.org'
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -68,8 +73,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: ${{ env.NPM_REGISTRY_URL }}
 
       - name: Ensure latest npm
         run: |
@@ -79,7 +84,7 @@ jobs:
       - name: Verify npm registry connectivity
         run: |
           echo "🔍 Verifying npm registry connectivity..."
-          npm ping --registry https://registry.npmjs.org
+          npm ping --registry "$NPM_REGISTRY_URL"
           echo "✅ npm registry is reachable"
 
       - name: Verify Maven Central credentials and API reachability
@@ -175,8 +180,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: ${{ env.NPM_REGISTRY_URL }}
 
       - name: Ensure latest npm (>= 11.5.1 required for Trusted Publishing)
         run: |
@@ -187,7 +192,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 10.26.0
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
         run: |
@@ -263,7 +268,7 @@ jobs:
 
           ALL_PUBLISHED=true
           for pkg in "${PKGS[@]}"; do
-            if npm view "${pkg}@${VERSION}" version --registry https://registry.npmjs.org 2>/dev/null | grep -q "$VERSION"; then
+            if npm view "${pkg}@${VERSION}" version --registry "$NPM_REGISTRY_URL" 2>/dev/null | grep -q "$VERSION"; then
               echo "   ✅ ${pkg}@${VERSION} already exists"
             else
               echo "   ⏳ ${pkg}@${VERSION} not found yet"
@@ -663,8 +668,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: ${{ env.NPM_REGISTRY_URL }}
 
       - name: Ensure latest npm (>= 11.5.1 required for Trusted Publishing)
         run: |
@@ -675,7 +680,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 10.26.0
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
         run: |
@@ -696,20 +701,12 @@ jobs:
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
           echo "✅ Versions updated successfully"
 
-      - name: Update template npm dependencies
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          TEMPLATE_PKG="template/sparkling-app-template/package.json"
-          sed -i "s|\"sparkling-navigation\": *\"[^\"]*\"|\"sparkling-navigation\": \"^${VERSION}\"|" "$TEMPLATE_PKG"
-          sed -i "s|\"sparkling-debug-tool\": *\"[^\"]*\"|\"sparkling-debug-tool\": \"~${VERSION}\"|" "$TEMPLATE_PKG"
-          sed -i "s|\"sparkling-app-cli\": *\"[^\"]*\"|\"sparkling-app-cli\": \"~${VERSION}\"|" "$TEMPLATE_PKG"
-
       - name: Wait for npm packages availability
         run: |
           VERSION="${{ needs.prepare.outputs.version }}"
           echo "⏳ Waiting for npm packages to be available..."
           ALL_FOUND=true
-          for pkg in sparkling-navigation sparkling-debug-tool sparkling-app-cli; do
+          for pkg in sparkling-navigation sparkling-debug-tool sparkling-app-cli sparkling-types; do
             FOUND=false
             for i in {1..30}; do
               if pnpm view "$pkg@$VERSION" version 2>/dev/null | grep -q "$VERSION"; then
@@ -753,13 +750,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: ${{ env.NPM_REGISTRY_URL }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 10.26.0
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -778,13 +775,6 @@ jobs:
         run: |
           chmod +x scripts/update-all-version.sh
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
-
-      - name: Update template Android dependencies
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          GRADLE_FILE="template/sparkling-app-template/android/app/build.gradle.kts"
-          sed -i "s|com.tiktok.sparkling:sparkling:[^\"]*|com.tiktok.sparkling:sparkling:${VERSION}|" "$GRADLE_FILE"
-          sed -i "s|com.tiktok.sparkling:sparkling-method:[^\"]*|com.tiktok.sparkling:sparkling-method:${VERSION}|" "$GRADLE_FILE"
 
       - name: Verify template Android build
         working-directory: template/sparkling-app-template/android
@@ -810,13 +800,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: ${{ env.NPM_REGISTRY_URL }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 10.26.0
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -838,12 +828,6 @@ jobs:
         run: |
           chmod +x scripts/update-all-version.sh
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
-
-      - name: Update template iOS dependencies
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          PODFILE="template/sparkling-app-template/ios/Podfile"
-          sed -i '' "s|SPARKLING_VERSION = '[^']*'|SPARKLING_VERSION = '${VERSION}'|" "$PODFILE"
 
       - name: Wait for CocoaPods CDN sync
         run: |
@@ -905,13 +889,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: ${{ env.NPM_REGISTRY_URL }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 10.26.0
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
         run: |
@@ -926,32 +910,56 @@ jobs:
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
           echo "✅ Versions updated successfully"
 
-      - name: Update template npm dependencies
+      - name: Verify template versions before publish
         run: |
           VERSION="${{ needs.prepare.outputs.version }}"
-          TEMPLATE_PKG="template/sparkling-app-template/package.json"
+          echo "🔎 Verifying template versions before publish..."
 
-          echo "📝 [Step 4a] Updating template npm dependencies..."
-          sed -i "s|\"sparkling-navigation\": *\"[^\"]*\"|\"sparkling-navigation\": \"^${VERSION}\"|" "$TEMPLATE_PKG"
-          sed -i "s|\"sparkling-debug-tool\": *\"[^\"]*\"|\"sparkling-debug-tool\": \"~${VERSION}\"|" "$TEMPLATE_PKG"
-          sed -i "s|\"sparkling-app-cli\": *\"[^\"]*\"|\"sparkling-app-cli\": \"~${VERSION}\"|" "$TEMPLATE_PKG"
+          node -e '
+            const fs = require("node:fs");
+            const version = process.env.VERSION;
+            const pkgPath = "template/sparkling-app-template/package.json";
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
 
-      - name: Update template Android dependencies
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          GRADLE_FILE="template/sparkling-app-template/android/app/build.gradle.kts"
+            const expectedDeps = {
+              "sparkling-navigation": `^${version}`,
+              "sparkling-debug-tool": `~${version}`,
+              "sparkling-app-cli": `~${version}`,
+              "sparkling-types": `~${version}`,
+            };
 
-          echo "📝 [Step 4a] Updating template Android dependencies..."
-          sed -i "s|com.tiktok.sparkling:sparkling:[^\"]*|com.tiktok.sparkling:sparkling:${VERSION}|" "$GRADLE_FILE"
-          sed -i "s|com.tiktok.sparkling:sparkling-method:[^\"]*|com.tiktok.sparkling:sparkling-method:${VERSION}|" "$GRADLE_FILE"
+            if (pkg.version !== version) {
+              console.error(`Template version mismatch: expected ${version}, got ${pkg.version}`);
+              process.exit(1);
+            }
 
-      - name: Update template iOS dependencies
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          PODFILE="template/sparkling-app-template/ios/Podfile"
+            for (const [name, expected] of Object.entries(expectedDeps)) {
+              const actual = pkg.dependencies?.[name] ?? pkg.devDependencies?.[name];
+              if (actual !== expected) {
+                console.error(`Dependency mismatch for ${name}: expected ${expected}, got ${actual ?? "<missing>"}`);
+                process.exit(1);
+              }
+            }
 
-          echo "📝 [Step 4a] Updating template iOS dependencies..."
-          sed -i "s|SPARKLING_VERSION = '[^']*'|SPARKLING_VERSION = '${VERSION}'|" "$PODFILE"
+            console.log("Template package version and dependencies are aligned.");
+          '
+
+          if ! grep -q "SPARKLING_VERSION = '${VERSION}'" template/sparkling-app-template/ios/Podfile; then
+            echo "::error::Podfile SPARKLING_VERSION is not updated to ${VERSION}"
+            exit 1
+          fi
+
+          if ! grep -q "com.tiktok.sparkling:sparkling:${VERSION}" template/sparkling-app-template/android/app/build.gradle.kts; then
+            echo "::error::Android sparkling dependency is not updated to ${VERSION}"
+            exit 1
+          fi
+
+          if ! grep -q "com.tiktok.sparkling:sparkling-method:${VERSION}" template/sparkling-app-template/android/app/build.gradle.kts; then
+            echo "::error::Android sparkling-method dependency is not updated to ${VERSION}"
+            exit 1
+          fi
+
+          echo "✅ Template dependency versions are verified"
 
       - name: Check if template already published
         id: template_check
@@ -981,15 +989,16 @@ jobs:
           echo ""
           if [ "${{ needs.prepare.outputs.is_rc }}" == "true" ]; then
             echo "   Tag: rc"
-            pnpm publish --registry https://registry.npmjs.org --access public --tag rc --no-git-checks
+            pnpm publish --registry "$NPM_REGISTRY_URL" --access public --tag rc --no-git-checks
           else
             echo "   Tag: latest"
-            pnpm publish --registry https://registry.npmjs.org --access public --tag latest --no-git-checks
+            pnpm publish --registry "$NPM_REGISTRY_URL" --access public --tag latest --no-git-checks
           fi
           echo ""
           echo "✅ sparkling-app-template published to npm successfully"
 
       - name: Create branch and commit template updates
+        if: needs.prepare.outputs.is_rc != 'true'
         run: |
           VERSION="${{ needs.prepare.outputs.version }}"
           BRANCH="chore/update-template-deps-${VERSION}"
@@ -1003,18 +1012,6 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git checkout -b "$BRANCH"
-
-          TEMPLATE_PKG="template/sparkling-app-template/package.json"
-          sed -i "s|\"sparkling-navigation\": *\"[^\"]*\"|\"sparkling-navigation\": \"^${VERSION}\"|" "$TEMPLATE_PKG"
-          sed -i "s|\"sparkling-debug-tool\": *\"[^\"]*\"|\"sparkling-debug-tool\": \"~${VERSION}\"|" "$TEMPLATE_PKG"
-          sed -i "s|\"sparkling-app-cli\": *\"[^\"]*\"|\"sparkling-app-cli\": \"~${VERSION}\"|" "$TEMPLATE_PKG"
-
-          GRADLE_FILE="template/sparkling-app-template/android/app/build.gradle.kts"
-          sed -i "s|com.tiktok.sparkling:sparkling:[^\"]*|com.tiktok.sparkling:sparkling:${VERSION}|" "$GRADLE_FILE"
-          sed -i "s|com.tiktok.sparkling:sparkling-method:[^\"]*|com.tiktok.sparkling:sparkling-method:${VERSION}|" "$GRADLE_FILE"
-
-          PODFILE="template/sparkling-app-template/ios/Podfile"
-          sed -i "s|SPARKLING_VERSION = '[^']*'|SPARKLING_VERSION = '${VERSION}'|" "$PODFILE"
 
           chmod +x scripts/update-all-version.sh
           ./scripts/update-all-version.sh "$VERSION"
@@ -1044,6 +1041,7 @@ jobs:
             - `sparkling-navigation`
             - `sparkling-debug-tool`
             - `sparkling-app-cli`
+            - `sparkling-types`
           - **Android** (`template/sparkling-app-template/android/app/build.gradle.kts`):
             - `com.tiktok.sparkling:sparkling`
             - `com.tiktok.sparkling:sparkling-method`
@@ -1061,12 +1059,29 @@ jobs:
               --body "$PR_BODY" \
               --base main \
               --head "$BRANCH" 2>&1) || {
-              echo "❌ Failed to create PR!"
-              echo "::error::Failed to create pull request for template dependency updates"
-              echo "   Output: $PR_URL"
+              if echo "$PR_URL" | grep -q "already exists"; then
+                echo "⚠️ PR already exists for branch $BRANCH, reusing it"
+                PR_URL=$(gh pr view --head "$BRANCH" --base main --json url --jq .url 2>/dev/null) || {
+                  echo "::warning::Failed to resolve existing PR URL for branch $BRANCH"
+                  echo "   Output: $PR_URL"
+                  exit 0
+                }
+              else
+                echo "❌ Failed to create PR!"
+                echo "::error::Failed to create pull request for template dependency updates"
+                echo "   Output: $PR_URL"
+                exit 0
+              fi
+            }
+            echo "✅ Pull request ready: $PR_URL"
+
+            echo "🤖 Enabling auto-merge after required checks..."
+            gh pr merge "$PR_URL" --auto --squash --delete-branch || {
+              echo "::warning::Failed to enable auto-merge for $PR_URL"
+              echo "   Please verify repository auto-merge/bypass settings and CLA bot allowlist."
               exit 0
             }
-            echo "✅ Pull request created: $PR_URL"
+            echo "✅ Auto-merge enabled for $PR_URL"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
