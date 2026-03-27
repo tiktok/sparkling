@@ -24,11 +24,48 @@ function toNumber(value: unknown): number {
   return 0;
 }
 
+function getQueryItems(
+  globalProps?: Record<string, unknown> | null,
+): Record<string, unknown> | undefined {
+  const qi = globalProps?.queryItems;
+  if (qi && typeof qi === 'object' && !Array.isArray(qi)) {
+    return qi as Record<string, unknown>;
+  }
+  return undefined;
+}
+
+/** True for scheme flags like `trans_status_bar=1` / `true`. */
+function isQueryFlagEnabled(value: unknown): boolean {
+  if (value === true || value === 1) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    const v = value.trim().toLowerCase();
+    return v === '1' || v === 'true' || v === 'yes';
+  }
+  return false;
+}
+
+/**
+ * Android: Lynx is laid out in the window's content area below the status bar
+ * unless `trans_status_bar=1` (see SparklingActivity.initStatusBar). Padding by
+ * `statusBarHeight` again would duplicate that offset and leave an empty band
+ * (often showing the native container color). Only add top inset when edge-to-edge.
+ */
+function androidTopInsetDp(globalProps: Record<string, unknown>): number {
+  const queryItems = getQueryItems(globalProps);
+  if (!isQueryFlagEnabled(queryItems?.trans_status_bar)) {
+    return 0;
+  }
+  return toNumber(globalProps.statusBarHeight);
+}
+
 /**
  * Reads top/bottom (and optional horizontal) insets from global props.
  *
- * - **iOS**: `topHeight`, `bottomHeight` (SPKGlobalPropsUtils)
- * - **Android**: `statusBarHeight`, `navigationBarHeight` (RuntimeInfo)
+ * - **iOS**: `topHeight`, `bottomHeight` (window safe area; SPKGlobalPropsUtils)
+ * - **Android**: top inset only when `queryItems.trans_status_bar` is enabled
+ *   (content may draw under the status bar); bottom uses `navigationBarHeight`
  */
 export function getSafeAreaInsetsFromGlobalProps(
   globalProps?: Record<string, unknown> | null,
@@ -50,7 +87,7 @@ export function getSafeAreaInsetsFromGlobalProps(
 
   if (os === 'android') {
     return {
-      top: toNumber(globalProps.statusBarHeight),
+      top: androidTopInsetDp(globalProps),
       right: 0,
       bottom: toNumber(globalProps.navigationBarHeight),
       left: 0,
@@ -71,7 +108,7 @@ export function getSafeAreaInsetsFromGlobalProps(
   }
 
   return {
-    top: toNumber(globalProps.statusBarHeight),
+    top: androidTopInsetDp(globalProps),
     right: 0,
     bottom: toNumber(globalProps.navigationBarHeight),
     left: 0,

@@ -20,12 +20,13 @@ class SplashActivity : AppCompatActivity() {
         val initialData: String = JsonUtils.toJson(initData)
 
         val context = SparklingContext()
+        // Optional: avoids a white flash behind Lynx before first paint (see SparklingView.handleUI).
         context.scheme = if (BuildConfig.DEBUG) {
             // In debug builds, load from the Rspeedy dev server for hot-reload.
             // 10.0.2.2 is the Android emulator alias for the host machine's localhost.
-            "hybrid://lynxview_page?url=http%3A%2F%2F10.0.2.2%3A5969%2Fmain.lynx.bundle&hide_nav_bar=1&screen_orientation=portrait"
+            "hybrid://lynxview_page?url=http%3A%2F%2F10.0.2.2%3A5969%2Fmain.lynx.bundle&hide_nav_bar=1&screen_orientation=portrait&container_bg_color=%2325f4ee"
         } else {
-            "hybrid://lynxview_page?bundle=main.lynx.bundle&hide_nav_bar=1&screen_orientation=portrait"
+            "hybrid://lynxview_page?bundle=main.lynx.bundle&hide_nav_bar=1&screen_orientation=portrait&container_bg_color=%2325f4ee"
         }
         context.withInitData("{ \"initial_data\":$initialData}")
         Sparkling.build(this, context).navigate()

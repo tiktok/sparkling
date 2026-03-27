@@ -26,12 +26,24 @@ describe('getSafeAreaInsetsFromGlobalProps', () => {
     ).toEqual({ top: 59, right: 0, bottom: 34, left: 0 })
   })
 
-  it('uses statusBarHeight and navigationBarHeight on Android', () => {
+  it('uses zero top inset on Android when not edge-to-edge (trans_status_bar off)', () => {
     expect(
       getSafeAreaInsetsFromGlobalProps({
         os: 'android',
         statusBarHeight: 24,
         navigationBarHeight: 48,
+        queryItems: { trans_status_bar: '0' },
+      }),
+    ).toEqual({ top: 0, right: 0, bottom: 48, left: 0 })
+  })
+
+  it('uses statusBarHeight as top inset on Android when trans_status_bar is enabled', () => {
+    expect(
+      getSafeAreaInsetsFromGlobalProps({
+        os: 'android',
+        statusBarHeight: 24,
+        navigationBarHeight: 48,
+        queryItems: { trans_status_bar: '1' },
       }),
     ).toEqual({ top: 24, right: 0, bottom: 48, left: 0 })
   })
