@@ -130,13 +130,18 @@ let vc = SPKRouter.create(withURL: url, context: context, frame: UIScreen.main.b
 let naviVC = UINavigationController(rootViewController: vc)
 ```
 
-- **Embed a container view**:
+- **Embed a container view** (for cards, banners, or partial-screen panels):
 
 ```swift
-let view = SPKContainerView(frame: UIScreen.main.bounds)
+let spkView = SPKContainerView(frame: containerView.bounds)
+spkView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+containerView.addSubview(spkView)
+
 let context = SPKContext()
-view.load(withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle", context)
+spkView.load(withURL: "hybrid://lynxview?bundle=card.lynx.bundle", context)
 ```
+
+  Embedded containers require manual lifecycle forwarding — see [Containers](../containers.md) for the full guide.
 
 </Steps>
 
