@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version to use (e.g. 2.1.0-rc.9 or 2.1.0)'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -37,9 +43,21 @@ jobs:
         id: get_version
         run: |
           echo "========================================="
-          echo "  Step 0: Extracting version from tag"
+          echo "  Step 0: Resolving release version"
           echo "========================================="
-          VERSION=${GITHUB_REF#refs/tags/}
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+            if [ -z "$VERSION" ]; then
+              echo "::error::workflow_dispatch input 'version' is required"
+              exit 1
+            fi
+            echo "   Source: workflow_dispatch input"
+          else
+            VERSION=${GITHUB_REF#refs/tags/}
+            echo "   Source: git tag"
+          fi
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "✅ Extracted version: $VERSION"
           echo "   Git ref: $GITHUB_REF"
