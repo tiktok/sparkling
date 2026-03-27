@@ -858,7 +858,7 @@ jobs:
         working-directory: template/sparkling-app-template/ios
         run: |
           echo "🔨 Verifying template iOS pod install..."
-          pod install
+          pod install --repo-update
           echo "✅ Template iOS pod install succeeded"
 
   # ──────────────────────────────────────────────────────────────
