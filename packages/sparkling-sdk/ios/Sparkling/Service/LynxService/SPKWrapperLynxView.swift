@@ -318,6 +318,14 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
         
         self.lifeCycleDelegate?.viewWillStartLoading?(self)
 
+        // Push globalProps to the LynxView engine before loading the template.
+        // setupGlobalProps() stores them in a private var but LynxView's
+        // loadTemplate(fromURL:initData:) doesn't accept globalProps, so we
+        // must call updateGlobalProps separately.
+        if let gp = self.globalProps {
+            self.updateGlobalProps(with: gp)
+        }
+
         if var sourceUrl = params.sourceUrl {
             self.loadTemplate(fromURL: sourceUrl, initData: initialData)
         }
