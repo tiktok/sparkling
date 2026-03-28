@@ -92,14 +92,14 @@ open class SPKResourceLoaderImpl: NSObject, SPKResourceLoaderProtocol {
         guard let url = url else {
             return nil
         }
-        
+
         let bundleURL: URL?
         if url.scheme == "asset" {
             bundleURL = URL.spk.url(string: ".\(url.path)")
         } else {
             bundleURL = url
         }
-        
+
         if let bundleURL = bundleURL,
            let result = self.loadBundleResource(withURL: bundleURL),
            let data = result.resourceData {
@@ -110,7 +110,21 @@ open class SPKResourceLoaderImpl: NSObject, SPKResourceLoaderProtocol {
             }
             return nil
         }
-        
+
+        // Network fallback for HTTP(S) URLs (e.g. dev server assets)
+        if let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https" {
+            let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
+            let task = URLSession.shared.dataTask(with: request) { data, _, error in
+                if let data = data, error == nil, let image = UIImage(data: data) {
+                    completion(image, nil)
+                } else {
+                    completion(nil, error)
+                }
+            }
+            task.resume()
+            return task
+        }
+
         return nil
     }
     
