@@ -12,7 +12,7 @@ class StorageServiceImpl: StorageService {
     
     private let userDefaults = UserDefaults(suiteName: sampleSuiteName) ?? UserDefaults.standard
     
-    func setObject(key: String, value: NSDictionary) {
+    func setObject(key: String, value: Any) {
         userDefaults.set(value, forKey: key)
     }
     
