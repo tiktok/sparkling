@@ -127,7 +127,7 @@ expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] navigate: c
 
       expect(mockOpen).toHaveBeenCalledWith(
         {
-          scheme: 'hybrid://lynxview_page?bundle=pages%2Fsecond.lynx.bundle&title=Second+Page&screen_orientation=portrait',
+          scheme: 'hybrid://lynxview_page?bundle=pages%2Fsecond.lynx.bundle&title=Second%20Page&screen_orientation=portrait',
           options: { animated: true },
         },
         callback
