@@ -38,7 +38,7 @@ public class SetStorageItemMethodParamModel: SPKMethodModel {
     }
     
     @objc public var key: String?
-    @objc public var data: NSDictionary?
+    @objc public var data: AnyObject?
     
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [

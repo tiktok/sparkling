@@ -8,5 +8,5 @@ import SparklingMethod
 public protocol StorageService {
     func object(forKey key: String) -> Any?
     func removeObject(forKey key: String)
-    func setObject(key: String, value: NSDictionary)
+    func setObject(key: String, value: Any)
 }
