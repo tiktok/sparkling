@@ -23,6 +23,7 @@ object SchemeConstants {
 
     object Param {
         const val BUNDLE = "bundle"
+        const val URL = "url"
         const val TITLE = "title"
         const val FALLBACK_URL = "fallback_url"
         const val TITLE_COLOR = "title_color"

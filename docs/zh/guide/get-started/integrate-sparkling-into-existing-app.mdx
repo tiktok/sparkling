@@ -129,13 +129,18 @@ let vc = SPKRouter.create(withURL: url, context: context, frame: UIScreen.main.b
 let naviVC = UINavigationController(rootViewController: vc)
 ```
 
-- **嵌入容器视图**：
+- **嵌入容器视图**（卡片、Banner 或局部面板场景）：
 
 ```swift
-let view = SPKContainerView(frame: UIScreen.main.bounds)
+let spkView = SPKContainerView(frame: containerView.bounds)
+spkView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+containerView.addSubview(spkView)
+
 let context = SPKContext()
-view.load(withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle", context)
+spkView.load(withURL: "hybrid://lynxview?bundle=card.lynx.bundle", context)
 ```
+
+  嵌入式容器需要手动转发生命周期事件 — 完整指南请参阅[容器](../containers.md)。
 
 </Steps>
 

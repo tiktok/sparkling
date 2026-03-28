@@ -50,6 +50,17 @@ class SchemeParserTest {
     }
 
     @Test
+    fun testParseSchemeUsesUrlWhenBundleMissing() {
+        val scheme = "hybrid://lynxview_page?url=http%3A%2F%2F10.0.2.2%3A5969%2Fmain.lynx.bundle"
+        val result = SchemeParser.parseScheme(scheme)
+
+        assertNotNull(result)
+        assertEquals(HybridKitType.LYNX, result!!.engineType)
+        assertEquals(HybridContainerType.PAGE, result.containerType)
+        assertEquals("http://10.0.2.2:5969/main.lynx.bundle", result.bundle)
+    }
+
+    @Test
     fun testParseSchemeWithWebView() {
         val scheme = "hybrid://webview?bundle=web_bundle&title=Web%20Title"
         val result = SchemeParser.parseScheme(scheme)

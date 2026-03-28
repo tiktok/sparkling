@@ -24,16 +24,23 @@ struct SPKSwiftVC: UIViewControllerRepresentable {
     init(frame: CGRect = .zero) {
         self.frame = frame
     }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
     
     func makeUIViewController(context: Context) -> UINavigationController {
-        let url = "hybrid://lynxview?bundle=.%2Fmain.lynx.bundle&hide_status_bar=1&hide_nav_bar=1"
-        let context = SPKContext()
-        let elements = SparklingLynxElement(lynxElementName: "input", lynxElementClassName: LynxInput.self)
-        context.customUIElements = [elements]
+        let url = DebugDevURLSupport.mainScheme()
+        let spkContext = DebugDevURLSupport.makeContext()
         let resolved = Self.resolvedFrame(frame)
-        let vc = SPKRouter.create(withURL: url, context: context, frame: resolved)
+        let vc = SPKRouter.create(withURL: url, context: spkContext, frame: resolved)
         let naviVC = UINavigationController(rootViewController: vc)
         naviVC.isNavigationBarHidden = true
+        context.coordinator.loadFailedDelegate = DevURLLoadFailedDelegate(
+            navigationController: naviVC,
+            frameProvider: { Self.resolvedFrame(self.frame) }
+        )
+        spkContext.containerLifecycleDelegate = context.coordinator.loadFailedDelegate
         return naviVC
     }
 
@@ -49,6 +56,10 @@ struct SPKSwiftVC: UIViewControllerRepresentable {
             return CGRect(origin: .zero, size: frame.size)
         }
         return CGRect(origin: .zero, size: UIScreen.main.bounds.size)
+    }
+
+    final class Coordinator {
+        var loadFailedDelegate: DevURLLoadFailedDelegate?
     }
 }
 

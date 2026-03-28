@@ -194,13 +194,31 @@ export function App(props: {
     );
   };
 
-  const openTransStatusBarDemo = () => {
+  const openTransStatusBarNoNav = () => {
     router.navigate(
       {
         path: 'second.lynx.bundle',
         options: {
           params: {
-            title: 'Trans Status Bar',
+            title: 'Trans Status Bar (No Nav)',
+            trans_status_bar: '1',
+            container_bg_color: '#0F3460',
+          },
+        },
+      },
+      (v: NavigateResponse) => {
+        setApiResponse(`Trans StatusBar (no nav): ${JSON.stringify(v)}`);
+      }
+    );
+  };
+
+  const openTransStatusBarWithNav = () => {
+    router.navigate(
+      {
+        path: 'second.lynx.bundle',
+        options: {
+          params: {
+            title: 'Trans Status Bar (With Nav)',
             trans_status_bar: '1',
             show_nav_bar_in_trans_status_bar: '1',
             nav_bar_color: '#80000000',
@@ -210,7 +228,7 @@ export function App(props: {
         },
       },
       (v: NavigateResponse) => {
-        setApiResponse(`Trans StatusBar: ${JSON.stringify(v)}`);
+        setApiResponse(`Trans StatusBar (with nav): ${JSON.stringify(v)}`);
       }
     );
   };
@@ -255,7 +273,8 @@ export function App(props: {
     { id: 12, title: 'debugToolSwitch', api: openDebugToolSwitch },
     { id: 6, title: 'mediaTest', api: openMediaTest },
     { id: 7, title: 'themedColor', api: openThemedColorDemo },
-    { id: 8, title: 'transStatusBar', api: openTransStatusBarDemo },
+    { id: 8, title: 'transStatusBar (no nav)', api: openTransStatusBarNoNav },
+    { id: 14, title: 'transStatusBar (with nav)', api: openTransStatusBarWithNav },
     { id: 9, title: 'chooseImage', api: chooseImage },
     { id: 10, title: 'chooseVideo', api: chooseVideo },
     { id: 11, title: 'takePhoto', api: takePhoto },

@@ -1,6 +1,7 @@
-# Sparkling SDK - Android
+# Sparkling SDK - Android API Reference
 
-This page documents the native Android SDK APIs for hosting Sparkling content.
+Native Android SDK for hosting Sparkling content.
+For usage guide and concepts, see [Containers](../guide/containers.md).
 For the `hybrid://...` URL format, see [Scheme](./scheme.md).
 
 ## Dependency
@@ -12,8 +13,6 @@ dependencies {
 ```
 
 ## Initialization (Application.onCreate)
-
-Sparkling containers require HybridKit to be initialized before opening any pages:
 
 ```kotlin
 HybridKit.init(this)
@@ -30,42 +29,50 @@ HybridKit.setHybridConfig(hybridConfig, this)
 HybridKit.initLynxKit()
 ```
 
-## Open a page (full-screen Activity)
+## Sparkling
 
-Create a `SparklingContext`, set a scheme, then navigate:
+Entry point for creating containers. See [Containers](../guide/containers.md) for usage guide.
 
-```kotlin
-val context = SparklingContext().apply {
-  scheme = "hybrid://lynxview_page?bundle=main.lynx.bundle&title=Home"
-  // optional initial data for the page:
-  // withInitData("{\"initial_data\":{}}")
-}
+| Method | Description |
+|--------|-------------|
+| `Sparkling.build(context, sparklingContext)` | Creates a `Sparkling` instance from an Android `Context` and a `SparklingContext`. |
+| `navigate()` | Starts `SparklingActivity` (full-page container). Returns `true` on success. |
+| `createView(withoutPrepare)` | Creates a `SparklingView` (embedded container). Returns `null` on failure. |
 
-Sparkling.build(this, context).navigate()
-```
+## SparklingView
 
-Key APIs:
-- `Sparkling.build(context, sparklingContext)`: constructs a Sparkling instance.
-- `Sparkling.navigate()`: starts `SparklingActivity` and loads the scheme.
+Embedded container — a `FrameLayout` hosting Lynx content. See [Containers — Embedded](../guide/containers.md#embedded-containers) for usage guide.
 
-## Embed a container view
+| Method / Property | Description |
+|-------------------|-------------|
+| `prepare(sparklingContext)` | Initializes the view with scheme params, creates the kit view, and sets up loading/error UI. Called automatically by `createView()` unless `withoutPrepare = true`. |
+| `loadUrl()` | Triggers content loading. Call after `prepare()` and after adding to the layout. |
+| `onShowEvent()` | Forwards show event to Lynx runtime. **Must be called by hosting Activity/Fragment.** |
+| `onHideEvent()` | Forwards hide event to Lynx runtime. **Must be called by hosting Activity/Fragment.** |
+| `release()` | Destroys the Lynx runtime and cleans up resources. Call when the view is permanently removed. |
+| `sendEventByJSON(eventName, params)` | Sends a custom event to the Lynx page. |
+| `updateGlobalPropsByIncrement(data)` | Updates global props at runtime. |
+| `refreshData(context, hybridContext)` | Refreshes content with updated scheme params without recreating the view. |
+| `loadStatus()` | Returns current load status (`INIT`, `LOADING`, `SUCCESS`). |
+| `isLoadSuccess()` | Returns `true` if content loaded successfully. |
 
-Instead of starting an Activity, you can create a `SparklingView`:
+## SparklingContext
 
-```kotlin
-val ctx = SparklingContext().apply {
-  scheme = "hybrid://lynxview_page?bundle=main.lynx.bundle"
-}
+Configuration object passed to both container types.
 
-val view = Sparkling.build(this, ctx).createView()
-// add `view` into your layout, then:
-view?.loadUrl()
-```
+| Property | Description |
+|----------|-------------|
+| `scheme` | The `hybrid://...` URL to load. |
+| `sparklingUIProvider` | Implements `SparklingUIProvider` for custom loading/error/toolbar views. |
+| `hybridSchemeParam` | Parsed scheme parameters (auto-populated from `scheme`). |
+| `containerId` | Unique container identifier (auto-generated). |
 
-## Customize loading/error/toolbars
+## SparklingUIProvider
 
-Implement `SparklingUIProvider` and attach it to `SparklingContext`:
+Interface for customizing container UI. Applies to both full-page and embedded containers.
 
-- `getLoadingView(context)`: loading UI
-- `getErrorView(context)`: error UI
-- `getToolBar(context)`: optional custom `Toolbar` used by `SparklingActivity`
+| Method | Description |
+|--------|-------------|
+| `getLoadingView(context)` | Returns a custom loading view, or `null` for the default. |
+| `getErrorView(context)` | Returns a custom error view, or `null` for the default. |
+| `getToolBar(context)` | Returns a custom `Toolbar` for `SparklingActivity` (full-page only). |

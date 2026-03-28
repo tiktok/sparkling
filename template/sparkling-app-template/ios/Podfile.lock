@@ -129,45 +129,45 @@ PODS:
     - SDWebImage/Core (~> 5.15)
   - SnapKit (5.7.1)
   - SocketRocket (0.7.1)
-  - Sparkling (2.1.0-rc.6):
-    - Sparkling/Application (= 2.1.0-rc.6)
-    - Sparkling/Service (= 2.1.0-rc.6)
-    - Sparkling/Utils (= 2.1.0-rc.6)
-  - Sparkling-DebugTool (2.1.0-rc.6):
+  - Sparkling (2.1.0-rc.11):
+    - Sparkling/Application (= 2.1.0-rc.11)
+    - Sparkling/Service (= 2.1.0-rc.11)
+    - Sparkling/Utils (= 2.1.0-rc.11)
+  - Sparkling-DebugTool (2.1.0-rc.11):
     - Lynx (~> 3.6.0)
     - LynxDevtool/Framework (~> 3.6.0)
     - LynxService/Devtool (~> 3.6.0)
-  - Sparkling-Router (2.1.0-rc.6):
+  - Sparkling-Router (2.1.0-rc.11):
     - Mantle (~> 2.2.0)
-    - Sparkling-Router/Core (= 2.1.0-rc.6)
+    - Sparkling-Router/Core (= 2.1.0-rc.11)
     - SparklingMethod/Core
     - SparklingMethod/DIProvider
-  - Sparkling-Router/Core (2.1.0-rc.6):
+  - Sparkling-Router/Core (2.1.0-rc.11):
     - Mantle (~> 2.2.0)
     - SparklingMethod/Core
     - SparklingMethod/DIProvider
-  - Sparkling/Application (2.1.0-rc.6):
+  - Sparkling/Application (2.1.0-rc.11):
     - SnapKit
     - Sparkling/Service
     - Sparkling/Utils
-    - SparklingMethod/Core (= 2.1.0-rc.6)
-  - Sparkling/Service (2.1.0-rc.6):
-    - Sparkling/Service/LynxService (= 2.1.0-rc.6)
+    - SparklingMethod/Core (= 2.1.0-rc.11)
+  - Sparkling/Service (2.1.0-rc.11):
+    - Sparkling/Service/LynxService (= 2.1.0-rc.11)
     - Sparkling/Utils
-    - SparklingMethod/Core (= 2.1.0-rc.6)
-  - Sparkling/Service/LynxService (2.1.0-rc.6):
+    - SparklingMethod/Core (= 2.1.0-rc.11)
+  - Sparkling/Service/LynxService (2.1.0-rc.11):
     - Lynx/Framework (= 3.6.0)
     - Sparkling/Utils
-    - SparklingMethod/Core (= 2.1.0-rc.6)
-    - SparklingMethod/Lynx (= 2.1.0-rc.6)
-  - Sparkling/Utils (2.1.0-rc.6)
-  - SparklingMethod/Core (2.1.0-rc.6):
+    - SparklingMethod/Core (= 2.1.0-rc.11)
+    - SparklingMethod/Lynx (= 2.1.0-rc.11)
+  - Sparkling/Utils (2.1.0-rc.11)
+  - SparklingMethod/Core (2.1.0-rc.11):
     - Mantle (~> 2.2.0)
-  - SparklingMethod/Debug (2.1.0-rc.6):
+  - SparklingMethod/Debug (2.1.0-rc.11):
     - SparklingMethod/Core
-  - SparklingMethod/DIProvider (2.1.0-rc.6):
+  - SparklingMethod/DIProvider (2.1.0-rc.11):
     - SparklingMethod/Core
-  - SparklingMethod/Lynx (2.1.0-rc.6):
+  - SparklingMethod/Lynx (2.1.0-rc.11):
     - Lynx/Framework (= 3.6.0)
     - PrimJS/napi (>= 2.12.0)
     - PrimJS/quickjs (>= 2.12.0)
@@ -185,12 +185,12 @@ DEPENDENCIES:
   - SDWebImage (= 5.15.5)
   - SDWebImageWebPCoder (= 0.11.0)
   - SnapKit
-  - Sparkling (= 2.1.0-rc.6)
+  - Sparkling (= 2.1.0-rc.11)
   - Sparkling-DebugTool (from `../node_modules/sparkling-debug-tool/ios`)
   - Sparkling-Router (from `../node_modules/sparkling-navigation/ios`)
-  - SparklingMethod/Debug (= 2.1.0-rc.6)
-  - SparklingMethod/DIProvider (= 2.1.0-rc.6)
-  - SparklingMethod/Lynx (= 2.1.0-rc.6)
+  - SparklingMethod/Debug (= 2.1.0-rc.11)
+  - SparklingMethod/DIProvider (= 2.1.0-rc.11)
+  - SparklingMethod/Lynx (= 2.1.0-rc.11)
 
 SPEC REPOS:
   trunk:
@@ -232,11 +232,11 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: 295a6573c512f54ad2dd58098e64e17dcf008499
   SnapKit: d612e99e678a2d3b95bf60b0705ed0a35c03484a
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  Sparkling: f263573ec2921733468b773b094de059aa168ff4
-  Sparkling-DebugTool: 0722f547b9b79af49cdcbb27f4fb3015df2033af
-  Sparkling-Router: 637b0d59f6e4a5766df67b57299ffdbb8fe8b34b
-  SparklingMethod: 8092ae762c525438fd5ac5be0fb98309b6c8be75
+  Sparkling: 48e74c7a24148d84420b135f268c8b95f64f34d5
+  Sparkling-DebugTool: 4b6ae83ee03791fc7a9ad318f35890794b969feb
+  Sparkling-Router: 3adc0d0f31f7ac7d062087a7bfe4186e93b9ff73
+  SparklingMethod: 79d56677b36b4f6b09a1575304a405de03867e7a
 
-PODFILE CHECKSUM: 4ef353849b8873631be6abeb3874da09fca399d3
+PODFILE CHECKSUM: 5e93e820d7e41669b7971f3e77bdd4034868bd44
 
 COCOAPODS: 1.16.2

@@ -16,6 +16,7 @@ import com.tiktok.sparkling.hybridkit.HybridKit
 import com.tiktok.sparkling.hybridkit.config.BaseInfoConfig
 import com.tiktok.sparkling.hybridkit.config.SparklingHybridConfig
 import com.tiktok.sparkling.hybridkit.config.SparklingLynxConfig
+import com.tiktok.sparkling.debugtool.SparklingDebugTool
 import com.tiktok.sparkling.method.registry.core.SparklingBridgeManager
 import com.tiktok.sparkling.method.router.close.RouterCloseMethod
 import com.tiktok.sparkling.method.router.open.RouterOpenMethod
@@ -39,6 +40,9 @@ class SparklingApplication : Application() {
     }
 
     private fun initSparkling() {
+        if (BuildConfig.DEBUG) {
+            SparklingDebugTool.init(this)
+        }
         initHybridKit()
         initSparklingMethods()
     }
