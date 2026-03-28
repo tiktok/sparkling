@@ -876,7 +876,21 @@ jobs:
         working-directory: template/sparkling-app-template/ios
         run: |
           echo "🔨 Verifying template iOS pod install..."
-          pod install --repo-update
+          MAX_ATTEMPTS=20
+          SLEEP_SECONDS=15
+          ATTEMPT=1
+
+          until pod install --repo-update; do
+            if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
+              echo "::error::Template iOS pod install failed after ${MAX_ATTEMPTS} attempts"
+              exit 1
+            fi
+
+            echo "⚠️ pod install failed (attempt ${ATTEMPT}/${MAX_ATTEMPTS}), retrying in ${SLEEP_SECONDS}s..."
+            ATTEMPT=$((ATTEMPT + 1))
+            sleep "$SLEEP_SECONDS"
+          done
+
           echo "✅ Template iOS pod install succeeded"
 
   # ──────────────────────────────────────────────────────────────
@@ -909,6 +923,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: ${{ env.NPM_REGISTRY_URL }}
+
+      - name: Ensure latest npm (>= 11.5.1 required for Trusted Publishing)
+        run: |
+          echo "📦 Upgrading npm for Trusted Publishing support..."
+          npm install -g npm@latest
+          echo "✅ npm version: $(npm --version)"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
