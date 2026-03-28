@@ -2,15 +2,13 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 import { open } from '../open/open';
+import { getDevServerBaseURL } from '../devServer';
 import type {
     NavigateRequest,
     NavigateResponse,
     NavigateOptions,
     NavigateParams,
 } from './navigate.d';
-
-declare const __DEV__: boolean;
-declare const __webpack_public_path__: string;
 
 const DEFAULT_ROUTER_SCHEME = 'hybrid://lynxview_page';
 const PROTOCOL_REGEX = /^[a-z][a-z0-9+.-]*:\/\//i;
@@ -27,17 +25,6 @@ function normalizePath(path: string): string {
     // Remove leading "./" or "/" to keep the bundle path relative
     normalized = normalized.replace(/^(?:\.\/|\/)+/, '');
     return normalized;
-}
-
-function getDevServerBaseURL(): string | undefined {
-    try {
-        if (typeof __DEV__ !== 'undefined' && __DEV__ && typeof __webpack_public_path__ === 'string' && __webpack_public_path__) {
-            return __webpack_public_path__;
-        }
-    } catch {
-        // __DEV__ or __webpack_public_path__ not available
-    }
-    return undefined;
 }
 
 function buildScheme(baseScheme: string, bundlePath: string, params?: NavigateOptions['params']): string {
@@ -73,7 +60,9 @@ function buildScheme(baseScheme: string, bundlePath: string, params?: NavigateOp
         }
     }
 
-    return `${sanitizedBase}?${searchParams.toString()}`;
+    // URLSearchParams encodes spaces as '+' (x-www-form-urlencoded), but
+    // native URL parsers only understand '%20'. Replace to avoid mangled values.
+    return `${sanitizedBase}?${searchParams.toString().replace(/\+/g, '%20')}`;
 }
 
 export function navigate(params: NavigateRequest, callback: (result: NavigateResponse) => void): void {

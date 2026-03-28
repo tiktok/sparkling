@@ -2,6 +2,7 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 import pipe from 'sparkling-method';
+import { getDevServerBaseURL } from '../devServer';
 import type { OpenRequest, OpenResponse } from './open.d';
 
 /**
@@ -37,8 +38,26 @@ export function open(params: OpenRequest, callback: (result: OpenResponse) => vo
         return;
     }
 
+    // In dev mode, rewrite bundle= to url= so the native side loads from the
+    // dev server instead of stale local assets.
+    let scheme = params.scheme.trim();
+    const devBase = getDevServerBaseURL();
+    if (devBase) {
+        try {
+            const u = new URL(scheme);
+            const bundle = u.searchParams.get('bundle');
+            if (bundle && !u.searchParams.get('url')) {
+                u.searchParams.delete('bundle');
+                u.searchParams.set('url', `${devBase.replace(/\/+$/, '')}/${bundle.replace(/^(?:\.\/|\/)+/, '')}`);
+                scheme = u.toString();
+            }
+        } catch {
+            // scheme is not a valid URL, pass through as-is
+        }
+    }
+
     pipe.call('router.open', {
-        scheme: params.scheme.trim(),
+        scheme,
         ...params.options,
     }, (v: unknown) => {
         const response = v as OpenResponse;
