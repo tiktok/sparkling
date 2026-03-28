@@ -85,6 +85,7 @@ object SchemeParser {
         params.forceThemeStyle = uri.safeGetQueryParameter(SchemeConstants.Param.FORCE_THEME_STYLE)
 
         params.bundle = uri.safeGetQueryParameter(SchemeConstants.Param.BUNDLE)
+            ?: uri.safeGetQueryParameter(SchemeConstants.Param.URL)
         params.title = uri.safeGetQueryParameter(SchemeConstants.Param.TITLE)
 //        params.fallbackUrl = uri.safeGetQueryParameter(SchemeConstants.Param.FALLBACK_URL)
         params.titleColor = resolveThemedColor(uri, SchemeConstants.Param.TITLE_COLOR, params.forceThemeStyle)

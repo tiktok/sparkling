@@ -32,7 +32,11 @@ export function App(props: { onMounted?: () => void }) {
   }, [])
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={{ flex: 1 }}>
+    <SafeAreaView
+      edges={['top', 'bottom']}
+      style={{ flex: 1, backgroundColor: '#25f4ee' }}
+      className="page-shell"
+    >
     <scroll-view className="page-scroll" scroll-orientation="vertical">
       <view className="app">
         <view className="hero">

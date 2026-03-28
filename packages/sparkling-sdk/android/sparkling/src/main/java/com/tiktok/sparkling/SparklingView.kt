@@ -40,6 +40,7 @@ class SparklingView(
 
     private var loadStatus = IPerformanceView.LoadStatus.INIT
     private var isReleased = false
+    private val defaultErrorText = "Oops, something went wrong!"
 
     fun prepare(sparklingContext: SparklingContext) {
         this.sparklingContext = sparklingContext
@@ -56,7 +57,7 @@ class SparklingView(
                     }
             }
             errorView = TextView(context).apply {
-                text = "Oops, something went wrong!"
+                text = defaultErrorText
                 setTextColor(Color.BLACK)
                 gravity = Gravity.CENTER
                 layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
@@ -64,6 +65,7 @@ class SparklingView(
         }
         val hybridSchemeParam = sparklingContext.hybridSchemeParam
         if (hybridSchemeParam == null) {
+            updateErrorMessage("", "invalid scheme or bundle address")
             errorView?.let {
                 if (it.parent == null) {
                     addView(it)
@@ -103,6 +105,7 @@ class SparklingView(
 
                 override fun onLoadFailed(view: IKitView, url: String, reason: String?) {
                     super.onLoadFailed(view, url, reason)
+                    updateErrorMessage(url, reason)
                     if (Looper.myLooper() != Looper.getMainLooper()) {
                         post {
                             showErrorView()
@@ -263,6 +266,21 @@ class SparklingView(
 
     override fun isLoadSuccess(): Boolean {
         return loadStatus == IPerformanceView.LoadStatus.SUCCESS
+    }
+
+    private fun updateErrorMessage(url: String, reason: String?) {
+        val view = errorView as? TextView ?: return
+        val suffix = buildString {
+            if (!reason.isNullOrBlank()) {
+                append('\n')
+                append(reason)
+            }
+            if (url.isNotBlank()) {
+                append("\nURL: ")
+                append(url)
+            }
+        }
+        view.text = defaultErrorText + suffix
     }
 
 }

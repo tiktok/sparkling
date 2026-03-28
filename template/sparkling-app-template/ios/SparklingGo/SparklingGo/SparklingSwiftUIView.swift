@@ -18,16 +18,10 @@ struct SPKSwiftUIView: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> SPKContainerView {
-        let context = SPKContext()
+        let context = DebugDevURLSupport.makeContext()
         
         let view = SPKContainerView(frame: rect)
-        
-        #if DEBUG
-        let url = "hybrid://lynxview?url=http%3A%2F%2Flocalhost%3A5969%2Fmain.lynx.bundle&hide_nav_bar=true&hide_status_bar=true"
-        #else
-        let url = "hybrid://lynxview?bundle=.%2Fmain.lynx.bundle&hide_nav_bar=true&hide_status_bar=true"
-        #endif
-        
+        let url = DebugDevURLSupport.mainScheme()
         view.load(withURL: url, context)
         return view
     }
@@ -46,5 +40,4 @@ struct DemoView: View {
         .statusBar(hidden: true)
     }
 }
-
 

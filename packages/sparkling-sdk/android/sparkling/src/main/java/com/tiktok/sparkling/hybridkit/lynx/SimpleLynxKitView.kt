@@ -55,20 +55,31 @@ class SimpleLynxKitView : LynxView, IKitView {
     }
 
     override fun load() {
-        rawUrl?.let { load(it) } ?: {
+        val target = rawUrl
+        if (target.isNullOrBlank()) {
             lynxKitLifeCycle?.onLoadFailed(this, "", "bundle path is null")
+            return
         }
+        load(target)
     }
 
     override fun load(uri: String) {
         lynxKitLifeCycle?.onLoadStart(this, uri)
-        if (uri.isEmpty()) {
-            lynxKitLifeCycle?.onLoadFailed(this, "", "uri is null")
+        if (uri.isBlank()) {
+            lynxKitLifeCycle?.onLoadFailed(this, "", "bundle address is empty")
+            return
         }
         rawUrl = uri
-        this.renderTemplateUrl(uri, hybridContext.initData())
-        updateGlobalProps(GlobalPropsUtils.instance.getGlobalProps(hybridContext.containerId))
-        lynxKitLifeCycle?.onLoadFinish(this)
+        runCatching {
+            this.renderTemplateUrl(uri, hybridContext.initData())
+            updateGlobalProps(GlobalPropsUtils.instance.getGlobalProps(hybridContext.containerId))
+        }.onFailure {
+            lynxKitLifeCycle?.onLoadFailed(
+                this,
+                uri,
+                "bundle address is invalid: ${it.message ?: "unknown error"}",
+            )
+        }
     }
 
     override fun reload() {
