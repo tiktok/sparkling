@@ -876,7 +876,7 @@ jobs:
         working-directory: template/sparkling-app-template/ios
         run: |
           echo "🔨 Verifying template iOS pod install..."
-          MAX_ATTEMPTS=20
+          MAX_ATTEMPTS=240
           SLEEP_SECONDS=15
           ATTEMPT=1
 
