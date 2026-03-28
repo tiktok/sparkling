@@ -2,8 +2,13 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 import pipe from 'sparkling-method';
-import type { ChooseMediaRequest, ChooseMediaResponse } from './chooseMedia.d';
+import type { ChooseMediaRequest, ChooseMediaResponse, MediaType, SourceType, CameraType } from './chooseMedia.d';
 import { validateParams, validationRules, isValidCallback, logInvalidCallback, mapPipeResponse } from '../utils/validation';
+
+// Native SPKChooseMediaMethodParamModel expects int enum values, not strings.
+const MEDIA_TYPE_MAP: Record<MediaType, number> = { image: 1, video: 2 };
+const SOURCE_TYPE_MAP: Record<SourceType, number> = { album: 1, camera: 2 };
+const CAMERA_TYPE_MAP: Record<CameraType, number> = { front: 1, back: 2 };
 
 /**
  * Choose media from album or camera
@@ -31,10 +36,10 @@ export function chooseMedia(params: ChooseMediaRequest, callback: (result: Choos
     }
 
     const pipeParams = {
-        mediaTypes: params.mediaTypes,
-        sourceType: params.sourceType,
+        mediaTypes: params.mediaTypes.map(t => MEDIA_TYPE_MAP[t] ?? 0),
+        sourceType: SOURCE_TYPE_MAP[params.sourceType] ?? 1,
         maxCount: params.maxCount ?? 1,
-        cameraType: params.cameraType ?? '',
+        cameraType: params.cameraType ? CAMERA_TYPE_MAP[params.cameraType] ?? 2 : 0,
         compressImage: params.compressImage ?? false,
         saveToPhotoAlbum: params.saveToPhotoAlbum ?? false,
         isNeedCut: params.isNeedCut ?? false,

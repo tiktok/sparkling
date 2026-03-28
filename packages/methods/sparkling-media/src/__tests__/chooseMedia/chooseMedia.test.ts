@@ -118,8 +118,8 @@ describe('chooseMedia', () => {
       expect(mockPipe.call).toHaveBeenCalledWith(
         'media.chooseMedia',
         expect.objectContaining({
-          mediaTypes: ['image'],
-          sourceType: 'album',
+          mediaTypes: [1],
+          sourceType: 1,
           maxCount: 1,
         }),
         expect.any(Function)
@@ -127,8 +127,8 @@ describe('chooseMedia', () => {
     });
 
     it('should call pipe with correct parameters for camera selection', () => {
-      const params: ChooseMediaRequest = { 
-        mediaTypes: ['image', 'video'], 
+      const params: ChooseMediaRequest = {
+        mediaTypes: ['image', 'video'],
         sourceType: 'camera',
         cameraType: 'back'
       };
@@ -139,9 +139,9 @@ describe('chooseMedia', () => {
       expect(mockPipe.call).toHaveBeenCalledWith(
         'media.chooseMedia',
         expect.objectContaining({
-          mediaTypes: ['image', 'video'],
-          sourceType: 'camera',
-          cameraType: 'back',
+          mediaTypes: [1, 2],
+          sourceType: 2,
+          cameraType: 2,
         }),
         expect.any(Function)
       );
