@@ -29,9 +29,11 @@ enum DebugDevURLSupport {
     static func networkBundleURL(fromScheme scheme: String?) -> String? {
         guard let scheme, !scheme.isEmpty,
               let components = URLComponents(string: scheme),
-              let urlValue = components.queryItems?.first(where: { $0.name == "url" })?.value,
-              let normalized = urlValue.removingPercentEncoding ?? urlValue,
-              normalized.hasPrefix("http://") || normalized.hasPrefix("https://") else {
+              let urlValue = components.queryItems?.first(where: { $0.name == "url" })?.value else {
+            return nil
+        }
+        let normalized = urlValue.removingPercentEncoding ?? urlValue
+        guard normalized.hasPrefix("http://") || normalized.hasPrefix("https://") else {
             return nil
         }
         return normalized
