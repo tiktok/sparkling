@@ -60,7 +60,9 @@ function buildScheme(baseScheme: string, bundlePath: string, params?: NavigateOp
         }
     }
 
-    return `${sanitizedBase}?${searchParams.toString()}`;
+    // URLSearchParams encodes spaces as '+' (x-www-form-urlencoded), but
+    // native URL parsers only understand '%20'. Replace to avoid mangled values.
+    return `${sanitizedBase}?${searchParams.toString().replace(/\+/g, '%20')}`;
 }
 
 export function navigate(params: NavigateRequest, callback: (result: NavigateResponse) => void): void {
