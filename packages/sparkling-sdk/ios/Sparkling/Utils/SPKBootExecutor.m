@@ -57,6 +57,22 @@ static void execute_method_with_images(SPKBootExecuteImage *image)
     }
 }
 
+static void execute_fallback_prepare_services(void)
+{
+    NSArray<NSString *> *classNames = @[
+        @"Sparkling.SPKLynxService",
+        @"Sparkling.SPKResourceLoaderImpl",
+    ];
+    SEL selector = @selector(executePrepareServiceTask);
+    for (NSString *clsName in classNames) {
+        Class cls = NSClassFromString(clsName);
+        if ([cls respondsToSelector:selector]) {
+            IMP imp = [cls methodForSelector:selector];
+            ((void (*)(id, SEL))imp)(cls, selector);
+        }
+    }
+}
+
 #pragma GCC diagnostic ignored "-Wundeclared-selector"
 
 static void handle_did_add_image(const SPKCodeRunnerMachoHeader *mhp)
@@ -65,6 +81,8 @@ static void handle_did_add_image(const SPKCodeRunnerMachoHeader *mhp)
     if (prepareServiceImage != NULL) {
         execute_method_with_images(prepareServiceImage);
         free(prepareServiceImage);
+    } else {
+        execute_fallback_prepare_services();
     }
     
     SPKBootExecuteImage *afterAllPrepareImage = create_image_with_section(mhp, SPK_AFTER_ALL_PREPARE_SECTION_NAME, @selector(executeAfterPrepareTask));

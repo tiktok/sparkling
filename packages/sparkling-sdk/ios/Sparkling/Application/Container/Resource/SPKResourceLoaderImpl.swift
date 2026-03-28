@@ -41,11 +41,6 @@ open class SPKResourceProvider: SPKResourceProtocol {
     }
 }
 
-@_used
-@_section("__DATA, SPK_PRE_SVC")
-nonisolated(unsafe)
-private let spkRegisterSPKResourceLoaderImpl: UnsafePointer<CChar>? = UnsafeRawPointer(("SPKResourceLoaderImpl\0" as StaticString).utf8Start).assumingMemoryBound(to: CChar.self)
-
 /// Implementation of the SPKResourceLoaderProtocol for loading resources.
 /// 
 /// This class provides functionality to load resources from both network URLs and local bundles.
