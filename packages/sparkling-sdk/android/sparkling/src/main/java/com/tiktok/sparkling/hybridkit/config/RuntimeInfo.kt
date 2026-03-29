@@ -19,6 +19,9 @@ open class RuntimeInfo() : ConcurrentHashMap<String, Any>() {
         const val APP_LANGUAGE = "appLanguage"
         const val APP_LOCALE = "appLocale"
         const val LYNX_SDK_VERSION = "lynxSdkVersion"
+        const val SPARKLING_VERSION = "sparklingVersion"
+        /** Hardcoded SDK version — update during release workflow. */
+        const val SPARKLING_VERSION_VALUE = "1.0.0"
         const val STATUS_BAR_HEIGHT = "statusBarHeight"
         const val SAFEAREA_HEIGHT = "safeAreaHeight"
         const val TEMPLATE_RES_DATA = "templateResData"
