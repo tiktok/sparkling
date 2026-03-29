@@ -1,6 +1,6 @@
 # 多页面导航
 
-Sparkling 采用原生容器模型，每个页面运行在独立的原生容器及其对应的 LynxView 中。页面之间通过 scheme URL 驱动导航。
+Sparkling 采用原生[容器](./containers.md)模型，每个页面运行在独立的原生容器及其对应的 LynxView 中。页面之间通过 [scheme URL](./scheme.md) 驱动导航。
 
 在构建配置的 `source.entry` 中定义的每个入口——无论是 `app.config.ts` 中的 `lynxConfig` 还是独立的 `lynx.config.ts`——都会生成一个可导航的 bundle。无需路由注册：bundle 构建完成后，任何页面都可以通过 `navigate()` 函数使用 bundle 路径跳转到该页面。
 

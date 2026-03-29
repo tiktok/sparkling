@@ -1,6 +1,6 @@
 # Multi-page Navigation
 
-Sparkling uses a native container model where each page runs as an independent native container with its own LynxView. Navigation between pages is driven by scheme URLs.
+Sparkling uses a native [container](./containers.md) model where each page runs as an independent native container with its own LynxView. Navigation between pages is driven by [scheme URLs](./scheme.md).
 
 Every entry you define in `source.entry` of your build config — whether that's the `lynxConfig` inside `app.config.ts` or a standalone `lynx.config.ts` — produces a bundle that can be navigated to. There is no route registration step: once a bundle is built, any page can navigate to it by its bundle path using the `navigate()` function.
 
@@ -8,8 +8,8 @@ Every entry you define in `source.entry` of your build config — whether that's
 
 When you call `navigate()`, Sparkling:
 
-1. Builds a scheme URL (e.g. `hybrid://lynxview_page?bundle=detail.lynx.bundle&title=Detail`)
-2. Hands the URL to the native layer, which opens a new container
+1. Builds a [scheme URL](./scheme.md) (e.g. `hybrid://lynxview_page?bundle=detail.lynx.bundle&title=Detail`)
+2. Hands the URL to the native layer, which opens a new [container](./containers.md)
 3. The new container loads the target bundle and receives the URL's query parameters via `lynx.__globalProps.queryItems`
 
 ## Basic navigation
@@ -34,7 +34,7 @@ navigate(
 );
 ```
 
-The `params` object supports all predefined keys (`title`, `hide_nav_bar`, `screen_orientation`, etc.) as well as arbitrary custom keys.
+The `params` object supports all [predefined scheme parameters](./scheme.md#common-parameters) (`title`, `hide_nav_bar`, `screen_orientation`, etc.) as well as arbitrary custom keys.
 
 ## Passing custom data
 
