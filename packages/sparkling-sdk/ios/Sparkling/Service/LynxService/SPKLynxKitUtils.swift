@@ -109,6 +109,7 @@ open class SPKLynxKitUtils: SPKKitUtils {
         let queryItems = params.queryItems ?? [:]
         
         globalPropos.updateValue(LynxVersion.versionString() ?? "", forKey: "lynxSdkVersion")
+        globalPropos.updateValue(SPKVersion.SPKVersion(), forKey: "sparklingVersion")
         globalPropos.updateValue(queryItems, forKey: "queryItems")
         globalPropos.updateValue(params.context?.originURL ?? "", forKey: "originUrl")
         globalPropos.updateValue(params.context?.fullURL ?? params.context?.originURL ?? "", forKey: "fullUrl")

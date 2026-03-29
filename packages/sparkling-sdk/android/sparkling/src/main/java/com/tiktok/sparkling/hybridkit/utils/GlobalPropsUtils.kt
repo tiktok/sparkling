@@ -37,6 +37,7 @@ class GlobalPropsUtils {
 
         val builtInStableFields = mapOf<String, () -> Any>(
             RuntimeInfo.LYNX_SDK_VERSION to { LynxEnv.inst().lynxVersion },
+            RuntimeInfo.SPARKLING_VERSION to { RuntimeInfo.SPARKLING_VERSION_VALUE },
             RuntimeInfo.SCREEN_WIDTH to {
                 DevicesUtil.px2dp(
                     DevicesUtil.getScreenWidth(HybridEnvironment.instance.context).toDouble(),

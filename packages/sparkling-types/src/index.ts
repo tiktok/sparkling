@@ -173,8 +173,11 @@ declare module '@lynx-js/types' {
     /** Timestamp (as string) when the container was initialized. */
     containerInitTime: string;
 
-    /** Version of the underlying Lynx SDK. */
+    /** Version of the underlying Lynx SDK (e.g. `"3.6.0"`). */
     lynxSdkVersion: string;
+
+    /** Version of the Sparkling SDK (e.g. `"1.0.0"`). */
+    sparklingVersion: string;
 
     /**
      * Template resource data passed to the container.
