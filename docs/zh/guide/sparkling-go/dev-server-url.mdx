@@ -1,0 +1,271 @@
+import { Steps } from '@theme';
+
+# 开发工作流
+
+本指南介绍 Sparkling 应用的完整开发工作流：启动 dev server、从模拟器或真机连接、
+使用热更新，以及管理 dev server URL。我们以 **Sparkling Go**（官方 demo 应用）为
+例，但这里的所有内容适用于任何 Sparkling 项目。
+
+:::tip
+核心思路：你机器上的 HTTP dev server 向 native shell 提供 JS bundle，每次保存文件
+时推送热更新，无需手动重新构建。
+:::
+
+## 启动 dev server
+
+<Steps>
+
+### 启动 server
+
+```bash
+npx sparkling dev
+```
+
+Dev server 默认运行在端口 **5969**（在手机键盘上拼出 **LYNX**：L=5 Y=9 N=6 X=9）。
+`app.config.ts` 中定义的每个入口点都作为 HTTP bundle 提供：
+
+```
+➜  Lynx  http://192.168.1.100:5969/main.lynx.bundle
+➜  Lynx  http://192.168.1.100:5969/showcase.lynx.bundle
+```
+
+可以用 `--port` 覆盖端口：
+
+```bash
+npx sparkling dev --port 8080
+```
+
+### 运行 native shell
+
+在另一个终端中：
+
+```bash
+# iOS
+npx sparkling run:ios
+
+# Android
+npx sparkling run:android
+```
+
+Debug 构建会自动连接 dev server。应用从 dev server URL 加载 `main.lynx.bundle`，
+而不是从打包的本地资源加载。
+
+### 编辑、保存、看到变化
+
+保存任意源文件，dev server 会重建受影响的 bundle 并推送热更新到运行中的应用——
+无需手动刷新。
+
+</Steps>
+
+### 真机 QR 码
+
+Dev server 启动时会在终端打印 **QR 码**。用安装了 LynxExplorer 或你的 Sparkling
+应用的设备扫描，即可直接加载 bundle。
+
+QR URL 可通过 `app.config.ts` 中的 `pluginQRCode` 插件自定义：
+
+```typescript
+import { pluginQRCode } from '@lynx-js/qrcode-rsbuild-plugin'
+
+plugins: [
+  pluginQRCode({
+    schema(url) {
+      return `${url}?fullscreen=true`
+    },
+  }),
+]
+```
+
+## 热模块替换（HMR）
+
+Sparkling 使用 **Rspeedy**（基于 Rsbuild/Rspack）作为打包器。开发模式下 HMR
+默认启用，无需配置。
+
+### 工作原理
+
+1. 你保存一个源文件。
+2. Rspeedy 检测到变更，生成 `.hot-update.js` 补丁。
+3. 补丁通过 HTTP 推送到运行中的应用。
+4. Lynx 运行时应用补丁，变更的组件重新渲染。
+
+### 状态保持更新
+
+要实现 React 状态保持更新，添加 `pluginReactLynx` 插件（默认模板已包含）：
+
+```typescript
+import { pluginReactLynx } from '@lynx-js/react-rsbuild-plugin'
+
+plugins: [
+  pluginReactLynx(),
+]
+```
+
+启用后，编辑组件时会保持其 React 状态——仅变更的组件重新渲染，不会重置页面。
+
+### 入口点变更
+
+在 `app.config.ts` 中添加、删除或重命名入口时，dev server 会自动重启。其他配置
+变更（输出设置、插件）需要手动重启。
+
+## 从真机连接
+
+在模拟器上，`localhost` 直接可用。在**真机**上，应用需要你机器的局域网 IP 地址。
+
+### 问题
+
+Dev server 运行在你的机器上，如 `http://192.168.1.100:5969/`。但
+`__webpack_public_path__` 在构建时被写死为 `http://localhost:5969/`。当应用调用
+`navigate()` 加载子页面时，它从 `__webpack_public_path__` 构建 URL——指向
+`localhost`，在设备上不存在。
+
+### 解决方案：运行时 URL 解析
+
+`sparkling-navigation` 自动处理这个问题。当你调用 `navigate()` 或 `open()` 时，
+它从 `lynx.__globalProps.queryItems.url` 读取 native 侧加载当前 bundle 时使用的
+**实际** URL，并以此作为所有子页面导航的基础。
+
+```
+Native 加载: http://192.168.1.100:5969/main.lynx.bundle
+              ↓ 存储在 globalProps.queryItems.url
+navigate({ path: 'settings.lynx.bundle' })
+              ↓ 解析为
+             http://192.168.1.100:5969/settings.lynx.bundle  ✓
+         而非 http://localhost:5969/settings.lynx.bundle       ✗
+```
+
+这是自动发生的，无需修改应用代码。
+
+## 管理 dev server URL
+
+Sparkling 提供两种方式在设备上设置 dev server URL：**应用内 Settings UI**
+（推荐 Sparkling Go 使用）和 **pipe API**（用于自定义集成）。
+
+### 方式 A：应用内 Settings UI（Sparkling Go）
+
+Sparkling Go 的 Settings 页面包含一个 **Dev Server** 卡片，仅在开发构建
+（`__DEV__ === true`）中出现。
+
+#### 连接状态
+
+卡片从 `lynx.__globalProps` 读取运行时 bundle URL（无需 pipe 调用），显示实时
+指示器：
+
+| 指示器 | 含义 |
+|--------|------|
+| **绿点** — Connected to dev server | Bundle 通过 HTTP 加载。显示 server origin。 |
+| **灰点** — Running from local assets | Bundle 从本地路径加载（生产环境）。 |
+
+<img src="/sparkling/guide/sparkling-go/dev-url-idle.png" width="300" alt="Connected to dev server, URL loaded" />
+
+#### 编辑 URL
+
+**Configured URL** 字段显示持久化的 dev server URL。输入新 URL 时 UI 给出即时反馈：
+
+| 状态 | 截图 |
+|------|------|
+| **校验错误** — URL 必须以 `http://` 或 `https://` 开头 | <img src="/sparkling/guide/sparkling-go/dev-url-validation.png" width="260" /> |
+| **可以保存** — URL 合法且与当前值不同 | <img src="/sparkling/guide/sparkling-go/dev-url-save-active.png" width="260" /> |
+
+#### 保存反馈
+
+点击 **Save** 在 native 侧持久化 URL。结果内联显示：
+
+| 状态 | 截图 |
+|------|------|
+| **成功** — 重启应用以生效 | <img src="/sparkling/guide/sparkling-go/dev-url-save-success.png" width="260" /> |
+| **失败** — 显示 native 侧错误信息 | <img src="/sparkling/guide/sparkling-go/dev-url-save-error.png" width="260" /> |
+
+#### 边界情况
+
+| 状态 | 截图 |
+|------|------|
+| **加载中** — 正在从 native 侧获取配置 | <img src="/sparkling/guide/sparkling-go/dev-url-loading.png" width="260" /> |
+| **Pipe 方法不可用** — `sparkling-debug-tool` 未集成 | <img src="/sparkling/guide/sparkling-go/dev-url-pipe-error.png" width="260" /> |
+| **URL 不匹配** — 配置的 server 与活跃连接不同 | <img src="/sparkling/guide/sparkling-go/dev-url-mismatch.png" width="260" /> |
+
+### 方式 B：Pipe API（自定义集成）
+
+如果你在构建自己的应用（不使用 Sparkling Go 的 Settings 页面），可以直接调用
+pipe 方法来读写持久化的 dev URL。
+
+**前提条件：** `sparkling-debug-tool` 必须集成在你的 native 项目中，并注册了
+`getDevUrl` 和 `setDevUrl` pipe 方法。
+
+```typescript
+import pipe from 'sparkling-method'
+
+// 读取当前持久化的 dev URL
+pipe.call('debugtool.getDevUrl', {}, (res) => {
+  if (res.code === 1) {
+    console.log('Dev URL:', res.data.url)
+  }
+})
+
+// 保存新的 dev URL
+pipe.call('debugtool.setDevUrl', { url: 'http://192.168.1.100:5969/' }, (res) => {
+  if (res.code === 1) {
+    // 重启应用以生效
+  }
+})
+```
+
+| `res.code` | 含义 |
+|------------|------|
+| `1` | 成功 |
+| `0` | 方法存在但操作失败 |
+| 负数 | 基础设施错误（方法未注册、模块缺失） |
+
+Native 侧存储位置：
+- **iOS**: `UserDefaults`，key 为 `sparkling.debug.dev_url`
+- **Android**: `SharedPreferences`，key 为 `dev_url`
+
+### 自动回退弹窗
+
+如果应用从 dev server 加载 bundle 失败（如 IP 错误、server 未运行），模板应用会
+自动弹出一个 native 对话框，提示输入正确的 dev server URL。这由 native shell 中的
+`DebugDevURLSupport` 处理——由于 bundle 尚未加载，不涉及 JS 代码。
+
+## 调试功能
+
+当 `sparkling-debug-tool` 集成并初始化（iOS 上 `SparklingDebugTool.setup()`，
+Android 上 `.init(application)`）后，会启用：
+
+| 功能 | iOS | Android |
+|------|-----|---------|
+| Lynx DevTools | ✓ | ✓ |
+| 错误 LogBox 浮层 | ✓ | ✓ |
+| 长按调试菜单 | — | ✓ |
+
+这些自动启用——`setup()` / `init()` 会将 `LynxEnv.devtoolEnabled`、
+`LynxEnv.logBoxEnabled` 和 `LynxEnv.lynxDebugEnabled` 设为 `true`。
+
+## 常见问题
+
+### 应用显示白屏/空白
+
+1. **Dev server 是否在运行？** 检查 `npx sparkling dev` 是否活跃且显示 "ready"。
+2. **设备能否访问 server？** 确认两者在同一网络。在设备或模拟器上尝试
+   `curl http://<your-ip>:5969/main.lynx.bundle`。
+3. **IP 错了？** 如果切换了网络，IP 可能已变。在 Settings 中更新 dev URL 或重启
+   `sparkling dev`。
+
+### 子页面导航在真机上失败
+
+`navigate()` 函数应自动解析正确的 dev server IP。如果没有，请检查：
+- `sparkling-navigation` 是否最新版（需要 `getDevServerBaseURL()` 修复）
+- Native 侧是否在 scheme 的 query 参数中传递了 `url=`
+
+### HMR 不工作
+
+1. 检查 dev server 终端是否有构建错误。
+2. 某些变更（新入口点、配置变更）需要重启 `sparkling dev`。
+3. 确认应用从 dev server 加载（检查 Settings 中的 "Connected to dev server"，
+   或查看运行时 URL 是否包含 `http://`）。
+
+### Settings 中显示 "Pipe methods not available"
+
+`getDevUrl` / `setDevUrl` 方法由 `sparkling-debug-tool` 提供。确保：
+1. `sparkling-debug-tool` 在依赖列表中
+2. Native 侧在应用初始化时调用了 `SparklingDebugTool.setup()`（iOS）或
+   `.init(application)`（Android）
+3. Pipe 方法已注册（检查 native 构建日志是否有注册错误）
