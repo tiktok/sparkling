@@ -22,6 +22,12 @@ object SparklingDebugTool {
 
     @JvmStatic
     fun init(application: Application) {
+        // Preset values must be set BEFORE LynxEnv flags so the DevTool
+        // service picks them up during initialization.
+        LynxDevToolService.INSTANCE.setLynxDebugPresetValue(true)
+        LynxDevToolService.INSTANCE.setLogBoxPresetValue(true)
+        LynxDevToolService.INSTANCE.setLoadJsBridge(true)
+
         LynxServiceCenter.inst().registerService(LynxDevToolService.INSTANCE)
         LynxEnv.inst().enableLynxDebug(true)
         LynxEnv.inst().enableDevtool(true)
