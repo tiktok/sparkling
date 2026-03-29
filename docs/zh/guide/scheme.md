@@ -26,6 +26,8 @@ hybrid://lynxview_page?bundle=detail.lynx.bundle&title=Detail&hide_nav_bar=1
 
 ## 容器类型（Host）
 
+Host 决定使用哪种原生容器来渲染内容。参见[容器](./containers.md)了解各容器模式的详情。
+
 | Host | 描述 |
 | --- | --- |
 | `lynxview_page` | Lynx 页面容器（推荐） |
@@ -54,6 +56,8 @@ hybrid://lynxview_page?bundle=detail.lynx.bundle&title=Detail&hide_nav_bar=1
 完整参数参考请查看 [Scheme API 文档](/apis/scheme)。
 
 ## 在 JS 中使用
+
+通常不需要手动构建 scheme URL。[`navigate()`](/apis/sparkling-methods/sparkling-navigation) 函数会为你构建它们。参见[多页面导航](./multi-page-navigation.md)了解常见的导航模式（传递数据、关闭页面等）。
 
 通常不需要手动构造 scheme URL。[`navigate()`](/apis/sparkling-methods/sparkling-navigation) 函数会自动构建：
 

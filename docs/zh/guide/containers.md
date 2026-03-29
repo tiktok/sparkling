@@ -175,9 +175,9 @@ spkView.update(withGlobalProps: ["theme": "dark"])
 spkView?.updateGlobalPropsByIncrement(mapOf("theme" to "dark"))
 ```
 
-## API 参考
+## 下一步
 
-平台相关的安装方式、初始化和详细方法签名：
-
-- [Sparkling SDK — iOS](../apis/sparkling-sdk-ios.md)
-- [Sparkling SDK — Android](../apis/sparkling-sdk-android.md)
+- [Scheme](./scheme.md) — 配置容器的完整 URL 参数列表
+- [多页面导航](./multi-page-navigation.md) — 页面间跳转、传递数据、关闭页面
+- [Sparkling SDK — iOS](../apis/sparkling-sdk-ios.md) — iOS API 参考
+- [Sparkling SDK — Android](../apis/sparkling-sdk-android.md) — Android API 参考
