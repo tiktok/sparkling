@@ -26,11 +26,14 @@ public class SparklingDebugTool: NSObject {
         env.logBoxEnabled = true
 
         // Enable DebugRouter so the DevTool desktop app can discover and
-        // connect to this app (via USB or network).
-        if let routerClass = NSClassFromString("DebugRouter"),
-           let instance = routerClass.perform(NSSelectorFromString("instance"))?.takeUnretainedValue(),
-           instance.responds(to: NSSelectorFromString("enableAllSessions")) {
-            instance.perform(NSSelectorFromString("enableAllSessions"))
+        // connect to this app via USB.
+        let enableSel = NSSelectorFromString("enableAllSessions")
+        let instanceSel = NSSelectorFromString("instance")
+        if let routerClass = NSClassFromString("DebugRouter") as? NSObject.Type,
+           routerClass.responds(to: instanceSel),
+           let router = routerClass.perform(instanceSel)?.takeUnretainedValue() as? NSObject,
+           router.responds(to: enableSel) {
+            router.perform(enableSel)
         }
     }
 
