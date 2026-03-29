@@ -237,17 +237,21 @@ the correct dev server URL. This is handled by `DebugDevURLSupport` in the nativ
 
 ## Debugging features
 
-When `sparkling-debug-tool` is integrated and initialized
-(`SparklingDebugTool.setup()` on iOS, `.init(application)` on Android), it enables:
+`SparklingDebugTool.setup()` (iOS) / `.init(application)` (Android) turns on the basic
+debug flags (`lynxDebugEnabled`, `devtoolEnabled`, `logBoxEnabled`). This enables
+**LogBox** (the error overlay) and the **long-press debug menu** (Android).
 
-| Feature | iOS | Android |
-|---------|-----|---------|
-| Lynx DevTools | ✓ | ✓ |
-| Error LogBox overlay | ✓ | ✓ |
-| Long-press debug menu | — | ✓ |
+For the full **Lynx DevTool** experience (element inspector, JS debugging, network
+monitor), you need to complete the additional integration steps described in the
+[Lynx DevTool guide](https://lynxjs.org/guide/start/integrate-lynx-devtool). The key
+missing pieces are `enableAllSessions`, `setLogBoxPresetValue`, and the JS bridge
+loaders — without these, the DevTool desktop app cannot connect to your running app.
 
-These are enabled automatically — `setup()` / `init()` sets `LynxEnv.devtoolEnabled`,
-`LynxEnv.logBoxEnabled`, and `LynxEnv.lynxDebugEnabled` to `true`.
+| Feature | Status |
+|---------|--------|
+| Error LogBox overlay | Works out of the box |
+| Long-press debug menu (Android) | Works out of the box |
+| Lynx DevTool (inspector, JS debug) | Requires [additional setup](https://lynxjs.org/guide/start/integrate-lynx-devtool) |
 
 ## Troubleshooting
 
