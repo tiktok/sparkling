@@ -43,7 +43,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     val sparklingVersion = (findProperty("SPARKLING_ANDROID_SDK_VERSION") as? String)
         ?: System.getenv("SPARKLING_ANDROID_SDK_VERSION")
-        ?: "2.0.0-rc.5"
+        ?: "2.1.0-rc.12"
     api("com.tiktok.sparkling:sparkling-method:$sparklingVersion")
 }
 

@@ -113,7 +113,7 @@ DEPENDENCIES
   ffi (= 1.16.3)
 
 RUBY VERSION
-   ruby 4.0.0p0
+   ruby 3.2.6p234
 
 BUNDLED WITH
    2.3.27
