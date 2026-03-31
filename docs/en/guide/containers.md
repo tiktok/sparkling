@@ -175,9 +175,9 @@ spkView.update(withGlobalProps: ["theme": "dark"])
 spkView?.updateGlobalPropsByIncrement(mapOf("theme" to "dark"))
 ```
 
-## API reference
+## Next steps
 
-For platform-specific installation, initialization, and detailed method signatures:
-
-- [Sparkling SDK — iOS](../apis/sparkling-sdk-ios.md)
-- [Sparkling SDK — Android](../apis/sparkling-sdk-android.md)
+- [Scheme](./scheme.md) — full list of URL parameters for configuring containers
+- [Multi-page Navigation](./multi-page-navigation.md) — navigate between pages, pass data, close pages
+- [Sparkling SDK — iOS](../apis/sparkling-sdk-ios.md) — iOS API reference
+- [Sparkling SDK — Android](../apis/sparkling-sdk-android.md) — Android API reference
