@@ -7,6 +7,187 @@ import SnapKit
 import SparklingMethod
 import UIKit
 
+final class SPKDefaultLoadErrorView: UIView, SPKLoadErrorViewProtocol {
+    private let titleLabel = UILabel()
+    private let detailLabel = UILabel()
+    private let retryButton = UIButton(type: .system)
+    private var refreshBlock: SPKLoadErrorRefreshBlock?
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        self.backgroundColor = .white
+
+        self.titleLabel.text = "Load failed"
+        self.titleLabel.font = UIFont.systemFont(ofSize: 20.0, weight: .semibold)
+        self.titleLabel.textColor = .black
+        self.titleLabel.textAlignment = .center
+
+        self.detailLabel.font = UIFont.systemFont(ofSize: 13.0, weight: .regular)
+        self.detailLabel.textColor = UIColor(white: 0.25, alpha: 1.0)
+        self.detailLabel.textAlignment = .center
+        self.detailLabel.numberOfLines = 0
+
+        self.retryButton.setTitle("Retry", for: .normal)
+        self.retryButton.titleLabel?.font = UIFont.systemFont(ofSize: 15.0, weight: .semibold)
+        self.retryButton.backgroundColor = UIColor(white: 0.12, alpha: 0.92)
+        self.retryButton.setTitleColor(.white, for: .normal)
+        self.retryButton.contentEdgeInsets = UIEdgeInsets(top: 10, left: 16, bottom: 10, right: 16)
+        self.retryButton.layer.cornerRadius = 12.0
+        self.retryButton.addTarget(self, action: #selector(handleRetryTap), for: .touchUpInside)
+
+        let stack = UIStackView(arrangedSubviews: [self.titleLabel, self.detailLabel, self.retryButton])
+        stack.axis = .vertical
+        stack.alignment = .center
+        stack.spacing = 12.0
+
+        self.addSubview(stack)
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            stack.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            stack.leadingAnchor.constraint(greaterThanOrEqualTo: self.leadingAnchor, constant: 24),
+            stack.trailingAnchor.constraint(lessThanOrEqualTo: self.trailingAnchor, constant: -24),
+        ])
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func register(refreshBlock: @escaping SPKLoadErrorRefreshBlock) {
+        self.refreshBlock = refreshBlock
+    }
+
+    func container(_ contianer: SPKContainerProtocol, didReceiveError error: Error?) {
+        self.detailLabel.text = error?.localizedDescription ?? "Unknown error"
+    }
+
+    @objc private func handleRetryTap() {
+        self.refreshBlock?()
+    }
+}
+
+final class SPKGlobalOTABadgeController: NSObject {
+    static let shared = SPKGlobalOTABadgeController()
+
+    private var badgeButton: UIButton?
+    private var didRegisterObservers = false
+
+    func start() {
+        DispatchQueue.main.async {
+            self.registerObserversIfNeeded()
+            self.attachIfNeeded()
+            self.refresh()
+        }
+    }
+
+    func refresh() {
+        DispatchQueue.main.async {
+            self.attachIfNeeded()
+            let shouldShow = SPKZephyrOTAManager.shared.hasPendingUpdate()
+            self.badgeButton?.isHidden = !shouldShow
+            if shouldShow, let badgeButton = self.badgeButton, let superview = badgeButton.superview {
+                superview.bringSubviewToFront(badgeButton)
+            }
+        }
+    }
+
+    private func registerObserversIfNeeded() {
+        guard !self.didRegisterObservers else {
+            return
+        }
+        self.didRegisterObservers = true
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handleUpdateReady(_:)),
+                                               name: SPKZephyrOTAManager.updateReadyNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handleDidBecomeActive),
+                                               name: UIApplication.didBecomeActiveNotification,
+                                               object: nil)
+    }
+
+    private func attachIfNeeded() {
+        guard let window = UIApplication.spk.mainWindow else {
+            return
+        }
+        if self.badgeButton?.superview === window {
+            return
+        }
+
+        let badgeButton = self.badgeButton ?? {
+            let button = UIButton(type: .system)
+            button.setTitle("Update ready · tap", for: .normal)
+            button.setTitleColor(.white, for: .normal)
+            button.backgroundColor = UIColor(white: 0.12, alpha: 0.92)
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 12.0, weight: .semibold)
+            button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 10, bottom: 6, right: 10)
+            button.layer.cornerRadius = 12.0
+            button.layer.masksToBounds = true
+            button.isHidden = true
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.addTarget(self, action: #selector(handleBadgeTap), for: .touchUpInside)
+            return button
+        }()
+
+        self.badgeButton = badgeButton
+        badgeButton.removeFromSuperview()
+        window.addSubview(badgeButton)
+        NSLayoutConstraint.activate([
+            badgeButton.topAnchor.constraint(equalTo: window.safeAreaLayoutGuide.topAnchor, constant: 12),
+            badgeButton.trailingAnchor.constraint(equalTo: window.trailingAnchor, constant: -16),
+        ])
+    }
+
+    @objc private func handleUpdateReady(_ notification: Notification) {
+        self.refresh()
+    }
+
+    @objc private func handleDidBecomeActive() {
+        self.refresh()
+    }
+
+    @objc private func handleBadgeTap() {
+        guard let viewController = Self.activeSparklingViewController() else {
+            NSLog("SPKGlobalOTABadgeController tap ignored: no active SPKViewController")
+            return
+        }
+        viewController.applyPendingOtaUpdate()
+        self.refresh()
+    }
+
+    private static func activeSparklingViewController() -> SPKViewController? {
+        return findSparklingViewController(from: UIApplication.spk.mainWindow?.rootViewController)
+    }
+
+    private static func findSparklingViewController(from controller: UIViewController?) -> SPKViewController? {
+        guard let controller else {
+            return nil
+        }
+        if let sparklingController = controller as? SPKViewController {
+            return sparklingController
+        }
+        if let presented = controller.presentedViewController,
+           let sparklingController = findSparklingViewController(from: presented) {
+            return sparklingController
+        }
+        if let navigationController = controller as? UINavigationController,
+           let sparklingController = findSparklingViewController(from: navigationController.visibleViewController ?? navigationController.viewControllers.last) {
+            return sparklingController
+        }
+        if let tabBarController = controller as? UITabBarController,
+           let sparklingController = findSparklingViewController(from: tabBarController.selectedViewController) {
+            return sparklingController
+        }
+        for child in controller.children.reversed() {
+            if let sparklingController = findSparklingViewController(from: child) {
+                return sparklingController
+            }
+        }
+        return nil
+    }
+}
+
 /// A view controller that manages SPK hybrid content with navigation and lifecycle support.
 /// 
 /// This class provides a complete container for hybrid content, handling navigation bars,
@@ -138,6 +319,7 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     /// 
     /// This property stores the initial URL for reference and potential reloading scenarios.
     public var originURL: URL?
+    private var otaReloadURL: URL?
     
     /// The type of hybrid engine being used for content rendering.
     /// 
@@ -232,7 +414,6 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     /// This optional view provides a custom background for the status bar area
     /// when needed for design consistency.
     var statusBarBackgroundView: UIView?
-    
     var originNavigationBarHidden: Bool = false
     var originNavigationBarIsHidden: Bool = false
     var originControllerPopGestureRecongnizerEnabled: Bool = false
@@ -270,6 +451,7 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
         let config = config ?? SPKScheme.resolver(withScheme: url, context: context, paramClass: SPKSchemeParam.self) as? SPKSchemeParam
         self.containerFrame = frame
         self.originURL = url
+        self.otaReloadURL = config?.originURL ?? url
         self.config = config
         self.statusBarStyle = config?.statusFontMode ?? self.statusBarStyle
         self.statusBarHiddenStatus = config?.hideStatusBar ?? self.statusBarHiddenStatus
@@ -312,6 +494,8 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
         self.load(withURL: self.originURL)
         
         self.setupNotification()
+        SPKZephyrOTAManager.shared.startPolling()
+        SPKGlobalOTABadgeController.shared.start()
         self.containerLifecycleDelegate?.containerViewDidLoad?(self)
     }
     
@@ -345,6 +529,10 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
                                                selector: #selector(handleResignActive),
                                                name: UIApplication.willResignActiveNotification,
                                                object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(handleOtaUpdateReady(_:)),
+                                               name: SPKZephyrOTAManager.updateReadyNotification,
+                                               object: nil)
     }
     
     /// Called when the view is about to appear.
@@ -374,6 +562,8 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     /// - Parameter animated: Whether the appearance was animated
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        SPKZephyrOTAManager.shared.startPolling()
+        SPKGlobalOTABadgeController.shared.start()
         self.oldDelegate = self.navigationController?.interactivePopGestureRecognizer?.delegate
         self.navigationController?.interactivePopGestureRecognizer?.delegate = self
         self.originControllerPopGestureRecongnizerEnabled = self.navigationController?.interactivePopGestureRecognizer?.isEnabled ?? self.originControllerPopGestureRecongnizerEnabled
@@ -548,7 +738,7 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
             })
         }
     }
-    
+
     /// Generates and configures a new navigation bar instance.
     /// 
     /// This method creates a navigation bar with proper button handlers,
@@ -587,6 +777,36 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
             navigationBar.update?(backgroundColor: navBarColor)
         }
         return navigationBar
+    }
+
+    @objc private func handleOtaUpdateReady(_ notification: Notification) {
+        NSLog("SPKViewController OTA update ready for container=%@", self.containerID)
+        SPKGlobalOTABadgeController.shared.refresh()
+    }
+
+    @objc private func handleOtaBadgeTap() {
+        self.applyPendingOtaUpdate()
+    }
+
+    func applyPendingOtaUpdate() {
+        guard let originURL = self.originURL else {
+            return
+        }
+        guard SPKZephyrOTAManager.shared.applyPendingUpdateIfNeeded() else {
+            SPKGlobalOTABadgeController.shared.refresh()
+            return
+        }
+        let reloadURL = self.otaReloadURL ?? originURL
+        let context = self.context as? SPKContext ?? SPKContext()
+        let resolved = SPKScheme.resolver(withScheme: reloadURL, context: context, paramClass: SPKSchemeParam.self)
+        NSLog("SPKViewController applying OTA: origin=%@ reload=%@ resolved=%@",
+              originURL.absoluteString,
+              reloadURL.absoluteString,
+              resolved?.resolvedURL?.absoluteString ?? "nil")
+        self.config = resolved
+        self.context = context
+        self.viewContainer?.load(withParams: resolved ?? SPKSchemeParam.resolver(withScheme: reloadURL, context: context), context, forceInitKitView: true)
+        SPKGlobalOTABadgeController.shared.refresh()
     }
     
     /// Handles the left button (back button) tap event.
@@ -765,6 +985,7 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
         }
         
         self.originURL = self.originURL ?? url
+        self.otaReloadURL = self.otaReloadURL ?? config.originURL ?? url
         self.viewContainer?.load(withParams: config, self.context)
     }
     
@@ -867,6 +1088,9 @@ extension SPKViewController: SPKContainerLifecycleProtocol {
     }
     
     public func container(_ container: any SPKContainerProtocol, didLoadFailedWithURL url: URL?, error: (any Error)?) {
+        NSLog("SPKViewController load failed: url=%@ error=%@",
+              url?.absoluteString ?? "nil",
+              error?.localizedDescription ?? "nil")
         if self.viewContainer?.shouldShowLoadFailedView(with: error) == true {
             self.addLoadFailedView(error)
         }
@@ -896,16 +1120,16 @@ extension SPKViewController: SPKContainerLifecycleProtocol {
     
     func buildLoadErrorView() -> (UIView & SPKLoadErrorViewProtocol)? {
         guard let context = self.context as? SPKContext else {
-            return nil
+            return SPKDefaultLoadErrorView()
         }
         
-        let loadFailedView = context.loadFailedView ?? context.failedViewBuilder?(self)
+        let loadFailedView = context.loadFailedView ?? context.failedViewBuilder?(self) ?? SPKDefaultLoadErrorView()
         
-        loadFailedView?.register?(refreshBlock: { [weak self] in
+        loadFailedView.register?(refreshBlock: { [weak self] in
             self?.handleErrorViewReload()
         })
         
-        return nil
+        return loadFailedView
     }
     
     func handleErrorViewReload() {

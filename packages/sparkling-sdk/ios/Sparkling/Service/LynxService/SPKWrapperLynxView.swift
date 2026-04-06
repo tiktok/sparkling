@@ -327,6 +327,9 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
         }
 
         if var sourceUrl = params.sourceUrl {
+            NSLog("SPKWrapperLynxView load: sourceUrl=%@ fullURL=%@",
+                  sourceUrl,
+                  params.context?.fullURL ?? "nil")
             self.loadTemplate(fromURL: sourceUrl, initData: initialData)
         }
     }
@@ -446,6 +449,7 @@ extension SPKWrapperLynxView: LynxViewLifecycle {
     }
     
     public func lynxView(_ view: LynxView!, didLoadFinishedWithUrl url: String!) {
+        NSLog("SPKWrapperLynxView didLoadFinishedWithUrl: %@", url ?? "nil")
         self.loadState = .SPKLoadStateSucceed
         self.estimatedProgress = Float(1)
         DispatchQueue.spk.asyncMain { [weak self] in
@@ -475,6 +479,7 @@ extension SPKWrapperLynxView: LynxViewLifecycle {
     }
     
     public func lynxView(_ view: LynxView!, didRecieveError error: (any Error)!) {
+        NSLog("SPKWrapperLynxView didReceiveError: %@", error?.localizedDescription ?? "nil")
         DispatchQueue.spk.asyncMain { [weak self] in
             self?.lifeCycleDelegate?.view?(self, didReceiveError: error)
         }

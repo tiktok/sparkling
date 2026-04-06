@@ -5,6 +5,7 @@
 import UIKit
 import SnapKit
 import SparklingMethod
+import ObjectiveC
 
 /// A hybrid view container that manages different types of SPK content.
 /// 
@@ -184,6 +185,7 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
     }
         
     deinit {
+        self.spk_standaloneOtaController.cleanup()
         let current = Date().timeIntervalSince1970 * 1000
         let stayDuration = current - self.initStartTimeStamp
         var metric: [String: AnyHashable] = [:]
@@ -234,6 +236,7 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
         
         self.config = params as? SPKSchemeParam
         self.context = context
+        self.context?.schemeParams = self.config
         self.context?.originURL = self.originURL?.absoluteString
         
         self.addContainerDefaultGlobalProps()
@@ -249,6 +252,7 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
             "status": "start",
             "engine_type": self.engineTypeString()
         ])
+        self.spk_standaloneOtaController.sync()
     }
     
     func engineTypeString() -> String {
@@ -291,6 +295,11 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
             return
         }
         self.kitView?.triggerLayout?()
+    }
+
+    public override func didMoveToWindow() {
+        super.didMoveToWindow()
+        self.spk_standaloneOtaController.sync()
     }
         
     /// Loads the hybrid engine with the configured parameters.

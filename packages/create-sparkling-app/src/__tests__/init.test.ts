@@ -18,7 +18,7 @@ describe('init command', () => {
   });
 
   it('forwards parsed name and flags to createSparklingApp', async () => {
-    await init(['my-app', '--template', 'sparkling-bare', '--pm', 'pnpm', '--no-install']);
+    await init(['my-app', '--template', 'sparkling-bare', '--pm', 'pnpm', '--no-install', '--with-zephyr']);
 
     expect(mockedCreateSparklingApp).toHaveBeenCalledWith(expect.objectContaining({
       args: { name: 'my-app' },
@@ -26,6 +26,7 @@ describe('init command', () => {
         install: false,
         pm: 'pnpm',
         template: 'sparkling-bare',
+        withZephyr: true,
       }),
       cwd: process.cwd(),
     }));

@@ -13,6 +13,7 @@ function parseFlags(argv: string[]): { name?: string; flags: CreateAppFlags } {
     .argument('[name]')
     .option('-t, --template <name>', 'Template name or path')
     .option('--template-version <version>', 'Template version or tag')
+    .option('--with-zephyr', 'Scaffold Zephyr deploy support')
     .option('-y, --yes', 'Skip all prompts')
     .option('-f, --force', 'Force overwrite existing directory')
     .option('--pm <pm>', 'Package manager to use')
@@ -28,6 +29,7 @@ function parseFlags(argv: string[]): { name?: string; flags: CreateAppFlags } {
   const opts = parsed.opts<{
     template?: string;
     templateVersion?: string;
+    withZephyr?: boolean;
     yes?: boolean;
     force?: boolean;
     pm?: string;
@@ -42,6 +44,7 @@ function parseFlags(argv: string[]): { name?: string; flags: CreateAppFlags } {
 
   const flags: CreateAppFlags = {
     template: opts.template,
+    withZephyr: opts.withZephyr,
     yes: opts.yes,
     force: opts.force,
     pm: opts.pm,

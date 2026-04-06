@@ -6,6 +6,7 @@ package com.tiktok.sparkling
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.tiktok.sparkling.ota.ZephyrOtaManager
 import com.tiktok.sparkling.utils.SchemeParser
 
 class Sparkling private constructor(
@@ -64,7 +65,10 @@ class Sparkling private constructor(
         val scheme = context.scheme
         if (!scheme.isNullOrBlank()) {
             try {
-                context.hybridSchemeParam = SchemeParser.parseScheme(scheme)
+                context.hybridSchemeParam = SchemeParser.parseScheme(scheme)?.apply {
+                    bundle = ZephyrOtaManager.resolveBundle(this@Sparkling.context, bundle)
+                }
+                ZephyrOtaManager.refreshIfNeeded(this.context)
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to parse scheme: ${e.message}")
             }

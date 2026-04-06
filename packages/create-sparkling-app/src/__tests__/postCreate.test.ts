@@ -32,7 +32,7 @@ describe('postCreate detectPackageManager', () => {
     process.env.npm_config_user_agent = '';
     mockedExecSync.mockImplementation((command: any) => {
       if (typeof command === 'string' && command.startsWith('pnpm')) {
-        return undefined as unknown as Buffer;
+        return '';
       }
       throw new Error('not installed');
     });

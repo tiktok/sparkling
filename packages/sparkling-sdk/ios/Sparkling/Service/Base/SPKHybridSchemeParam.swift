@@ -124,6 +124,12 @@ open class SPKHybridSchemeParam: NSObject {
         var newExtraDict = self.extra
 
         newExtraDict.merge(newParam.extra) { _, new in new }
+        if newParam.extra["url"] != nil && newParam.extra["bundle"] == nil {
+            newExtraDict.removeValue(forKey: "bundle")
+        }
+        if newParam.extra["bundle"] != nil && newParam.extra["url"] == nil {
+            newExtraDict.removeValue(forKey: "url")
+        }
         
         self.update(withDictionary: newExtraDict)
         self.originURL = newParam.originURL
@@ -182,7 +188,9 @@ open class SPKHybridSchemeParam: NSObject {
         let scheme = String("hybrid://hybrid")
         var dict: [String: String] = [:]
         dict.updateValue(innerScheme?.absoluteString ?? "", forKey: "url")
-        
+        let resolvedQueries = innerScheme?.spk.decodedQueryItems ?? queries
+        param.update(withDictionary: resolvedQueries, context: context)
+
         let resolvedScheme = URL.spk.url(string: scheme)?.spk.merging(queries: dict, encode: true)
         param.resolvedURL = resolvedScheme
         param.originURL = orignalURL
@@ -235,7 +243,15 @@ open class SPKHybridSchemeParam: NSObject {
         }
         
         var innerParams: [String: Any] = URL.spk.url(string: innerUrl)?.spk.decodedQueryItems ?? [:]
-        innerParams.merge(dict, uniquingKeysWith: { _, new in new})
+        let isWrappedHybridUrl = URL.spk.url(string: innerUrl)?.scheme == "hybrid"
+        var outerParams = dict
+        if isWrappedHybridUrl {
+            // OTA resolution wraps the actual Lynx params inside `url=hybrid://lynxview?...`.
+            // Keep the flattened inner query map as source of truth; otherwise the outer
+            // wrapper overwrites `url=https://...bundle` with `url=hybrid://lynxview?...`.
+            outerParams.removeValue(forKey: "url")
+        }
+        innerParams.merge(outerParams, uniquingKeysWith: { _, new in new})
         return innerParams
     }
     
@@ -249,10 +265,7 @@ open class SPKHybridSchemeParam: NSObject {
 
     static public func resolveURLStyle(toHybridScheme originURL: URL?, queries: [String: String]?) -> URL? {
         if originURL?.host?.contains("lynx") == true {
-            let url = queries?.spk.string(forKey: "url") ?? ""
-            var lynxQuery = queries
-            lynxQuery?.removeValue(forKey: "url")
-            let resolved = URL.spk.url(string: "hybrid://lynxview", queryItems: lynxQuery)
+            let resolved = URL.spk.url(string: "hybrid://lynxview", queryItems: queries)
             return resolved
         } else if originURL?.host?.contains("webview") == true {
             let baseUrl = String("hybrid://webview")
@@ -264,6 +277,16 @@ open class SPKHybridSchemeParam: NSObject {
     
     static public func resolveBundleStyle(toHybridScheme originURL: URL?, queries: [String: String]?) -> URL? {
         let bundle = queries?.spk.string(forKey: "bundle") ?? ""
+        let resolvedBundle = SPKZephyrOTAManager.shared.resolveBundle(bundle)
+        SPKZephyrOTAManager.shared.refreshIfNeeded()
+
+        if let resolvedBundle, SPKZephyrOTAManager.isRemoteUrl(resolvedBundle) {
+            var lynxQuery = queries ?? [:]
+            lynxQuery.removeValue(forKey: "bundle")
+            lynxQuery.updateValue(resolvedBundle, forKey: "url")
+            return URL.spk.url(string: "hybrid://lynxview", queryItems: lynxQuery)
+        }
+
         let baseURL = "hybrid://lynxview?bundle=\(bundle)"
         var lynxQuery = queries ?? [:]
         lynxQuery.removeValue(forKey: "bundle")

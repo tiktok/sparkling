@@ -8,6 +8,7 @@ import { autolink } from './commands/autolink';
 import { buildProject } from './commands/build';
 import { copyAssets } from './commands/copy-assets';
 import { devProject } from './commands/dev';
+import { deployToZephyr } from './commands/deploy-zephyr';
 import { doctor } from './commands/doctor';
 import { runAndroid } from './commands/run-android';
 import { runIos } from './commands/run-ios';
@@ -81,6 +82,24 @@ program
       source: opts.source,
       androidDest: opts.androidDest,
       iosDest: opts.iosDest,
+    });
+  });
+
+program
+  .command('deploy:zephyr')
+  .description('Build dist and upload Lynx bundles to Zephyr')
+  .option('--config <path>', 'Path to app.config.ts', 'app.config.ts')
+  .option('--target <platform>', 'Deployment target: android|ios|web')
+  .option('--output-dir <path>', 'Path to compiled assets', 'dist')
+  .option('--skip-build', 'Skip build and upload the existing output directory')
+  .action(async opts => {
+    const cwd = process.cwd();
+    await deployToZephyr({
+      cwd,
+      configFile: opts.config,
+      target: opts.target,
+      outputDir: opts.outputDir,
+      skipBuild: opts.skipBuild,
     });
   });
 

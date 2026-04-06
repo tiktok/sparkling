@@ -7,6 +7,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Looper
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
@@ -21,6 +22,9 @@ import com.tiktok.sparkling.hybridkit.base.IHybridView
 import com.tiktok.sparkling.hybridkit.base.IKitView
 import com.tiktok.sparkling.hybridkit.base.IPerformanceView
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
+import com.tiktok.sparkling.ota.ZephyrOtaManager
+import com.tiktok.sparkling.ota.ZephyrVersionInfo
+import com.tiktok.sparkling.utils.SchemeParser
 import org.json.JSONObject
 
 
@@ -35,7 +39,17 @@ class SparklingView(
     private var hideLoading: Boolean = false
     private var hideError: Boolean = false
     private var kitViewDelegate: IKitView? = null
+    private var otaBadgeView: TextView? = null
     var sparklingContext: SparklingContext? = null
+    private val otaListener = object : ZephyrOtaManager.Listener {
+        override fun onUpdateReady(info: ZephyrVersionInfo) {
+            if (Looper.myLooper() != Looper.getMainLooper()) {
+                post { showOtaBadge() }
+            } else {
+                showOtaBadge()
+            }
+        }
+    }
     // private var debugInfoTag: TextView? = null
 
     private var loadStatus = IPerformanceView.LoadStatus.INIT
@@ -84,6 +98,8 @@ class SparklingView(
         loadingViewBgColor?.let { color ->
             loadingView?.setBackgroundColor(color)
         }
+        setupOtaBadge()
+        ZephyrOtaManager.startPolling(context)
 
 
         val kitView = HybridKit.createKitView(
@@ -127,6 +143,7 @@ class SparklingView(
         )
         kitViewDelegate = kitView
         addView(kitView?.realView())
+        otaBadgeView?.let(::bringChildToFront)
 
         handleUI()
 
@@ -189,9 +206,12 @@ class SparklingView(
     override fun release() {
         if (isReleased) return
         isReleased = true
+        ZephyrOtaManager.removeListener(otaListener)
+        ZephyrOtaManager.stopPolling()
         kitViewDelegate?.destroy(true)
         loadingView = null
         errorView = null
+        otaBadgeView = null
         sparklingContext = null
     }
 
@@ -217,6 +237,72 @@ class SparklingView(
             }
         }
         // addDebugTagView()
+    }
+
+    private fun setupOtaBadge() {
+        val badge = otaBadgeView ?: TextView(context).apply {
+            text = "Update ready · tap"
+            setTextColor(Color.WHITE)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+            setPadding(dp(10), dp(6), dp(10), dp(6))
+            setBackgroundResource(android.R.drawable.toast_frame)
+            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
+                gravity = Gravity.TOP or Gravity.END
+                topMargin = dp(12)
+                marginEnd = dp(12)
+            }
+            visibility = View.GONE
+            elevation = dp(6).toFloat()
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { applyPendingOtaUpdate() }
+        }
+        otaBadgeView = badge
+        if (badge.parent == null) {
+            addView(badge)
+        }
+
+        ZephyrOtaManager.removeListener(otaListener)
+        ZephyrOtaManager.addListener(otaListener)
+        if (ZephyrOtaManager.hasPendingUpdate(context)) {
+            showOtaBadge()
+        } else {
+            hideOtaBadge()
+        }
+    }
+
+    private fun showOtaBadge() {
+        otaBadgeView?.visibility = View.VISIBLE
+        otaBadgeView?.let(::bringChildToFront)
+    }
+
+    private fun hideOtaBadge() {
+        otaBadgeView?.visibility = View.GONE
+    }
+
+    private fun dp(value: Int): Int {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            value.toFloat(),
+            resources.displayMetrics,
+        ).toInt()
+    }
+
+    private fun applyPendingOtaUpdate() {
+        val currentContext = sparklingContext ?: return
+        val scheme = currentContext.scheme ?: return
+        if (!ZephyrOtaManager.applyPendingUpdateIfNeeded(context)) {
+            hideOtaBadge()
+            return
+        }
+        val updatedParam = SchemeParser.parseScheme(scheme)?.apply {
+            bundle = ZephyrOtaManager.resolveBundle(context, bundle)
+        } ?: return
+
+        currentContext.hybridSchemeParam = updatedParam
+        kitViewDelegate?.refreshSchemeParam(updatedParam)
+        hideOtaBadge()
+        kitViewDelegate?.reload()
     }
 
     /*

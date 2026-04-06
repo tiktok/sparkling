@@ -7,6 +7,7 @@ import { runCommand } from '../utils/exec';
 import { ui } from '../utils/ui';
 import { isVerboseEnabled, verboseLog } from '../utils/verbose';
 import { copyAssets } from './copy-assets';
+import { writeZephyrRuntimeConfig } from './zephyr-runtime-config';
 
 export interface BuildOptions {
   cwd: string;
@@ -28,10 +29,14 @@ export async function buildProject(options: BuildOptions): Promise<void> {
   console.log(ui.headline(`Building Lynx bundle with config from ${path.relative(options.cwd, configPath)}`));
   await runCommand(rspeedyBin, ['build', '--config', tempConfigPath], { cwd: options.cwd });
 
+  const { config } = await loadAppConfig(options.cwd, options.configFile ?? 'app.config.ts');
+  writeZephyrRuntimeConfig({
+    cwd: options.cwd,
+    config,
+  });
+
   const shouldCopy = options.skipCopy !== true; // default to no copy
   if (shouldCopy) {
-    // Read AppConfig to locate platform asset destinations if provided
-    const { config } = await loadAppConfig(options.cwd, options.configFile ?? 'app.config.ts');
     await copyAssets({
       cwd: options.cwd,
       androidDest: config.paths?.androidAssets ?? 'android/app/src/main/assets',

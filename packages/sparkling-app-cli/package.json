@@ -30,7 +30,8 @@
     "fast-glob": "^3.3.3",
     "fs-extra": "^11.2.0",
     "semver": "^7.6.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "zephyr-agent": "^1.0.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",

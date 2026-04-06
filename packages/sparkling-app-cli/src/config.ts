@@ -140,7 +140,7 @@ function loadAppConfigViaEsm(cwd: string, configPath: string, originalError?: un
     `const url = ${JSON.stringify(fileUrl)};`,
     'const mod = await import(url);',
     'const cfg = (mod.default ?? mod);',
-    'const out = { lynxConfig: cfg.lynxConfig ?? {}, platform: cfg.platform ?? {}, paths: cfg.paths ?? {}, appName: cfg.appName, devtool: cfg.devtool };',
+    'const out = { lynxConfig: cfg.lynxConfig ?? {}, platform: cfg.platform ?? {}, paths: cfg.paths ?? {}, appName: cfg.appName, devtool: cfg.devtool, zephyr: cfg.zephyr ?? undefined };',
     'process.stdout.write(JSON.stringify(out));',
   ].join('\n');
   fs.writeFileSync(readerScript, script);

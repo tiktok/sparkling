@@ -35,6 +35,31 @@ export interface SplashScreenPluginConfig {
   };
 }
 
+export type ZephyrDeployTarget = 'android' | 'ios' | 'web';
+export type ZephyrOtaStrategy = 'next-launch' | 'prompt-restart';
+export type ZephyrOtaFallback = 'bundled';
+
+export interface ZephyrPlatformConfig {
+  target?: ZephyrDeployTarget;
+}
+
+export interface ZephyrPollingConfig {
+  enabled?: boolean;
+  intervalMs?: number;
+}
+
+export interface ZephyrConfig {
+  enabled?: boolean;
+  appId?: string;
+  channel?: string;
+  versionUrl?: string;
+  strategy?: ZephyrOtaStrategy;
+  fallback?: ZephyrOtaFallback;
+  polling?: ZephyrPollingConfig;
+  android?: ZephyrPlatformConfig;
+  ios?: ZephyrPlatformConfig;
+}
+
 export type PluginConfig =
   | ['splash-screen', SplashScreenPluginConfig]
   | [string, Record<string, unknown>?];
@@ -42,6 +67,7 @@ export type PluginConfig =
 export interface AppConfig {
   lynxConfig: LynxConfig;
   appName?: string;
+  zephyr?: ZephyrConfig;
   platform?: PlatformConfig;
   paths?: {
     androidAssets?: string;

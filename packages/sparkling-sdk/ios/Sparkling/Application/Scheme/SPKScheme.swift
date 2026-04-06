@@ -73,6 +73,12 @@ open class SPKScheme: NSObject, SPKSchemeProtocol {
             return nil
         }
 
+        // Prefer the already-flattened inner query map from the resolved params.
+        // Using the outer `resolvedURL` query map here re-wraps `url=hybrid://...`
+        // and can clobber the actual remote bundle URL during OTA apply.
+        extra = parsedParams.extra.reduce(into: [String: String]()) { partialResult, item in
+            partialResult[item.key] = "\(item.value)"
+        }
         parsedParams.update(withDictionary: extra)
         
         extra?.updateValue(parsedParams.resolvedURL?.absoluteString ?? "", forKey: "resolvedURL")

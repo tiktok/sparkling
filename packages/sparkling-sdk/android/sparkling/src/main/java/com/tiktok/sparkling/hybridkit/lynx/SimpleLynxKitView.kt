@@ -17,6 +17,7 @@ import com.tiktok.sparkling.hybridkit.KitViewManager
 import com.tiktok.sparkling.hybridkit.base.IGetDataCallback
 import com.tiktok.sparkling.hybridkit.base.IHybridKitLifeCycle
 import com.tiktok.sparkling.hybridkit.base.IKitView
+import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
 import com.tiktok.sparkling.hybridkit.utils.GlobalPropsUtils
 import com.tiktok.sparkling.hybridkit.utils.LogLevel
 import com.tiktok.sparkling.hybridkit.utils.LogUtils
@@ -91,6 +92,11 @@ class SimpleLynxKitView : LynxView, IKitView {
         rawUrl?.let {
             load(it)
         }
+    }
+
+    override fun refreshSchemeParam(hybridSchemeParam: HybridSchemeParam) {
+        this.hybridContext.hybridSchemeParam = hybridSchemeParam
+        this.rawUrl = hybridSchemeParam.bundle
     }
 
     override fun updateData(data: Map<String, Any>) {

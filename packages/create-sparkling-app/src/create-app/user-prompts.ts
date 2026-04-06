@@ -92,6 +92,18 @@ export async function askAdditionalTools(flags: { yes?: boolean }): Promise<stri
   return [];
 }
 
+export async function askZephyrSupport(flags: { yes?: boolean; withZephyr?: boolean }): Promise<boolean> {
+  if (flags.withZephyr !== undefined) return flags.withZephyr;
+  if (!flags.yes) {
+    const withZephyr = await p.confirm({
+      message: 'Add Zephyr deploy support?',
+      initialValue: false,
+    });
+    return checkCancel(withZephyr);
+  }
+  return false;
+}
+
 export async function askNamespace(defaultNamespace: string, flags: { yes?: boolean; namespace?: string; ['app-id']?: string }): Promise<string> {
   const provided = flags.namespace ?? flags['app-id'];
   if (provided) return provided;

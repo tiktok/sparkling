@@ -18,6 +18,13 @@ npm create sparkling-app@latest my-app
 cd my-app
 ```
 
+Optional. Scaffold Zephyr deploy support too:
+
+```bash
+npm create sparkling-app@latest my-app -- --with-zephyr
+cd my-app
+```
+
 ### Run native targets
 
 ```bash
@@ -57,6 +64,13 @@ Key folders/files created by the default template:
 - `android/`, `ios/`: native shells wired to Sparkling SDK
 - `app.config.ts`: build + routing config consumed by `sparkling-app-cli`
 - `package.json`: scripts (`dev`, `build`, `run:android`, `run:ios`)
+
+If you enable Zephyr support, the template also adds:
+
+- `deploy:zephyr:ios` / `deploy:zephyr:android` scripts powered by `sparkling-app-cli`
+- a `zephyr` section in `app.config.ts` for future Sparkling OTA wiring
+
+For the OTA contract and rollout model, see [Zephyr OTA for Sparkling](../deployment/zephyr-ota).
 
 ### Prerequisites
 

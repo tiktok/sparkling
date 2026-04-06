@@ -47,10 +47,12 @@ import {
   askNamespace,
   askProjectName,
   askTemplate,
+  askZephyrSupport,
   confirmInitGit,
   confirmInstall,
   confirmRemoveExistingDir,
 } from "./create-app/user-prompts";
+import { applyZephyrSupport } from "./create-app/zephyr";
 import { enableVerboseLogging, isVerboseEnabled, verboseLog } from "./utils/verbose";
 
 export type {
@@ -190,6 +192,7 @@ export async function createSparklingApp(
   const devTools = await askDevTools(flags);
 
   const additionalTools = await askAdditionalTools(flags);
+  const withZephyr = await askZephyrSupport(flags);
 
   const defaultNamespace = deriveDefaultNamespace(packageName);
   const packageNamespace = await askNamespace(defaultNamespace, flags);
@@ -272,6 +275,9 @@ export async function createSparklingApp(
         projectDir: config.targetDir,
         selection: androidDsl,
       });
+      if (withZephyr) {
+        applyZephyrSupport(config.targetDir, packageName);
+      }
       applyPackageNamespace(config.targetDir, packageNamespace);
       ensureExecutable(path.join(config.targetDir, "android", "gradlew"));
     },

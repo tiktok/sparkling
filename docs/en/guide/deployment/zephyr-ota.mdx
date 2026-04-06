@@ -1,0 +1,128 @@
+# Zephyr OTA for Sparkling
+
+Sparkling can already load remote Lynx bundles. Zephyr OTA support builds on top of that by adding:
+
+- snapshot/version polling
+- tap-to-apply remote bundle activation
+- bundled fallback
+
+## Status
+
+Current state in open source:
+
+- scaffold support: available
+- direct Zephyr deploy from `sparkling-app-cli`: available
+- live OTA resolver against a stable Zephyr `versionUrl`: available
+- built-in `Update ready` badge on pending OTA snapshots: available
+- tap badge to reload current container into latest snapshot: available
+- local cache/hash verification: planned
+
+## Deploy path
+
+Sparkling apps do not need to wrap the Lynx bundler config with a Zephyr plugin.
+
+The current deploy path is:
+
+1. `sparkling-app-cli build`
+2. `sparkling-app-cli deploy:zephyr --target ios|android`
+
+Under the hood, Sparkling calls `uploadOutputToZephyr()` from `zephyr-agent` against the generated `dist/` folder with `ssr: false`.
+
+## App config
+
+Sparkling apps can declare Zephyr OTA intent in `app.config.ts`:
+
+```ts
+import type { AppConfig } from 'sparkling-app-cli'
+
+const config: AppConfig = {
+  zephyr: {
+    enabled: true,
+    appId: 'my-app',
+    versionUrl: process.env.ZEPHYR_VERSION_URL,
+    channel: 'production',
+    strategy: 'next-launch',
+    fallback: 'bundled',
+    polling: {
+      enabled: true,
+      intervalMs: 15 * 60 * 1000,
+    },
+    ios: {
+      target: 'ios',
+    },
+    android: {
+      target: 'android',
+    },
+  },
+}
+```
+
+For real OTA rollouts, set `versionUrl` to a stable Zephyr alias that moves as new builds publish.
+
+```bash
+export ZEPHYR_VERSION_URL='https://t-latest-your-name-my-app-....ze.zephyrcloud.app'
+```
+
+If `versionUrl` is omitted, Sparkling writes the one-off deploy URL returned by `deploy:zephyr` into `dist/sparkling.zephyr.json`. Good enough for direct remote loads; not ideal for continuous OTA unless that URL also tracks the latest snapshot.
+
+For local OTA testing, set a very small polling interval:
+
+```ts
+zephyr: {
+  polling: {
+    enabled: true,
+    intervalMs: 1000,
+  },
+}
+```
+
+## Runtime flow
+
+1. app boots from bundled assets
+2. background poll hits `__get_version_info__` on `zephyr.versionUrl`
+3. if snapshot changed, Sparkling stores the returned `version_url`
+4. the current container shows a small `Update ready` badge
+5. tapping the badge rewrites `bundle=main.lynx.bundle` to `https://.../main.lynx.bundle` and reloads the current container
+6. if the remote load fails, Sparkling shows a retryable error view instead of a blank screen
+
+## Debug logs
+
+For iOS simulator debugging:
+
+```bash
+xcrun simctl spawn booted log stream --level debug --predicate 'eventMessage CONTAINS "SPKZephyrOTAManager" OR eventMessage CONTAINS "SPKViewController" OR eventMessage CONTAINS "SPKWrapperLynxView"'
+```
+
+Useful lines:
+
+- `SPKZephyrOTAManager refresh ...`
+- `SPKViewController applying OTA ...`
+- `SPKWrapperLynxView load: sourceUrl=...`
+- `SPKWrapperLynxView didReceiveError: ...`
+
+## Repo split
+
+`sparkling`
+
+- app config surface
+- native resolver hookup
+- route fallback logic
+- stable-version polling state
+
+`zephyr-packages`
+
+- direct deploy via `zephyr-agent`
+- future cache/hash helpers if Sparkling grows beyond remote-bundle OTA
+
+`zephyr-mono`
+
+- only needed if current version/snapshot endpoints need extra metadata beyond `__get_version_info__`
+
+## Next native work
+
+Next hardening work:
+
+- local download/cache instead of hot remote URLs
+- hash verification
+- route-level manifest
+- method ABI compatibility guard

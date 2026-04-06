@@ -10,6 +10,7 @@ export interface CreateAppArgs {
 export interface CreateAppFlags {
   template?: string;
   templateVersion?: string;
+  withZephyr?: boolean;
   yes?: boolean;
   force?: boolean;
   pm?: string;
