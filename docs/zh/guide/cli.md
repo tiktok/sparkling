@@ -41,9 +41,18 @@ npx sparkling dev
 | 选项 | 说明 |
 | --- | --- |
 | `--config <path>` | `app.config.ts` 路径（默认：`app.config.ts`） |
-| `--port <number>` | 开发服务器端口（默认：`5969`） |
+| `--port <number>` | 开发服务器端口（默认：`app.config.ts -> dev.server.port`，兜底 `5969`） |
 
 默认端口 **5969** 对应手机九宫格键盘上的 **LYNX**（L=5, Y=9, N=6, X=9）。
+
+端口优先级为：
+
+1. `--port`
+2. `app.config.ts` 的 `dev.server.port`
+3. `app.config.ts` 的 `lynxConfig.server.port`
+4. `5969`
+
+当执行 `sparkling dev --port <number>` 时，CLI 会把端口回写到 `app.config.ts` 的 `dev.server.port`。
 
 服务器启动后，将应用指向 `http://<你的IP>:5969/main.lynx.bundle`（或你需要的入口）。项目模板中，**DEBUG** 构建会自动连接开发服务器。
 
@@ -94,10 +103,14 @@ npx sparkling run:android
 该命令会依次执行：
 
 1. 为 Android 自动链接方法模块
-2. 构建 Lynx bundle
-3. 运行 `gradlew assembleDebug`
-4. 将 APK 安装到已连接的设备/模拟器
-5. 启动主 Activity
+2. 从 `app.config.ts` 解析端口，并在需要时自动拉起 dev server
+3. 自动识别目标设备并注入模板调试地址 host：
+   - 模拟器：`127.0.0.1`（并自动执行 `adb reverse`）
+   - 真机：本机局域网 IPv4
+4. 构建 Lynx bundle
+5. 运行 `gradlew assembleDebug`
+6. 将 APK 安装到已连接的设备/模拟器
+7. 启动主 Activity
 
 ### `sparkling run:ios`
 
@@ -117,10 +130,11 @@ npx sparkling run:ios
 该命令会依次执行：
 
 1. 选择模拟器（优先选择已启动的设备，否则回退到 iPhone 17 Pro 等常用型号）
-2. 为 iOS 自动链接方法模块
-3. 运行 `pod install`（除非指定 `--skip-pod-install`）
-4. 构建 Lynx bundle
-5. 构建、安装并在模拟器上启动应用
+2. 从 `app.config.ts` 解析端口，并在需要时自动拉起 dev server
+3. 为 iOS 自动链接方法模块
+4. 运行 `pod install`（除非指定 `--skip-pod-install`）
+5. 构建 Lynx bundle
+6. 构建、安装并在模拟器上启动应用
 
 你也可以通过设置 `SPARKLING_IOS_SIMULATOR` 环境变量来指定默认模拟器。
 

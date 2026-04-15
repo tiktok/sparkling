@@ -41,9 +41,18 @@ npx sparkling dev
 | Option | Description |
 | --- | --- |
 | `--config <path>` | Path to `app.config.ts` (default: `app.config.ts`) |
-| `--port <number>` | Dev server port (default: `5969`) |
+| `--port <number>` | Dev server port (default: `app.config.ts -> dev.server.port`, fallback `5969`) |
 
 The default port **5969** spells **LYNX** on a phone keypad (L=5, Y=9, N=6, X=9).
+
+Port resolution priority is:
+
+1. `--port`
+2. `app.config.ts` `dev.server.port`
+3. `app.config.ts` `lynxConfig.server.port`
+4. `5969`
+
+If you run `sparkling dev --port <number>`, the CLI writes it back to `app.config.ts` as `dev.server.port`.
 
 Once the server is running, point your app to `http://<your-ip>:5969/main.lynx.bundle` (or whatever entry point you need). In the project template, **DEBUG** builds connect to the dev server automatically.
 
@@ -94,10 +103,14 @@ npx sparkling run:android
 This command will:
 
 1. Autolink method modules for Android
-2. Build the Lynx bundle
-3. Run `gradlew assembleDebug`
-4. Install the APK on a connected device/emulator
-5. Launch the main activity
+2. Resolve the dev port from `app.config.ts` and auto-start a dev server if needed
+3. Auto-detect device type and inject host for template debug URL:
+   - emulator: `127.0.0.1` (and auto `adb reverse`)
+   - physical device: host LAN IPv4
+4. Build the Lynx bundle
+5. Run `gradlew assembleDebug`
+6. Install the APK on a connected device/emulator
+7. Launch the main activity
 
 ### `sparkling run:ios`
 
@@ -117,10 +130,11 @@ npx sparkling run:ios
 This command will:
 
 1. Pick a simulator (prefers a booted device; falls back to common names like iPhone 17 Pro)
-2. Autolink method modules for iOS
-3. Run `pod install` (unless `--skip-pod-install`)
-4. Build the Lynx bundle
-5. Build, install, and launch the app on the simulator
+2. Resolve the dev port from `app.config.ts` and auto-start a dev server if needed
+3. Autolink method modules for iOS
+4. Run `pod install` (unless `--skip-pod-install`)
+5. Build the Lynx bundle
+6. Build, install, and launch the app on the simulator
 
 You can also set the `SPARKLING_IOS_SIMULATOR` environment variable to specify a default simulator.
 

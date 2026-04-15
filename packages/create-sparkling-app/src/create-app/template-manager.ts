@@ -3,7 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 import fs from 'node:fs';
 import path from 'node:path';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 import { DEFAULT_TEMPLATE_PACKAGE } from './constants';
 import { ui } from '../ui';
@@ -15,6 +15,14 @@ export const sanitizeCacheKey = (packageName: string, version: string) => {
 };
 
 const NPM_TEMPLATE_PREFIX = 'npm:';
+
+const SAFE_GIT_REF = /^[a-zA-Z0-9._\-/]+$/;
+
+function validateGitRef(value: string, label: string): void {
+  if (!SAFE_GIT_REF.test(value)) {
+    throw new Error(`Invalid characters in GitHub ${label}: ${value}`);
+  }
+}
 
 export async function resolveCustomTemplate(templateInput: string, version?: string): Promise<string> {
   const trimmedInput = templateInput.trim();
@@ -37,13 +45,16 @@ export async function resolveCustomTemplate(templateInput: string, version?: str
 
   if (githubMatch) {
     const [, owner, repo, branch = 'main', subPath = ''] = githubMatch;
+    validateGitRef(owner, 'owner');
+    validateGitRef(repo, 'repo');
+    validateGitRef(branch, 'branch');
     const templateDir = path.join(process.cwd(), '.temp-templates', `${owner}-${repo}-${branch}`);
 
     try {
       if (fs.existsSync(templateDir)) {
-        execSync(`git -C "${templateDir}" pull`, { stdio: 'pipe' });
+        execFileSync('git', ['-C', templateDir, 'pull'], { stdio: 'pipe' });
       } else {
-        execSync(`git clone --depth 1 --branch ${branch} https://github.com/${owner}/${repo}.git "${templateDir}"`, { stdio: 'pipe' });
+        execFileSync('git', ['clone', '--depth', '1', '--branch', branch, `https://github.com/${owner}/${repo}.git`, templateDir], { stdio: 'pipe' });
       }
 
       const fullPath = subPath ? path.join(templateDir, subPath) : templateDir;
@@ -175,7 +186,7 @@ export async function resolveNpmTemplate(
     // precise error output below if installation fails.
     if (!skipInstall) {
       try {
-        execSync(`npm install ${normalizedName}@${versionSpecifier} --no-save --package-lock=false --no-audit --no-fund --silent`,
+        execFileSync('npm', ['install', `${normalizedName}@${versionSpecifier}`, '--no-save', '--package-lock=false', '--no-audit', '--no-fund', '--silent'],
           {
             cwd: installRoot,
             stdio: 'pipe',
