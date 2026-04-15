@@ -3,15 +3,66 @@
 // LICENSE file in the root directory of this source tree.
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
+import { execSync } from 'node:child_process';
+import { getConfiguredDevServerPorts, loadAppConfig, resolveDevServerPort } from '../config';
 import { autolink } from './autolink';
 import { buildProject } from './build';
 import { runCommand } from '../utils/exec';
 import { ui } from '../utils/ui';
 import { isVerboseEnabled, verboseLog } from '../utils/verbose';
+import { ensureDevServerRunning } from '../utils/dev-server';
 
 export interface RunAndroidOptions {
   cwd: string;
   skipCopy?: boolean;
+}
+
+interface AndroidDevice {
+  serial: string;
+  isEmulator: boolean;
+}
+
+function listConnectedAndroidDevices(): AndroidDevice[] {
+  try {
+    const output = execSync('adb devices', { encoding: 'utf8' });
+    const lines = output.split(/\r?\n/).slice(1);
+    const devices: AndroidDevice[] = [];
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const [serial, state] = trimmed.split(/\s+/);
+      if (state !== 'device') continue;
+      devices.push({ serial, isEmulator: serial.startsWith('emulator-') });
+    }
+    return devices;
+  } catch {
+    return [];
+  }
+}
+
+function resolveLocalIPv4(): string {
+  const interfaces = os.networkInterfaces();
+  const preferredOrder = ['en0', 'en1', 'wlan0'];
+
+  for (const name of preferredOrder) {
+    const candidates = interfaces[name] ?? [];
+    for (const addr of candidates) {
+      if (addr.family === 'IPv4' && !addr.internal) {
+        return addr.address;
+      }
+    }
+  }
+
+  for (const candidates of Object.values(interfaces)) {
+    for (const addr of candidates ?? []) {
+      if (addr.family === 'IPv4' && !addr.internal) {
+        return addr.address;
+      }
+    }
+  }
+
+  return '127.0.0.1';
 }
 
 function resolveAndroidAppGradle(cwd: string): string | null {
@@ -61,6 +112,34 @@ function resolveAndroidLaunchActivity(cwd: string, pkg: string): string {
 }
 
 export async function runAndroid(options: RunAndroidOptions): Promise<void> {
+  const { config } = await loadAppConfig(options.cwd);
+  const { devPort: configuredDevPort, lynxPort } = getConfiguredDevServerPorts(config);
+  if (configuredDevPort !== undefined && lynxPort !== undefined && configuredDevPort !== lynxPort) {
+    console.warn(ui.warn(
+      `Port config mismatch detected: dev.server.port=${configuredDevPort} and lynxConfig.server.port=${lynxPort}. ` +
+      `run:android uses dev.server.port (${configuredDevPort}).`,
+    ));
+  }
+  const devPort = resolveDevServerPort(config);
+  const connectedDevices = listConnectedAndroidDevices();
+  const emulatorSerials = connectedDevices.filter(d => d.isEmulator).map(d => d.serial);
+  const devServerHostForApp = emulatorSerials.length > 0 ? '127.0.0.1' : resolveLocalIPv4();
+  const devServerHostForCli = emulatorSerials.length > 0 ? '127.0.0.1' : '0.0.0.0';
+
+  await ensureDevServerRunning(options.cwd, devPort, devServerHostForCli);
+
+  for (const serial of emulatorSerials) {
+    await runCommand('adb', ['-s', serial, 'reverse', `tcp:${devPort}`, `tcp:${devPort}`], {
+      cwd: options.cwd,
+      ignoreFailure: true,
+    });
+  }
+
+  if (isVerboseEnabled()) {
+    verboseLog(
+      `run:android options -> skipCopy: ${options.skipCopy === true}, devPort: ${devPort}, devHost: ${devServerHostForApp}, emulatorCount: ${emulatorSerials.length}`,
+    );
+  }
   await autolink({ cwd: options.cwd, platform: 'android' });
   await buildProject({ cwd: options.cwd, skipCopy: options.skipCopy });
 
@@ -73,10 +152,15 @@ export async function runAndroid(options: RunAndroidOptions): Promise<void> {
     verboseLog(`Env overrides: ${JSON.stringify(env)}`);
   }
   // Always build first so artifacts exist even when no device is connected
-  await runCommand(gradleCmd, ['assembleDebug'], { cwd: androidDir, env });
+  const gradleArgs = [
+    `-PsparklingDevServerHost=${devServerHostForApp}`,
+    `-PsparklingDevServerPort=${devPort}`,
+  ];
+
+  await runCommand(gradleCmd, ['assembleDebug', ...gradleArgs], { cwd: androidDir, env });
   // Try to install if a device is connected; ignore failure so CI/headless environments are not blocked
   console.log(ui.tip('Attempting device install (if any devices are connected)...'));
-  await runCommand(gradleCmd, ['installDebug'], { cwd: androidDir, ignoreFailure: true, env });
+  await runCommand(gradleCmd, ['installDebug', ...gradleArgs], { cwd: androidDir, ignoreFailure: true, env });
   // Attempt to launch the app on a connected device
   const pkg = resolveAndroidPackageId(options.cwd);
   const activity = resolveAndroidLaunchActivity(options.cwd, pkg);

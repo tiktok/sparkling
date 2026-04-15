@@ -41,6 +41,15 @@ export type PluginConfig =
 
 export interface AppConfig {
   lynxConfig: LynxConfig;
+  /** Sparkling CLI dev settings. */
+  dev?: {
+    server?: {
+      /** Preferred dev server port for sparkling-app-cli dev/run commands. Defaults to 5969. */
+      port?: number;
+      /** Preferred dev server host for sparkling-app-cli dev command. */
+      host?: string;
+    };
+  };
   appName?: string;
   platform?: PlatformConfig;
   paths?: {

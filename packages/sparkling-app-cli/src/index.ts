@@ -57,14 +57,19 @@ program
   .command('dev')
   .description('Start Lynx dev server with HMR using app.config.ts')
   .option('--config <path>', 'Path to app.config.ts', 'app.config.ts')
-  .option('--port <number>', `Dev server port (default: ${DEV_SERVER_PORT})`, String(DEV_SERVER_PORT))
+  .option('--port <number>', `Dev server port (default: app.config.ts dev.server.port or ${DEV_SERVER_PORT})`)
+  .option('--host <host>', 'Dev server host (e.g. 127.0.0.1)')
   .action(async opts => {
     const cwd = process.cwd();
-    const port = Number.parseInt(String(opts.port), 10);
+    const rawPort = opts.port === undefined ? undefined : Number.parseInt(String(opts.port), 10);
+    if (opts.port !== undefined && !Number.isFinite(rawPort)) {
+      throw new Error(`Invalid --port value: ${opts.port}`);
+    }
     await devProject({
       cwd,
       configFile: opts.config,
-      port: Number.isFinite(port) ? port : undefined,
+      port: rawPort,
+      host: opts.host,
     });
   });
 

@@ -4,11 +4,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
+import { getConfiguredDevServerPorts, loadAppConfig, resolveDevServerPort } from '../config';
 import { autolink } from './autolink';
 import { buildProject } from './build';
 import { runCommand } from '../utils/exec';
 import { ui } from '../utils/ui';
 import { isVerboseEnabled, verboseLog } from '../utils/verbose';
+import { ensureDevServerRunning } from '../utils/dev-server';
 
 export interface RunIosOptions {
   cwd: string;
@@ -112,10 +114,6 @@ async function ensureRequiredBundler(gemfileDir: string): Promise<void> {
 
   console.log(ui.info(`Installing required Bundler version ${requiredVersion}...`));
 
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/6802e160-a55d-4751-84f7-c7cc9d523b20',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'run-ios.ts:ensureRequiredBundler',message:'Ruby env info before gem install',data:{whichRuby:(() => { try { return execSync('which ruby', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })(),whichGem:(() => { try { return execSync('which gem', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })(),gemEnv:(() => { try { return execSync('gem environment home', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })(),rubyVersion:(() => { try { return execSync('ruby --version', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })(),requiredVersion},timestamp:Date.now(),runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-  // #endregion
-
   // First try with --user-install to avoid permission issues with system Ruby
   try {
     await runCommand('gem', ['install', '--user-install', `bundler:${requiredVersion}`], { cwd: gemfileDir });
@@ -135,18 +133,11 @@ async function ensureRequiredBundler(gemfileDir: string): Promise<void> {
 
   // After install, the user gem bin may not be in PATH. Ensure bundle can find it.
   if (!isBundlerVersionInstalled(requiredVersion)) {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/6802e160-a55d-4751-84f7-c7cc9d523b20',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'run-ios.ts:ensureRequiredBundler:postInstall',message:'Bundler still not found after install attempt',data:{gemList:(() => { try { return execSync('gem list bundler --exact --versions', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })(),userGemDir:(() => { try { return execSync('ruby -e "puts Gem.user_dir"', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })()},timestamp:Date.now(),runId:'run1',hypothesisId:'H2'})}).catch(()=>{});
-    // #endregion
     console.warn(
       ui.warn(
         `Bundler ${requiredVersion} could not be verified after install. Proceeding anyway...`,
       ),
     );
-  } else {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/6802e160-a55d-4751-84f7-c7cc9d523b20',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'run-ios.ts:ensureRequiredBundler:success',message:'Bundler installed successfully',data:{requiredVersion,gemList:(() => { try { return execSync('gem list bundler --exact --versions', {stdio:'pipe'}).toString().trim(); } catch { return 'unknown'; } })()},timestamp:Date.now(),runId:'run1',hypothesisId:'H1'})}).catch(()=>{});
-    // #endregion
   }
 }
 
@@ -263,8 +254,18 @@ function pickSimulator(preferred?: string): SimulatorDevice | null {
 }
 
 export async function runIos(options: RunIosOptions): Promise<void> {
+  const { config } = await loadAppConfig(options.cwd);
+  const { devPort: configuredDevPort, lynxPort } = getConfiguredDevServerPorts(config);
+  if (configuredDevPort !== undefined && lynxPort !== undefined && configuredDevPort !== lynxPort) {
+    console.warn(ui.warn(
+      `Port config mismatch detected: dev.server.port=${configuredDevPort} and lynxConfig.server.port=${lynxPort}. ` +
+      `run:ios uses dev.server.port (${configuredDevPort}).`,
+    ));
+  }
+  const devPort = resolveDevServerPort(config);
+  await ensureDevServerRunning(options.cwd, devPort);
   if (isVerboseEnabled()) {
-    verboseLog(`run:ios options -> skipCopy: ${options.skipCopy === true}, device: ${options.device ?? '(auto)'}, skipPodInstall: ${options.skipPodInstall === true}`);
+    verboseLog(`run:ios options -> skipCopy: ${options.skipCopy === true}, device: ${options.device ?? '(auto)'}, skipPodInstall: ${options.skipPodInstall === true}, devPort: ${devPort}`);
   }
   const preferredDevice = options.device ?? process.env.SPARKLING_IOS_SIMULATOR;
   const device = pickSimulator(preferredDevice);
@@ -416,6 +417,13 @@ export async function runIos(options: RunIosOptions): Promise<void> {
     console.log(ui.info('Installing app on simulator...'));
     await runCommand('xcrun', ['simctl', 'install', device.udid, appPath], { cwd: options.cwd, ignoreFailure: true });
     console.log(ui.info(`Launching ${bundleId}...`));
-    await runCommand('xcrun', ['simctl', 'launch', device.udid, bundleId], { cwd: options.cwd, ignoreFailure: true });
+    await runCommand('xcrun', ['simctl', 'launch', device.udid, bundleId], {
+      cwd: options.cwd,
+      ignoreFailure: true,
+      env: {
+        SIMCTL_CHILD_SPARKLING_DEV_SERVER_PORT: String(devPort),
+        SIMCTL_CHILD_SPARKLING_DEV_SERVER_HOST: '127.0.0.1',
+      },
+    });
   }
 }
