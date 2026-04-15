@@ -9,16 +9,37 @@ import UIKit
 import DebugTool
 #endif
 
-private let defaultMainDevBundleURL = "http://localhost:5969/main.lynx.bundle"
-
 enum DebugDevURLSupport {
+    private static let defaultHost = "127.0.0.1"
+    private static let defaultPort = 5969
+    private static let defaultPath = "/main.lynx.bundle"
+
+    private static func fallbackDevURL() -> String {
+        let env = ProcessInfo.processInfo.environment
+        let host = env["SPARKLING_DEV_SERVER_HOST"] ?? defaultHost
+        let port = Int(env["SPARKLING_DEV_SERVER_PORT"] ?? "") ?? defaultPort
+        return "http://\(host):\(port)\(defaultPath)"
+    }
+
     static func mainScheme() -> String {
         #if DEBUG
-        let url = storedDevURL(fallback: defaultMainDevBundleURL)
-        return mainScheme(withDebugURL: url)
+        let source = storedDevURL(fallback: fallbackDevURL())
+        return mainScheme(withSource: source)
         #else
         return "hybrid://lynxview?bundle=.%2Fmain.lynx.bundle&hide_status_bar=1&hide_nav_bar=1"
         #endif
+    }
+
+    static func mainScheme(withSource source: String) -> String {
+        let normalized = source.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Debug source accepts both remote URL and local bundle name.
+        // - http(s)://... -> url=...
+        // - main.lynx.bundle -> bundle=...
+        if normalized.hasPrefix("http://") || normalized.hasPrefix("https://") {
+            return mainScheme(withDebugURL: normalized)
+        }
+        let encodedBundle = normalized.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? normalized
+        return "hybrid://lynxview?bundle=\(encodedBundle)&hide_status_bar=1&hide_nav_bar=1"
     }
 
     static func mainScheme(withDebugURL url: String) -> String {
@@ -65,7 +86,7 @@ enum DebugDevURLSupport {
         #if canImport(DebugTool)
         SparklingDebugTool.showDevURLDialog(from: controller, initialURL: initialURL, onSaved: onSaved)
         #else
-        onSaved(initialURL ?? defaultMainDevBundleURL)
+        onSaved(initialURL ?? fallbackDevURL())
         #endif
     }
 }
@@ -96,7 +117,7 @@ final class DevURLLoadFailedDelegate: NSObject, SPKContainerLifecycleProtocol {
                 return
             }
             self.isPrompting = false
-            let nextScheme = DebugDevURLSupport.mainScheme(withDebugURL: updatedURL)
+            let nextScheme = DebugDevURLSupport.mainScheme(withSource: updatedURL)
             let nextContext = DebugDevURLSupport.makeContext(delegate: self)
             let nextVC = SPKRouter.create(withURL: nextScheme, context: nextContext, frame: self.frameProvider())
             navigationController.setViewControllers([nextVC], animated: false)

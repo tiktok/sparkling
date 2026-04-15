@@ -38,6 +38,10 @@ object SparklingUriParser {
             queryMap.putAll(bundleToMap(bundle))
         }
 
+        // SECURITY: The nested "url" query parameter is parsed and its query keys are merged
+        // into queryMap without scheme validation. A malicious deep link could inject a
+        // javascript:, file:, or data: URL here. Callers that consume these merged parameters
+        // to load resources should enforce an https-only allowlist before use.
         runCatching {
             var url = uri.safeGetQueryParameter("url")
             if (url == null) {

@@ -30,6 +30,11 @@ const lynxConfig = defineConfig({
 
 const config: AppConfig = {
   lynxConfig,
+  dev: {
+    server: {
+      port: 5969,
+    },
+  },
   devtool: true,
   appName: '{{appName}}',
   platform: {

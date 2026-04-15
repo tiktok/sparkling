@@ -17,21 +17,33 @@ import com.tiktok.sparkling.SparklingContext
 import com.tiktok.sparkling.SparklingUIProvider
 import com.tiktok.sparkling.debugtool.SparklingDebugTool
 
-private const val DEFAULT_MAIN_DEV_BUNDLE_URL = "http://10.0.2.2:5969/main.lynx.bundle"
+private val DEFAULT_MAIN_DEV_BUNDLE_URL: String
+    get() = "http://${BuildConfig.SPARKLING_DEV_SERVER_HOST}:${BuildConfig.SPARKLING_DEV_SERVER_PORT}/main.lynx.bundle"
 
 object DebugDevUrlSupport {
-    fun currentMainBundleUrl(context: Context): String {
+    // Debug input supports both remote URL and local bundle source.
+    // Examples:
+    // - http://127.0.0.1:5969/main.lynx.bundle
+    // - main.lynx.bundle
+    fun currentMainBundleSource(context: Context): String {
         return SparklingDebugTool.getDevUrl(context, DEFAULT_MAIN_DEV_BUNDLE_URL)
     }
 
     fun buildMainPageScheme(context: Context): String {
-        val url = currentMainBundleUrl(context)
-        return buildMainPageSchemeWithUrl(url)
+        val source = currentMainBundleSource(context)
+        return buildMainPageSchemeWithSource(source)
     }
 
-    fun buildMainPageSchemeWithUrl(url: String): String {
-        val encoded = Uri.encode(url.trim())
-        return "hybrid://lynxview_page?url=$encoded&hide_nav_bar=1&screen_orientation=portrait"
+    fun buildMainPageSchemeWithSource(source: String): String {
+        val normalized = source.trim()
+        val encoded = Uri.encode(normalized)
+        // Remote source -> url=..., local source -> bundle=...
+        val isRemote = normalized.startsWith("http://") || normalized.startsWith("https://")
+        return if (isRemote) {
+            "hybrid://lynxview_page?url=$encoded&hide_nav_bar=1&screen_orientation=portrait"
+        } else {
+            "hybrid://lynxview_page?bundle=$encoded&hide_nav_bar=1&screen_orientation=portrait"
+        }
     }
 
     fun networkBundleUrlFromScheme(scheme: String?): String? {
@@ -105,7 +117,7 @@ private class DebugDevUrlErrorView(
 
         SparklingDebugTool.showDevUrlDialog(activity, currentUrl) { updatedUrl ->
             val nextContext = SparklingContext().apply {
-                scheme = DebugDevUrlSupport.buildMainPageSchemeWithUrl(updatedUrl)
+                scheme = DebugDevUrlSupport.buildMainPageSchemeWithSource(updatedUrl)
                 withInitData(initialDataJson)
                 sparklingUIProvider = DebugSparklingUiProvider(initialDataJson, scheme ?: "")
             }

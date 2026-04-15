@@ -19,6 +19,14 @@ android {
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
         }
+
+        val sparklingDevServerHost =
+            (project.findProperty("sparklingDevServerHost") as String?) ?: "127.0.0.1"
+        val sparklingDevServerPort =
+            (project.findProperty("sparklingDevServerPort") as String?) ?: "5969"
+        buildConfigField("String", "SPARKLING_DEV_SERVER_HOST", "\"$sparklingDevServerHost\"")
+        buildConfigField("int", "SPARKLING_DEV_SERVER_PORT", sparklingDevServerPort)
+
         buildTypes {
             release {
                 isMinifyEnabled = false
@@ -74,7 +82,9 @@ android {
 
         // BEGIN SPARKLING AUTOLINK
         listOf(
-            project(":sparkling-navigation")
+            project(":sparkling-media"),
+            project(":sparkling-navigation"),
+            project(":sparkling-storage")
         ).forEach { dep -> add("implementation", dep) }
         debugImplementation(project(":sparkling-debug-tool"))
         // END SPARKLING AUTOLINK

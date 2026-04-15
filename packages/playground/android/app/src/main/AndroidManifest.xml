@@ -10,6 +10,7 @@
 
     <application
         android:name="com.tiktok.sparkling.playground.SparklingApplication"
+        android:allowBackup="false"
         android:icon="@drawable/sparkling_icon"
         android:label="@string/app_name"
         android:roundIcon="@drawable/sparkling_icon"
