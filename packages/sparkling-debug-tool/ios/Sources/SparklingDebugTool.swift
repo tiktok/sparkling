@@ -11,9 +11,27 @@ public class SparklingDebugTool: NSObject {
     private static let devURLKey = "sparkling.debug.dev_url"
 
     public static func setup() {
-        LynxEnv.sharedInstance().lynxDebugEnabled = true
-        LynxEnv.sharedInstance().devtoolEnabled = true
-        LynxEnv.sharedInstance().logBoxEnabled = true
+        // Preset values must be set BEFORE LynxEnv flags so the DevTool
+        // service picks them up during initialization.
+        if let devtool = LynxServices.getInstanceWith(
+            NSProtocolFromString("LynxServiceDevToolProtocol")!
+        ) as? LynxServiceDevToolProtocol {
+            devtool.logBoxPresetValue = true
+            devtool.lynxDebugPresetValue = true
+        }
+
+        let env = LynxEnv.sharedInstance()
+        env.lynxDebugEnabled = true
+        env.devtoolEnabled = true
+        env.logBoxEnabled = true
+
+        // Enable DebugRouter so the DevTool desktop app can discover and
+        // connect to this app (via USB or network).
+        if let routerClass = NSClassFromString("DebugRouter"),
+           let instance = routerClass.perform(NSSelectorFromString("instance"))?.takeUnretainedValue(),
+           instance.responds(to: NSSelectorFromString("enableAllSessions")) {
+            instance.perform(NSSelectorFromString("enableAllSessions"))
+        }
     }
 
     public static func devURL(fallback: String) -> String {
