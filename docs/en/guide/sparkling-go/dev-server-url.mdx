@@ -1,0 +1,282 @@
+import { Steps } from '@theme';
+
+# Development Workflow
+
+This guide covers the complete development workflow for Sparkling apps: starting the dev
+server, connecting from a simulator or real device, using hot reload, and managing the
+dev server URL. We use **Sparkling Go** (the official demo app) as the running example,
+but everything here applies to any Sparkling project.
+
+:::tip
+The core idea: an HTTP dev server on your machine serves JS bundles to the native shell,
+with hot updates pushed on every file save. No manual rebuild needed.
+:::
+
+## Starting the dev server
+
+<Steps>
+
+### Start the server
+
+```bash
+npx sparkling dev
+```
+
+The dev server starts on port **5969** (spells **LYNX** on a phone keypad: L=5 Y=9 N=6 X=9).
+Each entry point defined in `app.config.ts` is served as an HTTP bundle:
+
+```
+➜  Lynx  http://192.168.1.100:5969/main.lynx.bundle
+➜  Lynx  http://192.168.1.100:5969/showcase.lynx.bundle
+```
+
+You can override the port with `--port`:
+
+```bash
+npx sparkling dev --port 8080
+```
+
+### Run the native shell
+
+In a separate terminal:
+
+```bash
+# iOS
+npx sparkling run:ios
+
+# Android
+npx sparkling run:android
+```
+
+Debug builds automatically connect to the dev server. The app loads
+`main.lynx.bundle` from the dev server URL instead of from bundled local assets.
+
+### Edit, save, see changes
+
+Save any source file. The dev server rebuilds the affected bundle and pushes a hot
+update to the running app — no manual reload needed.
+
+</Steps>
+
+### QR code for physical devices
+
+When the dev server starts, it prints a **QR code** in the terminal. Scan it with a
+device that has LynxExplorer or your Sparkling app installed to load the bundle directly.
+
+The QR URL is customizable via the `pluginQRCode` plugin in `app.config.ts`:
+
+```typescript
+import { pluginQRCode } from '@lynx-js/qrcode-rsbuild-plugin'
+
+plugins: [
+  pluginQRCode({
+    schema(url) {
+      return `${url}?fullscreen=true`
+    },
+  }),
+]
+```
+
+## Hot Module Replacement (HMR)
+
+Sparkling uses **Rspeedy** (built on Rsbuild/Rspack) as its bundler. HMR is enabled by
+default in dev mode — no configuration required.
+
+### How it works
+
+1. You save a source file.
+2. Rspeedy detects the change and generates a `.hot-update.js` patch.
+3. The patch is served over HTTP to the running app.
+4. The Lynx runtime applies the patch. Changed components re-render.
+
+### State-preserving updates
+
+For React state-preserving updates, add the `pluginReactLynx` plugin (included in the
+default template):
+
+```typescript
+import { pluginReactLynx } from '@lynx-js/react-rsbuild-plugin'
+
+plugins: [
+  pluginReactLynx(),
+]
+```
+
+With this, editing a component preserves its React state — only the changed component
+re-renders, without resetting the page.
+
+### Entry point changes
+
+When you add, remove, or rename entries in `app.config.ts`, the dev server
+automatically restarts. Other config changes (output settings, plugins) require a
+manual restart.
+
+## Connecting from a real device
+
+On a simulator, `localhost` just works. On a **real device**, the app needs your
+machine's LAN IP address.
+
+### The problem
+
+The dev server runs on your machine at (e.g.) `http://192.168.1.100:5969/`. But
+`__webpack_public_path__` is baked into the bundle at build time as
+`http://localhost:5969/`. When the app calls `navigate()` to load a sub-page, it
+builds the URL from `__webpack_public_path__` — pointing at `localhost`, which doesn't
+exist on the device.
+
+### The solution: runtime URL resolution
+
+`sparkling-navigation` automatically resolves this. When you call `navigate()` or
+`open()`, it reads the **actual** URL the native side used to load the current bundle
+from `lynx.__globalProps.queryItems.url`, and uses that as the base for all sub-page
+navigation.
+
+```
+Native loads:  http://192.168.1.100:5969/main.lynx.bundle
+                ↓ stored in globalProps.queryItems.url
+navigate({ path: 'settings.lynx.bundle' })
+                ↓ resolved to
+               http://192.168.1.100:5969/settings.lynx.bundle  ✓
+           NOT http://localhost:5969/settings.lynx.bundle       ✗
+```
+
+This happens automatically — no code changes needed in your app.
+
+## Managing the dev server URL
+
+Sparkling provides two ways to set the dev server URL on a device: the **in-app
+Settings UI** (recommended for Sparkling Go) and the **pipe API** (for custom
+integrations).
+
+### Option A: In-app Settings UI (Sparkling Go)
+
+Sparkling Go includes a **Dev Server** card on its Settings page. It only appears in
+dev builds (`__DEV__ === true`).
+
+#### Connection status
+
+The card reads the runtime bundle URL from `lynx.__globalProps` (no pipe call needed)
+and shows a live indicator:
+
+| Indicator | Meaning |
+|-----------|---------|
+| **Green dot** — Connected to dev server | The bundle was loaded over HTTP. The server origin is shown. |
+| **Gray dot** — Running from local assets | The bundle was loaded from a local path (production). |
+
+<img src="/sparkling/guide/sparkling-go/dev-url-idle.png" width="300" alt="Connected to dev server, URL loaded" />
+
+#### Editing the URL
+
+The **Configured URL** field shows the persisted dev server URL. Type a new one and the
+UI gives you inline feedback:
+
+| State | Screenshot |
+|-------|-----------|
+| **Validation error** — URL must start with `http://` or `https://` | <img src="/sparkling/guide/sparkling-go/dev-url-validation.png" width="260" /> |
+| **Ready to save** — valid URL, differs from current | <img src="/sparkling/guide/sparkling-go/dev-url-save-active.png" width="260" /> |
+
+#### Save feedback
+
+Tapping **Save** persists the URL on the native side. The result is shown inline:
+
+| State | Screenshot |
+|-------|-----------|
+| **Success** — restart the app to apply | <img src="/sparkling/guide/sparkling-go/dev-url-save-success.png" width="260" /> |
+| **Error** — shows the native error message | <img src="/sparkling/guide/sparkling-go/dev-url-save-error.png" width="260" /> |
+
+#### Edge cases
+
+| State | Screenshot |
+|-------|-----------|
+| **Loading** — fetching config from native side | <img src="/sparkling/guide/sparkling-go/dev-url-loading.png" width="260" /> |
+| **Pipe methods not available** — `sparkling-debug-tool` not integrated | <img src="/sparkling/guide/sparkling-go/dev-url-pipe-error.png" width="260" /> |
+| **URL mismatch** — configured server differs from active connection | <img src="/sparkling/guide/sparkling-go/dev-url-mismatch.png" width="260" /> |
+
+### Option B: Pipe API (custom integration)
+
+If you're building your own app (not using Sparkling Go's Settings page), you can call
+the pipe methods directly to read and write the persisted dev URL.
+
+**Prerequisites:** `sparkling-debug-tool` must be integrated in your native project with
+`getDevUrl` and `setDevUrl` pipe methods registered.
+
+```typescript
+import pipe from 'sparkling-method'
+
+// Read the current persisted dev URL
+pipe.call('debugtool.getDevUrl', {}, (res) => {
+  if (res.code === 1) {
+    console.log('Dev URL:', res.data.url)
+  }
+})
+
+// Save a new dev URL
+pipe.call('debugtool.setDevUrl', { url: 'http://192.168.1.100:5969/' }, (res) => {
+  if (res.code === 1) {
+    // Restart the app to apply
+  }
+})
+```
+
+| `res.code` | Meaning |
+|------------|---------|
+| `1` | Success |
+| `0` | Method exists but operation failed |
+| Negative | Infrastructure error (method not registered, module missing) |
+
+The native side stores the URL in:
+- **iOS**: `UserDefaults` with key `sparkling.debug.dev_url`
+- **Android**: `SharedPreferences` with key `dev_url`
+
+### Automatic fallback dialog
+
+If the app fails to load a bundle from the dev server (e.g. wrong IP, server not
+running), the template app automatically shows a native dialog prompting you to enter
+the correct dev server URL. This is handled by `DebugDevURLSupport` in the native shell
+— no JS code is involved, since the bundle hasn't loaded yet.
+
+## Debugging features
+
+When `sparkling-debug-tool` is integrated and initialized
+(`SparklingDebugTool.setup()` on iOS, `.init(application)` on Android), it enables:
+
+| Feature | iOS | Android |
+|---------|-----|---------|
+| Lynx DevTools | ✓ | ✓ |
+| Error LogBox overlay | ✓ | ✓ |
+| Long-press debug menu | — | ✓ |
+
+These are enabled automatically — `setup()` / `init()` sets `LynxEnv.devtoolEnabled`,
+`LynxEnv.logBoxEnabled`, and `LynxEnv.lynxDebugEnabled` to `true`.
+
+## Troubleshooting
+
+### App shows a white/blank screen
+
+1. **Is the dev server running?** Check `npx sparkling dev` is active and shows "ready".
+2. **Can the device reach the server?** Verify both are on the same network. Try
+   `curl http://<your-ip>:5969/main.lynx.bundle` from the device or simulator.
+3. **Wrong IP?** If you changed networks, the IP may have changed. Update the dev URL
+   in Settings or restart `sparkling dev`.
+
+### Sub-page navigation fails on real device
+
+The `navigate()` function should automatically resolve the correct dev server IP. If it
+doesn't, check that:
+- `sparkling-navigation` is up to date (needs the `getDevServerBaseURL()` fix)
+- The native side passes `url=` in the scheme's query parameters
+
+### HMR not working
+
+1. Check the dev server terminal for build errors.
+2. Some changes (new entry points, config changes) require restarting `sparkling dev`.
+3. Verify the app loaded from the dev server (check for "Connected to dev server" in
+   Settings, or look for `http://` in the runtime URL).
+
+### "Pipe methods not available" in Settings
+
+The `getDevUrl` / `setDevUrl` methods are provided by `sparkling-debug-tool`. Ensure:
+1. `sparkling-debug-tool` is in your dependencies
+2. The native side calls `SparklingDebugTool.setup()` (iOS) or `.init(application)`
+   (Android) during app initialization
+3. The pipe methods are registered (check native build logs for registration errors)
