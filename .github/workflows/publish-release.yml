@@ -135,42 +135,10 @@ jobs:
           fi
           echo "✅ Maven Central auth looks valid"
 
-  preflight-cocoapods-auth:
-    name: Preflight CocoaPods auth
-    runs-on: macos-latest
-    needs: prepare
-    environment:
-      name: package releasement
-    steps:
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2.6'
-
-      - name: Install CocoaPods
-        run: |
-          gem install cocoapods
-          pod setup
-
-      - name: Verify CocoaPods trunk token
-        env:
-          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
-        run: |
-          if [ -z "$COCOAPODS_TRUNK_TOKEN" ]; then
-            echo "::error::COCOAPODS_TRUNK_TOKEN secret is missing or empty."
-            exit 1
-          fi
-          COCOAPODS_TRUNK_TOKEN=$COCOAPODS_TRUNK_TOKEN pod trunk me >/tmp/pod_trunk_me.txt 2>&1 || {
-            cat /tmp/pod_trunk_me.txt
-            echo "::error::pod trunk me failed. Check COCOAPODS_TRUNK_TOKEN validity."
-            exit 1
-          }
-          echo "✅ CocoaPods trunk token is valid"
-
   # ──────────────────────────────────────────────────────────────
-  # Step 2: Publish Android, iOS, and npm packages in parallel
-  #         (playground, sparkling-sdk, sparkling-app-template
-  #          are NOT published here)
+  # Step 2: Publish Android and npm packages in parallel
+  #         (playground, sparkling-app-template are NOT published here)
+  #         iOS SDK is bundled in sparkling-sdk npm package (ios/ directory)
   # ──────────────────────────────────────────────────────────────
 
   # 2a. Publish TypeScript packages to npm
@@ -241,7 +209,7 @@ jobs:
           const path = require('node:path');
 
           const repoRoot = process.cwd();
-          const excluded = new Set(["sparkling-playground", "sparkling-sdk", "sparkling-app-template"]);
+          const excluded = new Set(["sparkling-playground", "sparkling-app-template"]);
           const roots = [path.join(repoRoot, "packages"), path.join(repoRoot, "template")];
 
           function readPackageJson(dir) {
@@ -435,248 +403,13 @@ jobs:
           ./scripts/publish-android-maven.sh ${{ needs.prepare.outputs.version }} --skip-tests
           echo "✅ Android SDK published to Maven Central successfully"
 
-  # 2c. Publish iOS SparklingMethod to CocoaPods
-  publish-ios-method:
-    name: Publish iOS SparklingMethod
-    runs-on: macos-latest
-    needs: [prepare, preflight-cocoapods-auth]
-    environment:
-      name: package releasement
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Log job start
-        run: |
-          echo "========================================="
-          echo "  Step 2c: Publish iOS SparklingMethod"
-          echo "========================================="
-          echo "  Version: ${{ needs.prepare.outputs.version }}"
-          echo "  Runner:  ${{ runner.os }} (${{ runner.arch }})"
-          echo "========================================="
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2.6'
-
-      - name: Install CocoaPods
-        run: |
-          echo "📦 Installing CocoaPods..."
-          gem install cocoapods
-          pod setup
-          echo "✅ CocoaPods version: $(pod --version)"
-
-      - name: Update versions
-        run: |
-          echo "📝 Updating all versions to ${{ needs.prepare.outputs.version }}..."
-          chmod +x scripts/update-all-version.sh
-          ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
-          echo "✅ Versions updated successfully"
-
-      - name: Verify CocoaPods credentials
-        env:
-          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
-        run: |
-          echo "🔑 Verifying CocoaPods trunk token..."
-          if [ -z "$COCOAPODS_TRUNK_TOKEN" ]; then
-            echo "❌ COCOAPODS_TRUNK_TOKEN is empty!"
-            echo "::error::COCOAPODS_TRUNK_TOKEN secret is missing or empty."
-            exit 1
-          fi
-          TRUNK_INFO=$(COCOAPODS_TRUNK_TOKEN=$COCOAPODS_TRUNK_TOKEN pod trunk me 2>&1) || {
-            echo "❌ CocoaPods trunk authentication failed!"
-            echo "::error::pod trunk me failed. Check that COCOAPODS_TRUNK_TOKEN is valid."
-            echo "   Output: $TRUNK_INFO"
-            exit 1
-          }
-          echo "✅ CocoaPods trunk authentication successful:"
-          echo "$TRUNK_INFO"
-
-      - name: Check if SparklingMethod already published
-        id: pod_method_check
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          echo "🔍 Checking if SparklingMethod is already published at version $VERSION..."
-          if pod trunk info SparklingMethod 2>/dev/null | grep -q "$VERSION"; then
-            echo "⚠️ SparklingMethod $VERSION already exists on CocoaPods — skipping publish"
-            echo "::warning::SparklingMethod at version $VERSION already published. Skipping."
-            echo "already_published=true" >> $GITHUB_OUTPUT
-          else
-            echo "✅ SparklingMethod $VERSION not found on CocoaPods — proceeding with publish"
-            echo "already_published=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Publish SparklingMethod to CocoaPods
-        if: steps.pod_method_check.outputs.already_published != 'true'
-        env:
-          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
-        run: |
-          echo "🚀 Publishing SparklingMethod to CocoaPods..."
-          echo "   Version: ${{ needs.prepare.outputs.version }}"
-          chmod +x scripts/publish-ios-sparkling-method.sh
-          ./scripts/publish-ios-sparkling-method.sh ${{ needs.prepare.outputs.version }} --skip-git
-          echo "✅ SparklingMethod published to CocoaPods successfully"
-
-  # 2d. Publish iOS Sparkling SDK to CocoaPods (depends on SparklingMethod)
-  publish-ios-sdk:
-    name: Publish iOS Sparkling SDK
-    runs-on: macos-latest
-    needs: [prepare, preflight-cocoapods-auth, publish-ios-method]
-    environment:
-      name: package releasement
-      url: https://cocoapods.org/pods/Sparkling
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Log job start
-        run: |
-          echo "========================================="
-          echo "  Step 2d: Publish iOS Sparkling SDK"
-          echo "========================================="
-          echo "  Version: ${{ needs.prepare.outputs.version }}"
-          echo "  Runner:  ${{ runner.os }} (${{ runner.arch }})"
-          echo "  Depends: publish-ios-method (SparklingMethod)"
-          echo "========================================="
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2.6'
-
-      - name: Install CocoaPods
-        run: |
-          echo "📦 Installing CocoaPods..."
-          gem install cocoapods
-          pod setup
-          echo "✅ CocoaPods version: $(pod --version)"
-
-      - name: Update versions
-        run: |
-          echo "📝 Updating all versions to ${{ needs.prepare.outputs.version }}..."
-          chmod +x scripts/update-all-version.sh
-          ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
-          echo "✅ Versions updated successfully"
-
-      - name: Wait for SparklingMethod CDN sync
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          echo "⏳ Waiting for SparklingMethod $VERSION to be available on CDN..."
-          FOUND=false
-          for i in {1..30}; do
-            if pod trunk info SparklingMethod 2>/dev/null | grep -q "$VERSION"; then
-              echo "✅ SparklingMethod $VERSION is available on CDN (after $i checks)"
-              FOUND=true
-              break
-            fi
-            echo "   Waiting... ($i/30, next check in 10s)"
-            sleep 10
-          done
-          if [ "$FOUND" != "true" ]; then
-            echo "❌ SparklingMethod $VERSION was NOT found on CDN after 30 attempts (5 minutes)"
-            echo "::error::SparklingMethod $VERSION not available on CocoaPods CDN after 5 minutes"
-            exit 1
-          fi
-
-      - name: Check if Sparkling SDK already published
-        id: pod_sdk_check
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          echo "🔍 Checking if Sparkling SDK is already published at version $VERSION..."
-          if pod trunk info Sparkling 2>/dev/null | grep -q "$VERSION"; then
-            echo "⚠️ Sparkling $VERSION already exists on CocoaPods — skipping publish"
-            echo "::warning::Sparkling SDK at version $VERSION already published. Skipping."
-            echo "already_published=true" >> $GITHUB_OUTPUT
-          else
-            echo "✅ Sparkling $VERSION not found on CocoaPods — proceeding with publish"
-            echo "already_published=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Publish Sparkling to CocoaPods
-        if: steps.pod_sdk_check.outputs.already_published != 'true'
-        env:
-          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
-        run: |
-          echo "🚀 Publishing Sparkling SDK to CocoaPods..."
-          echo "   Version: ${{ needs.prepare.outputs.version }}"
-          chmod +x scripts/publish-ios-sparkling.sh
-          ./scripts/publish-ios-sparkling.sh ${{ needs.prepare.outputs.version }} --skip-wait --skip-git
-          echo "✅ Sparkling SDK published to CocoaPods successfully"
-
-  # 2e. Publish iOS Sparkling-DebugTool to CocoaPods (depends on SparklingMethod git tag)
-  publish-ios-debug-tool:
-    name: Publish iOS Sparkling-DebugTool
-    runs-on: macos-latest
-    needs: [prepare, preflight-cocoapods-auth, publish-ios-method]
-    environment:
-      name: package releasement
-      url: https://cocoapods.org/pods/Sparkling-DebugTool
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Log job start
-        run: |
-          echo "========================================="
-          echo "  Step 2e: Publish iOS Sparkling-DebugTool"
-          echo "========================================="
-          echo "  Version: ${{ needs.prepare.outputs.version }}"
-          echo "  Runner:  ${{ runner.os }} (${{ runner.arch }})"
-          echo "  Depends: publish-ios-method (SparklingMethod)"
-          echo "========================================="
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2.6'
-
-      - name: Install CocoaPods
-        run: |
-          echo "Installing CocoaPods..."
-          gem install cocoapods
-          pod setup
-          echo "✅ CocoaPods version: $(pod --version)"
-
-      - name: Update versions
-        run: |
-          echo "📝 Updating all versions to ${{ needs.prepare.outputs.version }}..."
-          chmod +x scripts/update-all-version.sh
-          ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
-          echo "✅ Versions updated successfully"
-
-      - name: Check if Sparkling-DebugTool already published
-        id: pod_debug_tool_check
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          echo "🔍 Checking if Sparkling-DebugTool is already published at version $VERSION..."
-          if pod trunk info Sparkling-DebugTool 2>/dev/null | grep -q "$VERSION"; then
-            echo "⚠️ Sparkling-DebugTool $VERSION already exists on CocoaPods — skipping publish"
-            echo "::warning::Sparkling-DebugTool at version $VERSION already published. Skipping."
-            echo "already_published=true" >> $GITHUB_OUTPUT
-          else
-            echo "✅ Sparkling-DebugTool $VERSION not found on CocoaPods — proceeding with publish"
-            echo "already_published=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Publish Sparkling-DebugTool to CocoaPods
-        if: steps.pod_debug_tool_check.outputs.already_published != 'true'
-        env:
-          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
-        run: |
-          echo "🚀 Publishing Sparkling-DebugTool to CocoaPods..."
-          echo "   Version: ${{ needs.prepare.outputs.version }}"
-          chmod +x scripts/publish-ios-sparkling-debug-tool.sh
-          ./scripts/publish-ios-sparkling-debug-tool.sh ${{ needs.prepare.outputs.version }}
-          echo "✅ Sparkling-DebugTool published to CocoaPods successfully"
-
   # ──────────────────────────────────────────────────────────────
   # Step 3a: Verify template JS build first
   # ──────────────────────────────────────────────────────────────
   verify-template-js:
     name: Verify App Template JS
     runs-on: ubuntu-latest
-    needs: [prepare, publish-typescript, publish-android, publish-ios-sdk, publish-ios-debug-tool]
+    needs: [prepare, publish-typescript, publish-android]
     environment:
       name: package releasement
     steps:
@@ -724,7 +457,7 @@ jobs:
           VERSION="${{ needs.prepare.outputs.version }}"
           echo "⏳ Waiting for npm packages to be available..."
           ALL_FOUND=true
-          for pkg in sparkling-navigation sparkling-debug-tool sparkling-app-cli sparkling-types; do
+          for pkg in sparkling-navigation sparkling-debug-tool sparkling-app-cli sparkling-types sparkling-sdk sparkling-method; do
             FOUND=false
             for i in {1..30}; do
               if pnpm view "$pkg@$VERSION" version 2>/dev/null | grep -q "$VERSION"; then
@@ -804,6 +537,8 @@ jobs:
 
   # ──────────────────────────────────────────────────────────────
   # Step 3c: Verify template iOS pod install (mac runner)
+  #   Sparkling and SparklingMethod are resolved from node_modules
+  #   via :path — no CocoaPods CDN wait needed.
   # ──────────────────────────────────────────────────────────────
   verify-template-ios:
     name: Verify App Template iOS
@@ -847,50 +582,21 @@ jobs:
           chmod +x scripts/update-all-version.sh
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
 
-      - name: Wait for CocoaPods CDN sync
+      - name: Install template npm dependencies
+        working-directory: template/sparkling-app-template
         run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          echo "⏳ Waiting for Sparkling pods to be available on CDN..."
-          ALL_FOUND=true
-          for pod_name in SparklingMethod Sparkling Sparkling-DebugTool; do
-            FOUND=false
-            for i in {1..30}; do
-              if pod trunk info "$pod_name" 2>/dev/null | grep -q "$VERSION"; then
-                echo "✅ $pod_name $VERSION is available on CDN (after $i checks)"
-                FOUND=true
-                break
-              fi
-              echo "Waiting for $pod_name... ($i/30, next check in 10s)"
-              sleep 10
-            done
-            if [ "$FOUND" != "true" ]; then
-              echo "::warning::$pod_name $VERSION not available on CocoaPods CDN after 5 minutes"
-              ALL_FOUND=false
-            fi
-          done
-          if [ "$ALL_FOUND" != "true" ]; then
-            echo "⚠️ Some pods are not yet available on CDN, proceeding anyway..."
-          fi
+          echo "📦 Installing template dependencies (including sparkling-sdk and sparkling-method)..."
+          pnpm install --no-frozen-lockfile
+          echo "✅ Template npm dependencies installed"
+          echo "   node_modules/sparkling-sdk/ios exists: $(test -d node_modules/sparkling-sdk/ios && echo yes || echo no)"
+          echo "   node_modules/sparkling-method/ios exists: $(test -d node_modules/sparkling-method/ios && echo yes || echo no)"
 
       - name: Verify template iOS pod install
         working-directory: template/sparkling-app-template/ios
         run: |
           echo "🔨 Verifying template iOS pod install..."
-          MAX_ATTEMPTS=240
-          SLEEP_SECONDS=15
-          ATTEMPT=1
-
-          until pod install --repo-update; do
-            if [ "$ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
-              echo "::error::Template iOS pod install failed after ${MAX_ATTEMPTS} attempts"
-              exit 1
-            fi
-
-            echo "⚠️ pod install failed (attempt ${ATTEMPT}/${MAX_ATTEMPTS}), retrying in ${SLEEP_SECONDS}s..."
-            ATTEMPT=$((ATTEMPT + 1))
-            sleep "$SLEEP_SECONDS"
-          done
-
+          echo "   Sparkling and SparklingMethod resolved from node_modules via :path"
+          pod install --repo-update
           echo "✅ Template iOS pod install succeeded"
 
   # ──────────────────────────────────────────────────────────────
@@ -965,6 +671,8 @@ jobs:
               "sparkling-debug-tool": `~${version}`,
               "sparkling-app-cli": `~${version}`,
               "sparkling-types": `~${version}`,
+              "sparkling-sdk": `~${version}`,
+              "sparkling-method": `~${version}`,
             };
 
             if (pkg.version !== version) {
@@ -982,11 +690,6 @@ jobs:
 
             console.log("Template package version and dependencies are aligned.");
           '
-
-          if ! grep -q "SPARKLING_VERSION = '${VERSION}'" template/sparkling-app-template/ios/Podfile; then
-            echo "::error::Podfile SPARKLING_VERSION is not updated to ${VERSION}"
-            exit 1
-          fi
 
           if ! grep -q "com.tiktok.sparkling:sparkling:${VERSION}" template/sparkling-app-template/android/app/build.gradle.kts; then
             echo "::error::Android sparkling dependency is not updated to ${VERSION}"
@@ -1081,11 +784,13 @@ jobs:
             - `sparkling-debug-tool`
             - `sparkling-app-cli`
             - `sparkling-types`
+            - `sparkling-sdk` (iOS source via npm)
+            - `sparkling-method` (iOS source via npm)
           - **Android** (`template/sparkling-app-template/android/app/build.gradle.kts`):
             - `com.tiktok.sparkling:sparkling`
             - `com.tiktok.sparkling:sparkling-method`
           - **iOS** (`template/sparkling-app-template/ios/Podfile`):
-            - `SPARKLING_VERSION`
+            - Resolved from `node_modules` via `:path` (no CocoaPods trunk)
           - **Root & SDK versions** aligned
 
           > This PR was created automatically by GitHub Actions.
@@ -1193,7 +898,7 @@ jobs:
   notify-failure:
     name: Notify on Failure
     runs-on: ubuntu-latest
-    needs: [prepare, preflight-registry-auth, preflight-cocoapods-auth, publish-typescript, publish-android, publish-ios-method, publish-ios-sdk, publish-ios-debug-tool, verify-template-js, verify-template-android, verify-template-ios, publish-template]
+    needs: [prepare, preflight-registry-auth, publish-typescript, publish-android, verify-template-js, verify-template-android, verify-template-ios, publish-template]
     if: failure()
     steps:
       - name: Report failure details
@@ -1205,18 +910,14 @@ jobs:
           echo "  Version: ${{ needs.prepare.outputs.version }}"
           echo ""
           echo "  Job Results:"
-          echo "    prepare:                ${{ needs.prepare.result }}"
-          echo "    preflight-registry:     ${{ needs.preflight-registry-auth.result }}"
-          echo "    preflight-cocoapods:    ${{ needs.preflight-cocoapods-auth.result }}"
-          echo "    publish-typescript:     ${{ needs.publish-typescript.result }}"
-          echo "    publish-android:        ${{ needs.publish-android.result }}"
-          echo "    publish-ios-method:     ${{ needs.publish-ios-method.result }}"
-          echo "    publish-ios-sdk:        ${{ needs.publish-ios-sdk.result }}"
-          echo "    publish-ios-debug-tool: ${{ needs.publish-ios-debug-tool.result }}"
-          echo "    verify-template-js:     ${{ needs.verify-template-js.result }}"
+          echo "    prepare:                 ${{ needs.prepare.result }}"
+          echo "    preflight-registry:      ${{ needs.preflight-registry-auth.result }}"
+          echo "    publish-typescript:      ${{ needs.publish-typescript.result }}"
+          echo "    publish-android:         ${{ needs.publish-android.result }}"
+          echo "    verify-template-js:      ${{ needs.verify-template-js.result }}"
           echo "    verify-template-android: ${{ needs.verify-template-android.result }}"
-          echo "    verify-template-ios:    ${{ needs.verify-template-ios.result }}"
-          echo "    publish-template:       ${{ needs.publish-template.result }}"
+          echo "    verify-template-ios:     ${{ needs.verify-template-ios.result }}"
+          echo "    publish-template:        ${{ needs.publish-template.result }}"
           echo ""
           echo "  Please check the individual job logs above for details."
           echo "========================================="

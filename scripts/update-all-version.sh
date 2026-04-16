@@ -44,8 +44,9 @@ sedi() {
 show_usage() {
     echo "Usage: ./align-version.sh [version] [options]"
     echo ""
-    echo "Align version numbers across all platforms (Android, iOS, TypeScript)."
-    echo "Updates package versions, template dependency references, and podspec files."
+    echo "Align version numbers across all platforms (Android, TypeScript)."
+    echo "Updates package versions and template dependency references."
+    echo "iOS SDK is distributed via npm (source in ios/ directory), no podspec version update needed."
     echo ""
     echo "Options:"
     echo "  version     The version number to set (e.g., 2.0.0 or 2.0.0-rc.6)"
@@ -112,14 +113,8 @@ declare -a TYPESCRIPT_FILES=(
     "template/sparkling-app-template/package.json"
 )
 
-declare -a IOS_PODSPEC_FILES=(
-    "packages/sparkling-method/ios/SparklingMethod.podspec"
-    "packages/sparkling-sdk/ios/Sparkling.podspec"
-)
-
 TEMPLATE_PACKAGE_FILE="template/sparkling-app-template/package.json"
 TEMPLATE_ANDROID_FILE="template/sparkling-app-template/android/app/build.gradle.kts"
-TEMPLATE_IOS_FILE="template/sparkling-app-template/ios/Podfile"
 
 # Function to update TypeScript package.json files
 update_typescript_versions() {
@@ -147,32 +142,6 @@ update_typescript_versions() {
     done
 }
 
-# Function to update iOS podspec files
-update_ios_versions() {
-    print_info ""
-    print_info "========================================"
-    print_info "Updating iOS podspec files..."
-    print_info "========================================"
-
-    for file in "${IOS_PODSPEC_FILES[@]}"; do
-        local filepath="$PROJECT_ROOT/$file"
-        if [ -f "$filepath" ]; then
-            local current_version
-            current_version=$(grep -o 's\.version.*=.*"[^"]*"' "$filepath" | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
-
-            if [ "$DRY_RUN" = true ]; then
-                print_info "[DRY RUN] Would update $file: $current_version -> $VERSION"
-            else
-                # Update s.version in podspec file
-                sedi "s/s\.version.*=.*\"[^\"]*\"/s.version        = \"$VERSION\"/" "$filepath"
-                print_success "Updated $file: $current_version -> $VERSION"
-            fi
-        else
-            print_warning "File not found: $file"
-        fi
-    done
-}
-
 # Function to update app template dependency references
 update_template_dependencies() {
     print_info ""
@@ -182,7 +151,6 @@ update_template_dependencies() {
 
     local template_pkg="$PROJECT_ROOT/$TEMPLATE_PACKAGE_FILE"
     local template_android="$PROJECT_ROOT/$TEMPLATE_ANDROID_FILE"
-    local template_ios="$PROJECT_ROOT/$TEMPLATE_IOS_FILE"
 
     if [ -f "$template_pkg" ]; then
         if [ "$DRY_RUN" = true ]; then
@@ -191,11 +159,15 @@ update_template_dependencies() {
             print_info "          sparkling-debug-tool -> ~$VERSION"
             print_info "          sparkling-app-cli -> ~$VERSION"
             print_info "          sparkling-types -> ~$VERSION"
+            print_info "          sparkling-sdk -> ~$VERSION"
+            print_info "          sparkling-method -> ~$VERSION"
         else
             sedi "s|\"sparkling-navigation\": *\"[^\"]*\"|\"sparkling-navigation\": \"^${VERSION}\"|" "$template_pkg"
             sedi "s|\"sparkling-debug-tool\": *\"[^\"]*\"|\"sparkling-debug-tool\": \"~${VERSION}\"|" "$template_pkg"
             sedi "s|\"sparkling-app-cli\": *\"[^\"]*\"|\"sparkling-app-cli\": \"~${VERSION}\"|" "$template_pkg"
             sedi "s|\"sparkling-types\": *\"[^\"]*\"|\"sparkling-types\": \"~${VERSION}\"|" "$template_pkg"
+            sedi "s|\"sparkling-sdk\": *\"[^\"]*\"|\"sparkling-sdk\": \"~${VERSION}\"|" "$template_pkg"
+            sedi "s|\"sparkling-method\": *\"[^\"]*\"|\"sparkling-method\": \"~${VERSION}\"|" "$template_pkg"
             print_success "Updated template npm dependencies in $TEMPLATE_PACKAGE_FILE"
         fi
     else
@@ -214,16 +186,8 @@ update_template_dependencies() {
         print_warning "File not found: $TEMPLATE_ANDROID_FILE"
     fi
 
-    if [ -f "$template_ios" ]; then
-        if [ "$DRY_RUN" = true ]; then
-            print_info "[DRY RUN] Would update $TEMPLATE_IOS_FILE SPARKLING_VERSION -> '$VERSION'"
-        else
-            sedi "s|SPARKLING_VERSION = '[^']*'|SPARKLING_VERSION = '${VERSION}'|" "$template_ios"
-            print_success "Updated template iOS dependency in $TEMPLATE_IOS_FILE"
-        fi
-    else
-        print_warning "File not found: $TEMPLATE_IOS_FILE"
-    fi
+    print_info ""
+    print_info "iOS Podfile uses :path => node_modules — version is managed by npm, no Podfile update needed."
 }
 
 # Function to show Android info
@@ -257,18 +221,6 @@ verify_current_versions() {
             echo "  $file: $current_version"
         fi
     done
-
-    # Check iOS podspec files
-    print_info ""
-    print_info "iOS podspec versions:"
-    for file in "${IOS_PODSPEC_FILES[@]}"; do
-        local filepath="$PROJECT_ROOT/$file"
-        if [ -f "$filepath" ]; then
-            local current_version
-            current_version=$(grep -o 's\.version.*=.*"[^"]*"' "$filepath" | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
-            echo "  $file: $current_version"
-        fi
-    done
 }
 
 # Main execution
@@ -283,7 +235,6 @@ main() {
 
     # Update versions
     update_typescript_versions
-    update_ios_versions
     update_template_dependencies
     show_android_info
 
@@ -307,7 +258,6 @@ main() {
     print_info ""
     print_info "Or run local publish scripts:"
     print_info "     - Android: ./scripts/publish-android-maven.sh $VERSION"
-    print_info "     - iOS:     ./scripts/publish-ios-sparkling-method.sh $VERSION"
     print_info ""
 }
 

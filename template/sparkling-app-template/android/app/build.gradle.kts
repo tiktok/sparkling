@@ -81,11 +81,7 @@ android {
 //    kapt(libs.lynx.processor)
 
         // BEGIN SPARKLING AUTOLINK
-        listOf(
-            project(":sparkling-media"),
-            project(":sparkling-navigation"),
-            project(":sparkling-storage")
-        ).forEach { dep -> add("implementation", dep) }
+        implementation(project(":sparkling-navigation"))
         debugImplementation(project(":sparkling-debug-tool"))
         // END SPARKLING AUTOLINK
     }

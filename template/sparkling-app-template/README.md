@@ -37,6 +37,53 @@ Behavior:
 - Emulator: uses `127.0.0.1` and applies `adb reverse tcp:<port> tcp:<port>`
 - Physical device: injects your local LAN IPv4
 
+## Optional sparkling method packages
+
+The template ships with **`sparkling-navigation` only** (router) in npm, native autolink, Gradle, and CocoaPods.
+
+Other method packages like `sparkling-media` (image picker, camera) and `sparkling-storage` (key-value persistence) are **not included by default**. Add them when your app needs those capabilities:
+
+### 1. Install the npm package
+
+```bash
+pnpm add sparkling-media
+# or
+pnpm add sparkling-storage
+```
+
+### 2. Run autolink
+
+```bash
+pnpm autolink
+# or: sparkling autolink
+```
+
+This single command updates all native integration points:
+
+| Platform | Files updated |
+|----------|---------------|
+| Android  | `settings.gradle.kts` (project include), `build.gradle.kts` (dependency), `SparklingAutolink.kt` (module registry) |
+| iOS      | `Podfile` (pod entry), `SparklingAutolink.swift` (module registry) |
+
+### 3. Reinstall pods (iOS only)
+
+```bash
+cd ios && pod install && cd ..
+```
+
+### 4. Rebuild native apps
+
+```bash
+pnpm run:android   # or run:ios
+```
+
+Now you can import and use the newly added methods in your Lynx code:
+
+```ts
+import { pickImage } from 'sparkling-media'
+import { setItem, getItem } from 'sparkling-storage'
+```
+
 ## Release Behavior
 
 Release builds do not rely on debug-tool configuration.

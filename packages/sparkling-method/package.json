@@ -9,6 +9,11 @@
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "ios",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc && node -e \"require('fs').copyFileSync('src/typing.d.ts', 'dist/typing.d.ts')\""
   },

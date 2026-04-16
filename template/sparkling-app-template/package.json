@@ -20,7 +20,9 @@
   "dependencies": {
     "@lynx-js/react": "^0.116.2",
     "sparkling-debug-tool": "~2.1.0-rc.12",
-    "sparkling-navigation": "~2.1.0-rc.12"
+    "sparkling-method": "~2.1.0-rc.12",
+    "sparkling-navigation": "~2.1.0-rc.12",
+    "sparkling-sdk": "~2.1.0-rc.12"
   },
   "devDependencies": {
     "@lynx-js/qrcode-rsbuild-plugin": "^0.4.4",

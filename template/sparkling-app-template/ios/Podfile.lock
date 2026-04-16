@@ -137,12 +137,12 @@ PODS:
     - Lynx (~> 3.6.0)
     - LynxDevtool/Framework (~> 3.6.0)
     - LynxService/Devtool (~> 3.6.0)
-  - Sparkling-Router (2.1.0-rc.11):
+  - Sparkling-Router (2.1.0-rc.12):
     - Mantle (~> 2.2.0)
-    - Sparkling-Router/Core (= 2.1.0-rc.11)
+    - Sparkling-Router/Core (= 2.1.0-rc.12)
     - SparklingMethod/Core
     - SparklingMethod/DIProvider
-  - Sparkling-Router/Core (2.1.0-rc.11):
+  - Sparkling-Router/Core (2.1.0-rc.12):
     - Mantle (~> 2.2.0)
     - SparklingMethod/Core
     - SparklingMethod/DIProvider
@@ -185,12 +185,12 @@ DEPENDENCIES:
   - SDWebImage (= 5.15.5)
   - SDWebImageWebPCoder (= 0.11.0)
   - SnapKit
-  - Sparkling (= 2.1.0-rc.12)
+  - Sparkling (from `../node_modules/sparkling-sdk/ios`)
   - Sparkling-DebugTool (from `../node_modules/sparkling-debug-tool/ios`)
   - Sparkling-Router (from `../node_modules/sparkling-navigation/ios`)
-  - SparklingMethod/Debug (= 2.1.0-rc.12)
-  - SparklingMethod/DIProvider (= 2.1.0-rc.12)
-  - SparklingMethod/Lynx (= 2.1.0-rc.12)
+  - SparklingMethod/Debug (from `../node_modules/sparkling-method/ios`)
+  - SparklingMethod/DIProvider (from `../node_modules/sparkling-method/ios`)
+  - SparklingMethod/Lynx (from `../node_modules/sparkling-method/ios`)
 
 SPEC REPOS:
   trunk:
@@ -208,14 +208,16 @@ SPEC REPOS:
     - SDWebImageWebPCoder
     - SnapKit
     - SocketRocket
-    - Sparkling
-    - SparklingMethod
 
 EXTERNAL SOURCES:
+  Sparkling:
+    :path: "../node_modules/sparkling-sdk/ios"
   Sparkling-DebugTool:
     :path: "../node_modules/sparkling-debug-tool/ios"
   Sparkling-Router:
     :path: "../node_modules/sparkling-navigation/ios"
+  SparklingMethod:
+    :path: "../node_modules/sparkling-method/ios"
 
 SPEC CHECKSUMS:
   BaseDevtool: 39ad8896da6d55bfe4a2231feb85b8e0ef23e6e3
@@ -232,11 +234,11 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: 295a6573c512f54ad2dd58098e64e17dcf008499
   SnapKit: d612e99e678a2d3b95bf60b0705ed0a35c03484a
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  Sparkling: 72083ec4a80f6925659afd4f031c0a91c00d6874
+  Sparkling: 32617ad7a0a8553b09e5f657a69c1fa3178bdb83
   Sparkling-DebugTool: e88a5f91e46f4b55a2c62b0d2f6a4fca876b4e5c
-  Sparkling-Router: 3adc0d0f31f7ac7d062087a7bfe4186e93b9ff73
-  SparklingMethod: e0009ef011f5eff7542031074987314a39fcea50
+  Sparkling-Router: f9c364e753db42331a58d92089be6a84f6266f31
+  SparklingMethod: a8da97a23b54eb3ca869abd854bfaa264cc57255
 
-PODFILE CHECKSUM: a22f6035b8193d8b5d9065d50489d03cab23d20d
+PODFILE CHECKSUM: cf95736602e24454f20354adae28efbc63fdb5a9
 
 COCOAPODS: 1.16.2
