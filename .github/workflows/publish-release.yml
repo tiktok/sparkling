@@ -17,7 +17,7 @@ permissions:
   id-token: write
 
 env:
-  NODE_VERSION: '22'
+  NODE_VERSION: '22.21.1'
   PNPM_VERSION: '10.26.0'
   NPM_REGISTRY_URL: 'https://registry.npmjs.org'
 

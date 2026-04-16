@@ -125,7 +125,7 @@ jobs:
       #   if: needs.changes.outputs.any_unit_tests == 'true'
       #   uses: actions/setup-node@v4
       #   with:
-      #     node-version: 22
+      #     node-version: 22.21.1
       #     cache: pnpm
       #
       # - name: Install dependencies
