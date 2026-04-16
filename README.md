@@ -9,6 +9,7 @@
 - [Documentation](#documentation)
 - [Project Layout](#project-layout)
 - [How to Contribute](#how-to-contribute)
+- [Maintainers](#maintainers)
 - [License](#license)
 
 ## About Sparkling
@@ -50,6 +51,16 @@ We welcome you to join and become a member of Sparkling Authors. It's people lik
 Please refer to our [contributing guide][contributing] for details.
 
 [contributing]: CONTRIBUTING.md
+
+## Maintainers
+| Role | Github |
+| --- | --- |
+| Creator & Lead Maintainer | [@kyrieleee](https://github.com/kyrieleee) |
+| Lead Maintainer | [@HuxPro](https://github.com/HuxPro) |
+| Core Maintainer | [@ChenJr](https://github.com/ChenJr) |
+| Core Contributor | [@zhangyujie9999](https://github.com/zhangyujie9999) |
+
+For bug reports, feature requests, and maintenance discussions, please open an issue in this repository.
 
 
 ## License
