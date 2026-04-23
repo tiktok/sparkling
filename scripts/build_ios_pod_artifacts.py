@@ -69,12 +69,11 @@ def find_podspec(repo_root: Path, pod_name: str, search_dir: str) -> Path:
     return matches[0]
 
 
-def update_hardcoded_versions(repo_root: Path, version: str, pod_configs: list) -> None:
-    # Some podspecs (Sparkling, SparklingMethod) have hardcoded version strings
-    # instead of reading from package.json; update them before pod ipc spec runs.
+def update_podspec_versions(repo_root: Path, version: str, pod_configs: list) -> None:
+    # trunk pods have hardcoded version strings; update them before pod ipc spec runs.
     replacement = f's.version        = "{version}"'
     for cfg in pod_configs:
-        if not cfg.get("hardcoded_version"):
+        if not cfg.get("trunk"):
             continue
         podspec = find_podspec(repo_root, cfg["pod_name"], cfg["search_dir"])
         podspec.write_text(_PODSPEC_VERSION_RE.sub(replacement, podspec.read_text()))
@@ -188,9 +187,9 @@ def main() -> None:
     info(f"Output: {output_dir}")
     info("═══════════════════════════════════════════════════════════")
 
-    if any(c.get("hardcoded_version") for c in configs):
+    if any(c.get("trunk") for c in configs):
         info(f"Updating hardcoded podspec versions to {version}...")
-        update_hardcoded_versions(repo_root, version, configs)
+        update_podspec_versions(repo_root, version, configs)
 
     for cfg in configs:
         pod_name = cfg["pod_name"]

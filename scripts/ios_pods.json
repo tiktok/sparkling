@@ -2,8 +2,7 @@
   {
     "pod_name": "SparklingMethod",
     "search_dir": "packages/sparkling-method/ios",
-    "hardcoded_version": true,
-    "cdn_gate": true
+    "trunk": true
   },
   {
     "pod_name": "Sparkling-DebugTool",
@@ -12,7 +11,7 @@
   {
     "pod_name": "Sparkling",
     "search_dir": "packages/sparkling-sdk/ios",
-    "hardcoded_version": true
+    "trunk": true
   },
   {
     "pod_name": "Sparkling-Router",
