@@ -1,8 +1,6 @@
 require 'json'
 
 Pod::Spec.new do |s|
-  source_root      = 'packages/sparkling-method/ios'
-  source_globs     = ->(patterns) { patterns.flat_map { |pattern| [pattern, "#{source_root}/#{pattern}"] } }
   s.name           = 'SparklingMethod'
   s.version        = "2.1.0-rc.12"
   s.summary        = "iOS SDK for Sparkling Method"
@@ -24,25 +22,25 @@ Pod::Spec.new do |s|
   }
     
   s.subspec 'Core' do |core|
-    core.source_files = source_globs.call([
+    core.source_files = [
       'Sources/Core/Definitions/*.{h,m,swift}',
       'Sources/Core/Pipe/*.{h,m,swift}',
       'Sources/Core/Models/*.{h,m,swift}',
       'Sources/Core/Protocols/*.{h,m,swift}',
       'Sources/Core/Utils/*.{h,m,swift}',
       'Sources/Core/DI/**/*.{h,m,swift}',
-    ])
+    ]
     core.dependency 'Mantle', '~> 2.2.0'
   end
   
   s.subspec 'Lynx' do |lynx|
-    lynx.source_files = source_globs.call([
+    lynx.source_files = [
       'Sources/Lynx/Pipe/*.{h,m,swift}',
       'Sources/Lynx/Engine/*.{h,m,swift}',
       'Sources/Lynx/Definitions/*.{h,m,swift}',
       'Sources/Lynx/Module/*.{h,m,swift}',
       'Sources/Lynx/Models/*.{h,m,swift}',
-    ])
+    ]
     
     lynx.dependency 'SparklingMethod/Core'
     lynx.dependency 'Lynx/Framework', '3.6.0'
@@ -51,17 +49,17 @@ Pod::Spec.new do |s|
   end
   
   s.subspec 'DIProvider' do |di|
-    di.source_files = source_globs.call([
+    di.source_files = [
       'Sources/DIProvider/**/*.{h,m,swift}',
-    ])
+    ]
     
     di.dependency 'SparklingMethod/Core'
   end
   
   s.subspec 'Debug' do |de|
-    de.source_files = source_globs.call([
+    de.source_files = [
       'Sources/Debug/**/*.{h,m,swift}',
-    ])
+    ]
     
     de.dependency 'SparklingMethod/Core'
   end

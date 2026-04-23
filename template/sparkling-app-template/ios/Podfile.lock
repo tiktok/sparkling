@@ -185,7 +185,7 @@ DEPENDENCIES:
   - SDWebImage (= 5.15.5)
   - SDWebImageWebPCoder (= 0.11.0)
   - SnapKit
-  - Sparkling (from `../node_modules/sparkling-sdk/ios`)
+  - Sparkling (from `../node_modules/sparkling-sdk/ios/Sparkling`)
   - Sparkling-DebugTool (from `../node_modules/sparkling-debug-tool/ios`)
   - Sparkling-Router (from `../node_modules/sparkling-navigation/ios`)
   - SparklingMethod/Debug (from `../node_modules/sparkling-method/ios`)
@@ -211,7 +211,7 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Sparkling:
-    :path: "../node_modules/sparkling-sdk/ios"
+    :path: "../node_modules/sparkling-sdk/ios/Sparkling"
   Sparkling-DebugTool:
     :path: "../node_modules/sparkling-debug-tool/ios"
   Sparkling-Router:
@@ -239,6 +239,6 @@ SPEC CHECKSUMS:
   Sparkling-Router: f9c364e753db42331a58d92089be6a84f6266f31
   SparklingMethod: a8da97a23b54eb3ca869abd854bfaa264cc57255
 
-PODFILE CHECKSUM: cf95736602e24454f20354adae28efbc63fdb5a9
+PODFILE CHECKSUM: 1e854bf95a9fcfae399309e6f15a685ff5c2a3a5
 
 COCOAPODS: 1.16.2
