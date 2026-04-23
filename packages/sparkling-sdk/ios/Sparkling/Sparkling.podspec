@@ -1,6 +1,4 @@
 Pod::Spec.new do |s|
-  source_root      = 'packages/sparkling-sdk/ios'
-  source_globs     = ->(patterns) { patterns.flat_map { |pattern| [pattern, "#{source_root}/#{pattern}"] } }
   s.name           = 'Sparkling'
   s.version        = "2.1.0-rc.12"
   s.summary        = "iOS SDK for Sparkling Framework"
@@ -23,43 +21,33 @@ Pod::Spec.new do |s|
   }
   
   s.subspec 'Application' do |application|
-    application.source_files = source_globs.call([
-      'Sparkling/Application/**/*.{swift,m,h}',
-    ])
+    application.source_files = 'Sources/Application/**/*.{swift,m,h}'
     application.dependency 'Sparkling/Service'
     application.dependency 'Sparkling/Utils'
     application.dependency 'SparklingMethod/Core', s.version.to_s
     application.dependency 'SnapKit'
-    
     application.resource_bundle = {
-      'sparklingPageResource' => source_globs.call([
-        'Sparkling/Application/Container/UI/SparklingPageResource.xcassets',
-      ])
+      'sparklingPageResource' => 'Sources/Application/Container/UI/SparklingPageResource.xcassets'
     }
     
   end
   
   s.subspec 'Service' do |service|
-    service.source_files = source_globs.call([
-      'Sparkling/Service/{Base,Protocols}/**/*.{swift,m,h}',
-    ])
+    service.source_files = 'Sources/Service/{Base,Protocols}/**/*.{swift,m,h}'
     service.dependency 'Sparkling/Utils'
     service.dependency 'SparklingMethod/Core', s.version.to_s
     
     service.subspec 'LynxService' do |lynx|
       lynx.dependency 'Lynx/Framework', '3.6.0'
       lynx.dependency 'SparklingMethod/Lynx', s.version.to_s
-      lynx.source_files = source_globs.call([
-        'Sparkling/Service/{Base,Protocols}/**/*.{swift,m,h}',
-        'Sparkling/Service/LynxService/**/*.{swift,m,h}',
-      ])
+      lynx.source_files = [
+        'Sources/Service/{Base,Protocols}/**/*.{swift,m,h}',
+        'Sources/Service/LynxService/**/*.{swift,m,h}',
+      ]
     end
-    
   end
   
   s.subspec 'Utils' do |utils|
-    utils.source_files = source_globs.call([
-      'Sparkling/Utils/**/*.{swift,m,h}',
-    ])
+    utils.source_files = 'Sources/Utils/**/*.{swift,m,h}'
   end
 end

@@ -26,18 +26,38 @@ on:
         required: true
         default: false
         type: boolean
-      publish_ios_method:
-        description: Resume iOS SparklingMethod publish
+      publish_sparkling_method:
+        description: Resume SparklingMethod pod publish
         required: true
         default: false
         type: boolean
-      publish_ios_sdk:
-        description: Resume iOS Sparkling SDK publish
+      publish_sparkling:
+        description: Resume Sparkling pod publish
         required: true
         default: false
         type: boolean
-      publish_ios_debug_tool:
-        description: Resume iOS Sparkling-DebugTool publish
+      publish_debug_tool:
+        description: Resume Sparkling-DebugTool pod publish
+        required: true
+        default: false
+        type: boolean
+      publish_router:
+        description: Resume Sparkling-Router pod publish
+        required: true
+        default: false
+        type: boolean
+      publish_media:
+        description: Resume Sparkling-Media pod publish
+        required: true
+        default: false
+        type: boolean
+      publish_storage:
+        description: Resume Sparkling-Storage pod publish
+        required: true
+        default: false
+        type: boolean
+      publish_ios:
+        description: Run full iOS publish (build all pods + upload to GitHub Release + push to CocoaPods trunk)
         required: true
         default: false
         type: boolean
@@ -161,7 +181,7 @@ jobs:
     name: Preflight CocoaPods auth
     runs-on: macos-latest
     needs: prepare
-    if: ${{ github.event.inputs.publish_ios_method == 'true' || github.event.inputs.publish_ios_sdk == 'true' || github.event.inputs.publish_ios_debug_tool == 'true' || github.event.inputs.publish_template == 'true' }}
+    if: ${{ github.event.inputs.publish_sparkling_method == 'true' || github.event.inputs.publish_sparkling == 'true' || github.event.inputs.publish_debug_tool == 'true' || github.event.inputs.publish_router == 'true' || github.event.inputs.publish_media == 'true' || github.event.inputs.publish_storage == 'true' || github.event.inputs.publish_template == 'true' }}
     environment:
       name: package releasement
     steps:
@@ -171,9 +191,7 @@ jobs:
           ruby-version: '3.2.6'
 
       - name: Install CocoaPods
-        run: |
-          gem install cocoapods
-          pod setup
+        run: bundle install
 
       - name: Verify CocoaPods trunk token
         env:
@@ -183,11 +201,12 @@ jobs:
             echo "::error::COCOAPODS_TRUNK_TOKEN secret is missing or empty."
             exit 1
           fi
-          COCOAPODS_TRUNK_TOKEN=$COCOAPODS_TRUNK_TOKEN pod trunk me >/tmp/pod_trunk_me.txt 2>&1 || {
+          COCOAPODS_TRUNK_TOKEN=$COCOAPODS_TRUNK_TOKEN bundle exec pod trunk me >/tmp/pod_trunk_me.txt 2>&1 || {
             cat /tmp/pod_trunk_me.txt
-            echo "::error::pod trunk me failed. Check COCOAPODS_TRUNK_TOKEN validity."
+            echo "::error::bundle exec pod trunk me failed. Check COCOAPODS_TRUNK_TOKEN validity."
             exit 1
           }
+          echo "✅ CocoaPods trunk token is valid"
 
   publish-typescript:
     name: Resume NPM Packages
@@ -286,11 +305,16 @@ jobs:
           chmod +x scripts/publish-android-maven.sh
           ./scripts/publish-android-maven.sh ${{ needs.prepare.outputs.version }} --skip-tests
 
-  publish-ios-method:
-    name: Resume iOS SparklingMethod
+  publish-ios-cocoapods:
+    name: Resume iOS CocoaPods Publish
     runs-on: macos-latest
     needs: [prepare, preflight-cocoapods-auth]
-    if: ${{ github.event.inputs.publish_ios_method == 'true' }}
+    if: ${{ github.event.inputs.publish_sparkling_method == 'true' || github.event.inputs.publish_sparkling == 'true' || github.event.inputs.publish_debug_tool == 'true' || github.event.inputs.publish_router == 'true' || github.event.inputs.publish_media == 'true' || github.event.inputs.publish_storage == 'true' }}
+    environment:
+      name: package releasement
+    env:
+      COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+      VERSION: ${{ needs.prepare.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -301,92 +325,147 @@ jobs:
           ruby-version: '3.2.6'
 
       - name: Install CocoaPods
-        run: |
-          gem install cocoapods
-          pod setup
+        run: bundle install
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Update versions
         run: |
           chmod +x scripts/update-all-version.sh
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
 
-      - name: Check SparklingMethod status
-        id: pod_method_check
+      # ── Build phase ────────────────────────────────────────────────
+
+      - name: Build SparklingMethod
+        if: ${{ github.event.inputs.publish_sparkling_method == 'true' }}
+        run: python3 scripts/build_ios_pod_artifacts.py $VERSION --pod SparklingMethod --output-dir dist/ios
+
+      - name: Build Sparkling-DebugTool
+        if: ${{ github.event.inputs.publish_debug_tool == 'true' }}
+        run: python3 scripts/build_ios_pod_artifacts.py $VERSION --pod Sparkling-DebugTool --output-dir dist/ios
+
+      - name: Build Sparkling
+        if: ${{ github.event.inputs.publish_sparkling == 'true' }}
+        run: python3 scripts/build_ios_pod_artifacts.py $VERSION --pod Sparkling --output-dir dist/ios
+
+      - name: Build Sparkling-Router
+        if: ${{ github.event.inputs.publish_router == 'true' }}
+        run: python3 scripts/build_ios_pod_artifacts.py $VERSION --pod Sparkling-Router --output-dir dist/ios
+
+      - name: Build Sparkling-Media
+        if: ${{ github.event.inputs.publish_media == 'true' }}
+        run: python3 scripts/build_ios_pod_artifacts.py $VERSION --pod Sparkling-Media --output-dir dist/ios
+
+      - name: Build Sparkling-Storage
+        if: ${{ github.event.inputs.publish_storage == 'true' }}
+        run: python3 scripts/build_ios_pod_artifacts.py $VERSION --pod Sparkling-Storage --output-dir dist/ios
+
+      # ── Upload built zips to GitHub Release ────────────────────────
+
+      - name: Upload iOS artifacts to GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ needs.prepare.outputs.version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: dist/ios/*.zip
+          replacesArtifacts: true
+          allowUpdates: true
+
+      # ── Publish phase ──────────────────────────────────────────────
+
+      - name: Publish SparklingMethod to CocoaPods
+        if: ${{ github.event.inputs.publish_sparkling_method == 'true' }}
         run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          if pod trunk info SparklingMethod 2>/dev/null | grep -q "$VERSION"; then
-            echo "already_published=true" >> "$GITHUB_OUTPUT"
+          if bundle exec pod trunk info SparklingMethod 2>/dev/null | grep -q "$VERSION"; then
+            echo "⚠️ SparklingMethod $VERSION already on CocoaPods — skipping"
           else
-            echo "already_published=false" >> "$GITHUB_OUTPUT"
+            bundle exec pod trunk push dist/ios/SparklingMethod.podspec.json --allow-warnings
+            echo "✅ SparklingMethod pushed"
           fi
 
-      - name: Publish SparklingMethod
-        if: steps.pod_method_check.outputs.already_published != 'true'
-        env:
-          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+      - name: Publish Sparkling-DebugTool to CocoaPods
+        if: ${{ github.event.inputs.publish_debug_tool == 'true' }}
         run: |
-          chmod +x scripts/publish-ios-sparkling-method.sh
-          ./scripts/publish-ios-sparkling-method.sh ${{ needs.prepare.outputs.version }} --skip-git
+          if bundle exec pod trunk info Sparkling-DebugTool 2>/dev/null | grep -q "$VERSION"; then
+            echo "⚠️ Sparkling-DebugTool $VERSION already on CocoaPods — skipping"
+          else
+            bundle exec pod trunk push dist/ios/Sparkling-DebugTool.podspec.json --allow-warnings
+            echo "✅ Sparkling-DebugTool pushed"
+          fi
 
-  publish-ios-sdk:
-    name: Resume iOS Sparkling SDK
-    runs-on: macos-latest
-    needs: [prepare, preflight-cocoapods-auth]
-    if: ${{ github.event.inputs.publish_ios_sdk == 'true' }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2.6'
-
-      - name: Install CocoaPods
+      - name: Wait for SparklingMethod on CDN
+        if: ${{ github.event.inputs.publish_sparkling == 'true' || github.event.inputs.publish_router == 'true' || github.event.inputs.publish_media == 'true' || github.event.inputs.publish_storage == 'true' }}
         run: |
-          gem install cocoapods
-          pod setup
-
-      - name: Update versions
-        run: |
-          chmod +x scripts/update-all-version.sh
-          ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
-
-      - name: Wait for SparklingMethod CDN sync
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
+          echo "⏳ Waiting for SparklingMethod $VERSION on CDN..."
           for i in {1..30}; do
-            if pod trunk info SparklingMethod 2>/dev/null | grep -q "$VERSION"; then
-              exit 0
+            if bundle exec pod trunk info SparklingMethod 2>/dev/null | grep -q "$VERSION"; then
+              echo "✅ SparklingMethod $VERSION is live"; exit 0
             fi
-            sleep 10
+            echo "   waiting... ($i/30)"; sleep 10
           done
-          echo "::error::SparklingMethod $VERSION is not available on CocoaPods CDN yet."
+          echo "::error::SparklingMethod $VERSION not available on CDN after 5 minutes"
           exit 1
 
-      - name: Check Sparkling SDK status
-        id: pod_sdk_check
+      - name: Publish Sparkling to CocoaPods
+        if: ${{ github.event.inputs.publish_sparkling == 'true' }}
         run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          if pod trunk info Sparkling 2>/dev/null | grep -q "$VERSION"; then
-            echo "already_published=true" >> "$GITHUB_OUTPUT"
+          if bundle exec pod trunk info Sparkling 2>/dev/null | grep -q "$VERSION"; then
+            echo "⚠️ Sparkling $VERSION already on CocoaPods — skipping"
           else
-            echo "already_published=false" >> "$GITHUB_OUTPUT"
+            bundle exec pod trunk push dist/ios/Sparkling.podspec.json --allow-warnings
+            echo "✅ Sparkling pushed"
           fi
 
-      - name: Publish Sparkling SDK
-        if: steps.pod_sdk_check.outputs.already_published != 'true'
-        env:
-          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+      - name: Publish Sparkling-Router to CocoaPods
+        if: ${{ github.event.inputs.publish_router == 'true' }}
         run: |
-          chmod +x scripts/publish-ios-sparkling.sh
-          ./scripts/publish-ios-sparkling.sh ${{ needs.prepare.outputs.version }} --skip-wait --skip-git
+          if bundle exec pod trunk info Sparkling-Router 2>/dev/null | grep -q "$VERSION"; then
+            echo "⚠️ Sparkling-Router $VERSION already on CocoaPods — skipping"
+          else
+            bundle exec pod trunk push dist/ios/Sparkling-Router.podspec.json --allow-warnings
+            echo "✅ Sparkling-Router pushed"
+          fi
 
-  publish-ios-debug-tool:
-    name: Resume iOS Sparkling-DebugTool
+      - name: Publish Sparkling-Media to CocoaPods
+        if: ${{ github.event.inputs.publish_media == 'true' }}
+        run: |
+          if bundle exec pod trunk info Sparkling-Media 2>/dev/null | grep -q "$VERSION"; then
+            echo "⚠️ Sparkling-Media $VERSION already on CocoaPods — skipping"
+          else
+            bundle exec pod trunk push dist/ios/Sparkling-Media.podspec.json --allow-warnings
+            echo "✅ Sparkling-Media pushed"
+          fi
+
+      - name: Publish Sparkling-Storage to CocoaPods
+        if: ${{ github.event.inputs.publish_storage == 'true' }}
+        run: |
+          if bundle exec pod trunk info Sparkling-Storage 2>/dev/null | grep -q "$VERSION"; then
+            echo "⚠️ Sparkling-Storage $VERSION already on CocoaPods — skipping"
+          else
+            bundle exec pod trunk push dist/ios/Sparkling-Storage.podspec.json --allow-warnings
+            echo "✅ Sparkling-Storage pushed"
+          fi
+
+  publish-ios:
+    name: Publish iOS Pods
     runs-on: macos-latest
-    needs: [prepare, preflight-cocoapods-auth]
-    if: ${{ github.event.inputs.publish_ios_debug_tool == 'true' }}
+    needs: [prepare]
+    if: ${{ github.event.inputs.publish_ios == 'true' }}
+    permissions:
+      contents: write
+    environment:
+      name: package releasement
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -394,35 +473,30 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2.6'
+          ruby-version: '3.2'
 
-      - name: Install CocoaPods
-        run: |
-          gem install cocoapods
-          pod setup
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: Update versions
-        run: |
-          chmod +x scripts/update-all-version.sh
-          ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
 
-      - name: Check Sparkling-DebugTool status
-        id: pod_debug_tool_check
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          if pod trunk info Sparkling-DebugTool 2>/dev/null | grep -q "$VERSION"; then
-            echo "already_published=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "already_published=false" >> "$GITHUB_OUTPUT"
-          fi
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
-      - name: Publish Sparkling-DebugTool
-        if: steps.pod_debug_tool_check.outputs.already_published != 'true'
-        env:
-          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
-        run: |
-          chmod +x scripts/publish-ios-sparkling-debug-tool.sh
-          ./scripts/publish-ios-sparkling-debug-tool.sh ${{ needs.prepare.outputs.version }}
+      - name: Publish iOS pods
+        uses: ./.github/actions/publish-ios
+        with:
+          version: ${{ needs.prepare.outputs.version }}
+          is_rc: ${{ needs.prepare.outputs.is_rc }}
+          cocoapods_trunk_token: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
   publish-template:
     name: Resume App Template Publish

@@ -1,0 +1,60 @@
+name: Publish iOS Pods
+description: >
+  Build iOS pod artifacts, upload zips to GitHub Release,
+  and publish each pod to CocoaPods trunk in dependency order.
+
+inputs:
+  version:
+    description: Release version (e.g. 2.1.0 or 2.1.0-rc.12)
+    required: true
+  is_rc:
+    description: Whether this is a release candidate ('true' or 'false')
+    required: true
+  cocoapods_trunk_token:
+    description: CocoaPods trunk authentication token
+    required: true
+  github_token:
+    description: GitHub token for uploading release assets
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare environment
+      shell: bash
+      run: scripts/setup_ios_publish_env.sh
+
+    - name: Update versions
+      shell: bash
+      run: |
+        chmod +x scripts/update-all-version.sh
+        ./scripts/update-all-version.sh ${{ inputs.version }}
+
+    - name: Build iOS pod artifacts
+      shell: bash
+      run: |
+        echo "📦 Building iOS pod artifacts for ${{ inputs.version }}..."
+        python3 scripts/build_ios_pod_artifacts.py ${{ inputs.version }} --output-dir dist/ios
+        echo "✅ iOS pod artifacts built"
+        echo ""
+        echo "Artifacts:"
+        ls -lh dist/ios/
+
+    - name: Upload iOS zip assets to GitHub Release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ inputs.version }}
+        name: Release ${{ inputs.version }}
+        token: ${{ inputs.github_token }}
+        draft: ${{ inputs.is_rc == 'true' }}
+        prerelease: ${{ inputs.is_rc == 'true' }}
+        generateReleaseNotes: true
+        artifacts: dist/ios/*.zip
+        replacesArtifacts: true
+        allowUpdates: true
+
+    - name: Publish pods to CocoaPods trunk
+      shell: bash
+      env:
+        COCOAPODS_TRUNK_TOKEN: ${{ inputs.cocoapods_trunk_token }}
+      run: python3 scripts/publish_ios_cocoapods.py ${{ inputs.version }} --artifacts-dir dist/ios

@@ -536,6 +536,43 @@ jobs:
           echo "✅ Template Android build succeeded"
 
   # ──────────────────────────────────────────────────────────────
+  # Step 2c: Publish iOS pods
+  #   Runs in parallel with npm and Android publishing.
+  #   Composite action: build artifacts → upload to GitHub Release
+  #   → publish to CocoaPods trunk (all in one runner, no artifact
+  #   upload/download needed between steps).
+  # ──────────────────────────────────────────────────────────────
+  publish-ios:
+    name: Publish iOS Pods
+    runs-on: macos-latest
+    needs: [prepare]
+    permissions:
+      contents: write
+    environment:
+      name: package releasement
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Publish iOS pods
+        uses: ./.github/actions/publish-ios
+        with:
+          version: ${{ needs.prepare.outputs.version }}
+          is_rc: ${{ needs.prepare.outputs.is_rc }}
+          cocoapods_trunk_token: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  # ──────────────────────────────────────────────────────────────
   # Step 3c: Verify template iOS pod install (mac runner)
   #   Sparkling and SparklingMethod are resolved from node_modules
   #   via :path — no CocoaPods CDN wait needed.
@@ -569,9 +606,8 @@ jobs:
       - name: Install CocoaPods
         run: |
           echo "📦 Installing CocoaPods..."
-          gem install cocoapods
-          pod setup
-          echo "✅ CocoaPods version: $(pod --version)"
+          bundle install
+          echo "✅ CocoaPods version: $(bundle exec pod --version)"
 
       - name: Install dependencies
         run: |
@@ -596,7 +632,7 @@ jobs:
         run: |
           echo "🔨 Verifying template iOS pod install..."
           echo "   Sparkling and SparklingMethod resolved from node_modules via :path"
-          pod install --repo-update
+          bundle exec pod install --repo-update
           echo "✅ Template iOS pod install succeeded"
 
   # ──────────────────────────────────────────────────────────────
@@ -831,74 +867,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ──────────────────────────────────────────────────────────────
-  # Step 5: Create GitHub Release
-  # ──────────────────────────────────────────────────────────────
-  create-release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    needs: [prepare, publish-template]
-    if: always() && needs.prepare.result == 'success'
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Log job start
-        run: |
-          echo "========================================="
-          echo "  Step 5: Create GitHub Release"
-          echo "========================================="
-          echo "  Version: ${{ needs.prepare.outputs.version }}"
-          echo "  Is RC:   ${{ needs.prepare.outputs.is_rc }}"
-          echo "========================================="
-
-      - name: Determine release status
-        id: status
-        run: |
-          echo "📋 Checking publish job results..."
-          TEMPLATE_RESULT="${{ needs.publish-template.result }}"
-          echo "   publish-template: $TEMPLATE_RESULT"
-
-          if [ "$TEMPLATE_RESULT" == "success" ]; then
-            echo "all_success=true" >> $GITHUB_OUTPUT
-            echo "✅ All publish jobs succeeded - creating release"
-          else
-            echo "all_success=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Some publish jobs failed - creating draft release"
-            echo "::warning::Not all publish jobs succeeded. Release will be created as draft."
-          fi
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Release ${{ needs.prepare.outputs.version }}
-          draft: ${{ needs.prepare.outputs.is_rc == 'true' || steps.status.outputs.all_success != 'true' }}
-          prerelease: ${{ needs.prepare.outputs.is_rc == 'true' }}
-          generate_release_notes: true
-          fail_on_unmatched_files: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Log release result
-        run: |
-          echo "========================================="
-          if [ "${{ needs.prepare.outputs.is_rc }}" == "true" ]; then
-            echo "✅ Draft pre-release created for ${{ needs.prepare.outputs.version }}"
-          elif [ "${{ steps.status.outputs.all_success }}" == "true" ]; then
-            echo "✅ Release created for ${{ needs.prepare.outputs.version }}"
-          else
-            echo "⚠️ Draft release created for ${{ needs.prepare.outputs.version }} (some jobs failed)"
-          fi
-          echo "========================================="
-
-  # ──────────────────────────────────────────────────────────────
   # Notify on failure
   # ──────────────────────────────────────────────────────────────
   notify-failure:
     name: Notify on Failure
     runs-on: ubuntu-latest
-    needs: [prepare, preflight-registry-auth, publish-typescript, publish-android, verify-template-js, verify-template-android, verify-template-ios, publish-template]
+    needs: [prepare, preflight-registry-auth, publish-typescript, publish-android, publish-ios, verify-template-js, verify-template-android, verify-template-ios, publish-template]
     if: failure()
     steps:
       - name: Report failure details
@@ -914,6 +888,7 @@ jobs:
           echo "    preflight-registry:      ${{ needs.preflight-registry-auth.result }}"
           echo "    publish-typescript:      ${{ needs.publish-typescript.result }}"
           echo "    publish-android:         ${{ needs.publish-android.result }}"
+          echo "    publish-ios:             ${{ needs.publish-ios.result }}"
           echo "    verify-template-js:      ${{ needs.verify-template-js.result }}"
           echo "    verify-template-android: ${{ needs.verify-template-android.result }}"
           echo "    verify-template-ios:     ${{ needs.verify-template-ios.result }}"
