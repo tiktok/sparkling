@@ -44,6 +44,8 @@ Pod::Spec.new do |s|
     
     lynx.dependency 'SparklingMethod/Core'
     lynx.dependency 'Lynx/Framework', '3.6.0'
+    lynx.dependency 'LynxBase/Framework', '3.6.0'
+    lynx.dependency 'LynxServiceAPI', '3.6.0'
     lynx.dependency 'PrimJS/quickjs', '>=2.12.0'
     lynx.dependency 'PrimJS/napi', '>=2.12.0'
   end
