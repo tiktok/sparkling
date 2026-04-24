@@ -595,7 +595,7 @@ jobs:
               "sparkling-debug-tool": `~${version}`,
               "sparkling-app-cli": `~${version}`,
               "sparkling-types": `~${version}`,
-              "sparkling-sdk": `~${version}`,
+              "@sparklingjs/runtime": `~${version}`,
               "sparkling-method": `~${version}`,
             };
 
