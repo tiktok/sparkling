@@ -26,36 +26,6 @@ on:
         required: true
         default: false
         type: boolean
-      publish_sparkling_method:
-        description: Resume SparklingMethod pod publish
-        required: true
-        default: false
-        type: boolean
-      publish_sparkling:
-        description: Resume Sparkling pod publish
-        required: true
-        default: false
-        type: boolean
-      publish_debug_tool:
-        description: Resume Sparkling-DebugTool pod publish
-        required: true
-        default: false
-        type: boolean
-      publish_router:
-        description: Resume Sparkling-Router pod publish
-        required: true
-        default: false
-        type: boolean
-      publish_media:
-        description: Resume Sparkling-Media pod publish
-        required: true
-        default: false
-        type: boolean
-      publish_storage:
-        description: Resume Sparkling-Storage pod publish
-        required: true
-        default: false
-        type: boolean
       publish_ios:
         description: Run full iOS publish (build all pods + upload to GitHub Release + push to CocoaPods trunk)
         required: true
@@ -125,7 +95,7 @@ jobs:
           echo "  is_rc:   $IS_RC"
           echo "  npm_tag: $NPM_TAG"
 
-  preflight-registry-auth:
+  preflight-linux-auth:
     name: Preflight npm + Maven auth
     runs-on: ubuntu-latest
     needs: prepare
@@ -133,85 +103,40 @@ jobs:
     environment:
       name: package releasement
     steps:
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify npm + Maven auth
+        uses: ./.github/actions/preflight-registry-auth
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          registry-url: 'https://registry.npmjs.org'
+          publish_android: ${{ github.event.inputs.publish_android }}
+          maven_central_username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          maven_central_password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
+          signing_password: ${{ secrets.SIGNING_PASSWORD }}
+          signing_key: ${{ secrets.SIGNING_KEY }}
 
-      - name: Ensure latest npm
-        run: |
-          npm install -g npm@latest
-          npm --version
-
-      - name: Verify npm registry connectivity
-        run: |
-          npm ping --registry https://registry.npmjs.org
-
-      - name: Verify Maven Central credentials and API reachability
-        if: ${{ github.event.inputs.publish_android == 'true' }}
-        env:
-          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
-          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-        run: |
-          MISSING=""
-          [ -z "$MAVEN_CENTRAL_USERNAME" ] && MISSING="$MISSING MAVEN_CENTRAL_USERNAME"
-          [ -z "$MAVEN_CENTRAL_PASSWORD" ] && MISSING="$MISSING MAVEN_CENTRAL_PASSWORD"
-          [ -z "$SIGNING_KEY_ID" ] && MISSING="$MISSING SIGNING_KEY_ID"
-          [ -z "$SIGNING_PASSWORD" ] && MISSING="$MISSING SIGNING_PASSWORD"
-          [ -z "$SIGNING_KEY" ] && MISSING="$MISSING SIGNING_KEY"
-          if [ -n "$MISSING" ]; then
-            echo "::error::Missing Maven Central secrets:$MISSING"
-            exit 1
-          fi
-
-          BEARER_TOKEN=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64)
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "Authorization: Bearer ${BEARER_TOKEN}" \
-            "https://ossrh-staging-api.central.sonatype.com/manual/search/repositories?ip=any&profile_id=com.tiktok.sparkling")
-          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
-            echo "::error::Maven Central API auth check failed (HTTP $HTTP_CODE)."
-            exit 1
-          fi
-
-  preflight-cocoapods-auth:
+  preflight-darwin-auth:
     name: Preflight CocoaPods auth
     runs-on: macos-latest
     needs: prepare
-    if: ${{ github.event.inputs.publish_sparkling_method == 'true' || github.event.inputs.publish_sparkling == 'true' || github.event.inputs.publish_debug_tool == 'true' || github.event.inputs.publish_router == 'true' || github.event.inputs.publish_media == 'true' || github.event.inputs.publish_storage == 'true' || github.event.inputs.publish_template == 'true' }}
+    if: ${{ github.event.inputs.publish_ios == 'true' || github.event.inputs.publish_template == 'true' }}
     environment:
       name: package releasement
     steps:
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify CocoaPods auth
+        uses: ./.github/actions/preflight-registry-auth
         with:
-          ruby-version: '3.2.6'
-
-      - name: Install CocoaPods
-        run: bundle install
-
-      - name: Verify CocoaPods trunk token
-        env:
-          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
-        run: |
-          if [ -z "$COCOAPODS_TRUNK_TOKEN" ]; then
-            echo "::error::COCOAPODS_TRUNK_TOKEN secret is missing or empty."
-            exit 1
-          fi
-          COCOAPODS_TRUNK_TOKEN=$COCOAPODS_TRUNK_TOKEN bundle exec pod trunk me >/tmp/pod_trunk_me.txt 2>&1 || {
-            cat /tmp/pod_trunk_me.txt
-            echo "::error::bundle exec pod trunk me failed. Check COCOAPODS_TRUNK_TOKEN validity."
-            exit 1
-          }
-          echo "✅ CocoaPods trunk token is valid"
+          publish_ios: ${{ github.event.inputs.publish_ios }}
+          cocoapods_trunk_token: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
 
   publish-typescript:
     name: Resume NPM Packages
     runs-on: ubuntu-latest
-    needs: [prepare, preflight-registry-auth]
+    needs: [prepare, preflight-linux-auth]
     if: ${{ github.event.inputs.publish_typescript == 'true' }}
     steps:
       - name: Checkout
@@ -257,210 +182,26 @@ jobs:
   publish-android:
     name: Resume Android Maven Publish
     runs-on: ubuntu-latest
-    needs: [prepare, preflight-registry-auth]
+    needs: [prepare, preflight-linux-auth]
     if: ${{ github.event.inputs.publish_android == 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup JDK
-        uses: actions/setup-java@v4
+      - name: Publish Android
+        uses: ./.github/actions/publish-android
         with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Update versions
-        run: |
-          chmod +x scripts/update-all-version.sh
-          ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
-
-      - name: Check Android artifacts status
-        id: maven_check
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          SDK_URL="https://repo1.maven.org/maven2/com/tiktok/sparkling/sparkling/$VERSION/sparkling-$VERSION.pom"
-          DEBUG_TOOL_URL="https://repo1.maven.org/maven2/com/tiktok/sparkling/sparkling-debug-tool/$VERSION/sparkling-debug-tool-$VERSION.pom"
-
-          SDK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SDK_URL" 2>/dev/null || echo "000")
-          DEBUG_TOOL_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEBUG_TOOL_URL" 2>/dev/null || echo "000")
-
-          if [ "$SDK_STATUS" == "200" ] && [ "$DEBUG_TOOL_STATUS" == "200" ]; then
-            echo "already_published=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "already_published=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Publish to Maven Central
-        if: steps.maven_check.outputs.already_published != 'true'
-        env:
-          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
-          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-        run: |
-          chmod +x scripts/publish-android-maven.sh
-          ./scripts/publish-android-maven.sh ${{ needs.prepare.outputs.version }} --skip-tests
-
-  publish-ios-cocoapods:
-    name: Resume iOS CocoaPods Publish
-    runs-on: macos-latest
-    needs: [prepare, preflight-cocoapods-auth]
-    if: ${{ github.event.inputs.publish_sparkling_method == 'true' || github.event.inputs.publish_sparkling == 'true' || github.event.inputs.publish_debug_tool == 'true' || github.event.inputs.publish_router == 'true' || github.event.inputs.publish_media == 'true' || github.event.inputs.publish_storage == 'true' }}
-    environment:
-      name: package releasement
-    env:
-      COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
-      VERSION: ${{ needs.prepare.outputs.version }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2.6'
-
-      - name: Install CocoaPods
-        run: bundle install
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Update versions
-        run: |
-          chmod +x scripts/update-all-version.sh
-          ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
-
-      # ── Build phase ────────────────────────────────────────────────
-
-      - name: Build SparklingMethod
-        if: ${{ github.event.inputs.publish_sparkling_method == 'true' }}
-        run: python3 scripts/build_ios_pod_artifacts.py $VERSION --pod SparklingMethod --output-dir dist/ios
-
-      - name: Build Sparkling-DebugTool
-        if: ${{ github.event.inputs.publish_debug_tool == 'true' }}
-        run: python3 scripts/build_ios_pod_artifacts.py $VERSION --pod Sparkling-DebugTool --output-dir dist/ios
-
-      - name: Build Sparkling
-        if: ${{ github.event.inputs.publish_sparkling == 'true' }}
-        run: python3 scripts/build_ios_pod_artifacts.py $VERSION --pod Sparkling --output-dir dist/ios
-
-      - name: Build Sparkling-Router
-        if: ${{ github.event.inputs.publish_router == 'true' }}
-        run: python3 scripts/build_ios_pod_artifacts.py $VERSION --pod Sparkling-Router --output-dir dist/ios
-
-      - name: Build Sparkling-Media
-        if: ${{ github.event.inputs.publish_media == 'true' }}
-        run: python3 scripts/build_ios_pod_artifacts.py $VERSION --pod Sparkling-Media --output-dir dist/ios
-
-      - name: Build Sparkling-Storage
-        if: ${{ github.event.inputs.publish_storage == 'true' }}
-        run: python3 scripts/build_ios_pod_artifacts.py $VERSION --pod Sparkling-Storage --output-dir dist/ios
-
-      # ── Upload built zips to GitHub Release ────────────────────────
-
-      - name: Upload iOS artifacts to GitHub Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ needs.prepare.outputs.version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: dist/ios/*.zip
-          replacesArtifacts: true
-          allowUpdates: true
-
-      # ── Publish phase ──────────────────────────────────────────────
-
-      - name: Publish SparklingMethod to CocoaPods
-        if: ${{ github.event.inputs.publish_sparkling_method == 'true' }}
-        run: |
-          if bundle exec pod trunk info SparklingMethod 2>/dev/null | grep -q "$VERSION"; then
-            echo "⚠️ SparklingMethod $VERSION already on CocoaPods — skipping"
-          else
-            bundle exec pod trunk push dist/ios/SparklingMethod.podspec.json --allow-warnings
-            echo "✅ SparklingMethod pushed"
-          fi
-
-      - name: Publish Sparkling-DebugTool to CocoaPods
-        if: ${{ github.event.inputs.publish_debug_tool == 'true' }}
-        run: |
-          if bundle exec pod trunk info Sparkling-DebugTool 2>/dev/null | grep -q "$VERSION"; then
-            echo "⚠️ Sparkling-DebugTool $VERSION already on CocoaPods — skipping"
-          else
-            bundle exec pod trunk push dist/ios/Sparkling-DebugTool.podspec.json --allow-warnings
-            echo "✅ Sparkling-DebugTool pushed"
-          fi
-
-      - name: Wait for SparklingMethod on CDN
-        if: ${{ github.event.inputs.publish_sparkling == 'true' || github.event.inputs.publish_router == 'true' || github.event.inputs.publish_media == 'true' || github.event.inputs.publish_storage == 'true' }}
-        run: |
-          echo "⏳ Waiting for SparklingMethod $VERSION on CDN..."
-          for i in {1..30}; do
-            if bundle exec pod trunk info SparklingMethod 2>/dev/null | grep -q "$VERSION"; then
-              echo "✅ SparklingMethod $VERSION is live"; exit 0
-            fi
-            echo "   waiting... ($i/30)"; sleep 10
-          done
-          echo "::error::SparklingMethod $VERSION not available on CDN after 5 minutes"
-          exit 1
-
-      - name: Publish Sparkling to CocoaPods
-        if: ${{ github.event.inputs.publish_sparkling == 'true' }}
-        run: |
-          if bundle exec pod trunk info Sparkling 2>/dev/null | grep -q "$VERSION"; then
-            echo "⚠️ Sparkling $VERSION already on CocoaPods — skipping"
-          else
-            bundle exec pod trunk push dist/ios/Sparkling.podspec.json --allow-warnings
-            echo "✅ Sparkling pushed"
-          fi
-
-      - name: Publish Sparkling-Router to CocoaPods
-        if: ${{ github.event.inputs.publish_router == 'true' }}
-        run: |
-          if bundle exec pod trunk info Sparkling-Router 2>/dev/null | grep -q "$VERSION"; then
-            echo "⚠️ Sparkling-Router $VERSION already on CocoaPods — skipping"
-          else
-            bundle exec pod trunk push dist/ios/Sparkling-Router.podspec.json --allow-warnings
-            echo "✅ Sparkling-Router pushed"
-          fi
-
-      - name: Publish Sparkling-Media to CocoaPods
-        if: ${{ github.event.inputs.publish_media == 'true' }}
-        run: |
-          if bundle exec pod trunk info Sparkling-Media 2>/dev/null | grep -q "$VERSION"; then
-            echo "⚠️ Sparkling-Media $VERSION already on CocoaPods — skipping"
-          else
-            bundle exec pod trunk push dist/ios/Sparkling-Media.podspec.json --allow-warnings
-            echo "✅ Sparkling-Media pushed"
-          fi
-
-      - name: Publish Sparkling-Storage to CocoaPods
-        if: ${{ github.event.inputs.publish_storage == 'true' }}
-        run: |
-          if bundle exec pod trunk info Sparkling-Storage 2>/dev/null | grep -q "$VERSION"; then
-            echo "⚠️ Sparkling-Storage $VERSION already on CocoaPods — skipping"
-          else
-            bundle exec pod trunk push dist/ios/Sparkling-Storage.podspec.json --allow-warnings
-            echo "✅ Sparkling-Storage pushed"
-          fi
+          version: ${{ needs.prepare.outputs.version }}
+          maven_central_username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          maven_central_password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          signing_key_id: ${{ secrets.SIGNING_KEY_ID }}
+          signing_password: ${{ secrets.SIGNING_PASSWORD }}
+          signing_key: ${{ secrets.SIGNING_KEY }}
 
   publish-ios:
     name: Publish iOS Pods
     runs-on: macos-latest
-    needs: [prepare]
+    needs: [prepare, preflight-darwin-auth]
     if: ${{ github.event.inputs.publish_ios == 'true' }}
     permissions:
       contents: write
@@ -501,7 +242,7 @@ jobs:
   publish-template:
     name: Resume App Template Publish
     runs-on: macos-latest
-    needs: [prepare, preflight-registry-auth, preflight-cocoapods-auth]
+    needs: [prepare, preflight-linux-auth, preflight-darwin-auth]
     if: ${{ github.event.inputs.publish_template == 'true' }}
     steps:
       - name: Checkout

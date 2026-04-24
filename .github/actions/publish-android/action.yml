@@ -1,0 +1,82 @@
+name: Publish Android to Maven Central
+description: Build and publish Android SDK to Maven Central, skipping if already published.
+
+inputs:
+  version:
+    description: Release version (e.g. 2.1.0 or 2.1.0-rc.12)
+    required: true
+  maven_central_username:
+    description: Maven Central username
+    required: true
+  maven_central_password:
+    description: Maven Central password
+    required: true
+  signing_key_id:
+    description: GPG signing key ID
+    required: true
+  signing_password:
+    description: GPG signing key password
+    required: true
+  signing_key:
+    description: GPG signing key
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Cache Gradle
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Update versions
+      shell: bash
+      run: |
+        chmod +x scripts/update-all-version.sh
+        ./scripts/update-all-version.sh ${{ inputs.version }}
+
+    - name: Check if already published
+      id: maven_check
+      shell: bash
+      run: |
+        VERSION="${{ inputs.version }}"
+        SDK_URL="https://repo1.maven.org/maven2/com/tiktok/sparkling/sparkling/$VERSION/sparkling-$VERSION.pom"
+        DEBUG_TOOL_URL="https://repo1.maven.org/maven2/com/tiktok/sparkling/sparkling-debug-tool/$VERSION/sparkling-debug-tool-$VERSION.pom"
+
+        SDK_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SDK_URL" 2>/dev/null || echo "000")
+        DEBUG_TOOL_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$DEBUG_TOOL_URL" 2>/dev/null || echo "000")
+
+        if [ "$SDK_STATUS" == "200" ] && [ "$DEBUG_TOOL_STATUS" == "200" ]; then
+          echo "⚠️ Android artifacts at version $VERSION already on Maven Central — skipping"
+          echo "already_published=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "already_published=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Publish to Maven Central
+      if: steps.maven_check.outputs.already_published != 'true'
+      shell: bash
+      env:
+        MAVEN_CENTRAL_USERNAME: ${{ inputs.maven_central_username }}
+        MAVEN_CENTRAL_PASSWORD: ${{ inputs.maven_central_password }}
+        SIGNING_KEY_ID: ${{ inputs.signing_key_id }}
+        SIGNING_PASSWORD: ${{ inputs.signing_password }}
+        SIGNING_KEY: ${{ inputs.signing_key }}
+      run: |
+        chmod +x scripts/publish-android-maven.sh
+        ./scripts/publish-android-maven.sh ${{ inputs.version }} --skip-tests
+        echo "✅ Android SDK published to Maven Central successfully"
