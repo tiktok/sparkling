@@ -5,6 +5,7 @@
 import Foundation
 import Lynx
 import UIKit
+import DebugRouter
 
 @objcMembers
 public class SparklingDebugTool: NSObject {
@@ -13,9 +14,9 @@ public class SparklingDebugTool: NSObject {
     public static func setup() {
         // Preset values must be set BEFORE LynxEnv flags so the DevTool
         // service picks them up during initialization.
-        if let devtool = LynxServices.getInstanceWith(
-            NSProtocolFromString("LynxServiceDevToolProtocol")!
-        ) as? LynxServiceDevToolProtocol {
+        
+        if let devtool = LynxServices.getInstanceWith(LynxServiceDevToolProtocol.self) 
+            as? LynxServiceDevToolProtocol {
             devtool.logBoxPresetValue = true
             devtool.lynxDebugPresetValue = true
         }
@@ -27,11 +28,7 @@ public class SparklingDebugTool: NSObject {
 
         // Enable DebugRouter so the DevTool desktop app can discover and
         // connect to this app (via USB or network).
-        if let routerClass = NSClassFromString("DebugRouter"),
-           let instance = routerClass.perform(NSSelectorFromString("instance"))?.takeUnretainedValue(),
-           instance.responds(to: NSSelectorFromString("enableAllSessions")) {
-            instance.perform(NSSelectorFromString("enableAllSessions"))
-        }
+        DebugRouter.instance().enableAllSessions()
     }
 
     public static func devURL(fallback: String) -> String {

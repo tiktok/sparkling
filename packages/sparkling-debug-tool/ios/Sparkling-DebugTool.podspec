@@ -22,4 +22,5 @@ Pod::Spec.new do |s|
   s.dependency 'Lynx', '~> 3.6.0'
   s.dependency 'LynxService/Devtool', '~> 3.6.0'
   s.dependency 'LynxDevtool/Framework', '~> 3.6.0'
+  s.dependency 'DebugRouter'
 end
