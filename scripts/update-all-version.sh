@@ -110,7 +110,19 @@ declare -a TYPESCRIPT_FILES=(
     "packages/sparkling-sdk/package.json"
     "packages/sparkling-method/package.json"
     "packages/sparkling-types/package.json"
+    "packages/methods/sparkling-navigation/package.json"
+    "packages/methods/sparkling-media/package.json"
+    "packages/methods/sparkling-storage/package.json"
     "template/sparkling-app-template/package.json"
+)
+
+declare -a IOS_PODSPEC_FILES=(
+    "packages/sparkling-method/ios/SparklingMethod.podspec"
+    "packages/sparkling-sdk/ios/Sparkling/Sparkling.podspec"
+    "packages/sparkling-debug-tool/ios/Sparkling-DebugTool.podspec"
+    "packages/methods/sparkling-navigation/ios/Sparkling-Router.podspec"
+    "packages/methods/sparkling-media/ios/Sparkling-Media.podspec"
+    "packages/methods/sparkling-storage/ios/Sparkling-Storage.podspec"
 )
 
 TEMPLATE_PACKAGE_FILE="template/sparkling-app-template/package.json"
@@ -134,6 +146,31 @@ update_typescript_versions() {
                 # Use sed to update version in package.json
                 # Handle both "version": "x.x.x" and "version":"x.x.x" formats
                 sedi "s/\"version\": *\"[^\"]*\"/\"version\": \"$VERSION\"/" "$filepath"
+                print_success "Updated $file: $current_version -> $VERSION"
+            fi
+        else
+            print_warning "File not found: $file"
+        fi
+    done
+}
+
+# Function to update iOS podspec files
+update_ios_versions() {
+    print_info ""
+    print_info "========================================"
+    print_info "Updating iOS podspec files..."
+    print_info "========================================"
+
+    for file in "${IOS_PODSPEC_FILES[@]}"; do
+        local filepath="$PROJECT_ROOT/$file"
+        if [ -f "$filepath" ]; then
+            local current_version
+            current_version=$(grep -o 's\.version.*=.*"[^"]*"' "$filepath" | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
+
+            if [ "$DRY_RUN" = true ]; then
+                print_info "[DRY RUN] Would update $file: $current_version -> $VERSION"
+            else
+                sedi "s/s\.version.*=.*\"[^\"]*\"/s.version        = \"$VERSION\"/" "$filepath"
                 print_success "Updated $file: $current_version -> $VERSION"
             fi
         else
@@ -221,6 +258,18 @@ verify_current_versions() {
             echo "  $file: $current_version"
         fi
     done
+
+    # Check iOS podspec files
+    print_info ""
+    print_info "iOS podspec versions:"
+    for file in "${IOS_PODSPEC_FILES[@]}"; do
+        local filepath="$PROJECT_ROOT/$file"
+        if [ -f "$filepath" ]; then
+            local current_version
+            current_version=$(grep -o 's\.version.*=.*"[^"]*"' "$filepath" | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
+            echo "  $file: $current_version"
+        fi
+    done
 }
 
 # Main execution
@@ -235,6 +284,7 @@ main() {
 
     # Update versions
     update_typescript_versions
+    update_ios_versions
     update_template_dependencies
     show_android_info
 
@@ -258,6 +308,8 @@ main() {
     print_info ""
     print_info "Or run local publish scripts:"
     print_info "     - Android: ./scripts/publish-android-maven.sh $VERSION"
+    print_info "     - iOS:     python3 scripts/build_ios_pod_artifacts.py $VERSION"
+    print_info "               python3 scripts/publish_ios_cocoapods.py $VERSION"
     print_info ""
 }
 
