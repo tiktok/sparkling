@@ -345,7 +345,7 @@ jobs:
           VERSION="${{ needs.prepare.outputs.version }}"
           echo "⏳ Waiting for npm packages to be available..."
           ALL_FOUND=true
-          for pkg in sparkling-navigation sparkling-debug-tool sparkling-app-cli sparkling-types @sparklingjs/runtime sparkling-method; do
+          for pkg in sparkling-navigation sparkling-debug-tool sparkling-app-cli sparkling-types sparkling-method; do
             FOUND=false
             for i in {1..30}; do
               if pnpm view "$pkg@$VERSION" version 2>/dev/null | grep -q "$VERSION"; then
@@ -462,13 +462,13 @@ jobs:
 
   # ──────────────────────────────────────────────────────────────
   # Step 3c: Verify template iOS pod install (mac runner)
-  #   Sparkling and SparklingMethod are resolved from node_modules
-  #   via :path — no CocoaPods CDN wait needed.
+  #   Sparkling is resolved from CocoaPods trunk and methods from
+  #   node_modules via :path.
   # ──────────────────────────────────────────────────────────────
   verify-template-ios:
     name: Verify App Template iOS
     runs-on: macos-latest
-    needs: [prepare, verify-template-js]
+    needs: [prepare, verify-template-js, publish-ios]
     environment:
       name: package releasement
     steps:
@@ -509,17 +509,16 @@ jobs:
       - name: Install template npm dependencies
         working-directory: template/sparkling-app-template
         run: |
-          echo "📦 Installing template dependencies (including @sparklingjs/runtime and sparkling-method)..."
+          echo "📦 Installing template dependencies (methods + tooling)..."
           pnpm install --no-frozen-lockfile
           echo "✅ Template npm dependencies installed"
-          echo "   node_modules/@sparklingjs/runtime/ios exists: $(test -d node_modules/@sparklingjs/runtime/ios && echo yes || echo no)"
           echo "   node_modules/sparkling-method/ios exists: $(test -d node_modules/sparkling-method/ios && echo yes || echo no)"
 
       - name: Verify template iOS pod install
         working-directory: template/sparkling-app-template/ios
         run: |
           echo "🔨 Verifying template iOS pod install..."
-          echo "   Sparkling and SparklingMethod resolved from node_modules via :path"
+          echo "   Sparkling resolved from CocoaPods trunk; SparklingMethod from node_modules via :path"
           bundle exec pod install --repo-update
           echo "✅ Template iOS pod install succeeded"
 
@@ -595,7 +594,6 @@ jobs:
               "sparkling-debug-tool": `~${version}`,
               "sparkling-app-cli": `~${version}`,
               "sparkling-types": `~${version}`,
-              "@sparklingjs/runtime": `~${version}`,
               "sparkling-method": `~${version}`,
             };
 
@@ -708,13 +706,13 @@ jobs:
             - `sparkling-debug-tool`
             - `sparkling-app-cli`
             - `sparkling-types`
-            - `@sparklingjs/runtime` (iOS source via npm)
             - `sparkling-method` (iOS source via npm)
           - **Android** (`template/sparkling-app-template/android/app/build.gradle.kts`):
             - `com.tiktok.sparkling:sparkling`
             - `com.tiktok.sparkling:sparkling-method`
           - **iOS** (`template/sparkling-app-template/ios/Podfile`):
-            - Resolved from `node_modules` via `:path` (no CocoaPods trunk)
+            - `Sparkling` pod pinned to release version from CocoaPods trunk
+            - `SparklingMethod` resolved from `node_modules` via `:path`
           - **Root & SDK versions** aligned
 
           > This PR was created automatically by GitHub Actions.

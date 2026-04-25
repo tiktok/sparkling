@@ -127,6 +127,7 @@ declare -a IOS_PODSPEC_FILES=(
 
 TEMPLATE_PACKAGE_FILE="template/sparkling-app-template/package.json"
 TEMPLATE_ANDROID_FILE="template/sparkling-app-template/android/app/build.gradle.kts"
+TEMPLATE_IOS_PODFILE="template/sparkling-app-template/ios/Podfile"
 
 # Function to update TypeScript package.json files
 update_typescript_versions() {
@@ -188,6 +189,7 @@ update_template_dependencies() {
 
     local template_pkg="$PROJECT_ROOT/$TEMPLATE_PACKAGE_FILE"
     local template_android="$PROJECT_ROOT/$TEMPLATE_ANDROID_FILE"
+    local template_ios_podfile="$PROJECT_ROOT/$TEMPLATE_IOS_PODFILE"
 
     if [ -f "$template_pkg" ]; then
         if [ "$DRY_RUN" = true ]; then
@@ -196,14 +198,12 @@ update_template_dependencies() {
             print_info "          sparkling-debug-tool -> ~$VERSION"
             print_info "          sparkling-app-cli -> ~$VERSION"
             print_info "          sparkling-types -> ~$VERSION"
-            print_info "          @sparklingjs/runtime -> ~$VERSION"
             print_info "          sparkling-method -> ~$VERSION"
         else
             sedi "s|\"sparkling-navigation\": *\"[^\"]*\"|\"sparkling-navigation\": \"^${VERSION}\"|" "$template_pkg"
             sedi "s|\"sparkling-debug-tool\": *\"[^\"]*\"|\"sparkling-debug-tool\": \"~${VERSION}\"|" "$template_pkg"
             sedi "s|\"sparkling-app-cli\": *\"[^\"]*\"|\"sparkling-app-cli\": \"~${VERSION}\"|" "$template_pkg"
             sedi "s|\"sparkling-types\": *\"[^\"]*\"|\"sparkling-types\": \"~${VERSION}\"|" "$template_pkg"
-            sedi "s|\"@sparklingjs/runtime\": *\"[^\"]*\"|\"@sparklingjs/runtime\": \"~${VERSION}\"|" "$template_pkg"
             sedi "s|\"sparkling-method\": *\"[^\"]*\"|\"sparkling-method\": \"~${VERSION}\"|" "$template_pkg"
             print_success "Updated template npm dependencies in $TEMPLATE_PACKAGE_FILE"
         fi
@@ -223,8 +223,19 @@ update_template_dependencies() {
         print_warning "File not found: $TEMPLATE_ANDROID_FILE"
     fi
 
+    if [ -f "$template_ios_podfile" ]; then
+        if [ "$DRY_RUN" = true ]; then
+            print_info "[DRY RUN] Would update Sparkling pod version in $TEMPLATE_IOS_PODFILE -> $VERSION"
+        else
+            sedi "s|pod 'Sparkling', '[^']*'|pod 'Sparkling', '${VERSION}'|" "$template_ios_podfile"
+            print_success "Updated Sparkling pod version in $TEMPLATE_IOS_PODFILE"
+        fi
+    else
+        print_warning "File not found: $TEMPLATE_IOS_PODFILE"
+    fi
+
     print_info ""
-    print_info "iOS Podfile uses :path => node_modules — version is managed by npm, no Podfile update needed."
+    print_info "iOS Podfile pins Sparkling pod version directly and is updated by this script."
 }
 
 # Function to show Android info
