@@ -196,12 +196,14 @@ update_template_dependencies() {
             print_info "          sparkling-debug-tool -> ~$VERSION"
             print_info "          sparkling-app-cli -> ~$VERSION"
             print_info "          sparkling-types -> ~$VERSION"
+            print_info "          @sparklingjs/runtime -> ~$VERSION"
             print_info "          sparkling-method -> ~$VERSION"
         else
             sedi "s|\"sparkling-navigation\": *\"[^\"]*\"|\"sparkling-navigation\": \"^${VERSION}\"|" "$template_pkg"
             sedi "s|\"sparkling-debug-tool\": *\"[^\"]*\"|\"sparkling-debug-tool\": \"~${VERSION}\"|" "$template_pkg"
             sedi "s|\"sparkling-app-cli\": *\"[^\"]*\"|\"sparkling-app-cli\": \"~${VERSION}\"|" "$template_pkg"
             sedi "s|\"sparkling-types\": *\"[^\"]*\"|\"sparkling-types\": \"~${VERSION}\"|" "$template_pkg"
+            sedi "s|\"@sparklingjs/runtime\": *\"[^\"]*\"|\"@sparklingjs/runtime\": \"~${VERSION}\"|" "$template_pkg"
             sedi "s|\"sparkling-method\": *\"[^\"]*\"|\"sparkling-method\": \"~${VERSION}\"|" "$template_pkg"
             print_success "Updated template npm dependencies in $TEMPLATE_PACKAGE_FILE"
         fi
