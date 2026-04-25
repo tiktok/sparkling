@@ -415,6 +415,42 @@ jobs:
           chmod +x scripts/update-all-version.sh
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
 
+      - name: Wait for Android Maven packages availability
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          echo "⏳ Waiting for Android artifacts on Maven Central (max 30 minutes, every 20s)..."
+
+          declare -a ARTIFACTS=(
+            "com/tiktok/sparkling/sparkling"
+            "com/tiktok/sparkling/sparkling-method"
+          )
+
+          ALL_FOUND=true
+          for artifact in "${ARTIFACTS[@]}"; do
+            FOUND=false
+            POM_URL="https://repo1.maven.org/maven2/${artifact}/${VERSION}/$(basename "${artifact}")-${VERSION}.pom"
+
+            for i in {1..90}; do
+              if curl -fsSL "$POM_URL" >/dev/null 2>&1; then
+                echo "✅ ${artifact//\//.}:${VERSION} is available (after $i checks)"
+                FOUND=true
+                break
+              fi
+
+              echo "Waiting for ${artifact//\//.}:${VERSION}... ($i/90, next check in 20s)"
+              sleep 20
+            done
+
+            if [ "$FOUND" != "true" ]; then
+              echo "::error::${artifact//\//.}:${VERSION} not available on Maven Central after 30 minutes"
+              ALL_FOUND=false
+            fi
+          done
+
+          if [ "$ALL_FOUND" != "true" ]; then
+            exit 1
+          fi
+
       - name: Verify template Android build
         working-directory: template/sparkling-app-template/android
         run: |
