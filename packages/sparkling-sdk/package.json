@@ -1,5 +1,5 @@
 {
-  "name": "sparkling-sdk",
+  "name": "@sparklingjs/runtime",
   "version": "2.1.0-rc.12",
   "license": "Apache-2.0",
   "description": "Android & iOS SDK for Sparkling Framework",
@@ -11,6 +11,8 @@
   },
   "files": [
     "ios",
+    "!ios/macro",
+    "!ios/SparklingMarco",
     "README.md"
   ]
 }

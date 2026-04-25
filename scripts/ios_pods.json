@@ -1,0 +1,32 @@
+[
+  {
+    "pod_name": "SparklingMethod",
+    "search_dir": "packages/sparkling-method/ios",
+    "trunk": true
+  },
+  {
+    "pod_name": "Sparkling-DebugTool",
+    "search_dir": "packages/sparkling-debug-tool/ios",
+    "trunk": true
+  },
+  {
+    "pod_name": "Sparkling",
+    "search_dir": "packages/sparkling-sdk/ios",
+    "trunk": true
+  },
+  {
+    "pod_name": "Sparkling-Router",
+    "search_dir": "packages/methods/sparkling-navigation/ios",
+    "trunk": true
+  },
+  {
+    "pod_name": "Sparkling-Media",
+    "search_dir": "packages/methods/sparkling-media/ios",
+    "trunk": true
+  },
+  {
+    "pod_name": "Sparkling-Storage",
+    "search_dir": "packages/methods/sparkling-storage/ios",
+    "trunk": true
+  }
+]

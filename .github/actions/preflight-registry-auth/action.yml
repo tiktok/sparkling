@@ -1,0 +1,110 @@
+name: Preflight Registry Auth
+description: Verify npm registry connectivity and optionally Maven Central credentials.
+
+inputs:
+  publish_android:
+    description: Whether to verify Maven Central credentials ('true' or 'false')
+    required: true
+    default: 'false'
+  maven_central_username:
+    description: Maven Central username
+    required: false
+  maven_central_password:
+    description: Maven Central password
+    required: false
+  signing_key_id:
+    description: GPG signing key ID
+    required: false
+  signing_password:
+    description: GPG signing key password
+    required: false
+  signing_key:
+    description: GPG signing key
+    required: false
+  publish_ios:
+    description: Whether to verify CocoaPods trunk token ('true' or 'false')
+    required: true
+    default: 'false'
+  cocoapods_trunk_token:
+    description: CocoaPods trunk authentication token
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.21.1'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Ensure latest npm
+      shell: bash
+      run: |
+        npm install -g npm@latest
+        npm --version
+
+    - name: Verify npm registry connectivity
+      shell: bash
+      run: |
+        npm ping --registry https://registry.npmjs.org
+        echo "✅ npm registry is reachable"
+
+    - name: Verify Maven Central credentials and API reachability
+      if: ${{ inputs.publish_android == 'true' }}
+      shell: bash
+      env:
+        MAVEN_CENTRAL_USERNAME: ${{ inputs.maven_central_username }}
+        MAVEN_CENTRAL_PASSWORD: ${{ inputs.maven_central_password }}
+        SIGNING_KEY_ID: ${{ inputs.signing_key_id }}
+        SIGNING_PASSWORD: ${{ inputs.signing_password }}
+        SIGNING_KEY: ${{ inputs.signing_key }}
+      run: |
+        MISSING=""
+        [ -z "$MAVEN_CENTRAL_USERNAME" ] && MISSING="$MISSING MAVEN_CENTRAL_USERNAME"
+        [ -z "$MAVEN_CENTRAL_PASSWORD" ] && MISSING="$MISSING MAVEN_CENTRAL_PASSWORD"
+        [ -z "$SIGNING_KEY_ID" ] && MISSING="$MISSING SIGNING_KEY_ID"
+        [ -z "$SIGNING_PASSWORD" ] && MISSING="$MISSING SIGNING_PASSWORD"
+        [ -z "$SIGNING_KEY" ] && MISSING="$MISSING SIGNING_KEY"
+        if [ -n "$MISSING" ]; then
+          echo "::error::Missing Maven Central secrets:$MISSING"
+          exit 1
+        fi
+
+        BEARER_TOKEN=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64)
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+          -H "Authorization: Bearer ${BEARER_TOKEN}" \
+          "https://ossrh-staging-api.central.sonatype.com/manual/search/repositories?ip=any&profile_id=com.tiktok.sparkling")
+        if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+          echo "::error::Maven Central API auth check failed (HTTP $HTTP_CODE)."
+          exit 1
+        fi
+        echo "✅ Maven Central auth looks valid"
+
+    - name: Setup Ruby
+      if: ${{ inputs.publish_ios == 'true' }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2.6'
+
+    - name: Install CocoaPods
+      if: ${{ inputs.publish_ios == 'true' }}
+      shell: bash
+      run: bundle install
+
+    - name: Verify CocoaPods trunk token
+      if: ${{ inputs.publish_ios == 'true' }}
+      shell: bash
+      env:
+        COCOAPODS_TRUNK_TOKEN: ${{ inputs.cocoapods_trunk_token }}
+      run: |
+        if [ -z "$COCOAPODS_TRUNK_TOKEN" ]; then
+          echo "::error::COCOAPODS_TRUNK_TOKEN secret is missing or empty."
+          exit 1
+        fi
+        COCOAPODS_TRUNK_TOKEN=$COCOAPODS_TRUNK_TOKEN bundle exec pod trunk me >/tmp/pod_trunk_me.txt 2>&1 || {
+          cat /tmp/pod_trunk_me.txt
+          echo "::error::bundle exec pod trunk me failed. Check COCOAPODS_TRUNK_TOKEN validity."
+          exit 1
+        }
+        echo "✅ CocoaPods trunk token is valid"

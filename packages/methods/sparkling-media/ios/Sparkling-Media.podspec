@@ -1,14 +1,10 @@
-require 'json'
-
-package = JSON.parse(File.read(File.join(__dir__, '..', 'package.json')))
-
 Pod::Spec.new do |s|
   s.name           = 'Sparkling-Media'
-  s.version        = package['version']
-  s.summary        = package['description']
-  s.description    = package['description']
-  s.license        = package['license']
-  s.author         = package['author']
+  s.version        = "2.1.0-rc.12"
+  s.summary        = "Sparkling media methods for choosing, uploading, and downloading media files"
+  s.description    = "Sparkling media methods for choosing, uploading, and downloading media files"
+  s.license        = "Apache-2.0"
+  s.author         = "TikTok"
   s.homepage       = 'https://github.com/tiktok/sparkling'
   s.platforms      = {
     :ios => '12.0'
@@ -21,14 +17,14 @@ Pod::Spec.new do |s|
     'DEFINES_MODULE' => 'YES',
     'SWIFT_COMPILATION_MODE' => 'wholemodule'
   }
-  
+
   s.subspec 'Core' do |core|
     core.source_files = [
       'Sources/Core/Methods/**/*.{h,m,swift}',
       'Sources/Core/Utils/*.{h,m,swift}',
     ]
   end
-  
+
   s.dependency 'SparklingMethod/Core'
   s.dependency 'SparklingMethod/DIProvider'
   s.dependency 'Mantle', '~> 2.2.0'

@@ -1,12 +1,8 @@
-require 'json'
-
-package = JSON.parse(File.read(File.join(__dir__, '..', 'package.json')))
-
 Pod::Spec.new do |s|
   s.name           = 'Sparkling-DebugTool'
-  s.version        = package['version']
-  s.summary        = package['description']
-  s.description    = package['description']
+  s.version        = "2.1.0-rc.12"
+  s.summary        = "Sparkling debug tool SDK"
+  s.description    = "Sparkling debug tool SDK"
   s.license        = { :type => 'Apache-2.0' }
   s.author         = 'TikTok'
   s.homepage       = 'https://github.com/tiktok/sparkling'
@@ -16,12 +12,11 @@ Pod::Spec.new do |s|
   s.static_framework = true
 
   s.source_files = [
-    'packages/sparkling-debug-tool/ios/Sources/**/*.{h,m,swift}',
-    'ios/Sources/**/*.{h,m,swift}',
     'Sources/**/*.{h,m,swift}'
   ]
 
   s.dependency 'Lynx', '~> 3.6.0'
   s.dependency 'LynxService/Devtool', '~> 3.6.0'
   s.dependency 'LynxDevtool/Framework', '~> 3.6.0'
+  s.dependency 'DebugRouter'
 end

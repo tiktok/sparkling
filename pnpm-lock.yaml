@@ -301,18 +301,18 @@ importers:
       '@lynx-js/react':
         specifier: ^0.116.2
         version: 0.116.5(@lynx-js/types@3.7.0)(@types/react@18.3.28)
+      '@sparklingjs/runtime':
+        specifier: ~2.1.0-rc.12
+        version: link:../../packages/sparkling-sdk
       sparkling-debug-tool:
         specifier: ~2.1.0-rc.12
-        version: link:../../packages/sparkling-debug-tool
+        version: 2.1.0-rc.14
       sparkling-method:
         specifier: ~2.1.0-rc.12
         version: link:../../packages/sparkling-method
       sparkling-navigation:
         specifier: ~2.1.0-rc.12
         version: 2.1.0-rc.12
-      sparkling-sdk:
-        specifier: ~2.1.0-rc.12
-        version: link:../../packages/sparkling-sdk
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.4.4
@@ -4674,6 +4674,10 @@ packages:
     resolution: {integrity: sha512-bGR7W5SmTCgQNQWA5b9vg7a9RleZisdxfonOR08UuBRtct71jh9KasQ3YRmJA3+81K9YxOxddiPSfJ+dPTqsyQ==}
     engines: {node: ^22 || ^24}
     hasBin: true
+
+  sparkling-debug-tool@2.1.0-rc.14:
+    resolution: {integrity: sha512-UMrfTHc/x7WfS9V5cob8uS8E/ucb2/PompUpAppqPmFQOv/Eg3KORT9Oqp0QP5JjG5HAEwe0vIi6zUiWRw38Tw==}
+    engines: {node: ^22 || ^24}
 
   sparkling-method@2.1.0-rc.12:
     resolution: {integrity: sha512-TfSMzFS66MYJWZG4Drn5gNCMtDqkJIvVNHhVu6DIyVxjFhIgdRiXqYsDwLh8VIQlHnTQnuNmONVEtHPzsEWaFw==}
@@ -10891,6 +10895,8 @@ snapshots:
       - typescript
       - utf-8-validate
       - webpack
+
+  sparkling-debug-tool@2.1.0-rc.14: {}
 
   sparkling-method@2.1.0-rc.12: {}
 

@@ -31,7 +31,7 @@ def sparkling_devtool
 end
 
 def sparkling_kit
-  pod 'Sparkling', :path => '../../sparkling-sdk/ios'
+  pod 'Sparkling', :path => '../../sparkling-sdk/ios/Sparkling'
   
   sparkling_methods
   sparkling_methods_dep
