@@ -519,7 +519,7 @@ async function main() {
   }
 
   // Hard exclusions: these packages should not be published to npm.
-  // Note: sparkling-sdk is now published to npm (iOS source bundled in ios/ directory).
+  // Note: @sparklingjs/runtime is now published to npm (iOS source bundled in ios/ directory).
   const excludedNames = new Set(["sparkling-playground", "sparkling-app-template", "@sparklingjs/runtime", ...args.skip]);
 
   const publishable = pkgs.filter((p) => {

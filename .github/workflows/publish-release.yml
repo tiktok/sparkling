@@ -117,7 +117,7 @@ jobs:
   # ──────────────────────────────────────────────────────────────
   # Step 2: Publish Android and npm packages in parallel
   #         (playground, sparkling-app-template are NOT published here)
-  #         iOS SDK is bundled in sparkling-sdk npm package (ios/ directory)
+  #         iOS SDK is bundled in @sparklingjs/runtime npm package (ios/ directory)
   # ──────────────────────────────────────────────────────────────
 
   # 2a. Publish TypeScript packages to npm
@@ -127,7 +127,7 @@ jobs:
     needs: [prepare, preflight-linux-auth]
     environment:
       name: package releasement
-      url: https://www.npmjs.com/package/sparkling-sdk
+      url: https://www.npmjs.com/package/@sparklingjs/runtime
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -345,7 +345,7 @@ jobs:
           VERSION="${{ needs.prepare.outputs.version }}"
           echo "⏳ Waiting for npm packages to be available..."
           ALL_FOUND=true
-          for pkg in sparkling-navigation sparkling-debug-tool sparkling-app-cli sparkling-types sparkling-sdk sparkling-method; do
+          for pkg in sparkling-navigation sparkling-debug-tool sparkling-app-cli sparkling-types @sparklingjs/runtime sparkling-method; do
             FOUND=false
             for i in {1..30}; do
               if pnpm view "$pkg@$VERSION" version 2>/dev/null | grep -q "$VERSION"; then
@@ -509,10 +509,10 @@ jobs:
       - name: Install template npm dependencies
         working-directory: template/sparkling-app-template
         run: |
-          echo "📦 Installing template dependencies (including sparkling-sdk and sparkling-method)..."
+          echo "📦 Installing template dependencies (including @sparklingjs/runtime and sparkling-method)..."
           pnpm install --no-frozen-lockfile
           echo "✅ Template npm dependencies installed"
-          echo "   node_modules/sparkling-sdk/ios exists: $(test -d node_modules/sparkling-sdk/ios && echo yes || echo no)"
+          echo "   node_modules/@sparklingjs/runtime/ios exists: $(test -d node_modules/@sparklingjs/runtime/ios && echo yes || echo no)"
           echo "   node_modules/sparkling-method/ios exists: $(test -d node_modules/sparkling-method/ios && echo yes || echo no)"
 
       - name: Verify template iOS pod install
@@ -708,7 +708,7 @@ jobs:
             - `sparkling-debug-tool`
             - `sparkling-app-cli`
             - `sparkling-types`
-            - `sparkling-sdk` (iOS source via npm)
+            - `@sparklingjs/runtime` (iOS source via npm)
             - `sparkling-method` (iOS source via npm)
           - **Android** (`template/sparkling-app-template/android/app/build.gradle.kts`):
             - `com.tiktok.sparkling:sparkling`
