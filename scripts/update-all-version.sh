@@ -225,17 +225,22 @@ update_template_dependencies() {
 
     if [ -f "$template_ios_podfile" ]; then
         if [ "$DRY_RUN" = true ]; then
-            print_info "[DRY RUN] Would update Sparkling pod version in $TEMPLATE_IOS_PODFILE -> $VERSION"
+            print_info "[DRY RUN] Would update iOS Podfile Sparkling pod versions in $TEMPLATE_IOS_PODFILE -> $VERSION"
+            print_info "          Sparkling, SparklingMethod, Sparkling-DebugTool, Sparkling-Router"
         else
             sedi "s|pod 'Sparkling', '[^']*'|pod 'Sparkling', '${VERSION}'|" "$template_ios_podfile"
-            print_success "Updated Sparkling pod version in $TEMPLATE_IOS_PODFILE"
+            sedi "s|pod 'SparklingMethod', '[^']*'|pod 'SparklingMethod', '${VERSION}'|" "$template_ios_podfile"
+            sedi "s|pod 'Sparkling-DebugTool', '[^']*'|pod 'Sparkling-DebugTool', '${VERSION}'|" "$template_ios_podfile"
+            sedi "s|pod 'Sparkling-Router', '[^']*'|pod 'Sparkling-Router', '${VERSION}'|" "$template_ios_podfile"
+            print_success "Updated iOS Podfile pod versions in $TEMPLATE_IOS_PODFILE"
         fi
     else
         print_warning "File not found: $TEMPLATE_IOS_PODFILE"
     fi
 
     print_info ""
-    print_info "iOS Podfile pins Sparkling pod version directly and is updated by this script."
+    print_info "iOS Podfile pins Sparkling pod versions directly (from CocoaPods trunk) and is updated by this script."
+    print_info "After version bump, run: cd template/sparkling-app-template/ios && pod install --repo-update"
 }
 
 # Function to show Android info

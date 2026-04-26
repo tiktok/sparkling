@@ -1,4 +1,4 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
 ruby '>= 3.2.6'
 gem 'cocoapods', '>= 1.14'

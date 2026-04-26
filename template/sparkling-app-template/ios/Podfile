@@ -12,19 +12,18 @@ install! 'cocoapods',
 inhibit_all_warnings!
 
 def sparkling_methods
-  pod 'SparklingMethod', :path => '../node_modules/sparkling-method/ios',
-      :subspecs => ['Lynx', 'DIProvider', 'Debug']
+  pod 'SparklingMethod', '2.1.0-rc.12', :subspecs => ['Lynx', 'DIProvider', 'Debug']
 end
 
 def sparkling_methods_dep
   # BEGIN SPARKLING AUTOLINK
-  pod 'Sparkling-Router', :path => '../node_modules/sparkling-navigation/ios'
+  pod 'Sparkling-Router', '2.1.0-rc.12'
   # END SPARKLING AUTOLINK
 end
 
 def sparkling_devtool
   # BEGIN SPARKLING AUTOLINK
-  pod 'Sparkling-DebugTool', :path => '../node_modules/sparkling-debug-tool/ios'
+  pod 'Sparkling-DebugTool', '2.1.0-rc.12'
   # END SPARKLING AUTOLINK
 end
 
