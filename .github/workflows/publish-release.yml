@@ -554,7 +554,10 @@ jobs:
           VERSION="${{ needs.prepare.outputs.version }}"
           echo "⏳ Waiting for iOS pods on CocoaPods trunk (max 10 minutes, every 30s)..."
 
-          mapfile -t PODS < <(jq -r '.[] | select(.trunk == true) | .pod_name' scripts/ios_pods.json)
+          PODS=()
+          while IFS= read -r pod; do
+            PODS+=("$pod")
+          done < <(jq -r '.[] | select(.trunk == true) | .pod_name' scripts/ios_pods.json)
 
           ALL_FOUND=true
           for pod in "${PODS[@]}"; do
