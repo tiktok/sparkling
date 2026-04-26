@@ -545,16 +545,50 @@ jobs:
       - name: Install template npm dependencies
         working-directory: template/sparkling-app-template
         run: |
-          echo "📦 Installing template dependencies (methods + tooling)..."
+          echo "📦 Installing template dependencies (JS tooling)..."
           pnpm install --no-frozen-lockfile
           echo "✅ Template npm dependencies installed"
-          echo "   node_modules/sparkling-method/ios exists: $(test -d node_modules/sparkling-method/ios && echo yes || echo no)"
+
+      - name: Wait for iOS pods on CocoaPods trunk
+        run: |
+          VERSION="${{ needs.prepare.outputs.version }}"
+          echo "⏳ Waiting for iOS pods on CocoaPods trunk (max 10 minutes, every 30s)..."
+
+          mapfile -t PODS < <(jq -r '.[] | select(.trunk == true) | .pod_name' scripts/ios_pods.json)
+
+          ALL_FOUND=true
+          for pod in "${PODS[@]}"; do
+            FOUND=false
+
+            for i in {1..20}; do
+              if bundle exec pod trunk info "$pod" 2>/dev/null | grep -q "$VERSION"; then
+                echo "✅ $pod $VERSION is indexed on trunk (after $i checks)"
+                FOUND=true
+                break
+              fi
+
+              echo "Waiting for $pod $VERSION... ($i/20, next check in 30s)"
+              sleep 30
+            done
+
+            if [ "$FOUND" != "true" ]; then
+              echo "::error::$pod $VERSION not found on CocoaPods trunk after 10 minutes"
+              ALL_FOUND=false
+            fi
+          done
+
+          if [ "$ALL_FOUND" != "true" ]; then
+            exit 1
+          fi
+
+          echo "✅ All pods indexed on trunk. Waiting 90s for CDN propagation..."
+          sleep 90
 
       - name: Verify template iOS pod install
         working-directory: template/sparkling-app-template/ios
         run: |
           echo "🔨 Verifying template iOS pod install..."
-          echo "   Sparkling resolved from CocoaPods trunk; SparklingMethod from node_modules via :path"
+          echo "   All Sparkling pods resolved from CocoaPods trunk"
           bundle exec pod install --repo-update
           echo "✅ Template iOS pod install succeeded"
 
@@ -747,8 +781,7 @@ jobs:
             - `com.tiktok.sparkling:sparkling`
             - `com.tiktok.sparkling:sparkling-method`
           - **iOS** (`template/sparkling-app-template/ios/Podfile`):
-            - `Sparkling` pod pinned to release version from CocoaPods trunk
-            - `SparklingMethod` resolved from `node_modules` via `:path`
+            - All Sparkling pods (`Sparkling`, `SparklingMethod`, `Sparkling-DebugTool`, `Sparkling-Router`) pinned to release version from CocoaPods trunk
           - **Root & SDK versions** aligned
 
           > This PR was created automatically by GitHub Actions.
