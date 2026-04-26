@@ -46,7 +46,6 @@ runs:
         tag: ${{ inputs.version }}
         name: Release ${{ inputs.version }}
         token: ${{ inputs.github_token }}
-        draft: ${{ inputs.is_rc == 'true' }}
         prerelease: ${{ inputs.is_rc == 'true' }}
         generateReleaseNotes: true
         artifacts: dist/ios/*.zip
