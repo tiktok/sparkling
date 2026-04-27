@@ -592,8 +592,21 @@ jobs:
         run: |
           echo "🔨 Verifying template iOS pod install..."
           echo "   All Sparkling pods resolved from CocoaPods trunk"
-          bundle exec pod install --repo-update
-          echo "✅ Template iOS pod install succeeded"
+
+          DELAY=60
+          for i in {1..6}; do
+            if bundle exec pod install --repo-update --verbose; then
+              echo "✅ Template iOS pod install succeeded"
+              exit 0
+            fi
+            if [ $i -eq 6 ]; then
+              echo "::error::pod install failed after 6 attempts"
+              exit 1
+            fi
+            echo "pod install failed (attempt $i/6), waiting ${DELAY}s for CDN to propagate..."
+            sleep $DELAY
+            DELAY=$((DELAY + 60))
+          done
 
   # ──────────────────────────────────────────────────────────────
   # Step 4: Publish sparkling-app-template to npm
