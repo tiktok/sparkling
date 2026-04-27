@@ -19,15 +19,16 @@ end
 
 def sparkling_methods_dep
   # BEGIN SPARKLING AUTOLINK
-  pod 'Sparkling-DebugTool', :path => '../../sparkling-debug-tool/ios'
   pod 'Sparkling-Media', :path => '../../methods/sparkling-media/ios'
-  pod 'Sparkling-Storage', :path => '../../methods/sparkling-storage/ios'
   pod 'Sparkling-Router', :path => '../../methods/sparkling-navigation/ios'
+  pod 'Sparkling-Storage', :path => '../../methods/sparkling-storage/ios'
   # END SPARKLING AUTOLINK
 end
 
 def sparkling_devtool
+  # BEGIN SPARKLING AUTOLINK
   pod 'Sparkling-DebugTool', :path => '../../sparkling-debug-tool/ios'
+  # END SPARKLING AUTOLINK
 end
 
 def sparkling_kit

@@ -13,29 +13,32 @@
     "build": "pnpm -C ../.. --filter sparkling-method --filter sparkling-navigation --filter sparkling-storage --filter sparkling-media build && rspeedy build",
     "dev": "rspeedy dev",
     "format": "prettier --write .",
-    "preview": "rspeedy preview"
+    "preview": "rspeedy preview",
+    "run:android": "sparkling-app-cli run:android",
+    "run:ios": "sparkling-app-cli run:ios --copy"
   },
   "dependencies": {
     "@lynx-js/react": "^0.116.2",
+    "sparkling-app-cli": "2.1.0-rc.12",
+    "sparkling-media": "workspace:*",
     "sparkling-navigation": "workspace:*",
-    "sparkling-storage": "workspace:*",
-    "sparkling-media": "workspace:*"
+    "sparkling-storage": "workspace:*"
   },
   "devDependencies": {
     "@lynx-js/qrcode-rsbuild-plugin": "^0.4.4",
     "@lynx-js/react-rsbuild-plugin": "^0.12.7",
     "@lynx-js/rspeedy": "^0.13.3",
     "@lynx-js/types": "^3.6.0",
-    "sparkling-types": "workspace:*",
     "@rsbuild/core": "1.7.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@types/react": "^18.3.20",
+    "@vitest/coverage-v8": "^3.1.2",
     "jsdom": "^26.1.0",
     "prettier": "^3.5.3",
     "sparkling-debug-tool": "workspace:*",
+    "sparkling-types": "workspace:*",
     "typescript": "^5.8.3",
-    "vitest": "^3.1.2",
-    "@vitest/coverage-v8": "^3.1.2"
+    "vitest": "^3.1.2"
   },
   "engines": {
     "node": "^22 || ^24"

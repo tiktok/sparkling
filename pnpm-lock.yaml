@@ -105,6 +105,9 @@ importers:
       '@lynx-js/react':
         specifier: ^0.116.2
         version: 0.116.5(@lynx-js/types@3.7.0)(@types/react@18.3.28)
+      sparkling-app-cli:
+        specifier: 2.1.0-rc.12
+        version: 2.1.0-rc.12(@rspack/core@1.7.11(@swc/helpers@0.5.21))(@types/node@25.6.0)(typescript@5.9.3)(webpack@5.105.0)
       sparkling-media:
         specifier: workspace:*
         version: link:../methods/sparkling-media
@@ -309,7 +312,7 @@ importers:
         version: link:../../packages/sparkling-method
       sparkling-navigation:
         specifier: ~2.1.0-rc.12
-        version: 2.1.0-rc.12
+        version: link:../../packages/methods/sparkling-navigation
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.4.4
@@ -343,7 +346,7 @@ importers:
         version: 2.1.0-rc.12(@rspack/core@1.7.11(@swc/helpers@0.5.21))(@types/node@25.6.0)(typescript@5.9.3)(webpack@5.105.0)
       sparkling-types:
         specifier: ~2.1.0-rc.12
-        version: link:../../packages/sparkling-types
+        version: 2.1.0-rc.20(@lynx-js/types@3.7.0)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -4676,11 +4679,10 @@ packages:
     resolution: {integrity: sha512-UMrfTHc/x7WfS9V5cob8uS8E/ucb2/PompUpAppqPmFQOv/Eg3KORT9Oqp0QP5JjG5HAEwe0vIi6zUiWRw38Tw==}
     engines: {node: ^22 || ^24}
 
-  sparkling-method@2.1.0-rc.12:
-    resolution: {integrity: sha512-TfSMzFS66MYJWZG4Drn5gNCMtDqkJIvVNHhVu6DIyVxjFhIgdRiXqYsDwLh8VIQlHnTQnuNmONVEtHPzsEWaFw==}
-
-  sparkling-navigation@2.1.0-rc.12:
-    resolution: {integrity: sha512-kAQ5jZsjAixrQuoCBiiojY4jNxyilrhP/ZAjg9DvCmqdOQME73rC1+BR8zax1cyxLeAaa0fxcztAS6exA78qnA==}
+  sparkling-types@2.1.0-rc.20:
+    resolution: {integrity: sha512-87Nc4fhV+IAYr6iM0QcTWWE7bZ4IdvD2Pp5u5yCgdRfetYJYIjh5e0VFNPgahWU2gLjy7FxbvAY21r+TItCbuQ==}
+    peerDependencies:
+      '@lynx-js/types': '>=3.0.0'
 
   sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
@@ -10895,11 +10897,9 @@ snapshots:
 
   sparkling-debug-tool@2.1.0-rc.14: {}
 
-  sparkling-method@2.1.0-rc.12: {}
-
-  sparkling-navigation@2.1.0-rc.12:
+  sparkling-types@2.1.0-rc.20(@lynx-js/types@3.7.0):
     dependencies:
-      sparkling-method: 2.1.0-rc.12
+      '@lynx-js/types': 3.7.0
 
   sprintf-js@1.0.3: {}
 
