@@ -203,6 +203,9 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
+      - name: Add Android platform-tools to PATH
+        run: echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
