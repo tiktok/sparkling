@@ -13,12 +13,17 @@ Pod::Spec.new do |s|
   s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s }
   s.static_framework = true
 
-  s.source_files   = 'SparklingMacro/*.swift'
-  s.preserve_paths = 'Release/SparklingMacrosImpl'
+  s.default_subspec = 'RegisterMacro'
+
+  s.subspec 'RegisterMacro' do |register_macro|
+    register_macro.source_files = 'Sources/RegisterMacro/**/*.{swift,m,mm,h}'
+  end
+  
+  s.preserve_paths = 'Release/SparklingMacro'
 
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
     'SWIFT_COMPILATION_MODE' => 'wholemodule',
-    'OTHER_SWIFT_FLAGS' => '-Xfrontend -load-plugin-executable -Xfrontend ${PODS_TARGET_SRCROOT}/Release/SparklingMacrosImpl#SparklingMacrosImpl'
+    'OTHER_SWIFT_FLAGS' => '-Xfrontend -load-plugin-executable -Xfrontend ${PODS_TARGET_SRCROOT}/Release/SparklingMacro#SparklingMacrosImpl'
   }
 end

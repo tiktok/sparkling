@@ -33,7 +33,7 @@ end
 
 def sparkling_kit
   pod 'Sparkling', :path => '../../sparkling-sdk/ios/Sparkling'
-  pod 'SparklingMacro', :path => '../../sparkling-sdk/ios/SparklingMacro/Sources'
+  pod 'SparklingMacro', :path => '../../sparkling-sdk/ios/SparklingMacro'
   
   sparkling_methods
   sparkling_methods_dep

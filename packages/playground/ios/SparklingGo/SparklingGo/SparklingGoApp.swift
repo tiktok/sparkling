@@ -8,6 +8,7 @@ import Sparkling
 import SDWebImage
 import SDWebImageWebPCoder
 import SparklingMethod
+import SparklingMacro
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     var window: UIWindow?

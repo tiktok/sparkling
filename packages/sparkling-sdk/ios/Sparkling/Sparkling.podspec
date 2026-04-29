@@ -14,16 +14,17 @@ Pod::Spec.new do |s|
   s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s }
   s.static_framework = true
 
-  # Two plugin paths are specified to cover both integration modes:
-  # - PODS_TARGET_SRCROOT-relative: resolves correctly when SparklingMacro is a :path pod (local development)
-  # - PODS_ROOT-relative: resolves correctly when SparklingMacro is installed from trunk (CocoaPods CDN)
-  # If your project uses a monorepo layout, you may need to adjust these paths to match your directory structure.
+  # The macro plugin binary is resolved relative to the Sparkling pod root.
+  # This assumes Sparkling and SparklingMacro are installed as sibling pods under
+  # the same CocoaPods sandbox layout.
+  # If your project uses a monorepo, custom Podfile wiring, or any non-standard
+  # directory structure, update this relative path to match where
+  # SparklingMacro/Release/SparklingMacro is actually installed.
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
     'SWIFT_COMPILATION_MODE' => 'wholemodule',
     'OTHER_SWIFT_FLAGS' => "-enable-experimental-feature SymbolLinkageMarkers \
-        -Xfrontend -load-plugin-executable -Xfrontend ${PODS_TARGET_SRCROOT}/../SparklingMacro/Sources/Release/SparklingMacrosImpl#SparklingMacrosImpl \
-        -Xfrontend -load-plugin-executable -Xfrontend ${PODS_ROOT}/SparklingMacro/Release/SparklingMacrosImpl#SparklingMacrosImpl"
+        -Xfrontend -load-plugin-executable -Xfrontend ${PODS_TARGET_SRCROOT}/../SparklingMacro/Release/SparklingMacro#SparklingMacrosImpl"
   }
   
   s.subspec 'Application' do |application|
@@ -32,7 +33,7 @@ Pod::Spec.new do |s|
     application.dependency 'Sparkling/Utils'
     application.dependency 'SparklingMethod/Core', s.version.to_s
     application.dependency 'SnapKit'
-    application.dependency 'SparklingMacro'
+    application.dependency 'SparklingMacro/RegisterMacro'
     application.resource_bundle = {
       'sparklingPageResource' => 'Sources/Application/Container/UI/SparklingPageResource.xcassets'
     }
@@ -49,7 +50,7 @@ Pod::Spec.new do |s|
       lynx.dependency 'LynxBase/Framework', '3.6.0'
       lynx.dependency 'LynxServiceAPI', '3.6.0'
       lynx.dependency 'SparklingMethod/Lynx', s.version.to_s
-      lynx.dependency 'SparklingMacro'
+      lynx.dependency 'SparklingMacro/RegisterMacro'
       lynx.source_files = [
         'Sources/Service/{Base,Protocols}/**/*.{swift,m,h}',
         'Sources/Service/LynxService/**/*.{swift,m,h}',

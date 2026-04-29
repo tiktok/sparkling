@@ -3,7 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 
 public typealias SPKPluginData = (
-  version: Int, initializer: @convention(c) () -> UnsafePointer<CChar>
+  version: Int32, initializer: @convention(c) () -> UnsafePointer<CChar>
 )
 
 @freestanding(declaration)

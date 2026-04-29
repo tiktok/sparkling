@@ -29,6 +29,7 @@ end
 
 def sparkling_kit
   pod 'Sparkling', '2.1.0-rc.12'
+  pod 'SparklingMacro', '2.1.0-rc.12'
   sparkling_methods
   sparkling_methods_dep
   sparkling_devtool

@@ -43,8 +43,14 @@ CONFIG_FILE = Path(__file__).parent / "ios_pods.json"
 
 _PODSPEC_VERSION_RE = re.compile(r's\.version\s*=\s*"[^"]*"')
 
-ZIP_EXCLUDE_FILES = {".DS_Store", ".gitignore"}
-ZIP_EXCLUDE_DIRS  = {"__MACOSX"}
+ZIP_EXCLUDE_FILES = {
+    ".DS_Store",
+    ".gitignore",
+    "Package.swift",
+    "Package.resolved",
+    "README.md",
+}
+ZIP_EXCLUDE_DIRS  = {"__MACOSX", ".swiftpm"}
 ZIP_EXCLUDE_EXTS  = {".podspec", ".log"}
 
 
@@ -152,25 +158,25 @@ def generate_podspec_json(
 
 def build_swift_binary(cfg: dict, ios_dir: Path, repo_root: Path) -> None:
     pod_name = cfg["pod_name"]
-    # Swift package root is the parent of ios_dir (the podspec directory).
-    swift_pkg_dir = ios_dir.parent
     info(f"Building {pod_name} swift binary (swift build -c release)...")
-    result = subprocess.run(
-        ["swift", "build", "-c", "release"],
-        cwd=swift_pkg_dir,
-    )
-    if result.returncode != 0:
-        die(f"Failed to build swift binary for {pod_name}")
+    with tempfile.TemporaryDirectory() as tmp:
+        scratch_dir = Path(tmp) / ".build"
+        result = subprocess.run(
+            ["swift", "build", "-c", "release", "--scratch-path", str(scratch_dir)],
+            cwd=ios_dir,
+        )
+        if result.returncode != 0:
+            die(f"Failed to build swift binary for {pod_name}")
 
-    candidates = [f for f in (swift_pkg_dir / ".build/release").glob(f"{pod_name}*") if f.is_file()]
-    if not candidates:
-        die(f"No {pod_name} binary found in .build/release/")
-    src = candidates[0]
+        candidates = [f for f in (scratch_dir / "release").glob(f"{pod_name}*") if f.is_file()]
+        if not candidates:
+            die(f"No {pod_name} binary found in {scratch_dir / 'release'}")
+        src = candidates[0]
 
-    dst_dir = ios_dir / "Release"
-    dst_dir.mkdir(parents=True, exist_ok=True)
-    dst = dst_dir / pod_name
-    shutil.copy2(src, dst)
+        dst_dir = ios_dir / "Release"
+        dst_dir.mkdir(parents=True, exist_ok=True)
+        dst = dst_dir / pod_name
+        shutil.copy2(src, dst)
     success(f"Binary copied to {dst.relative_to(repo_root)}")
 
 
