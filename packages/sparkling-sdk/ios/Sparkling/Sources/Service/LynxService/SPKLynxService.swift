@@ -4,6 +4,7 @@
 
 import Foundation
 import Lynx
+import SparklingMacro
 
 /// Service class responsible for creating and managing Lynx-based views.
 /// 
@@ -11,6 +12,8 @@ import Lynx
 /// Lynx rendering engine integration within the SPK framework. It handles
 /// the creation of SPKWrapperLynxView instances with proper parameter conversion
 /// and configuration.
+/// 
+#spk_register(class: "SPKLynxService")
 @objcMembers
 open class SPKLynxService: NSObject, SPKViewRegisterService {
     

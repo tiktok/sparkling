@@ -70,11 +70,8 @@ def find_podspec(repo_root: Path, pod_name: str, search_dir: str) -> Path:
 
 
 def update_podspec_versions(repo_root: Path, version: str, pod_configs: list) -> None:
-    # trunk pods have hardcoded version strings; update them before pod ipc spec runs.
     replacement = f's.version        = "{version}"'
     for cfg in pod_configs:
-        if not cfg.get("trunk"):
-            continue
         podspec = find_podspec(repo_root, cfg["pod_name"], cfg["search_dir"])
         podspec.write_text(_PODSPEC_VERSION_RE.sub(replacement, podspec.read_text()))
     success("Podspec versions updated")
@@ -153,6 +150,30 @@ def generate_podspec_json(
     output_path.write_text(json.dumps(patched, indent=2))
 
 
+def build_swift_binary(cfg: dict, ios_dir: Path, repo_root: Path) -> None:
+    pod_name = cfg["pod_name"]
+    # Swift package root is the parent of ios_dir (the podspec directory).
+    swift_pkg_dir = ios_dir.parent
+    info(f"Building {pod_name} swift binary (swift build -c release)...")
+    result = subprocess.run(
+        ["swift", "build", "-c", "release"],
+        cwd=swift_pkg_dir,
+    )
+    if result.returncode != 0:
+        die(f"Failed to build swift binary for {pod_name}")
+
+    candidates = [f for f in (swift_pkg_dir / ".build/release").glob(f"{pod_name}*") if f.is_file()]
+    if not candidates:
+        die(f"No {pod_name} binary found in .build/release/")
+    src = candidates[0]
+
+    dst_dir = ios_dir / "Release"
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    dst = dst_dir / pod_name
+    shutil.copy2(src, dst)
+    success(f"Binary copied to {dst.relative_to(repo_root)}")
+
+
 def main() -> None:
     all_configs = load_pod_configs()
     valid_pod_names = [c["pod_name"] for c in all_configs]
@@ -187,9 +208,8 @@ def main() -> None:
     info(f"Output: {output_dir}")
     info("═══════════════════════════════════════════════════════════")
 
-    if any(c.get("trunk") for c in configs):
-        info(f"Updating hardcoded podspec versions to {version}...")
-        update_podspec_versions(repo_root, version, configs)
+    info(f"Updating hardcoded podspec versions to {version}...")
+    update_podspec_versions(repo_root, version, configs)
 
     for cfg in configs:
         pod_name = cfg["pod_name"]
@@ -201,6 +221,9 @@ def main() -> None:
         print()
         info(f"─── {pod_name} ───────────────────────────────────────────")
         info(f"  podspec: {podspec_path.relative_to(repo_root)}")
+
+        if cfg.get("swift_build"):
+            build_swift_binary(cfg, ios_dir, repo_root)
 
         info(f"Generating {json_path.name}")
         generate_podspec_json(podspec_path, pod_name, version, json_path, repo_root)

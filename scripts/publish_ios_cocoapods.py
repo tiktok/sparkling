@@ -137,8 +137,6 @@ def main() -> None:
         skip_pod_lint()
 
     for cfg in configs:
-        if not cfg.get("trunk"):
-            continue
         pod_name = cfg["pod_name"]
         push_pod(pod_name, version, artifacts_dir, args.dry_run)
 

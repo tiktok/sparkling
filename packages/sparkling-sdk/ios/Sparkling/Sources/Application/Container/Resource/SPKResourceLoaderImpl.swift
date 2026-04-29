@@ -3,6 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 
 import Foundation
+import SparklingMacro
 
 /// Type alias for network response completion handlers.
 /// 
@@ -46,6 +47,7 @@ open class SPKResourceProvider: SPKResourceProtocol {
 /// This class provides functionality to load resources from both network URLs and local bundles.
 /// It implements a singleton pattern and handles both remote and local resource loading scenarios.
 /// The @objcMembers attribute ensures Objective-C compatibility for all properties and methods.
+#spk_register(class: "SPKResourceLoaderImpl")
 @objcMembers
 open class SPKResourceLoaderImpl: NSObject, SPKResourceLoaderProtocol {
     

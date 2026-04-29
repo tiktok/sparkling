@@ -557,7 +557,7 @@ jobs:
           PODS=()
           while IFS= read -r pod; do
             PODS+=("$pod")
-          done < <(jq -r '.[] | select(.trunk == true) | .pod_name' scripts/ios_pods.json)
+          done < <(jq -r '.[].pod_name' scripts/ios_pods.json)
 
           ALL_FOUND=true
           for pod in "${PODS[@]}"; do

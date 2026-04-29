@@ -57,35 +57,14 @@ static void execute_method_with_images(SPKBootExecuteImage *image)
     }
 }
 
-static void execute_method_with_class_name(NSString *className, SEL selector)
-{
-    Class cls = NSClassFromString(className);
-    if ([cls respondsToSelector:selector]) {
-        IMP imp = [cls methodForSelector:selector];
-        ((void (*)(id, SEL))imp)(cls, selector);
-    }
-}
-
-static void execute_fallback_prepare_services(void)
-{
-    SEL selector = @selector(executePrepareServiceTask);
-    execute_method_with_class_name(@"Sparkling.SPKLynxService", selector);
-    execute_method_with_class_name(@"Sparkling.SPKResourceLoaderImpl", selector);
-}
-
 #pragma GCC diagnostic ignored "-Wundeclared-selector"
 
 static void handle_did_add_image(const SPKCodeRunnerMachoHeader *mhp)
 {
     SPKBootExecuteImage *prepareServiceImage = create_image_with_section(mhp, SPK_PREPARE_SERVICE_SECTION_NAME, @selector(executePrepareServiceTask));
-    BOOL hasPrepareServiceSection = NO;
     if (prepareServiceImage != NULL) {
-        hasPrepareServiceSection = YES;
         execute_method_with_images(prepareServiceImage);
         free(prepareServiceImage);
-    }
-    if (!hasPrepareServiceSection) {
-        execute_fallback_prepare_services();
     }
     
     SPKBootExecuteImage *afterAllPrepareImage = create_image_with_section(mhp, SPK_AFTER_ALL_PREPARE_SECTION_NAME, @selector(executeAfterPrepareTask));
@@ -95,10 +74,10 @@ static void handle_did_add_image(const SPKCodeRunnerMachoHeader *mhp)
     }
 }
 
-static void PIARunSegment() __attribute__((no_sanitize("address")))
+static void SPKRunSegment() __attribute__((no_sanitize("address")))
 {
     Dl_info info;
-    int ret = dladdr(PIARunSegment, &info);
+    int ret = dladdr(SPKRunSegment, &info);
     if (ret == 0) {
         return;
     }
@@ -117,6 +96,6 @@ void SPKExecuteAllPrepareBootTask(void)
     static BOOL isExecuted = NO;
     if (!isExecuted) {
         isExecuted = YES;
-        PIARunSegment();
+        SPKRunSegment();
     }
 }
