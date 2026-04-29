@@ -6,6 +6,8 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
+private let kSPKPluginDataVersion: Int32 = 1
+
 public enum SparklingSectionMacroError: Error {
   case macroKeysError
   case macroKeysTypeError
@@ -43,13 +45,15 @@ public struct SparklingSectionMacro: DeclarationMacro {
     let declartionString = """
       #if swift(>=6.3)
       @used
-      @section("__DATA, SPK_PRE_SVC")
+      @section("__DATA,SPK_PRE_SVC")
       #else
       @_used
-      @_section("__DATA, SPK_PRE_SVC")
+      @_section("__DATA,SPK_PRE_SVC")
       #endif
-      nonisolated(unsafe)
-      let \(infoName): UnsafePointer<CChar>? = UnsafeRawPointer(("\(className)\\0" as StaticString).utf8Start).assumingMemoryBound(to: CChar.self)
+      let \(infoName) = SPKPluginData(
+        version: \(kSPKPluginDataVersion),
+        initializer: {UnsafeRawPointer(("\(className)" as StaticString).utf8Start).assumingMemoryBound(to: CChar.self)}
+      )
       """
     return [
       DeclSyntax(stringLiteral: declartionString)

@@ -14,6 +14,13 @@
     typedef struct mach_header_64 SPKCodeRunnerMachoHeader;
 #endif
 
+typedef const char *(*SPKInitializer)(void);
+
+typedef struct _SPKPluginData {
+    int32_t version;
+    SPKInitializer initializer;
+} SPKPluginData;
+
 typedef struct _SPKBootExecuteImage {
     unsigned long size;
     uint64_t *memory;
@@ -23,8 +30,8 @@ typedef struct _SPKBootExecuteImage {
 static SPKBootExecuteImage* create_image_with_section(const SPKCodeRunnerMachoHeader *mhp, const char *secname, SEL selector)
 {
     unsigned long size = 0;
-    SPKBootExecuteImage *image = (SPKBootExecuteImage *)malloc(sizeof(SPKBootExecuteImage));
-    image->memory = (uint64_t *)getsectiondata((const struct mach_header_64 *)mhp, "__DATA", secname, &size);
+    SPKBootExecuteImage *image = static_cast<SPKBootExecuteImage *>(malloc(sizeof(SPKBootExecuteImage)));
+    image->memory = reinterpret_cast<uint64_t *>(getsectiondata(reinterpret_cast<const struct mach_header_64 *>(mhp), "__DATA", secname, &size));
     image->size = size;
     image->selector = selector;
     if (image->memory == NULL) {
@@ -36,24 +43,29 @@ static SPKBootExecuteImage* create_image_with_section(const SPKCodeRunnerMachoHe
 
 static void execute_method_with_images(SPKBootExecuteImage *image)
 {
-    if (image->memory != NULL) {
-        for (int i = 0; i < image->size / sizeof(void*); i++) {
-            const char *str = (const char *)image->memory[i];
-            #if __has_feature(address_sanitizer)
-            if (str == 0) {
-                continue;
-            }
-            #endif
-            NSString *clsName = [@"Sparkling." stringByAppendingString:[NSString stringWithUTF8String:str]];
-            if (clsName.length) {
-                SEL selector = image->selector;
-                Class cls = NSClassFromString(clsName);
-                if ([cls respondsToSelector:selector]) {
-                    IMP imp = [cls methodForSelector:selector];
-                    ((void (*)(id, SEL))imp)(cls, selector);
-                }
-            }
+    if (image == NULL || image->memory == NULL || image->size == 0) {
+        return;
+    }
+    const SPKPluginData *plugins = reinterpret_cast<const SPKPluginData *>(image->memory);
+    NSUInteger count = image->size / sizeof(SPKPluginData);
+    for (NSUInteger i = 0; i < count; i++) {
+        SPKPluginData plugin = plugins[i];
+        if (plugin.initializer == NULL) {
+            continue;
         }
+        const char *serviceName = plugin.initializer();
+        if (serviceName == NULL) {
+            continue;
+        }
+        NSString *clsName = [@"Sparkling." stringByAppendingString:[NSString stringWithUTF8String:serviceName]];
+          if (clsName.length) {
+              SEL selector = image->selector;
+              Class cls = NSClassFromString(clsName);
+              if ([cls respondsToSelector:selector]) {
+                  IMP imp = [cls methodForSelector:selector];
+                  reinterpret_cast<void (*)(id, SEL)>(imp)(cls, selector);
+              }
+          }
     }
 }
 
@@ -77,17 +89,17 @@ static void handle_did_add_image(const SPKCodeRunnerMachoHeader *mhp)
 static void SPKRunSegment() __attribute__((no_sanitize("address")))
 {
     Dl_info info;
-    int ret = dladdr(SPKRunSegment, &info);
+    int ret = dladdr(reinterpret_cast<const void *>(&SPKRunSegment), &info);
     if (ret == 0) {
         return;
     }
 #ifndef __LP64__
-    const struct mach_header *mhp = (struct mach_header*)info.dli_fbase;
+    const struct mach_header *mhp = reinterpret_cast<struct mach_header *>(info.dli_fbase);
 #else /* defined(__LP64__) */
-    const struct mach_header_64 *mhp = (struct mach_header_64*)info.dli_fbase;
+    const struct mach_header_64 *mhp = reinterpret_cast<struct mach_header_64 *>(info.dli_fbase);
 #endif /* defined(__LP64__) */
-    
-    handle_did_add_image((SPKCodeRunnerMachoHeader *)mhp);
+
+    handle_did_add_image(reinterpret_cast<const SPKCodeRunnerMachoHeader *>(mhp));
     
 }
 

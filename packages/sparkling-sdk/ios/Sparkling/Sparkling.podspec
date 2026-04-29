@@ -58,6 +58,6 @@ Pod::Spec.new do |s|
   end
   
   s.subspec 'Utils' do |utils|
-    utils.source_files = 'Sources/Utils/**/*.{swift,m,h}'
+    utils.source_files = 'Sources/Utils/**/*.{swift,m,mm,h}'
   end
 end
