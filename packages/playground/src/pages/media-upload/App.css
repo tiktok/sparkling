@@ -1,0 +1,272 @@
+/* Section Card */
+.mu-section {
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mu-section--dark {
+  background-color: #1c1c1e;
+}
+
+.mu-section--light {
+  background-color: #ffffff;
+}
+
+/* Section Title */
+.mu-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.mu-section-title--dark {
+  color: #ffffff;
+}
+
+.mu-section-title--light {
+  color: #000000;
+}
+
+/* Tab Row */
+.mu-tab-row {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.mu-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border-width: 1.5px;
+  border-style: solid;
+  flex: 1;
+}
+
+.mu-tab--active-dark {
+  background-color: rgba(37, 244, 238, 0.15);
+  border-color: #25f4ee;
+}
+
+.mu-tab--inactive-dark {
+  background-color: #2c2c2e;
+  border-color: #3a3a3c;
+}
+
+.mu-tab--active-light {
+  background-color: rgba(0, 153, 149, 0.1);
+  border-color: #009995;
+}
+
+.mu-tab--inactive-light {
+  background-color: #f2f2f7;
+  border-color: #e5e5ea;
+}
+
+.mu-tab-text {
+  font-size: 14px;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.mu-tab-text--active-dark {
+  color: #25f4ee;
+}
+
+.mu-tab-text--inactive-dark {
+  color: #8e8e93;
+}
+
+.mu-tab-text--active-light {
+  color: #009995;
+}
+
+.mu-tab-text--inactive-light {
+  color: #6c6c70;
+}
+
+/* Step indicator */
+.mu-step {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.mu-step--dark {
+  /* no bg needed */
+}
+
+.mu-step--light {
+  /* no bg needed */
+}
+
+.mu-step-num {
+  font-size: 12px;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background-color: #009995;
+  color: #ffffff;
+  text-align: center;
+  line-height: 22px;
+}
+
+.mu-step-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mu-step-label--dark {
+  color: #d1d1d6;
+}
+
+.mu-step-label--light {
+  color: #3a3a3c;
+}
+
+/* Choose File Button */
+.mu-choose-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border-radius: 10px;
+  border-width: 1.5px;
+  border-style: solid;
+}
+
+.mu-choose-btn--dark {
+  background-color: rgba(37, 244, 238, 0.08);
+  border-color: #25f4ee;
+}
+
+.mu-choose-btn--light {
+  background-color: rgba(0, 153, 149, 0.06);
+  border-color: #009995;
+}
+
+.mu-choose-btn-text--dark {
+  font-size: 14px;
+  font-weight: 600;
+  color: #25f4ee;
+}
+
+.mu-choose-btn-text--light {
+  font-size: 14px;
+  font-weight: 600;
+  color: #009995;
+}
+
+/* Status text */
+.mu-status-text {
+  font-size: 12px;
+  font-family: monospace;
+  word-break: break-all;
+}
+
+.mu-status-text--dark {
+  color: #8e8e93;
+}
+
+.mu-status-text--light {
+  color: #6c6c70;
+}
+
+/* Action Button */
+.mu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  border-radius: 12px;
+}
+
+.mu-btn--dark {
+  background-color: #25f4ee;
+}
+
+.mu-btn--light {
+  background-color: #009995;
+}
+
+.mu-btn-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+}
+
+/* Response Data Section */
+.mu-data-section {
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mu-data-section--dark {
+  background-color: #2c2c2e;
+}
+
+.mu-data-section--light {
+  background-color: #f2f2f7;
+}
+
+.mu-data-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.mu-data-title--dark {
+  color: #ffffff;
+}
+
+.mu-data-title--light {
+  color: #000000;
+}
+
+.mu-data-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.mu-data-key {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: monospace;
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.mu-data-key--dark {
+  color: #25f4ee;
+}
+
+.mu-data-key--light {
+  color: #009995;
+}
+
+.mu-data-value {
+  font-size: 12px;
+  font-family: monospace;
+  flex: 1;
+  word-break: break-all;
+}
+
+.mu-data-value--dark {
+  color: #d1d1d6;
+}
+
+.mu-data-value--light {
+  color: #3a3a3c;
+}

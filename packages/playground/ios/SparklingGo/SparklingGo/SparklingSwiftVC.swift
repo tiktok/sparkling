@@ -9,7 +9,6 @@ import UIKit
 
 class SparklingLynxElement: SPKLynxElement {
     var lynxElementName: String
-
     var lynxElementClassName: AnyClass
 
     init(lynxElementName: String, lynxElementClassName: AnyClass) {
@@ -21,15 +20,31 @@ class SparklingLynxElement: SPKLynxElement {
 struct SPKSwiftVC: UIViewControllerRepresentable {
     var frame: CGRect
 
+    init(frame: CGRect = .zero) {
+        self.frame = frame
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
     func makeUIViewController(context: Context) -> UINavigationController {
-        let url = "hybrid://lynxview?bundle=.%2Fmain.lynx.bundle&hide_nav_bar=1&hide_status_bar=1"
-        let context = SPKContext()
-        let elements = SparklingLynxElement(lynxElementName: "input", lynxElementClassName: LynxInput.self)
-        context.customUIElements = [elements]
-        let resolved = Self.resolvedFrame(frame)
-        let vc = SPKRouter.create(withURL: url, context: context, frame: resolved)
-        let naviVC = UINavigationController(rootViewController: vc)
+        let naviVC = UINavigationController()
         naviVC.isNavigationBarHidden = true
+
+        // Create the delegate FIRST, before loading anything.
+        let loadFailedDelegate = DevURLLoadFailedDelegate(
+            navigationController: naviVC,
+            frameProvider: { Self.resolvedFrame(self.frame) }
+        )
+        context.coordinator.loadFailedDelegate = loadFailedDelegate
+
+        // Pass delegate into makeContext so it's set BEFORE SPKRouter.create triggers loading.
+        let url = DebugDevURLSupport.mainScheme()
+        let spkContext = DebugDevURLSupport.makeContext(delegate: loadFailedDelegate)
+        let resolved = Self.resolvedFrame(frame)
+        let vc = SPKRouter.create(withURL: url, context: spkContext, frame: resolved)
+        naviVC.setViewControllers([vc], animated: false)
         return naviVC
     }
 
@@ -45,6 +60,10 @@ struct SPKSwiftVC: UIViewControllerRepresentable {
             return CGRect(origin: .zero, size: frame.size)
         }
         return CGRect(origin: .zero, size: UIScreen.main.bounds.size)
+    }
+
+    final class Coordinator {
+        var loadFailedDelegate: DevURLLoadFailedDelegate?
     }
 }
 

@@ -1,0 +1,168 @@
+/* Section Card */
+.gp-section {
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gp-section--dark {
+  background-color: #1c1c1e;
+}
+
+.gp-section--light {
+  background-color: #ffffff;
+}
+
+/* Section Title */
+.gp-section-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.gp-section-title--dark {
+  color: #25f4ee;
+}
+
+.gp-section-title--light {
+  color: #009995;
+}
+
+/* Section Description */
+.gp-section-desc {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.gp-section-desc--dark {
+  color: #8e8e93;
+}
+
+.gp-section-desc--light {
+  color: #6c6c70;
+}
+
+/* Property Row */
+.gp-prop-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 0;
+  border-bottom-width: 0.5px;
+  border-bottom-style: solid;
+}
+
+.gp-prop-row--dark {
+  border-bottom-color: #2c2c2e;
+}
+
+.gp-prop-row--light {
+  border-bottom-color: #e5e5ea;
+}
+
+/* Property Header */
+.gp-prop-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Property Name */
+.gp-prop-name {
+  font-size: 15px;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.gp-prop-name--dark {
+  color: #ffffff;
+}
+
+.gp-prop-name--light {
+  color: #1c1c1e;
+}
+
+/* Type Badge */
+.gp-type-badge {
+  font-size: 11px;
+  font-family: monospace;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.gp-type-badge--string {
+  background-color: rgba(37, 244, 238, 0.15);
+  color: #25f4ee;
+}
+
+.gp-type-badge--number {
+  background-color: rgba(48, 209, 88, 0.15);
+  color: #30d158;
+}
+
+.gp-type-badge--boolean {
+  background-color: rgba(175, 82, 222, 0.15);
+  color: #af52de;
+}
+
+/* Platform Badge */
+.gp-platform-badge {
+  font-size: 10px;
+  font-family: monospace;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: rgba(255, 149, 0, 0.15);
+  color: #ff9500;
+}
+
+/* Property Description */
+.gp-prop-desc {
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.gp-prop-desc--dark {
+  color: #8e8e93;
+}
+
+.gp-prop-desc--light {
+  color: #6c6c70;
+}
+
+/* Property Value Row */
+.gp-prop-value-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.gp-prop-value-label {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.gp-prop-value-label--dark {
+  color: #636366;
+}
+
+.gp-prop-value-label--light {
+  color: #aeaeb2;
+}
+
+.gp-prop-value {
+  font-size: 14px;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.gp-prop-value--dark {
+  color: #25f4ee;
+}
+
+.gp-prop-value--light {
+  color: #009995;
+}

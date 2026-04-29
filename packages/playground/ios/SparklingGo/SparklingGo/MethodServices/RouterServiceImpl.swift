@@ -20,6 +20,9 @@ class RouterServiceImpl: RouterService {
     func openScheme(withParams params: Sparkling_Router.OpenMethodParamModel, completion: @escaping SparklingMethod.PipeMethod.CompletionBlock) {
         let urlString = params.scheme
         let context = SPKContext()
+        // Register <input> custom element so sub-pages can use text inputs
+        let inputElement = SparklingLynxElement(lynxElementName: "input", lynxElementClassName: LynxInput.self)
+        context.customUIElements = [inputElement]
         if let rawExtra = params.extra as? [String: Any] {
             var extra: [String: AnyHashable] = [:]
             for (key, value) in rawExtra {
@@ -31,13 +34,8 @@ class RouterServiceImpl: RouterService {
             }
             context.extra = extra
         }
-        
-        DispatchQueue.main.async {
-            if let urlString = urlString,
-               PlaygroundNativeRouteRegistry.shared.tryOpen(scheme: urlString, completion: completion) {
-                return
-            }
 
+        DispatchQueue.main.async {
             func openWithRouter(completionHandler: ((Bool) -> Void)? = nil) {
                 if let (_, success) = SPKRouter.open(withURL: urlString, context: context), success {
                     completionHandler?(true)

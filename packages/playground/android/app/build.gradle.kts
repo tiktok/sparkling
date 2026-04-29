@@ -17,6 +17,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        val sparklingDevServerHost =
+            (project.findProperty("sparklingDevServerHost") as String?) ?: "127.0.0.1"
+        val sparklingDevServerPort =
+            (project.findProperty("sparklingDevServerPort") as String?) ?: "5969"
+        buildConfigField("String", "SPARKLING_DEV_SERVER_HOST", "\"$sparklingDevServerHost\"")
+        buildConfigField("int", "SPARKLING_DEV_SERVER_PORT", sparklingDevServerPort)
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
         }

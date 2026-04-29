@@ -111,6 +111,9 @@ importers:
       sparkling-media:
         specifier: workspace:*
         version: link:../methods/sparkling-media
+      sparkling-method:
+        specifier: workspace:*
+        version: link:../sparkling-method
       sparkling-navigation:
         specifier: workspace:*
         version: link:../methods/sparkling-navigation
@@ -309,10 +312,10 @@ importers:
         version: 2.1.0-rc.14
       sparkling-method:
         specifier: ~2.1.0-rc.12
-        version: link:../../packages/sparkling-method
+        version: 2.1.0-rc.20
       sparkling-navigation:
         specifier: ~2.1.0-rc.12
-        version: link:../../packages/methods/sparkling-navigation
+        version: 2.1.0-rc.20
     devDependencies:
       '@lynx-js/qrcode-rsbuild-plugin':
         specifier: ^0.4.4
@@ -4678,6 +4681,12 @@ packages:
   sparkling-debug-tool@2.1.0-rc.14:
     resolution: {integrity: sha512-UMrfTHc/x7WfS9V5cob8uS8E/ucb2/PompUpAppqPmFQOv/Eg3KORT9Oqp0QP5JjG5HAEwe0vIi6zUiWRw38Tw==}
     engines: {node: ^22 || ^24}
+
+  sparkling-method@2.1.0-rc.20:
+    resolution: {integrity: sha512-sohXXw00KzgaKrzE81Y7Jg/QUUWoIdyZnWiyq8aw8OSemH1k9Hq4b6aRDnqf2A1jUPJy0PK0ZmWXn9VcI+0YGA==}
+
+  sparkling-navigation@2.1.0-rc.20:
+    resolution: {integrity: sha512-kFG88DrZmQcqSMqzwsB/yp5COTwGH9E3Cbqsh+PXbQpGxOw9L+lTWZttoHAs0dJj1sCiHl/Ry04jviFFwOFZIw==}
 
   sparkling-types@2.1.0-rc.20:
     resolution: {integrity: sha512-87Nc4fhV+IAYr6iM0QcTWWE7bZ4IdvD2Pp5u5yCgdRfetYJYIjh5e0VFNPgahWU2gLjy7FxbvAY21r+TItCbuQ==}
@@ -9210,7 +9219,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 25.6.0
+      '@types/node': 22.19.17
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -10896,6 +10905,12 @@ snapshots:
       - webpack
 
   sparkling-debug-tool@2.1.0-rc.14: {}
+
+  sparkling-method@2.1.0-rc.20: {}
+
+  sparkling-navigation@2.1.0-rc.20:
+    dependencies:
+      sparkling-method: 2.1.0-rc.20
 
   sparkling-types@2.1.0-rc.20(@lynx-js/types@3.7.0):
     dependencies:

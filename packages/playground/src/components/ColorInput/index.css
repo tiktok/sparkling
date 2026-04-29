@@ -1,0 +1,85 @@
+.color-input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.color-input-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.color-input-label--dark {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.color-input-label--light {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.color-input-desc {
+  font-size: 11px;
+}
+
+.color-input-desc--dark {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.color-input-desc--light {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+.color-input-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-input-box {
+  flex: 1;
+  height: 36px;
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-family: monospace;
+}
+
+.color-input-box--dark {
+  background-color: #2a2a2a;
+  color: #ffffff;
+}
+
+.color-input-box--light {
+  background-color: #f0f2f5;
+  color: #000000;
+}
+
+.color-input-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.color-input-presets {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.color-input-preset {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: transparent;
+}
+
+.color-input-preset--active {
+  border-color: #25f4ee;
+}

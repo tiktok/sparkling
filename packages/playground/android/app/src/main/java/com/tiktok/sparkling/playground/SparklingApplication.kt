@@ -33,6 +33,7 @@ import com.tiktok.sparkling.method.media.utils.MediaProvider
 import com.tiktok.sparkling.playground.depend.AppMediaDepend
 import com.tiktok.sparkling.playground.input.LynxInputComponent
 import com.tiktok.sparkling.playground.provider.BuiltinTemplateProvider
+import com.tiktok.sparkling.debugtool.SparklingDebugTool
 import com.tiktok.sparkling.playground.depend.AppNetworkDepend
 import com.tiktok.sparkling.playground.depend.AppPermissionDepend
 import com.tiktok.sparkling.playground.depend.AppThreadPoolDepend
@@ -53,6 +54,9 @@ class SparklingApplication : Application() {
     }
 
     private fun initSparkling() {
+        if (BuildConfig.DEBUG) {
+            SparklingDebugTool.init(this)
+        }
         initHybridKit()
         initDepends()
         initSparklingMethods()

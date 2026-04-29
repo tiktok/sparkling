@@ -20,10 +20,17 @@ class SplashActivity : AppCompatActivity() {
     private fun gotoSparklingPage() {
         val initData = mapOf<Any, Any>()
         val initialData: String = JsonUtils.toJson(initData)
+        val initialDataJson = "{ \"initial_data\":$initialData}"
 
         val context = SparklingContext()
-        context.scheme = "hybrid://lynxview_page?bundle=main.lynx.bundle&hide_nav_bar=1&screen_orientation=portrait"
-        context.withInitData("{ \"initial_data\":$initialData}")
+        context.scheme = if (BuildConfig.DEBUG) {
+            val debugScheme = DebugDevUrlSupport.buildMainPageScheme(this)
+            context.sparklingUIProvider = DebugSparklingUiProvider(initialDataJson, debugScheme)
+            debugScheme
+        } else {
+            "hybrid://lynxview_page?bundle=main.lynx.bundle&hide_nav_bar=1&screen_orientation=portrait"
+        }
+        context.withInitData(initialDataJson)
         Sparkling.build(this, context).navigate()
         finish()
     }

@@ -20,10 +20,6 @@ class SparklingHostRouterDepend: IHostRouterDepend {
         platformType: BridgePlatformType,
         context: Context?
     ): Boolean {
-        if (PlaygroundNativeRouteRegistry.openIfMatches(scheme, context)) {
-            return true
-        }
-
         val sparklingContext = SparklingContext()
         sparklingContext.scheme = scheme
         val rawExtra = extraParams["extra"] as? Map<*, *>

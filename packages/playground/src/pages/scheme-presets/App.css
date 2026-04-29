@@ -1,0 +1,145 @@
+/* Preset Card */
+.preset-card {
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preset-card--dark {
+  background-color: #1c1c1e;
+}
+
+.preset-card--light {
+  background-color: #ffffff;
+}
+
+/* Preset Name */
+.preset-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.preset-name--dark {
+  color: #25f4ee;
+}
+
+.preset-name--light {
+  color: #009995;
+}
+
+/* Preset Description */
+.preset-desc {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.preset-desc--dark {
+  color: #8e8e93;
+}
+
+.preset-desc--light {
+  color: #6c6c70;
+}
+
+/* Params List */
+.preset-params {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.preset-param-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.preset-param-key {
+  font-size: 13px;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.preset-param-key--dark {
+  color: #25f4ee;
+}
+
+.preset-param-key--light {
+  color: #009995;
+}
+
+.preset-param-value {
+  font-size: 13px;
+  font-family: monospace;
+}
+
+.preset-param-value--dark {
+  color: #d1d1d6;
+}
+
+.preset-param-value--light {
+  color: #3a3a3c;
+}
+
+/* Try It Button */
+.try-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border-radius: 10px;
+  margin-top: 4px;
+}
+
+.try-button--dark {
+  background-color: #25f4ee;
+}
+
+.try-button--light {
+  background-color: #009995;
+}
+
+.try-button-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: #000000;
+}
+
+/* Result row */
+.preset-result {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.preset-result-label {
+  font-size: 13px;
+}
+
+.preset-result-label--dark {
+  color: #8e8e93;
+}
+
+.preset-result-label--light {
+  color: #6c6c70;
+}
+
+.preset-result-code {
+  font-size: 13px;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.preset-result-code--success {
+  color: #30d158;
+}
+
+.preset-result-code--error {
+  color: #fe2c3a;
+}

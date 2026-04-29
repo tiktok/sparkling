@@ -1,0 +1,174 @@
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-field-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.form-field-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.form-field-label--dark {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.form-field-label--light {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.form-field-desc {
+  font-size: 12px;
+}
+
+.form-field-desc--dark {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.form-field-desc--light {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+/* Input */
+.form-field-input {
+  height: 40px;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.form-field-input--dark {
+  background-color: #2a2a2a;
+  color: #ffffff;
+}
+
+.form-field-input--light {
+  background-color: #f0f2f5;
+  color: #000000;
+}
+
+/* Toggle — iOS style: label left, switch right */
+.form-field-toggle-ios {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.form-field-toggle-ios-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.form-field-toggle {
+  width: 48px;
+  height: 28px;
+  border-radius: 14px;
+  padding: 2px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.form-field-toggle--on {
+  background-color: #25f4ee;
+  justify-content: flex-end;
+}
+
+.form-field-toggle--off-dark {
+  background-color: #3a3a3a;
+  justify-content: flex-start;
+}
+
+.form-field-toggle--off-light {
+  background-color: #d1d5db;
+  justify-content: flex-start;
+}
+
+.form-field-toggle-knob {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+}
+
+.form-field-toggle-knob--on {
+  background-color: #000000;
+}
+
+.form-field-toggle-knob--off {
+  background-color: #ffffff;
+}
+
+.form-field-toggle-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-field-toggle-label--dark {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.form-field-toggle-label--light {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* Picker */
+.form-field-picker {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.form-field-picker-option {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.form-field-picker-option--active-dark {
+  background-color: rgba(37, 244, 238, 0.12);
+  border-color: #25f4ee;
+}
+
+.form-field-picker-option--active-light {
+  background-color: rgba(0, 153, 149, 0.1);
+  border-color: #009995;
+}
+
+.form-field-picker-option--inactive-dark {
+  background-color: #2a2a2a;
+  border-color: transparent;
+}
+
+.form-field-picker-option--inactive-light {
+  background-color: #f0f2f5;
+  border-color: transparent;
+}
+
+.form-field-picker-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-field-picker-text--active {
+  color: #25f4ee;
+}
+
+.form-field-picker-text--dark {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.form-field-picker-text--light {
+  color: rgba(0, 0, 0, 0.55);
+}

@@ -29,14 +29,24 @@ function copyDir(src: string, dest: string) {
 }
 
 export default defineConfig({
+  server: {
+    port: 5969,
+  },
   source: {
     entry: {
-      main: './src/index.tsx', // Main app entry
-      second: './src/pages/second/index.tsx', // Second page entry
-      'card-view': './src/pages/card-view/index.tsx', // Card view demo entry
-      'media-test': './src/pages/media-test/index.tsx', // Media test page entry
-      'card-view-demo': './src/pages/card-view-demo/index.tsx', // Card view demo with native container
-      'debug-tool-switch': './src/pages/debug-tool-switch/index.tsx', // Lynx debug switches (native panel on device)
+      main: './src/pages/main/index.tsx',
+      showcase: './src/pages/showcase/index.tsx',
+      'scheme-builder': './src/pages/scheme-builder/index.tsx',
+      'scheme-presets': './src/pages/scheme-presets/index.tsx',
+      'nav-basic': './src/pages/nav-basic/index.tsx',
+      'nav-chain': './src/pages/nav-chain/index.tsx',
+      'gp-device': './src/pages/gp-device/index.tsx',
+      'gp-screen': './src/pages/gp-screen/index.tsx',
+      'gp-container': './src/pages/gp-container/index.tsx',
+      'storage-demo': './src/pages/storage-demo/index.tsx',
+      'media-choose': './src/pages/media-choose/index.tsx',
+      'media-upload': './src/pages/media-upload/index.tsx',
+      'media-download': './src/pages/media-download/index.tsx',
     },
   },
   output: {

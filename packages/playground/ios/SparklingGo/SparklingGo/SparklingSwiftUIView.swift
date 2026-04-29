@@ -19,10 +19,11 @@ struct SPKSwiftUIView: UIViewRepresentable {
     
     func makeUIView(context: Context) -> SPKContainerView {
         let context = SPKContext()
+        
         let view = SPKContainerView(frame: rect)
-        let url = "hybrid://lynxview?bundle=.%2Fcard-view.lynx.bundle"
-        let elements = SparklingLynxElement(lynxElementName: "input", lynxElementClassName: LynxInput.self)
-        context.customUIElements = [elements]
+        
+        let url = "hybrid://lynxview?bundle=.%2Fmain.lynx.bundle&hide_nav_bar=true&hide_status_bar=true"
+        
         view.load(withURL: url, context)
         return view
     }
@@ -37,5 +38,9 @@ struct DemoView: View {
         GeometryReader { geo in
             SPKSwiftUIView(rect: geo.frame(in: .global))
         }
+        .navigationBarHidden(true)
+        .statusBar(hidden: true)
     }
 }
+
+

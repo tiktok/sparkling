@@ -1,0 +1,353 @@
+/* Section Card */
+.sto-section {
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sto-section--dark {
+  background-color: #1c1c1e;
+}
+
+.sto-section--light {
+  background-color: #ffffff;
+}
+
+/* Section Title */
+.sto-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.sto-section-title--dark {
+  color: #ffffff;
+}
+
+.sto-section-title--light {
+  color: #000000;
+}
+
+/* Section Description */
+.sto-section-desc {
+  font-size: 13px;
+  line-height: 18px;
+  margin-bottom: 4px;
+}
+
+.sto-section-desc--dark {
+  color: #8e8e93;
+}
+
+.sto-section-desc--light {
+  color: #6c6c70;
+}
+
+/* API Signature */
+.sto-api-sig {
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 4px;
+}
+
+.sto-api-sig--dark {
+  background-color: #2c2c2e;
+}
+
+.sto-api-sig--light {
+  background-color: #f2f2f7;
+}
+
+.sto-api-sig-text {
+  font-size: 13px;
+  font-family: monospace;
+}
+
+.sto-api-sig-text--dark {
+  color: #25f4ee;
+}
+
+.sto-api-sig-text--light {
+  color: #009995;
+}
+
+/* Param Info */
+.sto-param-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.sto-param-info--dark {
+  background-color: #2c2c2e;
+}
+
+.sto-param-info--light {
+  background-color: #f2f2f7;
+}
+
+.sto-param-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.sto-param-name {
+  font-size: 14px;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.sto-param-name--dark {
+  color: #25f4ee;
+}
+
+.sto-param-name--light {
+  color: #009995;
+}
+
+.sto-param-type {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: #3a3a3c;
+  color: #ff9f0a;
+}
+
+.sto-param-required {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: #fe2c3a;
+  color: #ffffff;
+}
+
+.sto-param-optional {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.sto-param-optional--dark {
+  background-color: #3a3a3c;
+  color: #8e8e93;
+}
+
+.sto-param-optional--light {
+  background-color: #e5e5ea;
+  color: #6c6c70;
+}
+
+.sto-param-desc {
+  font-size: 13px;
+  line-height: 18px;
+  margin-left: 4px;
+}
+
+.sto-param-desc--dark {
+  color: #aeaeb2;
+}
+
+.sto-param-desc--light {
+  color: #6c6c70;
+}
+
+.sto-param-divider {
+  height: 1px;
+}
+
+.sto-param-divider--dark {
+  background-color: #3a3a3c;
+}
+
+.sto-param-divider--light {
+  background-color: #e5e5ea;
+}
+
+/* Action Buttons */
+.sto-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border-radius: 10px;
+  margin-top: 4px;
+}
+
+.sto-btn--dark {
+  background-color: #25f4ee;
+}
+
+.sto-btn--light {
+  background-color: #25f4ee;
+}
+
+.sto-btn-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Log Header */
+.sto-log-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Clear Button */
+.sto-clear-btn {
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+.sto-clear-btn--dark {
+  background-color: #2c2c2e;
+}
+
+.sto-clear-btn--light {
+  background-color: #f2f2f7;
+}
+
+.sto-clear-btn-text {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sto-clear-btn-text--dark {
+  color: #8e8e93;
+}
+
+.sto-clear-btn-text--light {
+  color: #6c6c70;
+}
+
+/* Log Empty */
+.sto-log-empty {
+  padding: 16px;
+  border-radius: 8px;
+  align-items: center;
+}
+
+.sto-log-empty--dark {
+  background-color: #2c2c2e;
+}
+
+.sto-log-empty--light {
+  background-color: #f2f2f7;
+}
+
+.sto-log-empty-text {
+  font-size: 13px;
+  text-align: center;
+}
+
+.sto-log-empty-text--dark {
+  color: #636366;
+}
+
+.sto-log-empty-text--light {
+  color: #aeaeb2;
+}
+
+/* Log Entry */
+.sto-log-entry {
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sto-log-entry--dark {
+  background-color: #2c2c2e;
+}
+
+.sto-log-entry--light {
+  background-color: #f2f2f7;
+}
+
+.sto-log-entry-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sto-log-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #ffffff;
+}
+
+.sto-log-badge--set {
+  background-color: #009995;
+}
+
+.sto-log-badge--get {
+  background-color: #5856d6;
+}
+
+.sto-log-time {
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.sto-log-time--dark {
+  color: #636366;
+}
+
+.sto-log-time--light {
+  color: #aeaeb2;
+}
+
+.sto-log-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sto-log-label--dark {
+  color: #8e8e93;
+}
+
+.sto-log-label--light {
+  color: #6c6c70;
+}
+
+.sto-log-json {
+  font-size: 12px;
+  font-family: monospace;
+  line-height: 16px;
+}
+
+.sto-log-json--dark {
+  color: #d1d1d6;
+}
+
+.sto-log-json--light {
+  color: #3a3a3c;
+}
+
+.sto-log-response {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Default value hint */
+.default-hint { display: flex; flex-direction: row; align-items: center; gap: 8px; }
+.default-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background-color: rgba(37, 244, 238, 0.15); color: #25f4ee; letter-spacing: 0.5px; }
+.default-text { font-size: 13px; font-family: monospace; }
+.default-text--dark { color: rgba(255, 255, 255, 0.6); }
+.default-text--light { color: rgba(0, 0, 0, 0.5); }

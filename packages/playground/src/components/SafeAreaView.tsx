@@ -53,12 +53,8 @@ function paddingFromInsets(
 }
 
 /**
- * Applies safe-area padding from Sparkling `globalProps`.
- *
- * - **iOS**: uses `topHeight` / `bottomHeight` (window safe area).
- * - **Android**: top padding only when `queryItems.trans_status_bar` is enabled, because
- *   the default window already lays out content below the status bar; duplicating
- *   `statusBarHeight` would leave an empty band. Bottom still uses `navigationBarHeight`.
+ * Applies safe-area padding from Sparkling `globalProps` so Lynx content stays
+ * clear of the status bar and home indicator after native edge-to-edge layout.
  */
 export function SafeAreaView(props: SafeAreaViewProps) {
   const {

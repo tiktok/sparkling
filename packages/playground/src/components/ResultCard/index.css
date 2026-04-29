@@ -1,0 +1,114 @@
+.result-card {
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.result-card--dark {
+  background-color: #1c1c1e;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.result-card--light {
+  background-color: #ffffff;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.result-card-label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.result-card-label--dark {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.result-card-label--light {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.result-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-card-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.result-card-key {
+  font-size: 13px;
+  font-family: monospace;
+  font-weight: 600;
+  min-width: 40px;
+}
+
+.result-card-key--dark {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.result-card-key--light {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.result-card-value--success {
+  font-size: 14px;
+  font-family: monospace;
+  font-weight: 700;
+  color: #34c759;
+}
+
+.result-card-value--error {
+  font-size: 14px;
+  font-family: monospace;
+  font-weight: 700;
+  color: #fe2c3a;
+}
+
+.result-card-msg {
+  font-size: 14px;
+  flex: 1;
+}
+
+.result-card-msg--dark {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.result-card-msg--light {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.result-card-data {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.result-card-data-scroll {
+  width: 100%;
+}
+
+.result-card-data-text {
+  font-size: 13px;
+  font-family: monospace;
+  line-height: 20px;
+}
+
+.result-card-data-text--dark {
+  color: #25f4ee;
+}
+
+.result-card-data-text--light {
+  color: #009995;
+}
