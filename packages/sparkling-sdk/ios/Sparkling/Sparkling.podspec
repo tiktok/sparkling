@@ -38,9 +38,9 @@ Pod::Spec.new do |s|
     service.dependency 'SparklingMethod/Core', s.version.to_s
     
     service.subspec 'LynxService' do |lynx|
-      lynx.dependency 'Lynx/Framework', '3.6.0'
-      lynx.dependency 'LynxBase/Framework', '3.6.0'
-      lynx.dependency 'LynxServiceAPI', '3.6.0'
+      lynx.dependency 'Lynx/Framework', '3.7.0'
+      lynx.dependency 'LynxBase/Framework', '3.7.0'
+      lynx.dependency 'LynxServiceAPI', '3.7.0'
       lynx.dependency 'SparklingMethod/Lynx', s.version.to_s
       lynx.source_files = [
         'Sources/Service/{Base,Protocols}/**/*.{swift,m,h}',

@@ -37,14 +37,14 @@ def sparkling_kit
   sparkling_methods
   sparkling_methods_dep
   
-  pod 'Lynx', '3.6.0', :subspecs => [
+  pod 'Lynx', '3.7.0', :subspecs => [
     'Framework',
     'ReleaseResource'
   ]
   
-  pod 'PrimJS', '3.6.1', :subspecs => ['quickjs', 'napi']
+  pod 'PrimJS', '3.7.0', :subspecs => ['quickjs', 'napi']
 
-  pod 'LynxService', '3.6.0', :subspecs => [
+  pod 'LynxService', '3.7.0', :subspecs => [
     'Image',
     'Log',
     'Http',

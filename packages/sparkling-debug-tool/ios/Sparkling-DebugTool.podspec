@@ -15,8 +15,8 @@ Pod::Spec.new do |s|
     'Sources/**/*.{h,m,swift}'
   ]
 
-  s.dependency 'Lynx', '~> 3.6.0'
-  s.dependency 'LynxService/Devtool', '~> 3.6.0'
-  s.dependency 'LynxDevtool/Framework', '~> 3.6.0'
+  s.dependency 'Lynx', '3.7.0'
+  s.dependency 'LynxService/Devtool', '3.7.0'
+  s.dependency 'LynxDevtool/Framework', '3.7.0'
   s.dependency 'DebugRouter'
 end
