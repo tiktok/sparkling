@@ -4,7 +4,7 @@ A Swift compiler macro plugin for the [Sparkling](https://github.com/tiktok/spar
 
 ## Overview
 
-`SparklingMacro` provides the `#spk_register` freestanding declaration macro, which registers a Sparkling service class into the `__DATA, SPK_PRE_SVC` Mach-O section at compile time. The Sparkling runtime reads this section to discover and instantiate registered services.
+`SparklingMacro` provides the `#spk_register` freestanding declaration macro, and also exports `SPKExecuteAllPrepareBootTask()` for executing registered boot tasks during app startup. The macro registers a Sparkling service class into the `__DATA, SPK_PRE_SVC` Mach-O section at compile time, and the Sparkling runtime reads this section to discover and instantiate registered services.
 
 ```swift
 import SparklingMacro
@@ -50,6 +50,15 @@ Import `SparklingMacro` and call `#spk_register` at file scope to register a ser
 import SparklingMacro
 
 #spk_register(class: "MySparklingService")
+```
+
+The same module also exposes `SPKExecuteAllPrepareBootTask()` for app startup:
+
+```swift
+import SparklingMacro
+
+SPKServiceRegister.registerAll()
+SPKExecuteAllPrepareBootTask()
 ```
 
 This expands at compile time to a static constant placed in the `__DATA, SPK_PRE_SVC` Mach-O section, making the class name discoverable by the Sparkling runtime without any runtime registration overhead.

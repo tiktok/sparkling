@@ -8,17 +8,22 @@ For the `hybrid://...` URL format, see [Scheme](./scheme.md).
 
 ```ruby
 pod 'Sparkling', '2.0.0'
+pod 'SparklingMacro', '2.0.0'
 ```
 
 ## Initialization
 
 ```swift
+import SparklingMacro
+
 SPKServiceRegister.registerAll()
 SPKExecuteAllPrepareBootTask()
 ```
 
 `SPKServiceRegister` is defined in your app target (see the template under
 `template/sparkling-app-template/ios/.../MethodServices/SPKServiceRegistrar.swift`).
+`SPKExecuteAllPrepareBootTask()` is provided by `SparklingMacro`, so your app target
+must depend on `SparklingMacro` and import it before calling this function.
 
 ## SPKRouter
 

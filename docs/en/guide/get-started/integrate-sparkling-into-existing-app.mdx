@@ -90,6 +90,7 @@ The core container and Lynx integration:
 
 ```ruby
 pod 'Sparkling', '2.0.0'
+pod 'SparklingMacro', '2.0.0'
 ```
 
 2. **Sparkling Method**
@@ -107,9 +108,14 @@ Then run `pod install` (or `bundle exec pod install` if you use Bundler).
 The template's `AppDelegate` registers services and boot tasks:
 
 ```swift
+import SparklingMacro
+
 SPKServiceRegister.registerAll()
 SPKExecuteAllPrepareBootTask()
 ```
+
+`SPKExecuteAllPrepareBootTask()` now lives in `SparklingMacro`, so your app target
+must add the `SparklingMacro` pod and import it before calling this function.
 
 ### Provide bundle assets
 
