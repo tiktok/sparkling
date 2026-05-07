@@ -8,6 +8,15 @@ android {
     namespace = "com.example.sparkling.go"
     compileSdk = 34
 
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a")
+            isUniversalApk = false
+        }
+    }
+
     defaultConfig {
         applicationId = "com.example.sparkling.go"
         minSdk = 24
@@ -16,10 +25,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        ndk {
-            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
-        }
-
         val sparklingDevServerHost =
             (project.findProperty("sparklingDevServerHost") as String?) ?: "127.0.0.1"
         val sparklingDevServerPort =
@@ -29,7 +34,8 @@ android {
 
         buildTypes {
             release {
-                isMinifyEnabled = false
+                isMinifyEnabled = true
+                isShrinkResources = true
                 proguardFiles(
                     getDefaultProguardFile("proguard-android-optimize.txt"),
                     "proguard-rules.pro",
@@ -68,7 +74,12 @@ android {
         androidTestImplementation(libs.androidx.junit)
         androidTestImplementation(libs.androidx.espresso.core)
 
-        implementation("com.tiktok.sparkling:sparkling:2.1.0-rc.12")
+        implementation("com.tiktok.sparkling:sparkling:2.1.0-rc.12") {
+            exclude(group = "org.lynxsdk.lynx", module = "lynx-service-devtool")
+            exclude(group = "org.lynxsdk.lynx", module = "lynx-devtool")
+            exclude(group = "org.lynxsdk.lynx", module = "debug-router")
+            exclude(group = "org.lynxsdk.lynx", module = "base-devtool")
+        }
         implementation("com.tiktok.sparkling:sparkling-method:2.1.0-rc.12")
         implementation("com.squareup.okhttp3:okhttp:4.9.0")
 

@@ -24,8 +24,8 @@ Large-scale apps like TikTok are never built with a single technology. Sparkling
 
 ## Documentation
 The full documentation for Sparkling can be found in [`docs`](/docs)
-- [Get Started](./docs/en/guide/get-started/create-new-app.md)
-- [Integrate Sparkling into an existing app](./docs/en/guide/get-started/integrate-sparkling-into-existing-app.md)
+- [Get Started](./docs/en/guide/get-started/create-new-app.mdx)
+- [Integrate Sparkling into an existing app](./docs/en/guide/get-started/integrate-sparkling-into-existing-app.mdx)
 - [API Reference](./docs/en/apis/)
 
 ## Project Layout

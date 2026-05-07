@@ -233,6 +233,9 @@ function loadAppConfigViaEsm(cwd: string, configPath: string, originalError?: un
   let esmLoader = 'ts-node/esm';
   try {
     esmLoader = esmReq.resolve('ts-node/esm');
+    if (path.isAbsolute(esmLoader)) {
+      esmLoader = pathToFileURL(esmLoader).href;
+    }
   } catch {}
 
   const res = spawnSync('node', ['--loader', esmLoader, readerScript], {

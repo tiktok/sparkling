@@ -15,7 +15,6 @@ import androidx.appcompat.widget.Toolbar
 import com.tiktok.sparkling.Sparkling
 import com.tiktok.sparkling.SparklingContext
 import com.tiktok.sparkling.SparklingUIProvider
-import com.tiktok.sparkling.debugtool.SparklingDebugTool
 
 private val DEFAULT_MAIN_DEV_BUNDLE_URL: String
     get() = "http://${BuildConfig.SPARKLING_DEV_SERVER_HOST}:${BuildConfig.SPARKLING_DEV_SERVER_PORT}/main.lynx.bundle"
@@ -26,7 +25,7 @@ object DebugDevUrlSupport {
     // - http://127.0.0.1:5969/main.lynx.bundle
     // - main.lynx.bundle
     fun currentMainBundleSource(context: Context): String {
-        return SparklingDebugTool.getDevUrl(context, DEFAULT_MAIN_DEV_BUNDLE_URL)
+        return SparklingDebugBridge.getDevUrl(context, DEFAULT_MAIN_DEV_BUNDLE_URL)
     }
 
     fun buildMainPageScheme(context: Context): String {
@@ -115,7 +114,7 @@ private class DebugDevUrlErrorView(
         val currentUrl = DebugDevUrlSupport.networkBundleUrlFromScheme(currentScheme) ?: return
         prompted = true
 
-        SparklingDebugTool.showDevUrlDialog(activity, currentUrl) { updatedUrl ->
+        SparklingDebugBridge.showDevUrlDialog(activity, currentUrl) { updatedUrl ->
             val nextContext = SparklingContext().apply {
                 scheme = DebugDevUrlSupport.buildMainPageSchemeWithSource(updatedUrl)
                 withInitData(initialDataJson)
