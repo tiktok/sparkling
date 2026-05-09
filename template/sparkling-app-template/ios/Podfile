@@ -25,6 +25,8 @@ def sparkling_devtool
   # BEGIN SPARKLING AUTOLINK
   pod 'Sparkling-DebugTool', '2.1.0-rc.12'
   # END SPARKLING AUTOLINK
+  pod 'DebugRouter', '5.0.15'
+  pod 'DebugRouter/MessageTransceiverEnable', '5.0.15'
 end
 
 def sparkling_kit
@@ -32,13 +34,12 @@ def sparkling_kit
   pod 'SparklingMacro', '2.1.0-rc.12'
   sparkling_methods
   sparkling_methods_dep
-  sparkling_devtool
 
   pod 'Lynx', '3.6.0', :subspecs => [
     'Framework',
     'ReleaseResource'
   ]
-  
+
   pod 'PrimJS', '3.6.1', :subspecs => ['quickjs', 'napi']
 
   pod 'LynxService', '3.6.0', :subspecs => [
@@ -46,17 +47,27 @@ def sparkling_kit
     'Log',
     'Http',
   ]
-  
+
   pod 'SnapKit'
   pod 'Mantle', '~> 2.2.0'
-  
+
   pod 'SDWebImage','5.15.5'
   pod 'SDWebImageWebPCoder', '0.11.0'
 end
 
 use_frameworks!
+
+# SparklingGo is the production-style target: no devtool dependencies are
+# linked, so DebugRouter / LynxDevtool symbols cannot leak into a Release
+# build. Use SparklingGoInHouse for day-to-day development (it is what
+# `pnpm run:ios` builds).
 target 'SparklingGo' do
   sparkling_kit
+end
+
+target 'SparklingGoInHouse' do
+  sparkling_kit
+  sparkling_devtool
 end
 
 target 'SparklingGoTests' do
@@ -69,32 +80,4 @@ end
 
 target 'SparklingGoUITests' do
   sparkling_kit
-end
-
-# Strip devtool pods from Release builds so they are debug-only.
-devtool_frameworks = ['Sparkling_DebugTool']
-devtool_pod_names = ['Sparkling-DebugTool']
-
-post_install do |installer|
-  # 1. Exclude all source files from devtool pod targets in Release
-  installer.target_installation_results.pod_target_installation_results.each do |pod_name, result|
-    next unless devtool_pod_names.any? { |n| pod_name.to_s.include?(n) }
-    result.native_target.build_configurations.each do |config|
-      if config.name == 'Release'
-        config.build_settings['EXCLUDED_SOURCE_FILE_NAMES'] = '*'
-      end
-    end
-  end
-
-  # 2. Strip devtool framework references from app target linker flags in Release
-  installer.aggregate_targets.each do |aggregate_target|
-    aggregate_target.xcconfigs.each do |config_name, xcconfig|
-      next unless config_name == 'Release'
-      devtool_frameworks.each do |fw|
-        xcconfig.other_linker_flags[:frameworks].delete(fw)
-      end
-      xcconfig_path = aggregate_target.xcconfig_path(config_name)
-      xcconfig.save_as(xcconfig_path)
-    end
-  end
 end

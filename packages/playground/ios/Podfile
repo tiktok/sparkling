@@ -29,6 +29,8 @@ def sparkling_devtool
   # BEGIN SPARKLING AUTOLINK
   pod 'Sparkling-DebugTool', :path => '../../sparkling-debug-tool/ios'
   # END SPARKLING AUTOLINK
+  pod 'DebugRouter', '5.0.15'
+  pod 'DebugRouter/MessageTransceiverEnable', '5.0.15'
 end
 
 def sparkling_kit
@@ -60,7 +62,16 @@ def sparkling_kit
 end
 
 use_frameworks!
+
+# SparklingGo is the production-style target: no devtool dependencies are
+# linked, so DebugRouter / LynxDevtool symbols cannot leak into a Release
+# build. Use SparklingGoInHouse for day-to-day development (it is what
+# `pnpm run:ios` builds).
 target 'SparklingGo' do
+  sparkling_kit
+end
+
+target 'SparklingGoInHouse' do
   sparkling_kit
   sparkling_devtool
 end
@@ -77,10 +88,6 @@ target 'SparklingGoUITests' do
   sparkling_kit
 end
 
-# Strip debug-tool pods from Release builds so they are debug-only.
-devtool_frameworks = ['Sparkling_DebugTool']
-devtool_pod_names = ['Sparkling-DebugTool']
-
 # Append Local.xcconfig (gitignored) to the Pods-generated xcconfigs so
 # developers can override build settings (e.g. DEVELOPMENT_TEAM) locally.
 post_install do |installer|
@@ -92,28 +99,6 @@ post_install do |installer|
       unless content.include?(include_line)
         File.open(path, 'a') { |f| f.puts "\n#{include_line}" }
       end
-    end
-  end
-
-  # 1. Exclude all source files from debug-tool pod targets in Release
-  installer.target_installation_results.pod_target_installation_results.each do |pod_name, result|
-    next unless devtool_pod_names.any? { |n| pod_name.to_s.include?(n) }
-    result.native_target.build_configurations.each do |config|
-      if config.name == 'Release'
-        config.build_settings['EXCLUDED_SOURCE_FILE_NAMES'] = '*'
-      end
-    end
-  end
-
-  # 2. Strip devtool framework references from app target linker flags in Release
-  installer.aggregate_targets.each do |aggregate_target|
-    aggregate_target.xcconfigs.each do |config_name, xcconfig|
-      next unless config_name == 'Release'
-      devtool_frameworks.each do |fw|
-        xcconfig.other_linker_flags[:frameworks].delete(fw)
-      end
-      xcconfig_path = aggregate_target.xcconfig_path(config_name)
-      xcconfig.save_as(xcconfig_path)
     end
   end
 end

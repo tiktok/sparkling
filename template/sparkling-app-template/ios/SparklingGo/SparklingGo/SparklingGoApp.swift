@@ -9,6 +9,9 @@ import SDWebImage
 import SDWebImageWebPCoder
 import SparklingMethod
 import SparklingMacro
+#if canImport(Sparkling_DebugTool)
+import Sparkling_DebugTool
+#endif
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     var window: UIWindow?
@@ -17,7 +20,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         window = UIWindow(frame: UIScreen.main.bounds)
         let webPCoder = SDImageWebPCoder.shared
         SDImageCodersManager.shared.addCoder(webPCoder)
-        
+        #if canImport(Sparkling_DebugTool)
+        SparklingDebugTool.setup()
+        #endif
         SPKServiceRegister.registerAll()
         SPKExecuteAllPrepareBootTask()
         SPKKit.DIContainer.register(SPKTrackerService.self, scope: ServiceScope.transient) {

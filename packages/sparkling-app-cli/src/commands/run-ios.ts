@@ -70,6 +70,24 @@ function resolveWorkspacePath(cwd: string): string | null {
   return candidates.find(p => fs.existsSync(p)) ?? null;
 }
 
+/**
+ * Pick the scheme to build. Prefer `SparklingGoInHouse` when present: it is
+ * the developer-facing target that links Sparkling-DebugTool / DebugRouter so
+ * LynxDevTool can attach. Older projects only have `SparklingGo`, so fall
+ * back to that for backwards compatibility.
+ */
+function resolveScheme(cwd: string): string {
+  const inHouseScheme = path.resolve(
+    cwd,
+    'ios',
+    'SparklingGo.xcodeproj',
+    'xcshareddata',
+    'xcschemes',
+    'SparklingGoInHouse.xcscheme',
+  );
+  return fs.existsSync(inHouseScheme) ? 'SparklingGoInHouse' : 'SparklingGo';
+}
+
 function findNearestGemfile(startDir: string): string | null {
   let current = startDir;
   const { root } = path.parse(startDir);
@@ -378,14 +396,18 @@ export async function runIos(options: RunIosOptions): Promise<void> {
   }
 
   // ── Step 2: Build (always runs, regardless of simulator state) ──
+  const scheme = resolveScheme(options.cwd);
+  if (isVerboseEnabled()) {
+    verboseLog(`Selected scheme: ${scheme}`);
+  }
   const destination = `id=${device.udid}`;
   const derivedDataPath = path.resolve(options.cwd, 'ios/build');
-  console.log(ui.info('Building Xcode project (this may take a while)...'));
+  console.log(ui.info(`Building Xcode project with scheme \`${scheme}\` (this may take a while)...`));
   await runCommand('xcodebuild', [
     '-workspace',
     workspacePath,
     '-scheme',
-    'SparklingGo',
+    scheme,
     '-configuration',
     'Debug',
     '-sdk',
@@ -402,7 +424,7 @@ export async function runIos(options: RunIosOptions): Promise<void> {
   ], { cwd: options.cwd });
 
   // ── Step 3: Install & launch (best-effort, only if simulator is up) ──
-  const appPath = path.resolve(options.cwd, 'ios/build/Build/Products/Debug-iphonesimulator/SparklingGo.app');
+  const appPath = path.resolve(options.cwd, `ios/build/Build/Products/Debug-iphonesimulator/${scheme}.app`);
   if (!fs.existsSync(appPath)) {
     console.warn(ui.warn(`Built app not found at ${appPath}, skipped simulator install/launch.`));
   } else if (!simulatorReady) {
