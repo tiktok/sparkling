@@ -7,7 +7,7 @@
 ## Content
 - [Content](#content)
 - [About Sparkling](#about-sparkling)
-- [Documentation](#documentation)
+- [Documentation](#documentation)t
 - [Project Layout](#project-layout)
 - [How to Contribute](#how-to-contribute)
   - [Code of Conduct](#code-of-conduct)
