@@ -5,10 +5,13 @@
 </p>
 
 ## Content
+- [Content](#content)
 - [About Sparkling](#about-sparkling)
 - [Documentation](#documentation)
 - [Project Layout](#project-layout)
 - [How to Contribute](#how-to-contribute)
+  - [Code of Conduct](#code-of-conduct)
+  - [Contributing Guide](#contributing-guide)
 - [Maintainers](#maintainers)
 - [License](#license)
 
@@ -57,7 +60,7 @@ Please refer to our [contributing guide][contributing] for details.
 | --- | --- |
 | Creator & Lead Maintainer | [@Kunyang Lee](https://github.com/leeekyrie) |
 | Lead Maintainer | [@HuxPro](https://github.com/HuxPro) |
-| Core Maintainer | [@ChenJr](https://github.com/ChenJr) |
+| Core Maintainer | [@Chen-Jr](https://github.com/Chen-Jr) |
 | Core Contributor | [@Yujie Zhang](https://github.com/zhangyujie9999) |
 
 For bug reports, feature requests, and maintenance discussions, please open an issue in this repository.

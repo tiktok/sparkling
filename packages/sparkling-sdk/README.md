@@ -29,6 +29,7 @@ Add to your `Podfile`:
 
 ```ruby
 pod 'Sparkling'  # Uses latest version
+pod 'SparklingMacro'  # Required for SPKExecuteAllPrepareBootTask and macro registration
 ```
 
 Then run `pod install`.

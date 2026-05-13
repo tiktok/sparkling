@@ -116,14 +116,7 @@ declare -a TYPESCRIPT_FILES=(
     "template/sparkling-app-template/package.json"
 )
 
-declare -a IOS_PODSPEC_FILES=(
-    "packages/sparkling-method/ios/SparklingMethod.podspec"
-    "packages/sparkling-sdk/ios/Sparkling/Sparkling.podspec"
-    "packages/sparkling-debug-tool/ios/Sparkling-DebugTool.podspec"
-    "packages/methods/sparkling-navigation/ios/Sparkling-Router.podspec"
-    "packages/methods/sparkling-media/ios/Sparkling-Media.podspec"
-    "packages/methods/sparkling-storage/ios/Sparkling-Storage.podspec"
-)
+IOS_PODS_CONFIG="$SCRIPT_DIR/ios_pods.json"
 
 TEMPLATE_PACKAGE_FILE="template/sparkling-app-template/package.json"
 TEMPLATE_ANDROID_FILE="template/sparkling-app-template/android/app/build.gradle.kts"
@@ -155,6 +148,22 @@ update_typescript_versions() {
     done
 }
 
+# Resolve all iOS podspec paths from $IOS_PODS_CONFIG, one absolute path per line.
+# Warnings for missing podspecs go to stderr so callers can consume stdout cleanly.
+list_ios_podspecs() {
+    local entry pod_name search_dir podspec_path
+    while IFS= read -r entry; do
+        pod_name=$(echo "$entry" | jq -r '.pod_name')
+        search_dir=$(echo "$entry" | jq -r '.search_dir')
+        podspec_path=$(find "$PROJECT_ROOT/$search_dir" -name "${pod_name}.podspec" | head -1)
+        if [ -z "$podspec_path" ]; then
+            print_warning "Podspec not found for $pod_name under $search_dir" >&2
+            continue
+        fi
+        echo "$podspec_path"
+    done < <(jq -c '.[]' "$IOS_PODS_CONFIG")
+}
+
 # Function to update iOS podspec files
 update_ios_versions() {
     print_info ""
@@ -162,22 +171,18 @@ update_ios_versions() {
     print_info "Updating iOS podspec files..."
     print_info "========================================"
 
-    for file in "${IOS_PODSPEC_FILES[@]}"; do
-        local filepath="$PROJECT_ROOT/$file"
-        if [ -f "$filepath" ]; then
-            local current_version
-            current_version=$(grep -o 's\.version.*=.*"[^"]*"' "$filepath" | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
+    while IFS= read -r podspec_path; do
+        local rel_path current_version
+        rel_path="${podspec_path#"$PROJECT_ROOT"/}"
+        current_version=$(grep -o 's\.version.*=.*"[^"]*"' "$podspec_path" | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
 
-            if [ "$DRY_RUN" = true ]; then
-                print_info "[DRY RUN] Would update $file: $current_version -> $VERSION"
-            else
-                sedi "s/s\.version.*=.*\"[^\"]*\"/s.version        = \"$VERSION\"/" "$filepath"
-                print_success "Updated $file: $current_version -> $VERSION"
-            fi
+        if [ "$DRY_RUN" = true ]; then
+            print_info "[DRY RUN] Would update $rel_path: $current_version -> $VERSION"
         else
-            print_warning "File not found: $file"
+            sedi "s/s\.version.*=.*\"[^\"]*\"/s.version        = \"$VERSION\"/" "$podspec_path"
+            print_success "Updated $rel_path: $current_version -> $VERSION"
         fi
-    done
+    done < <(list_ios_podspecs)
 }
 
 # Function to update app template dependency references
@@ -226,9 +231,10 @@ update_template_dependencies() {
     if [ -f "$template_ios_podfile" ]; then
         if [ "$DRY_RUN" = true ]; then
             print_info "[DRY RUN] Would update iOS Podfile Sparkling pod versions in $TEMPLATE_IOS_PODFILE -> $VERSION"
-            print_info "          Sparkling, SparklingMethod, Sparkling-DebugTool, Sparkling-Router"
+            print_info "          Sparkling, SparklingMacro, SparklingMethod, Sparkling-DebugTool, Sparkling-Router"
         else
             sedi "s|pod 'Sparkling', '[^']*'|pod 'Sparkling', '${VERSION}'|" "$template_ios_podfile"
+            sedi "s|pod 'SparklingMacro', '[^']*'|pod 'SparklingMacro', '${VERSION}'|" "$template_ios_podfile"
             sedi "s|pod 'SparklingMethod', '[^']*'|pod 'SparklingMethod', '${VERSION}'|" "$template_ios_podfile"
             sedi "s|pod 'Sparkling-DebugTool', '[^']*'|pod 'Sparkling-DebugTool', '${VERSION}'|" "$template_ios_podfile"
             sedi "s|pod 'Sparkling-Router', '[^']*'|pod 'Sparkling-Router', '${VERSION}'|" "$template_ios_podfile"
@@ -278,14 +284,12 @@ verify_current_versions() {
     # Check iOS podspec files
     print_info ""
     print_info "iOS podspec versions:"
-    for file in "${IOS_PODSPEC_FILES[@]}"; do
-        local filepath="$PROJECT_ROOT/$file"
-        if [ -f "$filepath" ]; then
-            local current_version
-            current_version=$(grep -o 's\.version.*=.*"[^"]*"' "$filepath" | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
-            echo "  $file: $current_version"
-        fi
-    done
+    while IFS= read -r podspec_path; do
+        local current_version rel_path
+        current_version=$(grep -o 's\.version.*=.*"[^"]*"' "$podspec_path" | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
+        rel_path="${podspec_path#"$PROJECT_ROOT"/}"
+        echo "  $rel_path: $current_version"
+    done < <(list_ios_podspecs)
 }
 
 # Main execution

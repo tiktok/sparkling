@@ -164,6 +164,9 @@ PODS:
     - SparklingMethod/Lynx (= 2.1.0-rc.12)
   - Sparkling/Utils (2.1.0-rc.12)
   - SparklingMethod/Core (2.1.0-rc.12):
+  - SparklingMacro (2.1.0-rc.12):
+    - SparklingMacro/RegisterMacro (= 2.1.0-rc.12)
+  - SparklingMacro/RegisterMacro (2.1.0-rc.12)
     - Mantle (~> 2.2.0)
   - SparklingMethod/Debug (2.1.0-rc.12):
     - SparklingMethod/Core
@@ -193,6 +196,7 @@ DEPENDENCIES:
   - SparklingMethod/Debug (= 2.1.0-rc.12)
   - SparklingMethod/DIProvider (= 2.1.0-rc.12)
   - SparklingMethod/Lynx (= 2.1.0-rc.12)
+  - SparklingMacro (= 2.1.0-rc.12)
 
 SPEC REPOS:
   trunk:
@@ -213,6 +217,7 @@ SPEC REPOS:
     - Sparkling
     - Sparkling-DebugTool
     - Sparkling-Router
+    - SparklingMacro
     - SparklingMethod
 
 SPEC CHECKSUMS:
@@ -234,6 +239,7 @@ SPEC CHECKSUMS:
   Sparkling-DebugTool: 5715a16e6ee38ea6308fdaf761592822325953de
   Sparkling-Router: 093e97e8ded7be91c1c976d82f52a436eb9050f4
   SparklingMethod: a8da97a23b54eb3ca869abd854bfaa264cc57255
+  SparklingMacro: 6f8bf9d96dbb30baef5511a73545280935ba5085
 
 PODFILE CHECKSUM: 463d4547103ad4eb84afdecf5eb91f55190cce4f
 

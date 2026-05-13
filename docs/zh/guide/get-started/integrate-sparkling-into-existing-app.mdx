@@ -89,6 +89,7 @@ Sparkling.build(this, context).navigate()
 
 ```ruby
 pod 'Sparkling', '2.0.0'
+pod 'SparklingMacro', '2.0.0'
 ```
 
 2. **Sparkling Method**
@@ -106,9 +107,14 @@ pod 'SparklingMethod', '2.0.0', :subspecs => ['Lynx', 'DIProvider', 'Debug']
 模板的 `AppDelegate` 注册服务和引导任务：
 
 ```swift
+import SparklingMacro
+
 SPKServiceRegister.registerAll()
 SPKExecuteAllPrepareBootTask()
 ```
+
+`SPKExecuteAllPrepareBootTask()` 已经移动到 `SparklingMacro` 中，因此你的 App Target
+需要额外添加 `SparklingMacro` pod，并在调用前先 `import SparklingMacro`。
 
 ### 提供 bundle 资源
 

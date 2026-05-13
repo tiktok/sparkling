@@ -8,17 +8,22 @@
 
 ```ruby
 pod 'Sparkling', '2.0.0'
+pod 'SparklingMacro', '2.0.0'
 ```
 
 ## 初始化
 
 ```swift
+import SparklingMacro
+
 SPKServiceRegister.registerAll()
 SPKExecuteAllPrepareBootTask()
 ```
 
 `SPKServiceRegister` 通常在你的 App Target 中定义（参见模板
 `template/sparkling-app-template/ios/.../MethodServices/SPKServiceRegistrar.swift`）。
+`SPKExecuteAllPrepareBootTask()` 由 `SparklingMacro` 提供，因此你的 App Target
+需要依赖 `SparklingMacro` 并在调用前先 `import SparklingMacro`。
 
 ## SPKRouter
 

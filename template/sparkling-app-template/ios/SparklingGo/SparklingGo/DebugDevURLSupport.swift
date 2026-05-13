@@ -5,8 +5,8 @@
 import Foundation
 import Sparkling
 import UIKit
-#if canImport(DebugTool)
-import DebugTool
+#if canImport(Sparkling_DebugTool)
+import Sparkling_DebugTool
 #endif
 
 enum DebugDevURLSupport {
@@ -69,7 +69,7 @@ enum DebugDevURLSupport {
     }
 
     static func storedDevURL(fallback: String) -> String {
-        #if canImport(DebugTool)
+        #if canImport(Sparkling_DebugTool)
         SparklingDebugTool.devURL(fallback: fallback)
         #else
         fallback
@@ -77,13 +77,13 @@ enum DebugDevURLSupport {
     }
 
     static func saveDevURL(_ url: String) {
-        #if canImport(DebugTool)
+        #if canImport(Sparkling_DebugTool)
         SparklingDebugTool.setDevURL(url)
         #endif
     }
 
     static func showDevURLDialog(from controller: UIViewController, initialURL: String?, onSaved: @escaping (String) -> Void) {
-        #if canImport(DebugTool)
+        #if canImport(Sparkling_DebugTool)
         SparklingDebugTool.showDevURLDialog(from: controller, initialURL: initialURL, onSaved: onSaved)
         #else
         onSaved(initialURL ?? fallbackDevURL())

@@ -5,7 +5,8 @@ iOS framework for hosting Lynx-driven Sparkling content.
 ## Install (CocoaPods)
 Add the local pod from the monorepo, then install:
 ```ruby
-pod 'Sparkling', :path => '../packages/sparkling-sdk/ios'
+pod 'Sparkling', :path => '../packages/sparkling-sdk/ios/Sparkling'
+pod 'SparklingMacro', :path => '../packages/sparkling-sdk/ios/SparklingMacro'
 ```
 ```bash
 pod install
