@@ -382,10 +382,7 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
         self.updateStatusBarStatus()
         self.navigationController?.setNavigationBarHidden(true, animated: animated)
         
-        if !self.hasExecuteDidAppearedOnce {
-            self.handleViewDidAppear()
-            self.handleViewDidDisappear()
-        }
+        self.handleViewDidAppear()
         self.hasExecuteDidAppearedOnce = true
         self.containerLifecycleDelegate?.containerViewDidAppear?(self)
     }
