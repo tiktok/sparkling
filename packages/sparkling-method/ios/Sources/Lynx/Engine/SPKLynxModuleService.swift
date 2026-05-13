@@ -7,6 +7,10 @@ import Lynx
 
 @objcMembers
 public class SPKLynxModuleService: NSObject, LynxServiceModuleProtocol {
+    public func initLynxViewGroup(_ lynxViewGroup: LynxViewGroup) {
+      
+    }
+  
     public func cloneGlobalProps(forReload lynxView: LynxView) {
         
     }
