@@ -26,9 +26,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         #endif
         SPKServiceRegister.registerAll()
         SPKExecuteAllPrepareBootTask()
-#if DEBUG
-        SparklingDebugTool.setup()
-#endif
         SPKKit.DIContainer.register(SPKTrackerService.self, scope: ServiceScope.transient) {
             SparklingGoTrackerService()
         }
