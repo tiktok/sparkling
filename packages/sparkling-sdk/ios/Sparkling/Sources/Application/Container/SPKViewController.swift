@@ -861,19 +861,74 @@ extension SPKViewController: SPKContainerLifecycleProtocol {
         if !self.hybridInBackground && self.hasExecuteDidAppearedOnce {
             self.viewContainer?.handleViewDidAppear()
         }
+        self.containerLifecycleDelegate?.container?(container, didFinishLoadWithURL: url)
     }
-    
+
     public func container(_ container: any SPKContainerProtocol, didLoadFailedWithURL url: URL?, error: (any Error)?) {
         if self.viewContainer?.shouldShowLoadFailedView(with: error) == true {
             self.addLoadFailedView(error)
         }
         self.forceShowNavigationBar()
+        self.containerLifecycleDelegate?.container?(container, didLoadFailedWithURL: url, error: error)
     }
-    
+
     public func container(_ container: any SPKContainerProtocol, updateTitle title: String) {
         if !isEmptyString(title) {
             self.navigationBar?.update(centerTitle: title)
         }
+        self.containerLifecycleDelegate?.container?(container, updateTitle: title)
+    }
+
+    public func container(_ container: any SPKContainerProtocol, didChangeIntrinsicContentSize size: CGSize) {
+        self.containerLifecycleDelegate?.container?(container, didChangeIntrinsicContentSize: size)
+    }
+
+    public func containerBeforeLoading(_ container: any SPKContainerProtocol) {
+        self.containerLifecycleDelegate?.containerBeforeLoading?(container)
+    }
+
+    public func containerWillStartLoading(_ container: any SPKContainerProtocol) {
+        self.containerLifecycleDelegate?.containerWillStartLoading?(container)
+    }
+
+    public func containerDidStartLoading(_ container: any SPKContainerProtocol) {
+        self.containerLifecycleDelegate?.containerDidStartLoading?(container)
+    }
+
+    public func container(_ container: any SPKContainerProtocol, didStartFetchResourceWithURL url: URL?) {
+        self.containerLifecycleDelegate?.container?(container, didStartFetchResourceWithURL: url)
+    }
+
+    public func container(_ container: any SPKContainerProtocol, didFetchedResource resource: (any SPKResourceProtocol)?, error: (any Error)?) {
+        self.containerLifecycleDelegate?.container?(container, didFetchedResource: resource, error: error)
+    }
+
+    public func containerDidFirstScreen(_ container: any SPKContainerProtocol) {
+        self.containerLifecycleDelegate?.containerDidFirstScreen?(container)
+    }
+
+    public func containerDidUpdate(_ container: any SPKContainerProtocol) {
+        self.containerLifecycleDelegate?.containerDidUpdate?(container)
+    }
+
+    public func containerDidPageUpdate(_ container: any SPKContainerProtocol) {
+        self.containerLifecycleDelegate?.containerDidPageUpdate?(container)
+    }
+
+    public func container(_ container: any SPKContainerProtocol, didRecieveError error: (any Error)?) {
+        self.containerLifecycleDelegate?.container?(container, didRecieveError: error)
+    }
+
+    public func container(_ container: any SPKContainerProtocol, didReceivePerformance perfDict: [AnyHashable: Any]?) {
+        self.containerLifecycleDelegate?.container?(container, didReceivePerformance: perfDict)
+    }
+
+    public func containerWillReload(_ container: any SPKContainerProtocol) {
+        self.containerLifecycleDelegate?.containerWillReload?(container)
+    }
+
+    public func containerDidConstructJSRuntime(_ container: any SPKContainerProtocol) {
+        self.containerLifecycleDelegate?.containerDidConstructJSRuntime?(container)
     }
     
     public func addLoadFailedView(_ error: Error?) {

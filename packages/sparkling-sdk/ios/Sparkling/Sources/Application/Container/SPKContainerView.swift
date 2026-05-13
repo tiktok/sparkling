@@ -237,7 +237,9 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
         self.context?.originURL = self.originURL?.absoluteString
         
         self.addContainerDefaultGlobalProps()
-        self.containerLifecycleDelegate = context.containerLifecycleDelegate
+        if self.containerLifecycleDelegate == nil {
+            self.containerLifecycleDelegate = context.containerLifecycleDelegate
+        }
         
         self.beginLoadTimeStamp = Date(timeIntervalSinceNow: 0).timeIntervalSince1970 * 1000
         
