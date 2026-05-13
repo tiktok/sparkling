@@ -16,6 +16,21 @@ import Foundation
 /// and providing fallback values when necessary.
 @objcMembers
 open class SPKGlobalPropsUtils: NSObject {
+    private static let preferredThemeKey = "sparkling.preferredTheme"
+
+    /// Persist the user's theme preference so all new containers inherit it.
+    public static func setPreferredTheme(_ theme: String?) {
+        if let theme = theme?.trimmingCharacters(in: .whitespacesAndNewlines), !theme.isEmpty {
+            UserDefaults.standard.set(theme, forKey: preferredThemeKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: preferredThemeKey)
+        }
+    }
+
+    /// Read the persisted theme preference, if any.
+    public static func preferredTheme() -> String? {
+        UserDefaults.standard.string(forKey: preferredThemeKey)
+    }
     /// Generates a dictionary of default global properties for the current device and environment.
     /// 
     /// This method collects comprehensive device information including screen dimensions,
@@ -82,7 +97,8 @@ open class SPKGlobalPropsUtils: NSObject {
             "isLowPowerMode": ProcessInfo.processInfo.isLowPowerModeEnabled ? 1 : 0,
             "isAppBackground": UIApplication.shared.applicationState == .background,
             "screenOrientation": self.screenOrientationString(),
-            "deviceModel": UIDevice.spk.hwModel?.lowercased() ?? ""
+            "deviceModel": UIDevice.spk.hwModel?.lowercased() ?? "",
+            "preferredTheme": preferredTheme() ?? ""
         ]
     }
     

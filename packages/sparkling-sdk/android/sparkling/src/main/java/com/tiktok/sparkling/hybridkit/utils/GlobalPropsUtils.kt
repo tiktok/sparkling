@@ -31,8 +31,33 @@ class GlobalPropsUtils {
     private val removableGlobalKeys = SafeConcurrentHashMap<String, MutableList<String>>()
 
     companion object {
+        private const val PREFS_NAME = "sparkling_global"
+        private const val KEY_PREFERRED_THEME = "preferredTheme"
+
         val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
             GlobalPropsUtils()
+        }
+
+        /** Persist the user's theme preference so all new containers inherit it. */
+        @JvmStatic
+        fun setPreferredTheme(context: Context, theme: String?) {
+            val prefs = context.applicationContext
+                .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            if (theme.isNullOrBlank()) {
+                prefs.edit().remove(KEY_PREFERRED_THEME).apply()
+            } else {
+                prefs.edit().putString(KEY_PREFERRED_THEME, theme.trim()).apply()
+            }
+        }
+
+        /** Read the persisted theme preference, if any. */
+        @JvmStatic
+        fun getPreferredTheme(context: Context): String? {
+            return context.applicationContext
+                .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getString(KEY_PREFERRED_THEME, null)
+                ?.trim()
+                ?.ifEmpty { null }
         }
 
         val builtInStableFields = mapOf<String, () -> Any>(
@@ -221,6 +246,9 @@ class GlobalPropsUtils {
                 put("screenOrientation", if (isPortrait) "Portrait" else "Landscape")
                 put("orientation", if (isPortrait) 0 else 1)
                 put("theme", if (hybridContext.getTheme(context) == Theme.DARK) "dark" else "light")
+                context?.let { ctx ->
+                    getPreferredTheme(ctx)?.let { put("preferredTheme", it) }
+                }
             }
             putAll(unstableMap)
         }
