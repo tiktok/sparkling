@@ -30,97 +30,97 @@ import Foundation
 @objc public class MethodStatus: NSObject {
     @objc public let code: MethodStatusCode
     @objc public let message: String?
-    
+
     // Convenience constructor
     @objc public init(code: MethodStatusCode, message: String? = nil) {
         self.code = code
         self.message = message
     }
-    
+
     // Convenience factory method
     @objc public static func succeeded() -> MethodStatus {
         return MethodStatus(code: .succeeded)
     }
-    
+
     @objc public static func failed(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .failed, message: message)
     }
-    
+
     @objc public static func invalidParameter(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .invalidInputParameter, message: message)
     }
-    
+
     @objc public static func notImplemented(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .notImplemented, message: message)
     }
-    
+
     // Convenience methods for other common statuses
     @objc public static func unregisteredMethod(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .unregisteredMethod, message: message)
     }
-    
+
     @objc public static func invalidNamespace(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .invalidNamespace, message: message)
     }
-    
+
     @objc public static func invalidResult(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .invalidResult, message: message)
     }
-    
+
     @objc public static func unauthorizedAccess(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .unauthorizedAccess, message: message)
     }
-    
+
     @objc public static func operationCancelled(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .operationCancelled, message: message)
     }
-    
+
     @objc public static func operationTimeout(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .operationTimeout, message: message)
     }
-    
+
     @objc public static func notFound(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .notFound, message: message)
     }
-    
+
     @objc public static func alreadyExists(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .alreadyExists, message: message)
     }
-    
+
     @objc public static func paramModelTypeWrong(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .paramModelTypeWrong, message: message)
     }
-    
+
     @objc public static func resultModelTypeWrong(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .resultModelTypeWrong, message: message)
     }
-    
+
     @objc public static func unknown(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .unknown, message: message)
     }
-    
+
     @objc public static func networkUnreachable(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .networkUnreachable, message: message)
     }
-    
+
     @objc public static func networkTimeout(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .networkTimeout, message: message)
     }
-    
+
     @objc public static func malformedResponse(message: String? = nil) -> MethodStatus {
         return MethodStatus(code: .malformedResponse, message: message)
     }
-    
+
     // For compatibility with original Int type code access
     @objc public var rawCode: Int {
         return code.rawValue
     }
-    
+
     // Whether it's successful
     @objc public var isSuccess: Bool {
         return code == .succeeded
     }
-    
+
     // Already have instance variable message, no need for duplicate computed property
 }
 
@@ -129,11 +129,11 @@ extension MethodStatus {
         let msg = self.message ?? ""
         return "<MethodStatus - code: \(self.code), message: \"\(msg)\">"
     }
-    
+
     public static func == (lhs: MethodStatus, rhs: MethodStatus) -> Bool {
         return lhs.code == rhs.code
     }
-    
+
     public static func === (lhs: MethodStatus, rhs: MethodStatus) -> Bool {
         return lhs.code == rhs.code && lhs.message == rhs.message
     }

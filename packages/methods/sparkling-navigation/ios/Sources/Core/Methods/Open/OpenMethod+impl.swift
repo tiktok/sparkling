@@ -21,11 +21,10 @@ extension OpenMethod {
             completionHandler.handleCompletion(status: .invalidParameter(message: "The schema should not be empty."), result: nil)
             return
         }
-        
+
         routerService.openScheme(withParams: typedParamModel) { status, result in
             completionHandler.handleCompletion(status: status, result: nil)
         }
     }
-    
 
 }

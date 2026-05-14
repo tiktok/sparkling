@@ -6,8 +6,8 @@ import Foundation
 
 @objcMembers
 public class SPKNavigationBarButtonItem: NSObject, SPKNavigationBarButtonProtocol {
-    
+
     public var icon: UIImage = UIImage()
-    
+
     public var navBarHandler: SPKNavBarHandler?
 }

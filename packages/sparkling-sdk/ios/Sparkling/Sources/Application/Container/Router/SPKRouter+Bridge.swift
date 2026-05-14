@@ -10,11 +10,11 @@ extension SPKRouter {
         guard let uiResponder = container as? UIResponder else {
             return false
         }
-        
+
         guard let targetVC = viewController(for: uiResponder) else {
             return false
         }
-        
+
         if let naviVC = targetVC.navigationController {
             if SPKResponder.isTopViewController(viewController: targetVC) {
                 if naviVC.viewControllers.count == 1 && naviVC.presentingViewController != nil {
@@ -35,7 +35,7 @@ extension SPKRouter {
         }
         return true
     }
-    
+
     public static func viewController(for responder: UIResponder) -> UIViewController? {
         var nextRepsonder: UIResponder? = responder
         while let responder = nextRepsonder {

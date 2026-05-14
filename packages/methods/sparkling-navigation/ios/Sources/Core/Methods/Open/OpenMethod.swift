@@ -10,19 +10,18 @@ public class OpenMethod: PipeMethod {
     public override var methodName: String {
         return "router.open"
     }
-    
+
     public override class func methodName() -> String {
         return "router.open"
     }
-    
+
     @objc public override var paramsModelClass: AnyClass {
         return OpenMethodParamModel.self
     }
-    
+
     @objc public override var resultModelClass: AnyClass {
         return EmptyMethodModelClass.self
     }
-
 
 }
 
@@ -31,7 +30,7 @@ public class OpenMethodParamModel: SPKMethodModel {
     public override class func requiredKeyPaths() -> Set<String>? {
         return ["scheme"]
     }
-    
+
     @objc public var scheme: String?
     @objc public var replace: Bool = false
     @objc public var replaceType: String?

@@ -11,7 +11,7 @@ public class SPKUploadImageMethodParamModel: SPKMethodModel {
     @objc public override static func requiredKeyPaths() -> Set<String>? {
         return ["url"]
     }
-    
+
     @objc public var url: String?
     @objc public var filePath: String?
     @objc public var name: String?
@@ -21,7 +21,7 @@ public class SPKUploadImageMethodParamModel: SPKMethodModel {
     @objc public var paramsOption: Int = 0
     @objc public var needCommonParams: Bool = true
     @objc public var timeoutInterval: Double = 0
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "url": "url",
@@ -32,13 +32,13 @@ public class SPKUploadImageMethodParamModel: SPKMethodModel {
             "params": "params",
             "paramsOption": "paramsOption",
             "needCommonParams": "needCommonParams",
-            "timeoutInterval": "timeoutInterval"
+            "timeoutInterval": "timeoutInterval",
         ]
     }
 }
 
 // Result model
-@objc(SPKUploadImageMethodResultModel) 
+@objc(SPKUploadImageMethodResultModel)
 class SPKUploadImageMethodResultModel: SPKMethodModel {
     @objc public var clientCode: Int = 0
     @objc public var httpCode: Int = 0
@@ -46,7 +46,7 @@ class SPKUploadImageMethodResultModel: SPKMethodModel {
     @objc public var uri: String?
     @objc public var header: [String: String]?
     @objc public var responseData: [String: Any]?
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "clientCode": "clientCode",
@@ -54,7 +54,7 @@ class SPKUploadImageMethodResultModel: SPKMethodModel {
             "url": "url",
             "uri": "uri",
             "header": "header",
-            "responseData": "response"
+            "responseData": "response",
         ]
     }
 }
@@ -65,15 +65,15 @@ public class SPKUploadImageMethod: PipeMethod {
     @objc public override var paramsModelClass: AnyClass {
         return SPKUploadImageMethodParamModel.self
     }
-    
+
     @objc public override var resultModelClass: AnyClass {
         return SPKUploadImageMethodResultModel.self
     }
-    
+
     public override var methodName: String {
         return "media.uploadImage"
     }
-    
+
     public override class func methodName() -> String {
         return "media.uploadImage"
     }

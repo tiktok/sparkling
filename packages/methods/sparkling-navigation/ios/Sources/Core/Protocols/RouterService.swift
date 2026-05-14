@@ -8,5 +8,5 @@ import SparklingMethod
 public protocol RouterService {
     func openScheme(withParams params: OpenMethodParamModel, completion: @escaping PipeMethod.CompletionBlock)
     func closeContainer(withParams params: CloseMethodParamModel, completion: @escaping PipeMethod.CompletionBlock)
-    
+
 }

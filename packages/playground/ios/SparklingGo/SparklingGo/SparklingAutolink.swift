@@ -12,5 +12,5 @@ let sparklingAutolinkModules: [SparklingAutolinkModule] = [
     SparklingAutolinkModule(name: "sparkling-debug-tool", iosModuleName: "DebugTool", className: "SparklingDebugTool"),
     SparklingAutolinkModule(name: "sparkling-media", iosModuleName: "", className: ""),
     SparklingAutolinkModule(name: "sparkling-storage", iosModuleName: "SPKStorage", className: "StorageMethod"),
-    SparklingAutolinkModule(name: "sparkling-navigation", iosModuleName: "Router", className: "RouterMethod")
+    SparklingAutolinkModule(name: "sparkling-navigation", iosModuleName: "Router", className: "RouterMethod"),
 ]

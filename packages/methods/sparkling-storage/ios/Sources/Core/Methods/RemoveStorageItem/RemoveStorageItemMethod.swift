@@ -7,23 +7,22 @@ import SparklingMethod
 
 @objc(RemoveStorageItemMethod)
 public final class RemoveStorageItemMethod: PipeMethod {
-    
+
     public override var methodName: String {
         return "storage.removeItem"
     }
-    
+
     public override class func methodName() -> String {
         return "storage.removeItem"
     }
-    
+
     @objc public override var paramsModelClass: AnyClass {
         return RemoveStorageItemMethodParamModel.self
     }
-    
+
     @objc public override var resultModelClass: AnyClass {
         return EmptyMethodModelClass.self
     }
-
 
 }
 
@@ -32,9 +31,9 @@ public class RemoveStorageItemMethodParamModel: SPKMethodModel {
     public override class func requiredKeyPaths() -> Set<String>? {
         return ["key"]
     }
-    
+
     @objc public var key: String?
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         var keyPaths = super.jsonKeyPathsByPropertyKey()
         keyPaths["key"] = "key"

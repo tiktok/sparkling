@@ -2,8 +2,8 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import Testing
 import Sparkling
+import Testing
 
 struct SPKDictionaryTests {
     @Test func test_urlQueryString() async throws {
@@ -20,7 +20,7 @@ struct SPKDictionaryTests {
         let dict: [String: Any] = ["b1": true, "b2": NSNumber(value: 0), "b3": "true"]
         #expect(dict.spk.bool(forKey: "b1") == true)
         #expect(dict.spk.bool(forKey: "b2") == false)
-        #expect(dict.spk.bool(forKey: "b3") == true) // NSString.boolValue supports "true"
+        #expect(dict.spk.bool(forKey: "b3") == true)  // NSString.boolValue supports "true"
         #expect(dict.spk.bool(forKey: "missing", default: true) == true)
     }
 
@@ -28,7 +28,7 @@ struct SPKDictionaryTests {
         let dict: [String: Any] = ["i1": 42, "i2": "123", "i3": "abc"]
         #expect(dict.spk.int(forKey: "i1") == 42)
         #expect(dict.spk.int(forKey: "i2") == 123)
-        #expect(dict.spk.int(forKey: "i3", default: 9) == 0) // NSString.integerValue returns 0 for invalid string
+        #expect(dict.spk.int(forKey: "i3", default: 9) == 0)  // NSString.integerValue returns 0 for invalid string
     }
 
     @Test func test_float_and_double_forKey() async throws {
@@ -68,20 +68,20 @@ struct SPKDictionaryTests {
         let missing: String = dict.spk.object(forKey: "nope", default: "default")
         #expect(missing == "default")
     }
-    
+
     @Test func test_urlQueryString_emptyDictionary() {
         let emptyDict: [String: Any] = [:]
         let query = emptyDict.spk.urlQueryString
         #expect(query == "")
     }
-    
+
     @Test func test_urlQueryString_specialCharacters() {
         let dict: [String: Any] = ["key with spaces": "value&with=special", "unicode": "sample"]
         let query = dict.spk.urlQueryString
         #expect(query != nil)
-        #expect(query!.contains("%")) // Should contain URL encoding
+        #expect(query!.contains("%"))  // Should contain URL encoding
     }
-    
+
     @Test func test_urlQueryString_nilValues() {
         let dict: [String: Any?] = ["key1": "value1", "key2": nil, "key3": "value3"]
         let query = dict.spk.urlQueryString
@@ -89,7 +89,7 @@ struct SPKDictionaryTests {
         // nil values should be ignored or handled
         #expect(!query!.contains("key2"))
     }
-    
+
     @Test func test_bool_forKey_edgeCases() {
         let dict: [String: Any] = [
             "zero": 0,
@@ -98,9 +98,9 @@ struct SPKDictionaryTests {
             "no": "NO",
             "false_string": "false",
             "empty": "",
-            "number_bool": NSNumber(value: true)
+            "number_bool": NSNumber(value: true),
         ]
-        
+
         #expect(dict.spk.bool(forKey: "zero") == false)
         #expect(dict.spk.bool(forKey: "one") == true)
         #expect(dict.spk.bool(forKey: "yes") == true)
@@ -109,7 +109,7 @@ struct SPKDictionaryTests {
         #expect(dict.spk.bool(forKey: "empty") == false)
         #expect(dict.spk.bool(forKey: "number_bool") == true)
     }
-    
+
     @Test func test_int_forKey_boundaryValues() {
         let dict: [String: Any] = [
             "max_int": Int.max,
@@ -117,37 +117,37 @@ struct SPKDictionaryTests {
             "float_to_int": 3.14,
             "large_string": "999999999999999999999",
             "negative": "-42",
-            "hex": "0xFF"
+            "hex": "0xFF",
         ]
-        
+
         #expect(dict.spk.int(forKey: "max_int") == Int.max)
         #expect(dict.spk.int(forKey: "min_int") == Int.min)
         #expect(dict.spk.int(forKey: "float_to_int") == 3)
         #expect(dict.spk.int(forKey: "negative") == -42)
         // hex strings may not be supported, depends on implementation
     }
-    
+
     @Test func test_float_double_precision() {
         let dict: [String: Any] = [
             "pi": 3.141592653589793,
             "scientific": "1.23e-4",
             "infinity": Float.infinity,
-            "nan": Float.nan
+            "nan": Float.nan,
         ]
-        
+
         let pi_float = dict.spk.float(forKey: "pi")
         #expect(abs(pi_float - 3.141593) < 0.000001)
-        
+
         let scientific = dict.spk.double(forKey: "scientific")
         #expect(abs(scientific - 0.000123) < 0.0000001)
-        
+
         let inf = dict.spk.float(forKey: "infinity")
         #expect(inf.isInfinite)
-        
+
         let nan = dict.spk.float(forKey: "nan")
         #expect(nan.isNaN)
     }
-    
+
     @Test func test_string_forKey_typeConversions() {
         let dict: [String: Any] = [
             "bool_true": true,
@@ -155,37 +155,37 @@ struct SPKDictionaryTests {
             "int": 42,
             "float": 3.14,
             "array": [1, 2, 3],
-            "dict": ["key": "value"]
+            "dict": ["key": "value"],
         ]
-        
+
         #expect(dict.spk.string(forKey: "bool_true") == "1")
         #expect(dict.spk.string(forKey: "bool_false") == "0")
         #expect(dict.spk.string(forKey: "int") == "42")
         #expect(dict.spk.string(forKey: "float") == "3.14")
         // String conversion of arrays and dictionaries depends on implementation
     }
-    
+
     @Test func test_array_forKey_typeValidation() {
         let dict: [String: Any] = [
             "string_array": ["a", "b", "c"],
             "mixed_array": [1, "two", 3.0],
             "empty_array": [],
-            "not_array": "string"
+            "not_array": "string",
         ]
-        
+
         let stringArray: [String]? = dict.spk.array(forKey: "string_array")
         #expect(stringArray == ["a", "b", "c"])
-        
+
         let mixedArray: [Any]? = dict.spk.array(forKey: "mixed_array")
         #expect(mixedArray?.count == 3)
-        
+
         let emptyArray: [Int]? = dict.spk.array(forKey: "empty_array")
         #expect(emptyArray?.isEmpty == true)
-        
+
         let notArray: [String]? = dict.spk.array(forKey: "not_array")
         #expect(notArray == nil)
     }
-    
+
     @Test func test_dictionary_forKey_nestedStructures() {
         let nestedDict: [String: Any] = [
             "level1": [
@@ -194,46 +194,46 @@ struct SPKDictionaryTests {
                 ]
             ],
             "empty_dict": [:],
-            "not_dict": "string"
+            "not_dict": "string",
         ]
-        
+
         let level1: [String: Any]? = nestedDict.spk.dictionary(forKey: "level1")
         #expect(level1 != nil)
-        
+
         if let level1 = level1 {
             let level2: [String: Any]? = level1.spk.dictionary(forKey: "level2")
             #expect(level2 != nil)
-            
+
             if let level2 = level2 {
                 let value = level2.spk.string(forKey: "level3")
                 #expect(value == "deep_value")
             }
         }
-        
+
         let emptyDict: [String: String]? = nestedDict.spk.dictionary(forKey: "empty_dict")
         #expect(emptyDict?.isEmpty == true)
-        
+
         let notDict: [String: String]? = nestedDict.spk.dictionary(forKey: "not_dict")
         #expect(notDict == nil)
     }
-    
+
     @Test func test_object_forKey_genericTypes() {
         let dict: [String: Any] = [
             "date": Date(),
             "url": URL(string: "https://example.com")!,
             "data": Data([1, 2, 3, 4]),
-            "custom_object": NSObject()
+            "custom_object": NSObject(),
         ]
-        
+
         let date: Date? = dict.spk.object(forKey: "date")
         #expect(date != nil)
-        
+
         let url: URL? = dict.spk.object(forKey: "url")
         #expect(url?.absoluteString == "https://example.com")
-        
+
         let data: Data? = dict.spk.object(forKey: "data")
         #expect(data?.count == 4)
-        
+
         let customObject: NSObject? = dict.spk.object(forKey: "custom_object")
         #expect(customObject != nil)
     }

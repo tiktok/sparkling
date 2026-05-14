@@ -10,13 +10,13 @@ extension String {
         // Implement simplified version to remove common sandbox path prefixes
         let fileManager = FileManager.default
         let homeDirectory = NSHomeDirectory()
-        
+
         if self.hasPrefix(homeDirectory) {
             return self.replacingOccurrences(of: homeDirectory, with: "")
         }
         return self
     }
-    
+
     /// Get actual path from processed file path
     public func spk_stringFromProcessFile() -> String {
         // Implement simplified version, assuming input is already a full path

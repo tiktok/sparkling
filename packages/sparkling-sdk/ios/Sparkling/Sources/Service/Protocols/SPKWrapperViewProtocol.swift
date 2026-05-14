@@ -3,9 +3,8 @@
 // LICENSE file in the root directory of this source tree.
 
 import Foundation
-import UIKit
-
 import SparklingMethod
+import UIKit
 
 /// Protocol for services that can create and register SPK views.
 ///
@@ -31,69 +30,69 @@ import SparklingMethod
 ///
 /// This protocol is for raw view. (Lynx/ webview)
 @objc public protocol SPKWrapperViewProtocol: SPKBaseProtocol {
-    
+
     /// The underlying raw UIView instance, if available.
-    var rawView: UIView? {get}
-    
+    var rawView: UIView? { get }
+
     /// Configuration parameters for the hybrid view.
-    var params: SPKHybridParams? {get}
-    
+    var params: SPKHybridParams? { get }
+
     /// Delegate for handling view lifecycle events.
     weak var lifeCycleDelegate: SPKWrapperViewLifecycleProtocol? { set get }
-    
+
     /// Method pipe instance for communication with JavaScript runtime.
     var anyMethodPipe: Any? { get }
-    
+
     /// Progress indicator for loading operations (0.0 to 1.0).
-    var estimatedProgress: Float {get}
-    
+    var estimatedProgress: Float { get }
+
     /// Configures the view with new parameters.
     ///
     /// - Parameter params: The hybrid parameters to apply to the view
     func config(withParams params: SPKHybridParams?)
-    
+
     /// Called when the view becomes visible with optional parameters.
     ///
     /// - Parameter params: Parameters passed when the view is shown
     func onshow(params: [AnyHashable: Any])
-    
+
     /// Called when the view becomes hidden with optional parameters.
     ///
     /// - Parameter params: Parameters passed when the view is hidden
     func onHide(params: [AnyHashable: Any])
-    
+
     /// Updates the view with new global properties.
     ///
     /// - Parameter globalProps: The global properties to update
     func update(withGlobalProps globalProps: Any?)
-    
+
     /// Configures the view with global properties.
     ///
     /// - Parameter globalProps: The global properties to configure
     func config(withGlobalProps globalProps: Any?)
-    
+
     /// Registers a UI component class with a processor name.
     ///
     /// - Parameters:
     ///   - withUI: The UI component class to register
     ///   - name: The processor name to associate with the UI component
     @objc optional func register(withUI: AnyClass, processorName name: String)
-    
+
     /// Updates the view with new data using an optional processor.
     ///
     /// - Parameters:
     ///   - data: The data to update with
     ///   - processor: Optional processor name for handling the data
     @objc optional func update(withData data: Any?, processorName processor: String?)
-    
+
     /// Triggers a layout update for the view.
     @objc optional func triggerLayout()
-    
+
     /// Returns the URL string currently being loaded.
     ///
     /// - Returns: The URL string, or nil if not available
     @objc optional func loadURLString() -> String?
-    
+
     /// Called when the view controller is about to be destroyed.
     @objc optional func onVCWillDestory()
 }

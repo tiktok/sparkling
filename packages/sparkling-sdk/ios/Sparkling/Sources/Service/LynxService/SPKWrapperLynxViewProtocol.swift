@@ -7,8 +7,8 @@ import Lynx
 
 @objc
 public protocol SPKLynxElement {
-    var lynxElementName: String {set get}
-    var lynxElementClassName: AnyObject.Type {set get}
+    var lynxElementName: String { set get }
+    var lynxElementClassName: AnyObject.Type { set get }
 }
 
 /// Configuration parameters for SPKWrapperLynxView instances.
@@ -19,40 +19,40 @@ public protocol SPKLynxElement {
 @objc public class SPKLynxKitParams: NSObject, SPKHybridParams {
     /// Global properties to be shared across the Lynx runtime environment.
     public var globalPropos: Any?
-    
+
     /// The hybrid context containing configuration and state information.
     public var context: SPKHybridContext?
-    
+
     /// The source URL from which to load the Lynx template or content.
     public var sourceUrl: String?
-    
+
     /// Initial properties to pass to the Lynx view upon creation.
     public var initialProperties: Any?
-    
+
     /// The width sizing mode for the Lynx view layout.
     public var widthMode: LynxViewSizeMode?
-    
+
     /// The height sizing mode for the Lynx view layout.
     public var heightMode: LynxViewSizeMode?
-    
+
     /// Query parameters to be passed along with requests.
     public var queryItems: [String: Any]?
-    
+
     /// Optional block for custom view builder configuration.
     public var rawViewBuilderBlock: ((Any, String) -> Void)?
-    
+
     /// Provider for loading Lynx templates.
     public weak var templateProvider: LynxTemplateProvider?
-    
+
     /// Provider for fetching images used within the Lynx view.
     public weak var imageFetcher: LynxImageFetcher?
-    
+
     /// Provider for fetching general resources.
     public weak var resourceFetcher: LynxResourceFetcher?
-    
+
     /// Provider for loading dynamic components at runtime.
     public weak var dynamicComponentFetcher: LynxDynamicComponentFetcher?
-    
+
     /// Metadata associated with the initial load operation.
     public var loadMeta: Any?
 }
@@ -74,43 +74,43 @@ public typealias HybridLynxBridgeHandler = (_ container: Any, _ name: String, _ 
 /// registration of modules, shadow nodes, and UI components.
 @objc public protocol SPKWrapperLynxViewProtocol: SPKWrapperViewProtocol {
     /// The underlying Lynx view instance that handles the actual rendering.
-    var lynxView: LynxView? {set get}
-    
+    var lynxView: LynxView? { set get }
+
     /// The Lynx configuration object that defines the rendering environment.
-    var lynxConfig: LynxConfig? {set get}
-    
+    var lynxConfig: LynxConfig? { set get }
+
     /// Flag indicating whether the Lynx view has been successfully created.
-    var isLynxCreated: Bool {set get}
-    
+    var isLynxCreated: Bool { set get }
+
     /// Initializes a new Lynx view with the specified frame and parameters.
     ///
     /// - Parameters:
     ///   - frame: The frame rectangle for the view
     ///   - params: Configuration parameters for the Lynx view
     init(withFrame frame: CGRect, params: SPKLynxKitParams?)
-    
-//    func register(withHandler handler: @escaping HybridLynxBridgeHandler, forMethod method: String)
-    
+
+    //    func register(withHandler handler: @escaping HybridLynxBridgeHandler, forMethod method: String)
+
     /// Registers a Lynx module with optional parameters.
     ///
     /// - Parameters:
     ///   - module: The module type to register
     ///   - param: Optional parameters for the module
     func register(withModule module: LynxModule.Type, param: Any?)
-    
+
     /// Registers a shadow node class with a specific name.
     ///
     /// - Parameters:
     ///   - node: The shadow node class to register
     ///   - name: The name to associate with the shadow node
     func register(withShadowNode node: AnyClass, withName name: String)
-    
+
     /// Registers a UI component class with a specific name.
     ///
     /// - Parameters:
     ///   - ui: The UI component class to register
     ///   - name: The name to associate with the UI component
     func register(withUI ui: AnyClass, withName name: String)
-    
-//    func remove(LynxBridgeWithMethodNames methods: [String])
+
+    //    func remove(LynxBridgeWithMethodNames methods: [String])
 }

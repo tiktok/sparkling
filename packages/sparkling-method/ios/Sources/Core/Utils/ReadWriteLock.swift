@@ -6,27 +6,27 @@ import Foundation
 
 final class ReadWriteLock {
     private var lock = pthread_rwlock_t()
-    
+
     init() {
         pthread_rwlock_init(&lock, nil)
     }
-    
+
     deinit {
         pthread_rwlock_destroy(&lock)
     }
-    
+
     func read<T>(_ block: () -> T) -> T {
         pthread_rwlock_rdlock(&lock)
         defer { pthread_rwlock_unlock(&lock) }
         return block()
     }
-    
+
     func write<T>(_ block: () -> T) -> T {
         pthread_rwlock_wrlock(&lock)
         defer { pthread_rwlock_unlock(&lock) }
         return block()
     }
-    
+
     func sync<T>(_ block: () -> T) -> T {
         return write(block)
     }

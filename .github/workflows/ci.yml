@@ -23,6 +23,8 @@ jobs:
       run_all: ${{ steps.filter.outputs.shared == 'true' || steps.filter.outputs.tooling == 'true' || github.event_name == 'workflow_dispatch' }}
       any_unit_tests: ${{ steps.filter.outputs.create_sparkling_app == 'true' || steps.filter.outputs.sparkling_method_cli == 'true' || steps.filter.outputs.sparkling_method == 'true' || steps.filter.outputs.sparkling_router == 'true' || steps.filter.outputs.sparkling_storage == 'true' || steps.filter.outputs.playground == 'true' || steps.filter.outputs.app_template == 'true' || steps.filter.outputs.shared == 'true' || steps.filter.outputs.tooling == 'true' || github.event_name == 'workflow_dispatch' }}
       build_playground: ${{ steps.filter.outputs.playground == 'true' || steps.filter.outputs.sparkling_sdk == 'true' || steps.filter.outputs.sparkling_method == 'true' || steps.filter.outputs.sparkling_debug_tool == 'true' || steps.filter.outputs.sparkling_navigation == 'true' || steps.filter.outputs.sparkling_media == 'true' || steps.filter.outputs.sparkling_storage == 'true' || steps.filter.outputs.shared == 'true' || steps.filter.outputs.tooling == 'true' || github.event_name == 'workflow_dispatch' }}
+      ios_swift: ${{ steps.filter.outputs.ios_swift }}
+      clang: ${{ steps.filter.outputs.clang }}
       android_kotlin: ${{ steps.filter.outputs.android_kotlin }}
       create_sparkling_app: ${{ steps.filter.outputs.create_sparkling_app }}
       sparkling_method_cli: ${{ steps.filter.outputs.sparkling_method_cli }}
@@ -78,6 +80,18 @@ jobs:
               - '.npmrc'
               - '.prettierrc'
               - '.github/workflows/**'
+            ios_swift:
+              - 'packages/**/*.swift'
+              - 'template/**/*.swift'
+              - '.swift-format'
+            clang:
+              - 'packages/**/*.m'
+              - 'packages/**/*.mm'
+              - 'packages/**/*.cpp'
+              - 'template/**/*.m'
+              - 'template/**/*.mm'
+              - 'template/**/*.cpp'
+              - '.clang-format'
             android_kotlin:
               - 'packages/**/*.kt'
               - 'packages/**/*.kts'
@@ -280,4 +294,34 @@ jobs:
 
       - name: Lint Kotlin files
         run: scripts/lint.sh kotlin
+
+  lint-ios-clang:
+    name: Lint iOS ObjC/C++
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.clang == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get install -y clang-format
+
+      - name: Lint ObjC/C++ files
+        run: scripts/lint.sh clang
+
+  lint-ios-swift:
+    name: Lint iOS Swift
+    runs-on: macos-latest
+    needs: changes
+    if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.ios_swift == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install swift-format
+        run: brew install swift-format
+
+      - name: Lint Swift files
+        run: scripts/lint.sh swift
 

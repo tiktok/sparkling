@@ -13,7 +13,7 @@ class SampleMethodParamModel: SPKMethodModel {
     @objc public static func requiredKeyPaths() -> Set<String>? {
         return ["sampleParam"]
     }
-    
+
     override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return ["sampleParam": "sample_param"]
     }
@@ -23,12 +23,12 @@ class SampleMethodParamModel: SPKMethodModel {
 @objc(SampleMethodResultModel)
 public final class SampleMethodResultModel: SPKMethodModel {
     var sampleResult: String?
-    
+
     // Required parameter key paths
     @objc public static func requiredKeyPaths() -> Set<String>? {
         return ["sampleResult"]
     }
-    
+
     override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return ["sampleResult": "sample_result"]
     }
@@ -41,16 +41,16 @@ public final class SampleMethod: PipeMethod {
     public override var methodName: String {
         return "sample_method"
     }
-    
+
     public override class func methodName() -> String {
         return "sample_method"
     }
-    
+
     /// Parameter model type
     @objc override var paramsModelType: AnyClass {
         return SampleMethodParamModel.self
     }
-    
+
     /// Result model type
     @objc override var resultModelType: AnyClass {
         return SampleMethodResultModel.self

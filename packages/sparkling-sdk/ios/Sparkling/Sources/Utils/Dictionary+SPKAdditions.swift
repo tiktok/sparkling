@@ -16,20 +16,21 @@ extension Dictionary: DictionaryProtocol {
 
 extension Dictionary: SPKKitCompatibleValue {}
 
-public extension SPKKitWrapper where Base: DictionaryProtocol {
-    var urlQueryString: String? {
+extension SPKKitWrapper where Base: DictionaryProtocol {
+    public var urlQueryString: String? {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return nil
         }
         var items: [String] = []
         items.reserveCapacity(dictionary.count)
-        
+
         dictionary.forEach { key, value in
             guard let unwrappedValue = value as? Any,
-                  String(describing: unwrappedValue) != "nil" else {
+                String(describing: unwrappedValue) != "nil"
+            else {
                 return
             }
-            
+
             let encodedKey = "\(key)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "\(key)"
             let encodedValue = "\(unwrappedValue)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "\(unwrappedValue)"
             let item = "\(encodedKey)=\(encodedValue)"
@@ -37,7 +38,7 @@ public extension SPKKitWrapper where Base: DictionaryProtocol {
         }
         return items.isEmpty ? "" : items.joined(separator: "&")
     }
-    func bool(forKey key: Base.Key, default defaultValue: Bool = false) -> Bool {
+    public func bool(forKey key: Base.Key, default defaultValue: Bool = false) -> Bool {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return defaultValue
         }
@@ -53,7 +54,7 @@ public extension SPKKitWrapper where Base: DictionaryProtocol {
         }
     }
 
-    func int(forKey key: Base.Key, default defaultValue: Int = 0) -> Int {
+    public func int(forKey key: Base.Key, default defaultValue: Int = 0) -> Int {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return defaultValue
         }
@@ -69,7 +70,7 @@ public extension SPKKitWrapper where Base: DictionaryProtocol {
         }
     }
 
-    func float(forKey key: Base.Key, default defaultValue: Float = 0.0) -> Float {
+    public func float(forKey key: Base.Key, default defaultValue: Float = 0.0) -> Float {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return defaultValue
         }
@@ -85,7 +86,7 @@ public extension SPKKitWrapper where Base: DictionaryProtocol {
         }
     }
 
-    func double(forKey key: Base.Key, default defaultValue: Double = 0.0) -> Double {
+    public func double(forKey key: Base.Key, default defaultValue: Double = 0.0) -> Double {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return defaultValue
         }
@@ -100,7 +101,7 @@ public extension SPKKitWrapper where Base: DictionaryProtocol {
             return defaultValue
         }
     }
-    func string(forKey key: Base.Key) -> String? {
+    public func string(forKey key: Base.Key) -> String? {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return nil
         }
@@ -116,7 +117,7 @@ public extension SPKKitWrapper where Base: DictionaryProtocol {
         }
     }
 
-    func string(forKey key: Base.Key, default defaultValue: String) -> String {
+    public func string(forKey key: Base.Key, default defaultValue: String) -> String {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return defaultValue
         }
@@ -132,7 +133,7 @@ public extension SPKKitWrapper where Base: DictionaryProtocol {
         }
     }
 
-    func array<T>(forKey key: Base.Key) -> [T]? {
+    public func array<T>(forKey key: Base.Key) -> [T]? {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return nil
         }
@@ -146,7 +147,7 @@ public extension SPKKitWrapper where Base: DictionaryProtocol {
         }
     }
 
-    func array<T>(forKey key: Base.Key, default defaultValue: [T]) -> [T] {
+    public func array<T>(forKey key: Base.Key, default defaultValue: [T]) -> [T] {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return defaultValue
         }
@@ -160,7 +161,7 @@ public extension SPKKitWrapper where Base: DictionaryProtocol {
         }
     }
 
-    func dictionary<K, V>(forKey key: Base.Key) -> [K: V]? {
+    public func dictionary<K, V>(forKey key: Base.Key) -> [K: V]? {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return nil
         }
@@ -174,7 +175,7 @@ public extension SPKKitWrapper where Base: DictionaryProtocol {
         }
     }
 
-    func dictionary<K, V>(forKey key: Base.Key, default defaultValue: [K: V]) -> [K: V] {
+    public func dictionary<K, V>(forKey key: Base.Key, default defaultValue: [K: V]) -> [K: V] {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return defaultValue
         }
@@ -187,7 +188,7 @@ public extension SPKKitWrapper where Base: DictionaryProtocol {
             return defaultValue
         }
     }
-    func object(forKey key: Base.Key) -> Any? {
+    public func object(forKey key: Base.Key) -> Any? {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return nil
         }
@@ -197,10 +198,10 @@ public extension SPKKitWrapper where Base: DictionaryProtocol {
         return value
     }
 
-    func object<T>(forKey key: Base.Key) -> T? {
+    public func object<T>(forKey key: Base.Key) -> T? {
         return object(forKey: key) as? T
     }
-    func object<T>(forKey key: Base.Key, default defaultValue: T) -> T {
+    public func object<T>(forKey key: Base.Key, default defaultValue: T) -> T {
         guard let dictionary = base as? [Base.Key: Base.Value] else {
             return defaultValue
         }

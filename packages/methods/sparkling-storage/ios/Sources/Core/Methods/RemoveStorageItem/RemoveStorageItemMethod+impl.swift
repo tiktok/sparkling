@@ -17,15 +17,14 @@ extension RemoveStorageItemMethod {
             }
             return
         }
-        
+
         guard let key = typedParamModel.key, !key.isEmpty else {
             completionHandler.handleCompletion(status: .invalidParameter(message: "The key should not be empty"), result: nil)
             return
         }
-        
+
         storageService.removeObject(forKey: key)
         completionHandler.handleCompletion(status: MethodStatus.succeeded(), result: nil)
     }
-    
 
 }

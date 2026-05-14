@@ -16,7 +16,7 @@ class SPKChooseMediaMethodResultTempFileModel: NSObject {
     @objc public var width: Int = 0
     @objc public var height: Int = 0
     @objc public var mediaType: Int = 0
-    
+
     @objc public class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "tempFilePath": "tempFilePath",
@@ -27,17 +27,17 @@ class SPKChooseMediaMethodResultTempFileModel: NSObject {
             "size": "size",
             "width": "width",
             "height": "height",
-            "mediaType": "mediaType"
+            "mediaType": "mediaType",
         ]
     }
 }
 
-@objc(SPKChooseMediaMethodParamModel) 
+@objc(SPKChooseMediaMethodParamModel)
 public class SPKChooseMediaMethodParamModel: SPKMethodModel {
     @objc public override static func requiredKeyPaths() -> Set<String>? {
         return nil
     }
-    
+
     @objc public var mediaTypes: [Int]?
     @objc public var sourceType: Int = SPKChooseMediaMediaSourceType.album.rawValue
     @objc public var cameraType: Int = SPKChooseMediaCameraType.back.rawValue
@@ -46,27 +46,27 @@ public class SPKChooseMediaMethodParamModel: SPKMethodModel {
     @objc public var videoMaxDuration: Double = 60.0
     @objc public var compressOption: Int = SPKChooseMediaCompressOption.default.rawValue
     @objc public var needPreview: Bool = true
-    
+
     @objc public var cameraPermissionDenyAction: Int = SPKChooseMediaPermissionDenyAction.default.rawValue
     @objc public var albumPermissionDenyAction: Int = SPKChooseMediaPermissionDenyAction.default.rawValue
-    
+
     @objc public var compressWidth: CGFloat = 0
     @objc public var compressHeight: CGFloat = 0
     @objc public var compressionQuality: CGFloat = 0.8
     @objc public var type: String? = nil
-    
+
     @objc public var needTempFilePath: Bool = true
     @objc public var needBase64: Bool = false
     @objc public var needSaveToAlbum: Bool = false
-    
+
     @objc public var compressImage: Bool = false
     @objc public var needBase64Data: Bool = false
     @objc public var saveToPhotoAlbum: Bool = false
-    
+
     @objc public var showTakePhotoButton: Bool = true
     @objc public var showCameraRoll: Bool = true
     @objc public var showPhotoLibrary: Bool = true
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "mediaTypes": "mediaTypes",
@@ -88,15 +88,15 @@ public class SPKChooseMediaMethodParamModel: SPKMethodModel {
             "compressWidth": "compressWidth",
             "compressHeight": "compressHeight",
             "compressionQuality": "compressionQuality",
-            "type": "type"
+            "type": "type",
         ]
     }
 }
 
-@objc(SPKChooseMediaMethodResultModel) 
+@objc(SPKChooseMediaMethodResultModel)
 class SPKChooseMediaMethodResultModel: SPKMethodModel {
     @objc public var tempFiles: [SPKChooseMediaMethodResultTempFileModel]?
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "tempFiles": "tempFiles"
@@ -104,20 +104,20 @@ class SPKChooseMediaMethodResultModel: SPKMethodModel {
     }
 }
 
-@objc(SPKChooseMediaMethod) 
+@objc(SPKChooseMediaMethod)
 public class SPKChooseMediaMethod: PipeMethod {
     @objc public override var paramsModelClass: AnyClass {
         return SPKChooseMediaMethodParamModel.self
     }
-    
+
     @objc public override var resultModelClass: AnyClass {
         return SPKChooseMediaMethodResultModel.self
     }
-    
+
     public override var methodName: String {
         return "media.chooseMedia"
     }
-    
+
     public override class func methodName() -> String {
         return "media.chooseMedia"
     }

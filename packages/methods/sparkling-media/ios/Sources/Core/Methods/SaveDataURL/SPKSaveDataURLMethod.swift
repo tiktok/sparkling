@@ -11,27 +11,27 @@ public class SPKSaveDataURLMethodParamModel: SPKMethodModel {
     @objc public override static func requiredKeyPaths() -> Set<String>? {
         return ["dataURL", "filename", "extension"]
     }
-    
+
     @objc public var dataURL: String?
     @objc public var filename: String?
     @objc public var extensions: String?
     @objc public var saveToAlbum: String?
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "dataURL": "dataURL",
             "filename": "filename",
             "extensions": "extension",
-            "saveToAlbum": "saveToAlbum"
+            "saveToAlbum": "saveToAlbum",
         ]
     }
 }
 
 // Result model
-@objc(SPKSaveDataURLMethodResultModel) 
+@objc(SPKSaveDataURLMethodResultModel)
 class SPKSaveDataURLMethodResultModel: SPKMethodModel {
     @objc public var filePath: String?
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "filePath": "filePath"
@@ -45,15 +45,15 @@ public class SPKSaveDataURLMethod: PipeMethod {
     @objc public override var paramsModelClass: AnyClass {
         return SPKSaveDataURLMethodParamModel.self
     }
-    
+
     @objc public override var resultModelClass: AnyClass {
         return SPKSaveDataURLMethodResultModel.self
     }
-    
+
     public override var methodName: String {
         return "media.saveDataURL"
     }
-    
+
     public override class func methodName() -> String {
         return "media.saveDataURL"
     }

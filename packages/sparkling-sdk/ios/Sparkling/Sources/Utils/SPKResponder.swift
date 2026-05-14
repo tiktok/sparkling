@@ -6,36 +6,38 @@ import Foundation
 
 //@objcMembers
 class SPKResponder: NSObject {
-    
+
     static var topViewController: UIViewController? {
         return self.topViewControllerForController(rootViewController: UIApplication.shared.keyWindow?.rootViewController)
     }
-    
+
     static func topViewControllerForController(rootViewController: UIViewController?) -> UIViewController? {
         guard rootViewController != nil else {
             return nil
         }
-        
+
         if let navigationCotnroller = rootViewController as? UINavigationController {
             return self.topViewControllerForController(rootViewController: navigationCotnroller.viewControllers.last)
         }
-        
+
         if let tabController = rootViewController as? UITabBarController {
             return self.topViewControllerForController(rootViewController: tabController.selectedViewController)
         }
-        
+
         if let presentedViewController = rootViewController?.presentedViewController {
             return self.topViewControllerForController(rootViewController: presentedViewController)
         }
         return rootViewController
     }
-    
+
     public static func topViewController(for viewController: UIViewController) -> UIViewController? {
         if let navVC = viewController as? UINavigationController,
-           let lastVC = navVC.viewControllers.last {
+            let lastVC = navVC.viewControllers.last
+        {
             return topViewController(for: lastVC)
         } else if let barVC = viewController as? UITabBarController,
-                  let selectedVC = barVC.selectedViewController {
+            let selectedVC = barVC.selectedViewController
+        {
             return topViewController(for: selectedVC)
         } else if let presentedVC = viewController.presentedViewController {
             return topViewController(for: presentedVC)
@@ -52,7 +54,7 @@ class SPKResponder: NSObject {
         guard let vc: UIViewController = (responder as? UIViewController) ?? UIWindow.spk.keyWindow?.rootViewController else { return nil }
         return topViewController(for: vc)
     }
-    
+
     public static func topViewController(for responder: UIResponder) -> UIViewController? {
         switch responder {
         case let controller as UIViewController: return topViewController(for: controller)

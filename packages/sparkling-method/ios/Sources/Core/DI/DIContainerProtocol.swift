@@ -20,7 +20,7 @@ extension DIContainerProtocol {
     public func register<Service>(_ serviceType: Service.Type, name: AnyHashable? = nil, scope: ServiceScope = .container, factory: @escaping Factory<Service>) {
         self.register(serviceType, name: name, scope: scope, factory: factory)
     }
-    
+
     public func resolve<Service>(_ serviceType: Service.Type, name: AnyHashable? = nil) -> Service? {
         return self.resolve(serviceType, name: name)
     }

@@ -7,6 +7,6 @@ import Foundation
 @objc
 public protocol SPKBottomToolBarProtocol {
     @objc optional func offsetHeight() -> CGFloat
-    
+
     @objc optional func updateSubviewsLayout(_ hideBottomToolBar: Bool)
 }

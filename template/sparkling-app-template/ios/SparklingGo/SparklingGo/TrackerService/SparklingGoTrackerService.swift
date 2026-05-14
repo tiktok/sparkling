@@ -5,7 +5,7 @@ import Foundation
 import Sparkling
 
 class SparklingGoTrackerService: SPKTrackerService {
-    func track(event: SPKTrackerEventKey?, metrics: [AnyHashable : AnyHashable]?, category: [AnyHashable : AnyHashable]?, containerView: UIView?) {
+    func track(event: SPKTrackerEventKey?, metrics: [AnyHashable: AnyHashable]?, category: [AnyHashable: AnyHashable]?, containerView: UIView?) {
         print("[Event: \(event?.rawValueString ?? "")] \nMetrics: \(metrics ?? [:]) \nCategory: \(category ?? [:]) \n View: \(containerView?.description ?? "")")
     }
 }

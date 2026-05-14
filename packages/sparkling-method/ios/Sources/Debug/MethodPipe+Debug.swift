@@ -8,7 +8,7 @@ extension MethodPipe {
     public convenience init(withNothing nothing: String? = nil) {
         self.init()
     }
-        
+
     /// Async/await version of `debugExecuteMethod`.
     /// Wraps the completion-based API with a checked continuation.
     /// - Note: Available on iOS 13+.
@@ -18,9 +18,11 @@ extension MethodPipe {
     ///   - thread: Target thread to run the method.
     /// - Returns: A tuple `(status, result)`.
     @available(iOS 13.0, *)
-    public func debugExecuteMethod(methodName: String,
-                                   params: [String: Any]?,
-                                   thread: MethodThread = .mainThread) async -> (MethodStatus, [String: Any]?) {
+    public func debugExecuteMethod(
+        methodName: String,
+        params: [String: Any]?,
+        thread: MethodThread = .mainThread
+    ) async -> (MethodStatus, [String: Any]?) {
         await withCheckedContinuation { continuation in
             var resumed = false
             self.executeMethod(methodName: methodName, params: params, thread: thread) { status, result in

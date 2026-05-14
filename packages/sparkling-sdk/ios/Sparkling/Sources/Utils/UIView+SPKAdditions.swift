@@ -4,8 +4,8 @@
 
 import UIKit
 
-public extension SPKKitWrapper where Base: UIView {
-    var viewController: UIViewController? {
+extension SPKKitWrapper where Base: UIView {
+    public var viewController: UIViewController? {
         var view: UIView? = base
         while view != nil {
             let nextResponsder = view?.next
@@ -16,7 +16,7 @@ public extension SPKKitWrapper where Base: UIView {
         }
         return nil
     }
-    var safeAreaInsets: UIEdgeInsets {
+    public var safeAreaInsets: UIEdgeInsets {
         if #available(iOS 13.0, *) {
             return base.safeAreaInsets
         }
@@ -26,7 +26,7 @@ public extension SPKKitWrapper where Base: UIView {
         if #available(iOS 11.0, *) {
             safeInset = base.safeAreaInsets
         }
-        
+
         let viewFrameInWindow = base.convert(base.bounds, to: nil)
 
         let statusBarView = UIApplication.shared.value(forKey: "statusBar") as? UIView

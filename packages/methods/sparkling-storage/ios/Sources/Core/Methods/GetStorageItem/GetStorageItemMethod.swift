@@ -7,23 +7,22 @@ import SparklingMethod
 
 @objc(GetStorageItemMethod)
 public class GetStorageItemMethod: PipeMethod {
-    
+
     public override var methodName: String {
         return "storage.getItem"
     }
-    
+
     public override class func methodName() -> String {
         return "storage.getItem"
     }
-    
+
     @objc public override var paramsModelClass: AnyClass {
         return GetStorageItemMethodParamModel.self
     }
-    
+
     @objc public override var resultModelClass: AnyClass {
         return GetStorageItemMethodResultModel.self
     }
-
 
 }
 
@@ -32,9 +31,9 @@ public class GetStorageItemMethodParamModel: SPKMethodModel {
     public override class func requiredKeyPaths() -> Set<String>? {
         return ["key"]
     }
-    
+
     @objc public var key: String?
-    
+
     public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "key": "key"
@@ -45,13 +44,13 @@ public class GetStorageItemMethodParamModel: SPKMethodModel {
 @objc(GetStorageItemMethodResultModel)
 public class GetStorageItemMethodResultModel: SPKMethodModel {
     public var data: AnyCodableValue?
-    
+
     public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "data": "data"
         ]
     }
-    
+
     public override func toDict() throws -> [String: Any]? {
         var dict = try super.toDict() ?? [:]
         if let data = self.data {

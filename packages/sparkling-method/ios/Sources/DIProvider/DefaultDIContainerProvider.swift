@@ -6,15 +6,15 @@ import Foundation
 
 public struct DefaultDIContainerProvider: DIContainerProvider {
     private static let pipeShared = DIContainer()
-    
+
     public static func inject() {
         DIProviderRegistry.provider = DefaultDIContainerProvider()
     }
-    
+
     public func pipeShared() -> any DIContainerProtocol {
         return Self.pipeShared
     }
-    
+
     public func container() -> any DIContainerProtocol {
         return DIContainer()
     }

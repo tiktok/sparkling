@@ -14,7 +14,7 @@ public protocol SPKResourceProtocol {
     ///
     /// This property provides access to the actual data bytes of the resource,
     /// which could be HTML, JavaScript, CSS, images, or other content types.
-    var resourceData: Data? {get}
+    var resourceData: Data? { get }
 }
 
 /// Protocol defining the interface for resource loading task control.
@@ -29,12 +29,12 @@ public protocol SPKResourceLoaderTaskProtocol {
     /// Once cancelled, the task cannot be resumed and will not invoke
     /// its completion handler.
     func cancel()
-    
+
     /// Suspends the resource loading task.
     ///
     /// A suspended task can be resumed later using the resume() method.
     func suspend()
-    
+
     /// Resumes a previously suspended resource loading task.
     ///
     /// This method has no effect if the task is not currently suspended.
@@ -70,8 +70,6 @@ public protocol SPKResourceLoaderProtocol {
     ///   - completion: Completion handler called when loading finishes
     /// - Returns: A task object for controlling the loading operation, or nil if the operation couldn't be started
     func loadResource(withURL url: URL?, completion: @escaping SPKResourceCompletionHandler) -> SPKResourceLoaderTaskProtocol?
-    
+
     func loadImage(withURL url: URL?, completion: @escaping SPKResourceImageCompletionHandler) -> SPKResourceLoaderTaskProtocol?
 }
-
-

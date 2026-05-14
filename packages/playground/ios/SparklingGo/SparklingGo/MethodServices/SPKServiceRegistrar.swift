@@ -12,7 +12,7 @@ enum SPKServiceRegister {
         // IMPORTANT: You must either use the provided DefaultDIContainerProvider.inject()
         // or manually inject your own implementation of DIContainer before using SPK services.
         DefaultDIContainerProvider.inject()
-        
+
         DIProviderRegistry.provider.pipeShared().register(RouterService.self) {
             RouterServiceImpl()
         }
@@ -23,7 +23,7 @@ enum SPKServiceRegister {
         /// Methods that conform to `SPKAutoRegisteringMethod` will be automatically
         /// registered into the global method table by calling this function.
         MethodRegistry.autoRegisterGlobalMethods()
-        
+
         /// Alternatively, you can manually register individual methods as shown below.
         // MethodRegistry.global.register(methodType: SPK_SPKRouter.OpenMethod.self)
         // MethodRegistry.global.register(methodType: XXX.self)

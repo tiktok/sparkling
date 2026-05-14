@@ -2,10 +2,10 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import XCTest
 import SparklingMethod
 import Sparkling_Storage
 import Testing
+import XCTest
 
 class SPKStorageTest: XCTestCase {
     var setStorageItemMethod: SetStorageItemMethod!
@@ -14,7 +14,7 @@ class SPKStorageTest: XCTestCase {
 
     var setStorageItemModelJSONDict: [String: Any] = [
         "key": "storage_test",
-        "data": ["test_key": "test_value", "number": 123] as [String: Any]
+        "data": ["test_key": "test_value", "number": 123] as [String: Any],
     ]
 
     var getStorageItemModelJSONDict: [String: Any] = [

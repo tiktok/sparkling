@@ -6,7 +6,7 @@ import Foundation
 
 public enum DIProviderRegistry {
     private static var _provider: DIContainerProvider?
-    
+
     public static var provider: DIContainerProvider! {
         get {
             guard let instance = _provider else {

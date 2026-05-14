@@ -5,19 +5,19 @@
 import Foundation
 
 /// A router class that manages navigation and page creation within the SPK framework.
-/// 
+///
 /// SPKRouter provides static methods for creating, opening, and managing SPK pages
 /// and view controllers. It handles URL-based navigation, system browser integration,
 /// and view controller lifecycle management. The @objcMembers attribute ensures
 /// Objective-C compatibility for all properties and methods.
 @objcMembers
 public class SPKRouter: NSObject {
-    
+
     /// Creates a new SPK page container with the specified URL and context.
-    /// 
+    ///
     /// This method resolves the provided URL using the scheme resolver, creates appropriate
     /// configuration parameters, and instantiates a SPKViewController as the page container.
-    /// 
+    ///
     /// - Parameters:
     ///   - url: The URL string for the page to create.
     ///   - context: The context object containing page configuration. Creates a new context if nil.
@@ -26,16 +26,16 @@ public class SPKRouter: NSObject {
     public static func create(withURL url: String?, context: SPKContext? = nil, frame: CGRect = UIScreen.main.bounds) -> (UIViewController & SPKContainerProtocol) {
         let context = context ?? SPKContext()
         let config = SPKSchemeParam.resolver(withScheme: URL.spk.url(string: url ?? ""), context: context) as? SPKSchemeParam
-        
+
         let pageContainer = SPKViewController(withURL: config?.resolvedURL, config: config, context: context, frame: frame)
         return pageContainer
     }
-    
+
     /// Opens a SPK page by pushing it onto the current navigation stack.
-    /// 
+    ///
     /// This method creates a new page container and attempts to push it onto the current
     /// navigation controller. It requires a valid navigation controller in the view hierarchy.
-    /// 
+    ///
     /// - Parameters:
     ///   - urlString: The URL string for the page to open.
     ///   - context: The context object containing page configuration.
@@ -47,7 +47,8 @@ public class SPKRouter: NSObject {
         context?.originURL = urlString
         let container = self.create(withURL: urlString, context: context)
         if let container = container as? (UIViewController & SPKContainerProtocol),
-           let topVC = SPKResponder.topViewController {
+            let topVC = SPKResponder.topViewController
+        {
             if let naviVC = topVC.navigationController as? UINavigationController {
                 naviVC.pushViewController(container, animated: true)
             } else if let naviVC = topVC.children.last as? UINavigationController {
@@ -62,7 +63,7 @@ public class SPKRouter: NSObject {
         }
         return (nil, false)
     }
-    
+
     /// Opens a URL in the system's default web browser.
     ///
     /// This method validates the URL and opens it using the system browser if it's a valid
@@ -94,9 +95,9 @@ public class SPKRouter: NSObject {
 
         return false
     }
-    
+
     /// Closes the top view controller in the current navigation stack.
-    /// 
+    ///
     /// This method intelligently determines how to close the current view controller:
     /// - If there are multiple view controllers in the navigation stack, it pops the top one.
     /// - If the navigation controller is presented modally, it dismisses the entire stack.

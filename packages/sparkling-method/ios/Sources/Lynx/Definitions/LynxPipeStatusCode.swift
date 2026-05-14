@@ -5,14 +5,14 @@
 import Foundation
 
 public enum LynxPipeStatusCode: Int {
-    case unknownError = -1000   // Unknown error
+    case unknownError = -1000  // Unknown error
     case manualCallback = -999  // Callback from the business side
-    case undefined = -998       // Frontend method not defined
-    case code404 = -997         // Frontend returns 404
-    case parameterError = -3    // Parameter error
-    case noHandler = -2         // Method not registered
-    case failed = 0             // Failure
-    case succeeded = 1          // Success
+    case undefined = -998  // Frontend method not defined
+    case code404 = -997  // Frontend returns 404
+    case parameterError = -3  // Parameter error
+    case noHandler = -2  // Method not registered
+    case failed = 0  // Failure
+    case succeeded = 1  // Success
 }
 
 extension LynxPipeStatusCode {

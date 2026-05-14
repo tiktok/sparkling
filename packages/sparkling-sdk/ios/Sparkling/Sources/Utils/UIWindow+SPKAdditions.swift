@@ -3,8 +3,8 @@
 // LICENSE file in the root directory of this source tree.
 import Foundation
 
-public extension SPKKitWrapper where Base: UIWindow {
-    static var keyWindow: UIWindow? {
+extension SPKKitWrapper where Base: UIWindow {
+    public static var keyWindow: UIWindow? {
         if #available(iOS 13, *) {
             let oldKeyWindow = UIApplication.shared.keyWindow
             let activeWindowScenes = UIApplication.shared
@@ -25,13 +25,15 @@ public extension SPKKitWrapper where Base: UIWindow {
                 result = UIApplication.shared.windows.first { $0.isKeyWindow }
             }
             if result == nil,
-               let oldKeyWindows = oldKeyWindow,
-               oldKeyWindows.isKeyWindow {
+                let oldKeyWindows = oldKeyWindow,
+                oldKeyWindows.isKeyWindow
+            {
                 result = oldKeyWindows
             }
             if result == nil,
-               let delegate = UIApplication.shared.delegate,
-               delegate.responds(to: #selector(getter: UIApplicationDelegate.window)) {
+                let delegate = UIApplication.shared.delegate,
+                delegate.responds(to: #selector(getter: UIApplicationDelegate.window))
+            {
                 result = UIApplication.shared.delegate?.window ?? nil
             }
             return result

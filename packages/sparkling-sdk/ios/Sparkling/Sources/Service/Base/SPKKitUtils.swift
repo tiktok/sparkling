@@ -3,27 +3,26 @@
 // LICENSE file in the root directory of this source tree.
 
 import Foundation
-
 //TODO: try to optimize this later
 import Lynx
 
 /// Utility class providing helper methods for SPK Kit operations.
-/// 
+///
 /// This class contains static utility methods for common operations
 /// such as updating global properties and managing hybrid context data.
 /// It handles different data types and provides type-safe operations.
 @objcMembers
 open class SPKKitUtils: NSObject {
     /// Updates global properties in a hybrid context with new values.
-    /// 
+    ///
     /// This method merges new global properties into the existing context,
     /// handling both dictionary-based and LynxTemplateData-based global properties.
     /// The merge operation preserves existing values unless explicitly overridden.
-    /// 
+    ///
     /// - Parameters:
     ///   - context: The hybrid context to update. If nil, no operation is performed.
     ///   - newGlobalProps: Dictionary of new properties to merge. If nil, treated as empty.
-    /// 
+    ///
     /// - Note: This method supports two global property formats:
     ///   - Dictionary format: Standard key-value pairs
     ///   - LynxTemplateData format: Lynx-specific template data structure
@@ -37,7 +36,7 @@ open class SPKKitUtils: NSObject {
             context.globalProps = dict
             return
         }
-        
+
         if var globalProps = context.globalProps as? LynxTemplateData {
             let newData = LynxTemplateData(dictionary: newGlobalProps)
             globalProps.update(with: newData)

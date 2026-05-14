@@ -3,10 +3,10 @@
 // LICENSE file in the root directory of this source tree.
 
 import Foundation
-import UIKit
 import Sparkling
 import SparklingMethod
 import Sparkling_Router
+import UIKit
 
 class RouterServiceImpl: RouterService {
     func closeContainer(withParams params: Sparkling_Router.CloseMethodParamModel, completion: @escaping SparklingMethod.PipeMethod.CompletionBlock) {
@@ -16,7 +16,7 @@ class RouterServiceImpl: RouterService {
             completion(.failed(message: "Unable to close the container"), nil)
         }
     }
-    
+
     func openScheme(withParams params: Sparkling_Router.OpenMethodParamModel, completion: @escaping SparklingMethod.PipeMethod.CompletionBlock) {
         let urlString = params.scheme
         let context = SPKContext()
@@ -45,7 +45,7 @@ class RouterServiceImpl: RouterService {
                     completion(.failed(message: "Failed to open URL"), nil)
                 }
             }
-            
+
             if params.useSysBrowser == true {
                 let success = SPKRouter.openInSystemBrowser(withURL: urlString)
                 if success {

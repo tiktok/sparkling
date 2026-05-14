@@ -7,23 +7,22 @@ import SparklingMethod
 
 @objc(CloseMethod)
 public class CloseMethod: PipeMethod {
-    
+
     public override var methodName: String {
         return "router.close"
     }
-    
+
     public override class func methodName() -> String {
         return "router.close"
     }
-    
+
     @objc public override var paramsModelClass: AnyClass {
         return CloseMethodParamModel.self
     }
-    
+
     @objc public override var resultModelClass: AnyClass {
         return EmptyMethodModelClass.self
     }
-
 
 }
 
@@ -31,15 +30,15 @@ public class CloseMethod: PipeMethod {
 public class CloseMethodParamModel: SPKMethodModel {
     @objc public var containerID: String?
     @objc public var animated: Bool = false
-    
+
     public override class func requiredKeyPaths() -> Set<String>? {
         return []
     }
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "containerID": "containerID",
-            "animated": "animated"
+            "animated": "animated",
         ]
     }
 }

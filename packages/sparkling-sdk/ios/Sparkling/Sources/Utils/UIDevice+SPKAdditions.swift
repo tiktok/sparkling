@@ -6,8 +6,8 @@ import Foundation
 
 extension UIDevice: SPKKitCompatible {}
 
-public extension SPKKitWrapper where Base: UIDevice {
-    static var hwModel: String? {
+extension SPKKitWrapper where Base: UIDevice {
+    public static var hwModel: String? {
         return self.getSysInfoByName("hw.model")
     }
     private static func getSysInfoByName(_ typeSpecifier: String) -> String? {
@@ -22,13 +22,13 @@ public extension SPKKitWrapper where Base: UIDevice {
         }
         return String(cString: answer)
     }
-    static var isIPhoneXSeries: Bool {
+    public static var isIPhoneXSeries: Bool {
         if #available(iOS 11.0, *) {
             if let window = UIApplication.shared.windows.first {
                 return window.safeAreaInsets.bottom > 0
             }
         }
-        
+
         var systemInfo = utsname()
         uname(&systemInfo)
         let machineMirror = Mirror(reflecting: systemInfo.machine)
@@ -36,25 +36,25 @@ public extension SPKKitWrapper where Base: UIDevice {
             guard let value = element.value as? Int8, value != 0 else { return identifier }
             return identifier + String(UnicodeScalar(UInt8(value)))
         }
-        
+
         let xSeriesRegex = try? NSRegularExpression(pattern: "^iPhone(1[0-9]|[2-9][0-9]),", options: [])
         let isXSeriesModel = xSeriesRegex?.firstMatch(in: platform, options: [], range: NSRange(location: 0, length: platform.count)) != nil
-        
+
         if platform.contains("x86_64") || platform.contains("arm64") {
             let deviceName = UIDevice.current.name
             let modelName = UIDevice.current.model
-            
+
             if modelName.contains("iPhone") && self.isScreenHeightLarge736() {
                 return true
             }
         }
-        
+
         return isXSeriesModel
     }
-    
+
     private static func isScreenHeightLarge736() -> Bool {
         let size = UIScreen.main.bounds.size
         let len = max(size.height, size.width)
-        return len > 736;
+        return len > 736
     }
 }

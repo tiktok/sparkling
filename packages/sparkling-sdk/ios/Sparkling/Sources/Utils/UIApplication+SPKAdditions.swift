@@ -6,8 +6,8 @@ import UIKit
 
 extension UIApplication: SPKKitCompatible {}
 
-public extension SPKKitWrapper where Base == UIApplication {
-    static var mainWindow: UIWindow? {
+extension SPKKitWrapper where Base == UIApplication {
+    public static var mainWindow: UIWindow? {
         if #available(iOS 13.0, *) {
             let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
             if let key = scenes.flatMap({ $0.windows }).first(where: { $0.isKeyWindow }) {

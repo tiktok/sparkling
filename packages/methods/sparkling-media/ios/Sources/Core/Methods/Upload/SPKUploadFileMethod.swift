@@ -20,12 +20,12 @@ enum SPKUploadStatusCode: Int {
 class SPKUploadStatus: NSObject {
     var statusCode: SPKUploadStatusCode = .succeeded
     var message: String?
-    
+
     init(statusCode: SPKUploadStatusCode, message: String? = nil) {
         self.statusCode = statusCode
         self.message = message
     }
-    
+
     static func statusWithStatusCode(_ statusCode: SPKUploadStatusCode, message: String?) -> SPKUploadStatus {
         return SPKUploadStatus(statusCode: statusCode, message: message)
     }
@@ -37,7 +37,7 @@ public class SPKUploadFileMethodParamModel: SPKMethodModel {
     @objc public override static func requiredKeyPaths() -> Set<String>? {
         return ["url", "filePath"]
     }
-    
+
     @objc public var url: String?
     @objc public var filePath: String?
     @objc public var name: String?
@@ -47,7 +47,7 @@ public class SPKUploadFileMethodParamModel: SPKMethodModel {
     @objc public var params: [String: Any]?
     @objc public var needCommonParams: Bool = true
     @objc public var timeoutInterval: Double = 0
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "url": "url",
@@ -58,25 +58,25 @@ public class SPKUploadFileMethodParamModel: SPKMethodModel {
             "header": "header",
             "params": "params",
             "needCommonParams": "needCommonParams",
-            "timeoutInterval": "timeoutInterval"
+            "timeoutInterval": "timeoutInterval",
         ]
     }
 }
 
 // Result model
-@objc(SPKUploadFileMethodResultModel) 
+@objc(SPKUploadFileMethodResultModel)
 class SPKUploadFileMethodResultModel: SPKMethodModel {
     @objc public var clientCode: Int = 0
     @objc public var httpCode: Int = 0
     @objc public var header: [String: String]?
     @objc public var responseData: [String: Any]?
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "clientCode": "clientCode",
             "httpCode": "httpCode",
             "header": "header",
-            "responseData": "responseData"
+            "responseData": "responseData",
         ]
     }
 }
@@ -87,15 +87,15 @@ public class SPKUploadFileMethod: PipeMethod {
     @objc public override var paramsModelClass: AnyClass {
         return SPKUploadFileMethodParamModel.self
     }
-    
+
     @objc public override var resultModelClass: AnyClass {
         return SPKUploadFileMethodResultModel.self
     }
-    
+
     public override var methodName: String {
         return "media.uploadFile"
     }
-    
+
     public override class func methodName() -> String {
         return "media.uploadFile"
     }

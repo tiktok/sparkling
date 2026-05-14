@@ -4,9 +4,9 @@
 
 import Foundation
 
-public extension SPKKitWrapper where Base: DispatchQueue {
+extension SPKKitWrapper where Base: DispatchQueue {
     @discardableResult
-    static func syncGlobal(timeout: TimeInterval = 0.01, flags: DispatchWorkItemFlags = [], execute work: @escaping @convention(block) () -> Void) -> DispatchTimeoutResult {
+    public static func syncGlobal(timeout: TimeInterval = 0.01, flags: DispatchWorkItemFlags = [], execute work: @escaping @convention(block) () -> Void) -> DispatchTimeoutResult {
         var timeout = timeout
         if Thread.isMainThread {
             if timeout <= 0 {
@@ -21,8 +21,8 @@ public extension SPKKitWrapper where Base: DispatchQueue {
             return .success
         }
     }
-    
-    static func syncMain(flags: DispatchWorkItemFlags = [], execute work: @escaping @convention(block) () -> Void) {
+
+    public static func syncMain(flags: DispatchWorkItemFlags = [], execute work: @escaping @convention(block) () -> Void) {
         if isMain {
             work()
         } else {
@@ -30,7 +30,9 @@ public extension SPKKitWrapper where Base: DispatchQueue {
         }
     }
 
-    static func asyncMain(group: DispatchGroup? = nil, qos: DispatchQoS = .unspecified, flags: DispatchWorkItemFlags = [], execute work: @escaping @convention(block) () -> Void) {
+    public static func asyncMain(
+        group: DispatchGroup? = nil, qos: DispatchQoS = .unspecified, flags: DispatchWorkItemFlags = [], execute work: @escaping @convention(block) () -> Void
+    ) {
         if isMain {
             work()
         } else {
@@ -38,12 +40,12 @@ public extension SPKKitWrapper where Base: DispatchQueue {
         }
     }
 
-    static var isMain: Bool {
+    public static var isMain: Bool {
         return currentLabel == DispatchQueue.main.label
     }
-    
+
     private static var currentLabel: String {
         return String(validatingUTF8: __dispatch_queue_get_label(nil)) ?? ""
     }
-    
+
 }

@@ -7,7 +7,7 @@ import Foundation
 /// HTTP response Swift implementation
 public class SPKHttpResponse: NSObject {
     public var allHeaderFields: [AnyHashable: Any]? = [:]
-    
+
     init(allHeaderFields: [AnyHashable: Any]? = nil) {
         self.allHeaderFields = allHeaderFields
     }
@@ -16,7 +16,7 @@ public class SPKHttpResponse: NSObject {
 /// Chromium-style HTTP response
 public class SPKHttpResponseChromium: SPKHttpResponse {
     public var statusCode: Int = 200
-    
+
     init(statusCode: Int = 200, allHeaderFields: [AnyHashable: Any]? = nil) {
         self.statusCode = statusCode
         super.init(allHeaderFields: allHeaderFields)

@@ -13,21 +13,21 @@ class LynxPipeEngine: PipeEngine {
     private(set) weak var lynxView: LynxView?
     var namescope: String?
     weak var executor: LynxPipeEngineExecutor?
-    
+
     var pipeContainer: PipeContainer? {
         return lynxView
     }
-    
+
     required init?(withLynxView lynxView: LynxView, executor: LynxPipeEngineExecutor? = nil) {
         self.lynxView = lynxView
         self.executor = executor
     }
-    
+
     func attch(to lynxView: LynxView) {
         self.lynxView = lynxView
     }
-    
-    func fireEvent(name: String, params: [String : Any]?) {
+
+    func fireEvent(name: String, params: [String: Any]?) {
         guard let lynxView = self.lynxView else {
             return
         }

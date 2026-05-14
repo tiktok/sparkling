@@ -11,28 +11,28 @@ struct LynxSendMessage {
     var code: LynxPipeStatusCode
     var data: Any?
     var recvMessage: LynxRecvMessage?
-    
+
     static func succeededMessage(with containerID: String) -> LynxSendMessage {
         let message = LynxSendMessage(containerID: containerID, code: .succeeded)
         return message
     }
-    
+
     static func paramsErrorMessage(with containerID: String?, errorMsg: String?) -> LynxSendMessage {
         var message = LynxSendMessage(containerID: containerID, code: .parameterError)
         message.data = [LynxKeys.message: errorMsg ?? ""]
         return message
     }
-    
+
     static func noHandlerErrorMessage(with containerID: String?) -> LynxSendMessage {
         return LynxSendMessage(containerID: containerID, code: .noHandler)
     }
-    
+
     init(containerID: String?, data: Any? = nil, code: LynxPipeStatusCode = .unknownError) {
         self.containerID = containerID
         self.data = data
         self.code = code
     }
-    
+
     func toDict() -> [String: Any] {
         var dict: [String: Any] = [:]
         dict[LynxKeys.code] = code.rawValue
@@ -42,12 +42,12 @@ struct LynxSendMessage {
         dict[LynxKeys.protocolVersion] = "1.1.0"
         return dict
     }
-    
+
     func paramsErrorDict(errorMsg: String?) -> [String: Any] {
         let message = LynxSendMessage.paramsErrorMessage(with: containerID, errorMsg: errorMsg)
         return message.toDict()
     }
-    
+
     func noHandlerMessageDict() -> [String: Any] {
         let message = LynxSendMessage.noHandlerErrorMessage(with: containerID)
         return message.toDict()

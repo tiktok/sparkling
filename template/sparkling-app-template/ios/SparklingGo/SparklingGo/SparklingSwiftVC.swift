@@ -3,8 +3,8 @@
 // LICENSE file in the root directory of this source tree.
 
 import Foundation
-import SwiftUI
 import Sparkling
+import SwiftUI
 import UIKit
 
 class SparklingLynxElement: SPKLynxElement {
@@ -20,7 +20,7 @@ class SparklingLynxElement: SPKLynxElement {
 
 struct SPKSwiftVC: UIViewControllerRepresentable {
     var frame: CGRect
-    
+
     init(frame: CGRect = .zero) {
         self.frame = frame
     }
@@ -28,7 +28,7 @@ struct SPKSwiftVC: UIViewControllerRepresentable {
     func makeCoordinator() -> Coordinator {
         Coordinator()
     }
-    
+
     func makeUIViewController(context: Context) -> UINavigationController {
         let url = DebugDevURLSupport.mainScheme()
         let spkContext = DebugDevURLSupport.makeContext()

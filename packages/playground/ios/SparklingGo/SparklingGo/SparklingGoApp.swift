@@ -2,27 +2,28 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import SwiftUI
 import Lynx
-import Sparkling
 import SDWebImage
 import SDWebImageWebPCoder
+import Sparkling
+import SparklingMacro
 import SparklingMethod
 import Sparkling_Media
-import SparklingMacro
+import SwiftUI
+
 #if canImport(Sparkling_DebugTool)
-import Sparkling_DebugTool
+    import Sparkling_DebugTool
 #endif
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     var window: UIWindow?
-    
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
         let webPCoder = SDImageWebPCoder.shared
         SDImageCodersManager.shared.addCoder(webPCoder)
         #if canImport(Sparkling_DebugTool)
-        SparklingDebugTool.setup()
+            SparklingDebugTool.setup()
         #endif
         SPKServiceRegister.registerAll()
         SPKExecuteAllPrepareBootTask()

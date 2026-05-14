@@ -5,30 +5,32 @@
 import Foundation
 import Lynx
 
-public extension MethodPipe {
+extension MethodPipe {
     private static let setupOnce: Void = {
         let service = LynxServices.getInstanceWith(LynxServiceModuleProtocol.self)
         if (service as? LynxServiceModuleProtocol) == nil {
             LynxServices.registerService(withProtocol: SPKLynxModuleService.self, protocol: LynxServiceModuleProtocol.self)
         }
     }()
-    
+
     public convenience init(withLynxView lynxView: LynxView) {
         let _ = Self.setupOnce
-        
+
         self.init()
         let lynxEngine = LynxPipeEngine(withLynxView: lynxView, executor: self)
         self.engine = lynxEngine
         LynxPipeEnginePool.setEngine(engine: lynxEngine, containerID: lynxView.containerID)
     }
-    
+
     public class func setupLynxPipe(config: LynxConfig) {
         let _ = Self.setupOnce
-        
-        config.register(SPKLynxNativeModule.self, param: [
-            LynxKeys.containerID: config.spk_containerID ?? "",
-            LynxKeys.namespace: config.spk_namescope ?? ""
-        ])
+
+        config.register(
+            SPKLynxNativeModule.self,
+            param: [
+                LynxKeys.containerID: config.spk_containerID ?? "",
+                LynxKeys.namespace: config.spk_namescope ?? "",
+            ])
     }
 }
 

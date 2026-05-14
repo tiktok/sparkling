@@ -13,27 +13,26 @@ import Foundation
 
 @objc public protocol SPKBaseProtocol {
     /// Unique identifier for the view container.
-    var containerID: String {get}
-    
-    var context: SPKHybridContext? {set get}
-    
+    var containerID: String { get }
+
+    var context: SPKHybridContext? { set get }
+
     /// Current loading state of the view.
-    var loadState: SPKLoadState {set get}
-    
+    var loadState: SPKLoadState { set get }
+
     /// Loads content into the view based on the current configuration.
     func load()
-    
+
     /// Reloads the view with a new context.
     ///
     /// - Parameter context: The new hybrid context to use for reloading
     func reload(_ context: SPKHybridContext?)
-    
-    
+
     /// Sends an event to the runtime.
     ///
     /// - Parameters:
     ///   - event: The event name to send
     ///   - params: Optional parameters to include with the event
     ///   - callback: Optional callback to handle the response
-    func send(event event:String, params: [String: Any]?, callback:((Any?)->Void)?)
+    func send(event event: String, params: [String: Any]?, callback: ((Any?) -> Void)?)
 }

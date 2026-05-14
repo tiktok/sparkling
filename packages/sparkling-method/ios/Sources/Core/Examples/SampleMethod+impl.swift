@@ -13,11 +13,11 @@ import Foundation
             completionHandler.handleCompletion(status: .invalidParameter(message: "Invalid parameter model type"), result: nil)
             return
         }
-        
+
         // Simulate processing logic
         let result = SampleMethodResultModel()
         result.sampleResult = "Processed: \(params.sampleParam ?? "")"
-        
+
         // Return success result
         completionHandler.handleCompletion(status: MethodStatus.succeeded(), result: result)
     }

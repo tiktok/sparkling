@@ -7,16 +7,16 @@ import Lynx
 import SparklingMacro
 
 /// Service class responsible for creating and managing Lynx-based views.
-/// 
+///
 /// This service implements the SPKViewRegisterService protocol to provide
 /// Lynx rendering engine integration within the SPK framework. It handles
 /// the creation of SPKWrapperLynxView instances with proper parameter conversion
 /// and configuration.
-/// 
+///
 #spk_register(class: "SPKLynxService")
 @objcMembers
 open class SPKLynxService: NSObject, SPKViewRegisterService {
-    
+
     static func executePrepareServiceTask() {
         LynxEnv.sharedInstance()
         // Enable Lynx Debug switch
@@ -29,21 +29,21 @@ open class SPKLynxService: NSObject, SPKViewRegisterService {
             SPKLynxService()
         }
     }
-    
+
     /// Initializes a new instance of the Lynx service.
-    /// 
+    ///
     /// This initializer sets up the service for creating Lynx-based views
     /// within the SPK framework.
     public override init() {
         super.init()
     }
-    
+
     /// Creates a new Lynx kit view with the specified parameters and context.
-    /// 
+    ///
     /// This method converts the hybrid context into Lynx-specific parameters
     /// and creates a configured SPKWrapperLynxView instance. The view is ready
     /// for rendering Lynx templates and handling user interactions.
-    /// 
+    ///
     /// - Parameters:
     ///   - params: The hybrid scheme parameters containing URL and configuration data.
     ///   - context: The hybrid context with global properties and providers.

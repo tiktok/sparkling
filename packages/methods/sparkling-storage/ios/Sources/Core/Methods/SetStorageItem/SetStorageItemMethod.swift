@@ -7,43 +7,42 @@ import SparklingMethod
 
 @objc(SetStorageItemMethod)
 public class SetStorageItemMethod: PipeMethod {
-    
+
     public override var methodName: String {
         return "storage.setItem"
     }
-    
+
     public override class func methodName() -> String {
         return "storage.setItem"
     }
-    
+
     @objc public override var paramsModelClass: AnyClass {
         return SetStorageItemMethodParamModel.self
     }
-    
+
     @objc public override var resultModelClass: AnyClass {
         return EmptyMethodModelClass.self
     }
-
 
 }
 
 @objc(SetStorageItemMethodParamModel)
 public class SetStorageItemMethodParamModel: SPKMethodModel {
-    
+
     public override class func requiredKeyPaths() -> Set<String>? {
         [
             "key",
-            "data"
+            "data",
         ]
     }
-    
+
     @objc public var key: String?
     @objc public var data: AnyObject?
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "key": "key",
-            "data": "data"
+            "data": "data",
         ]
     }
 }

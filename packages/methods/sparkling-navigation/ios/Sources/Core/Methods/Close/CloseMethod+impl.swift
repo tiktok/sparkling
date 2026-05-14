@@ -17,11 +17,10 @@ extension CloseMethod {
             }
             return
         }
-        
+
         routerService.closeContainer(withParams: typedParamModel) { status, result in
             completionHandler.handleCompletion(status: status, result: nil)
         }
     }
-    
 
 }

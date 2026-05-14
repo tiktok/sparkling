@@ -2,10 +2,11 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import XCTest
 import SparklingMethod
-@testable import Sparkling_Router
+import XCTest
+
 @testable import Sparkling_Media
+@testable import Sparkling_Router
 
 class SPKDownloadFileMethodTests: XCTestCase {
     var downloadMethod: SPKDownloadFileMethod!
@@ -44,7 +45,7 @@ class SPKDownloadFileMethodTests: XCTestCase {
 
         let validParams: [String: Any] = [
             "url": "https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png",
-            "saveToAlbum": "image"
+            "saveToAlbum": "image",
         ]
 
         do {
@@ -63,7 +64,7 @@ class SPKDownloadFileMethodTests: XCTestCase {
     func testSaveToAlbumParameter() {
         let paramsDict: [String: Any] = [
             "url": "https://example.com/image.jpg",
-            "saveToAlbum": "image"
+            "saveToAlbum": "image",
         ]
 
         do {
@@ -79,7 +80,7 @@ class SPKDownloadFileMethodTests: XCTestCase {
         let paramsDict: [String: Any] = [
             "url": "https://example.com/image.jpg",
             "timeoutInterval": 30.0,
-            "saveToAlbum": "false"
+            "saveToAlbum": "false",
         ]
 
         do {
@@ -94,7 +95,7 @@ class SPKDownloadFileMethodTests: XCTestCase {
         let testURLs = [
             "https://example.com/image.jpg",
             "https://example.com/file.pdf",
-            "https://example.com/data"
+            "https://example.com/data",
         ]
 
         for url in testURLs {
@@ -151,7 +152,7 @@ class SPKDownloadFileMethodTests: XCTestCase {
         for format in formats {
             let paramsDict: [String: Any] = [
                 "url": "https://example.com/image.jpg",
-                "saveToAlbum": format
+                "saveToAlbum": format,
             ]
             do {
                 let paramModel = try SPKDownloadFileMethodParamModel(dictionary: paramsDict)

@@ -2,8 +2,8 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import Testing
 import Sparkling
+import Testing
 
 @MainActor
 struct SPKApplicationTests {
@@ -11,13 +11,13 @@ struct SPKApplicationTests {
         let window = SPKKitWrapper<UIApplication>.mainWindow
         #expect(window != nil)
     }
-    
+
     @Test func testMainWindow_consistentResults() {
         let window1 = SPKKitWrapper<UIApplication>.mainWindow
         let window2 = SPKKitWrapper<UIApplication>.mainWindow
         #expect(window1 === window2)
     }
-    
+
     @Test func testMainWindow_frameNotEmpty() {
         let window = SPKKitWrapper<UIApplication>.mainWindow
         if let window = window {
@@ -27,4 +27,3 @@ struct SPKApplicationTests {
         }
     }
 }
-

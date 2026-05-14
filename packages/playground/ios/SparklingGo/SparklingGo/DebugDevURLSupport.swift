@@ -5,8 +5,9 @@
 import Foundation
 import Sparkling
 import UIKit
+
 #if canImport(Sparkling_DebugTool)
-import Sparkling_DebugTool
+    import Sparkling_DebugTool
 #endif
 
 enum DebugDevURLSupport {
@@ -23,10 +24,10 @@ enum DebugDevURLSupport {
 
     static func mainScheme() -> String {
         #if DEBUG
-        let source = storedDevURL(fallback: fallbackDevURL())
-        return mainScheme(withSource: source)
+            let source = storedDevURL(fallback: fallbackDevURL())
+            return mainScheme(withSource: source)
         #else
-        return "hybrid://lynxview?bundle=.%2Fmain.lynx.bundle&trans_status_bar=1&hide_nav_bar=1"
+            return "hybrid://lynxview?bundle=.%2Fmain.lynx.bundle&trans_status_bar=1&hide_nav_bar=1"
         #endif
     }
 
@@ -46,8 +47,9 @@ enum DebugDevURLSupport {
 
     static func networkBundleURL(fromScheme scheme: String?) -> String? {
         guard let scheme, !scheme.isEmpty,
-              let components = URLComponents(string: scheme),
-              let urlValue = components.queryItems?.first(where: { $0.name == "url" })?.value else {
+            let components = URLComponents(string: scheme),
+            let urlValue = components.queryItems?.first(where: { $0.name == "url" })?.value
+        else {
             return nil
         }
         let normalized = urlValue.removingPercentEncoding ?? urlValue
@@ -67,23 +69,23 @@ enum DebugDevURLSupport {
 
     static func storedDevURL(fallback: String) -> String {
         #if canImport(Sparkling_DebugTool)
-        SparklingDebugTool.devURL(fallback: fallback)
+            SparklingDebugTool.devURL(fallback: fallback)
         #else
-        fallback
+            fallback
         #endif
     }
 
     static func saveDevURL(_ url: String) {
         #if canImport(Sparkling_DebugTool)
-        SparklingDebugTool.setDevURL(url)
+            SparklingDebugTool.setDevURL(url)
         #endif
     }
 
     static func showDevURLDialog(from controller: UIViewController, initialURL: String?, onSaved: @escaping (String) -> Void) {
         #if canImport(Sparkling_DebugTool)
-        SparklingDebugTool.showDevURLDialog(from: controller, initialURL: initialURL, onSaved: onSaved)
+            SparklingDebugTool.showDevURLDialog(from: controller, initialURL: initialURL, onSaved: onSaved)
         #else
-        onSaved(initialURL ?? fallbackDevURL())
+            onSaved(initialURL ?? fallbackDevURL())
         #endif
     }
 }
@@ -101,24 +103,25 @@ final class DevURLLoadFailedDelegate: NSObject, SPKContainerLifecycleProtocol {
 
     func container(_ container: SPKContainerProtocol, didLoadFailedWithURL url: URL?, error: Error?) {
         #if DEBUG
-        guard !isPrompting,
-              let navigationController,
-              let failedScheme = container.originURL?.absoluteString,
-              let currentURL = DebugDevURLSupport.networkBundleURL(fromScheme: failedScheme) else {
-            return
-        }
-        isPrompting = true
-
-        DebugDevURLSupport.showDevURLDialog(from: navigationController, initialURL: currentURL) { [weak self] updatedURL in
-            guard let self, let navigationController = self.navigationController else {
+            guard !isPrompting,
+                let navigationController,
+                let failedScheme = container.originURL?.absoluteString,
+                let currentURL = DebugDevURLSupport.networkBundleURL(fromScheme: failedScheme)
+            else {
                 return
             }
-            self.isPrompting = false
-            let nextScheme = DebugDevURLSupport.mainScheme(withSource: updatedURL)
-            let nextContext = DebugDevURLSupport.makeContext(delegate: self)
-            let nextVC = SPKRouter.create(withURL: nextScheme, context: nextContext, frame: self.frameProvider())
-            navigationController.setViewControllers([nextVC], animated: false)
-        }
+            isPrompting = true
+
+            DebugDevURLSupport.showDevURLDialog(from: navigationController, initialURL: currentURL) { [weak self] updatedURL in
+                guard let self, let navigationController = self.navigationController else {
+                    return
+                }
+                self.isPrompting = false
+                let nextScheme = DebugDevURLSupport.mainScheme(withSource: updatedURL)
+                let nextContext = DebugDevURLSupport.makeContext(delegate: self)
+                let nextVC = SPKRouter.create(withURL: nextScheme, context: nextContext, frame: self.frameProvider())
+                navigationController.setViewControllers([nextVC], animated: false)
+            }
         #endif
     }
 }

@@ -6,20 +6,20 @@ import Foundation
 
 extension String: SPKKitCompatibleValue {}
 
-public extension SPKKitWrapper where Base == String {
-    var urlEncoded: String? {
+extension SPKKitWrapper where Base == String {
+    public var urlEncoded: String? {
         let allowedCharacterSet = URL.spk.urlValid.subtracting(.init(charactersIn: ":!*();@/&?+$,='"))
         return base.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet)
     }
-    
+
     /// Parses the string as a URL query string and returns a dictionary of key-value pairs.
-    /// 
+    ///
     /// This method extracts query parameters from a URL string and converts them into a dictionary.
     /// It handles various edge cases including empty values, missing equals signs, and URL encoding.
-    /// 
+    ///
     /// - Parameter isEscapes: Whether to decode percent-encoded characters in keys and values.
     /// - Returns: A dictionary containing the parsed query parameters, or `nil` if no valid parameters found.
-    func queryDict(isEscapes: Bool) -> [String: String]? {
+    public func queryDict(isEscapes: Bool) -> [String: String]? {
         guard let queryString = base.spk.queryString() else {
             return nil
         }
@@ -31,7 +31,7 @@ public extension SPKKitWrapper where Base == String {
                 if let range = queryItem.range(of: "=") {
                     let keyString = String(queryItem[..<range.lowerBound])
                     let valueString = String(queryItem[range.upperBound...])
-                    
+
                     if !isEmptyString(keyString), !isEmptyString(valueString) {
                         pair = [keyString, valueString]
                     } else {
@@ -43,35 +43,35 @@ public extension SPKKitWrapper where Base == String {
             }
             var keyString: String? = pair[0]
             var valueString: String? = pair[1]
-            
+
             if isEscapes {
                 keyString = keyString?.removingPercentEncoding
                 valueString = valueString?.removingPercentEncoding
             }
-            
+
             if !isEmptyString(keyString), !isEmptyString(valueString) {
                 queryDict.updateValue(valueString ?? "", forKey: keyString ?? "")
             }
         })
         return queryDict.isEmpty ? nil : queryDict
     }
-    func queryString() -> String? {
+    public func queryString() -> String? {
         guard let questionMarkRange = base.range(of: "?") else {
             return nil
         }
-        
+
         let queryStart = questionMarkRange.upperBound
         var remaining = String(base[queryStart...])
-        
+
         while remaining.hasPrefix("?") {
             remaining.removeFirst()
         }
-        
+
         if let fragmentRange = remaining.range(of: "#") {
             let query = String(remaining[..<fragmentRange.lowerBound])
             return query.isEmpty ? nil : query
         }
-        
+
         return remaining.isEmpty ? nil : remaining
     }
 }

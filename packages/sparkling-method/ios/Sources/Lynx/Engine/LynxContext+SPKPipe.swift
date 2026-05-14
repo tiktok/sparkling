@@ -9,13 +9,13 @@ extension LynxContext {
     private struct AssociatedKeys {
         static var spk_containerID: UInt8 = 0
     }
-    
+
     var spk_containerID: String? {
         get {
             return objc_getAssociatedObject(self, &AssociatedKeys.spk_containerID) as? String
         }
         set {
-            objc_setAssociatedObject(self, &AssociatedKeys.spk_containerID, newValue , .OBJC_ASSOCIATION_COPY_NONATOMIC)
+            objc_setAssociatedObject(self, &AssociatedKeys.spk_containerID, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC)
         }
     }
 }

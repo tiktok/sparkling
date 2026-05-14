@@ -27,15 +27,13 @@ typedef struct _SPKBootExecuteImage {
   SEL selector;
 } SPKBootExecuteImage;
 
-static SPKBootExecuteImage *
-create_image_with_section(const SPKCodeRunnerMachoHeader *mhp,
-                          const char *secname, SEL selector) {
+static SPKBootExecuteImage *create_image_with_section(const SPKCodeRunnerMachoHeader *mhp,
+                                                      const char *secname, SEL selector) {
   unsigned long size = 0;
   SPKBootExecuteImage *image =
       static_cast<SPKBootExecuteImage *>(malloc(sizeof(SPKBootExecuteImage)));
-  image->memory = reinterpret_cast<uint64_t *>(
-      getsectiondata(reinterpret_cast<const struct mach_header_64 *>(mhp),
-                     "__DATA", secname, &size));
+  image->memory = reinterpret_cast<uint64_t *>(getsectiondata(
+      reinterpret_cast<const struct mach_header_64 *>(mhp), "__DATA", secname, &size));
   image->size = size;
   image->selector = selector;
   if (image->memory == NULL) {
@@ -49,8 +47,7 @@ static void execute_method_with_images(SPKBootExecuteImage *image) {
   if (image == NULL || image->memory == NULL || image->size == 0) {
     return;
   }
-  const SPKPluginData *plugins =
-      reinterpret_cast<const SPKPluginData *>(image->memory);
+  const SPKPluginData *plugins = reinterpret_cast<const SPKPluginData *>(image->memory);
   NSUInteger count = image->size / sizeof(SPKPluginData);
   for (NSUInteger i = 0; i < count; i++) {
     SPKPluginData plugin = plugins[i];
@@ -61,8 +58,8 @@ static void execute_method_with_images(SPKBootExecuteImage *image) {
     if (serviceName == NULL) {
       continue;
     }
-    NSString *clsName = [@"Sparkling."
-        stringByAppendingString:[NSString stringWithUTF8String:serviceName]];
+    NSString *clsName =
+        [@"Sparkling." stringByAppendingString:[NSString stringWithUTF8String:serviceName]];
     if (clsName.length) {
       SEL selector = image->selector;
       Class cls = NSClassFromString(clsName);
@@ -77,17 +74,15 @@ static void execute_method_with_images(SPKBootExecuteImage *image) {
 #pragma GCC diagnostic ignored "-Wundeclared-selector"
 
 static void handle_did_add_image(const SPKCodeRunnerMachoHeader *mhp) {
-  SPKBootExecuteImage *prepareServiceImage =
-      create_image_with_section(mhp, SPK_PREPARE_SERVICE_SECTION_NAME,
-                                @selector(executePrepareServiceTask));
+  SPKBootExecuteImage *prepareServiceImage = create_image_with_section(
+      mhp, SPK_PREPARE_SERVICE_SECTION_NAME, @selector(executePrepareServiceTask));
   if (prepareServiceImage != NULL) {
     execute_method_with_images(prepareServiceImage);
     free(prepareServiceImage);
   }
 
-  SPKBootExecuteImage *afterAllPrepareImage =
-      create_image_with_section(mhp, SPK_AFTER_ALL_PREPARE_SECTION_NAME,
-                                @selector(executeAfterPrepareTask));
+  SPKBootExecuteImage *afterAllPrepareImage = create_image_with_section(
+      mhp, SPK_AFTER_ALL_PREPARE_SECTION_NAME, @selector(executeAfterPrepareTask));
   if (afterAllPrepareImage != NULL) {
     execute_method_with_images(afterAllPrepareImage);
     free(afterAllPrepareImage);
@@ -101,11 +96,9 @@ static void SPKRunSegment() __attribute__((no_sanitize("address"))) {
     return;
   }
 #ifndef __LP64__
-  const struct mach_header *mhp =
-      reinterpret_cast<struct mach_header *>(info.dli_fbase);
+  const struct mach_header *mhp = reinterpret_cast<struct mach_header *>(info.dli_fbase);
 #else  /* defined(__LP64__) */
-  const struct mach_header_64 *mhp =
-      reinterpret_cast<struct mach_header_64 *>(info.dli_fbase);
+  const struct mach_header_64 *mhp = reinterpret_cast<struct mach_header_64 *>(info.dli_fbase);
 #endif /* defined(__LP64__) */
 
   handle_did_add_image(reinterpret_cast<const SPKCodeRunnerMachoHeader *>(mhp));

@@ -10,7 +10,7 @@ public enum SPKTrackerEventKey: Int {
     case containerLoadURL
     case viewLoadFailed
     case viewLoadSuccess
-    
+
     public var rawValueString: String {
         switch self {
         case .containerExit: return "hybrid_monitor_container_exit"

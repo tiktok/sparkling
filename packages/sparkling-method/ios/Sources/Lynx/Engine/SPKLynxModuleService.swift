@@ -8,19 +8,19 @@ import Lynx
 @objcMembers
 public class SPKLynxModuleService: NSObject, LynxServiceModuleProtocol {
     public func initLynxViewGroup(_ lynxViewGroup: LynxViewGroup) {
-      
+
     }
-  
+
     public func cloneGlobalProps(forReload lynxView: LynxView) {
-        
+
     }
-    
+
     public static func serviceScope() -> LynxServiceScope {
         return .default
     }
-    
+
     public func initGlobalProps(_ lynxView: LynxView) {}
-    
+
     public func clearModule(forDestroy lynxView: LynxView) {
         lynxView.spk_clearModuleForDestroy()
     }

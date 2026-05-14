@@ -9,7 +9,7 @@ public enum AnyCodableValue: Codable {
     case bool(Bool)
     case dictionary([String: AnyCodableValue])
     case array([AnyCodableValue])
-    
+
     public init?(_ any: Any) {
         switch any {
         case let v as String:
@@ -30,7 +30,7 @@ public enum AnyCodableValue: Codable {
             return nil
         }
     }
-    
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         if let int = try? container.decode(Int.self) {
@@ -52,7 +52,7 @@ public enum AnyCodableValue: Codable {
             )
         }
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
@@ -89,7 +89,7 @@ extension AnyCodableValue {
             return arr.map { $0.anyValue }
         }
     }
-    
+
     public func get<T>() -> T? {
         switch self {
         case .string(let v as T):
@@ -107,7 +107,7 @@ extension AnyCodableValue {
         default: return nil
         }
     }
-        
+
     public func dictionaryValue<ValueType>() -> [String: ValueType]? {
         if case .dictionary(let dict) = self {
             return dict.reduce(into: [String: ValueType]()) { result, pair in
@@ -118,7 +118,7 @@ extension AnyCodableValue {
         }
         return nil
     }
-    
+
     public func arrayValue<ValueType>() -> [ValueType]? {
         if case .array(let arr) = self {
             return arr.compactMap { $0.anyValue as? ValueType }

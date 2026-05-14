@@ -3,9 +3,9 @@
 // LICENSE file in the root directory of this source tree.
 
 import Foundation
-import UIKit
 import Photos
 import SparklingMethod
+import UIKit
 
 // Completion handler types
 typealias SPKBridgeMethodCompletionHandler = (Any?, Any?) -> Void
@@ -23,12 +23,12 @@ enum SPKBridgeStatusCode: Int {
 class SPKBridgeStatus: NSObject {
     var statusCode: SPKBridgeStatusCode = .succeeded
     var message: String?
-    
+
     init(statusCode: SPKBridgeStatusCode, message: String? = nil) {
         self.statusCode = statusCode
         self.message = message
     }
-    
+
     static func statusWithStatusCode(_ statusCode: SPKBridgeStatusCode, message: String?) -> SPKBridgeStatus {
         return SPKBridgeStatus(statusCode: statusCode, message: message)
     }
@@ -40,7 +40,7 @@ public class SPKDownloadFileMethodParamModel: SPKMethodModel {
     @objc public override static func requiredKeyPaths() -> Set<String>? {
         return ["url"]
     }
-    
+
     @objc public var url: String?
     @objc public var extensions: String?
     @objc public var header: [String: String]?
@@ -48,7 +48,7 @@ public class SPKDownloadFileMethodParamModel: SPKMethodModel {
     @objc public var needCommonParams: Bool = true
     @objc public var saveToAlbum: String?
     @objc public var timeoutInterval: Double = 0
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "url": "url",
@@ -57,7 +57,7 @@ public class SPKDownloadFileMethodParamModel: SPKMethodModel {
             "params": "params",
             "needCommonParams": "needCommonParams",
             "saveToAlbum": "saveToAlbum",
-            "timeoutInterval": "timeoutInterval"
+            "timeoutInterval": "timeoutInterval",
         ]
     }
 }
@@ -69,13 +69,13 @@ class SPKDownloadFileMethodResultModel: SPKMethodModel {
     @objc public var httpCode: Int = 0
     @objc public var header: [String: String]?
     @objc public var filePath: String?
-    
+
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "clientCode": "clientCode",
             "httpCode": "httpCode",
             "header": "header",
-            "filePath": "filePath"
+            "filePath": "filePath",
         ]
     }
 }
@@ -86,18 +86,17 @@ public class SPKDownloadFileMethod: PipeMethod {
     @objc public override var paramsModelClass: AnyClass {
         return SPKDownloadFileMethodParamModel.self
     }
-    
+
     @objc public override var resultModelClass: AnyClass {
         return SPKDownloadFileMethodResultModel.self
     }
-    
+
     public override var methodName: String {
         return "media.downloadFile"
     }
-    
+
     public override class func methodName() -> String {
         return "media.downloadFile"
     }
-    
 
 }

@@ -8,7 +8,7 @@ public typealias SPKNavBarHandler = ((UIViewController & SPKContainerProtocol)?)
 
 @objc
 public protocol SPKNavigationBarButtonProtocol {
-    var icon: UIImage {set get}
-    
-    var navBarHandler: SPKNavBarHandler? {set get}
+    var icon: UIImage { set get }
+
+    var navBarHandler: SPKNavBarHandler? { set get }
 }

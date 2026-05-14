@@ -6,11 +6,11 @@ import Foundation
 
 extension NSObject: SPKKitCompatible {}
 
-public extension SPKKitWrapper where Base: NSObject {
-    func setAttachedObject<T>(key: String, object: T?, weak: Bool = false) {
+extension SPKKitWrapper where Base: NSObject {
+    public func setAttachedObject<T>(key: String, object: T?, weak: Bool = false) {
         base.spk_attach(object, forKey: key, isWeak: weak)
     }
-    func getAttachedObject<T>(key: String, weak: Bool = false) -> T? {
+    public func getAttachedObject<T>(key: String, weak: Bool = false) -> T? {
         guard let object = base.spk_getAttachedObject(forKey: key, isWeak: weak) as? T else {
             return nil
         }

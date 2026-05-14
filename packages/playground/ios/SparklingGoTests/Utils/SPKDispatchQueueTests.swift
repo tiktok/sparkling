@@ -2,8 +2,8 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import Testing
 import Sparkling
+import Testing
 
 struct SPKDispatchQueueTests {
     @Test func testSyncGlobal_onMainThread_success() {
@@ -12,7 +12,7 @@ struct SPKDispatchQueueTests {
         }
         #expect(result == .success)
     }
-    
+
     @Test func testSyncGlobal_onBackgroundThread() async {
         await withCheckedContinuation { continuation in
             DispatchQueue.global().async {
@@ -24,7 +24,7 @@ struct SPKDispatchQueueTests {
             }
         }
     }
-    
+
     @Test func testSyncMain_onMainThread() {
         var executed = false
         SPKKitWrapper<DispatchQueue>.syncMain {
@@ -33,7 +33,7 @@ struct SPKDispatchQueueTests {
         }
         #expect(executed)
     }
-    
+
     @Test func testSyncMain_onBackgroundThread() async {
         await withCheckedContinuation { continuation in
             DispatchQueue.global().async {
@@ -45,7 +45,7 @@ struct SPKDispatchQueueTests {
             }
         }
     }
-    
+
     @Test func testIsMain() async {
         await withCheckedContinuation { continuation in
             DispatchQueue.global().async {
@@ -54,7 +54,7 @@ struct SPKDispatchQueueTests {
             }
         }
     }
-    
+
     @Test func testSyncGlobal_withReturnValue() {
         var result: String?
         let dispatchResult = SPKKitWrapper<DispatchQueue>.syncGlobal(timeout: 1.0) {
@@ -63,14 +63,14 @@ struct SPKDispatchQueueTests {
         #expect(dispatchResult == .success)
         #expect(result == "test_result")
     }
-    
+
     @Test func testSyncGlobal_multipleOperations() {
         var counter = 0
         let queue = DispatchQueue(label: "test.queue", attributes: .concurrent)
-        
+
         // Test multiple concurrent operations
         let group = DispatchGroup()
-        
+
         for _ in 0..<5 {
             group.enter()
             queue.async {
@@ -81,66 +81,66 @@ struct SPKDispatchQueueTests {
                 group.leave()
             }
         }
-        
+
         let waitResult = group.wait(timeout: .now() + 2.0)
         #expect(waitResult == .success)
         #expect(counter == 5)
     }
-    
+
     @Test func testSyncMain_nestedCalls() {
         var executionOrder: [String] = []
-        
+
         SPKKitWrapper<DispatchQueue>.syncMain {
             executionOrder.append("outer_start")
-            
+
             SPKKitWrapper<DispatchQueue>.syncMain {
                 executionOrder.append("inner")
             }
-            
+
             executionOrder.append("outer_end")
         }
-        
+
         #expect(executionOrder == ["outer_start", "inner", "outer_end"])
     }
-    
+
     @Test func testSyncMain_withException() {
         var didExecute = false
         var didComplete = false
-        
+
         SPKKitWrapper<DispatchQueue>.syncMain {
             didExecute = true
             // Simulate possible exception scenarios
             #expect(Thread.isMainThread)
         }
-        
+
         didComplete = true
         #expect(didExecute)
         #expect(didComplete)
     }
-    
+
     @Test func testSyncGlobal_performanceBaseline() {
         let startTime = CFAbsoluteTimeGetCurrent()
-        
+
         let result = SPKKitWrapper<DispatchQueue>.syncGlobal(timeout: 1.0) {
             // Simple operation, should complete quickly
             let _ = Array(0..<1000).reduce(0, +)
         }
-        
+
         let endTime = CFAbsoluteTimeGetCurrent()
         let duration = endTime - startTime
-        
+
         #expect(result == .success)
-        #expect(duration < 0.1) // Should complete within 100ms
+        #expect(duration < 0.1)  // Should complete within 100ms
     }
-    
+
     @Test func testSyncMain_fromDifferentQueues() async {
         let serialQueue = DispatchQueue(label: "test.serial")
         let concurrentQueue = DispatchQueue(label: "test.concurrent", attributes: .concurrent)
-        
+
         await withCheckedContinuation { continuation in
             let group = DispatchGroup()
             var results: [Bool] = []
-            
+
             // Call from serial queue
             group.enter()
             serialQueue.async {
@@ -149,7 +149,7 @@ struct SPKDispatchQueueTests {
                 }
                 group.leave()
             }
-            
+
             // Call from concurrent queue
             group.enter()
             concurrentQueue.async {
@@ -158,7 +158,7 @@ struct SPKDispatchQueueTests {
                 }
                 group.leave()
             }
-            
+
             group.notify(queue: .main) {
                 #expect(results.allSatisfy { $0 == true })
                 continuation.resume()

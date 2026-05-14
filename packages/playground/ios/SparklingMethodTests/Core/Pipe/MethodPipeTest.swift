@@ -2,9 +2,10 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import Testing
-@testable import SparklingMethod
 import Sparkling_Router
+import Testing
+
+@testable import SparklingMethod
 
 // MARK: - Test Models
 
@@ -123,7 +124,7 @@ class MockPipeEngine: PipeEngine {
     var lastEventName: String?
     var lastEventParams: [String: Any]?
 
-    func fireEvent(name: String, params: [String : Any]?) {
+    func fireEvent(name: String, params: [String: Any]?) {
         fireEventCalled = true
         lastEventName = name
         lastEventParams = params

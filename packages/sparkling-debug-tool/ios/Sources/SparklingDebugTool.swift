@@ -2,10 +2,10 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
+import DebugRouter
 import Foundation
 import Lynx
 import UIKit
-import DebugRouter
 
 @objcMembers
 public class SparklingDebugTool: NSObject {
@@ -14,9 +14,10 @@ public class SparklingDebugTool: NSObject {
     public static func setup() {
         // Preset values must be set BEFORE LynxEnv flags so the DevTool
         // service picks them up during initialization.
-        
-        if let devtool = LynxServices.getInstanceWith(LynxServiceDevToolProtocol.self) 
-            as? LynxServiceDevToolProtocol {
+
+        if let devtool = LynxServices.getInstanceWith(LynxServiceDevToolProtocol.self)
+            as? LynxServiceDevToolProtocol
+        {
             devtool.logBoxPresetValue = true
             devtool.lynxDebugPresetValue = true
         }
@@ -64,14 +65,17 @@ public class SparklingDebugTool: NSObject {
             }
 
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-            alert.addAction(UIAlertAction(title: "Save", style: .default, handler: { _ in
-                let value = alert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-                guard !value.isEmpty else {
-                    return
-                }
-                setDevURL(value)
-                onSaved?(value)
-            }))
+            alert.addAction(
+                UIAlertAction(
+                    title: "Save", style: .default,
+                    handler: { _ in
+                        let value = alert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                        guard !value.isEmpty else {
+                            return
+                        }
+                        setDevURL(value)
+                        onSaved?(value)
+                    }))
 
             viewController.present(alert, animated: true)
         }

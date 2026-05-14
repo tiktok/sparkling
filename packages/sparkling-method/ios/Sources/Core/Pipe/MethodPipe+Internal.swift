@@ -10,7 +10,7 @@ extension MethodPipe {
             completion?(.notFound(), nil)
             return
         }
-        
+
         let resultModelType = method.resultModelClass
         let resultBlk: PipeMethod.CompletionBlock = { status, result in
             if let result = result, type(of: result) != EmptyMethodModel.self {
@@ -20,7 +20,7 @@ extension MethodPipe {
                     return
                 }
             }
-            
+
             var fStatus = status
             var resultDict: [String: Any] = [:]
             do {
@@ -30,7 +30,7 @@ extension MethodPipe {
             } catch {
                 fStatus = .invalidResult(message: error.localizedDescription)
             }
-            
+
             resultDict[DictKeys.statusMessage] = fStatus.message
             completion?(fStatus, resultDict)
         }
@@ -39,10 +39,11 @@ extension MethodPipe {
             completion?(.invalidParameter(message: "Pipe inner error: empty params"), nil)
             return
         }
-        
+
         // Safely get requiredKeyPaths
-        if let methodModelType = paramsModelType as? MethodModel.Type, 
-           let requiredKeyPaths = methodModelType.requiredKeyPaths {
+        if let methodModelType = paramsModelType as? MethodModel.Type,
+            let requiredKeyPaths = methodModelType.requiredKeyPaths
+        {
             let paramsKeys: Set<String> = Set(params.keys)
             let missingKeys = requiredKeyPaths.subtracting(paramsKeys).sorted().joined(separator: ", ")
             if missingKeys.count > 0 {
@@ -50,7 +51,7 @@ extension MethodPipe {
                 return
             }
         }
-        
+
         var paramModel: MethodModel?
         do {
             if let methodModelType = paramsModelType as? MethodModel.Type {
@@ -71,7 +72,7 @@ extension MethodPipe {
             context.pipeContainer = self.engine?.pipeContainer
             return context
         }()
-        
+
         let invokeBlk: () -> Void = {
             method.invokeErased(withParams: paramModel, completion: resultBlk)
         }

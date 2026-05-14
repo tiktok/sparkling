@@ -2,11 +2,12 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import XCTest
-import SparklingMethod
-@testable import Sparkling_Router
-@testable import Sparkling_Media
 import Foundation
+import SparklingMethod
+import XCTest
+
+@testable import Sparkling_Media
+@testable import Sparkling_Router
 
 class MockCompletionHandler: NSObject, PipeMethod.CompletionHandlerProtocol {
     var statusCode: Int = 0
@@ -47,14 +48,16 @@ class SPKUploadFileMethodTests: XCTestCase {
     }
 
     func testParamModelCreationWithInvalidParams() {
-        XCTAssertThrowsError(try SPKUploadFileMethodParamModel(dictionary: [
-            "header": ["Content-Type": "application/json"],
-            "params": ["key": "value"]
-        ]))
+        XCTAssertThrowsError(
+            try SPKUploadFileMethodParamModel(dictionary: [
+                "header": ["Content-Type": "application/json"],
+                "params": ["key": "value"],
+            ]))
 
-        XCTAssertThrowsError(try SPKUploadFileMethodParamModel(dictionary: [
-            "url": "https://example.com/upload"
-        ]))
+        XCTAssertThrowsError(
+            try SPKUploadFileMethodParamModel(dictionary: [
+                "url": "https://example.com/upload"
+            ]))
     }
 
     func testParamModelCreationWithValidParams() {
@@ -63,7 +66,7 @@ class SPKUploadFileMethodTests: XCTestCase {
                 "url": "https://example.com/upload",
                 "filePath": "/path/to/file.jpg",
                 "header": ["Content-Type": "multipart/form-data"],
-                "params": ["key": "value"]
+                "params": ["key": "value"],
             ])
 
             XCTAssertEqual(params.url, "https://example.com/upload")
@@ -82,7 +85,7 @@ class SPKUploadFileMethodTests: XCTestCase {
                 "filePath": "/path/to/image.jpg",
                 "name": "uploadField",
                 "fileName": "custom_image.jpg",
-                "mimeType": "image/jpeg"
+                "mimeType": "image/jpeg",
             ])
 
             XCTAssertEqual(paramModel.url, "https://example.com/upload")
@@ -100,7 +103,7 @@ class SPKUploadFileMethodTests: XCTestCase {
             let paramModel = try SPKUploadFileMethodParamModel(dictionary: [
                 "url": "https://example.com/upload",
                 "filePath": "/path/to/file.jpg",
-                "timeoutInterval": 60.0
+                "timeoutInterval": 60.0,
             ])
 
             XCTAssertEqual(paramModel.url, "https://example.com/upload")
@@ -116,7 +119,7 @@ class SPKUploadFileMethodTests: XCTestCase {
             let params = try SPKUploadFileMethodParamModel(dictionary: [
                 "url": "https://example.com/upload",
                 "filePath": "/path/to/file.jpg",
-                "needCommonParams": false
+                "needCommonParams": false,
             ])
 
             XCTAssertEqual(params.url, "https://example.com/upload")
@@ -190,7 +193,7 @@ class SPKUploadFileMethodTests: XCTestCase {
         do {
             let paramModel = try SPKUploadFileMethodParamModel(dictionary: [
                 "url": "https://example.com/upload",
-                "filePath": "/non/existent/file.jpg"
+                "filePath": "/non/existent/file.jpg",
             ])
             let completionHandler = MockCompletionHandler()
             uploadMethod.call(withParamModel: paramModel, completionHandler: completionHandler)
@@ -217,7 +220,7 @@ class SPKUploadFileMethodTests: XCTestCase {
 
                 let paramModel = try SPKUploadFileMethodParamModel(dictionary: [
                     "url": "https://example.com/upload",
-                    "filePath": tempFilePath
+                    "filePath": tempFilePath,
                 ])
                 let completionHandler = MockCompletionHandler()
                 uploadMethod.call(withParamModel: paramModel, completionHandler: completionHandler)
@@ -244,7 +247,7 @@ class SPKUploadFileMethodTests: XCTestCase {
                 "params": ["key": "value"],
                 "header": ["Authorization": "Bearer token"],
                 "timeoutInterval": 30.0,
-                "needCommonParams": true
+                "needCommonParams": true,
             ])
             let completionHandler = MockCompletionHandler()
             uploadMethod.call(withParamModel: paramModel, completionHandler: completionHandler)
@@ -263,7 +266,7 @@ class SPKUploadFileMethodTests: XCTestCase {
 
             let paramModel = try SPKUploadFileMethodParamModel(dictionary: [
                 "url": "https://example.com/upload",
-                "filePath": tempFilePath
+                "filePath": tempFilePath,
             ])
             let completionHandler = MockCompletionHandler()
             uploadMethod.call(withParamModel: paramModel, completionHandler: completionHandler)

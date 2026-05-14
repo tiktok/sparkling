@@ -12,16 +12,16 @@ struct LynxRecvMessage {
     var namescope: String?
     private(set) var data: Any?
     private(set) var useUIThread: Bool = true
-        
+
     init(methodName: String, rawData: [String: Any]) {
         self.methodName = methodName
         self.rawData = rawData
-        
+
         self.data = rawData[LynxKeys.data]
         self.namescope = rawData[LynxKeys.namespace] as? String
         self.containerID = rawData[LynxKeys.containerID] as? String
         self.protocolVersion = rawData[LynxKeys.protocolVersion] as? String ?? "1.0.0"
-        
+
         if let data = self.data as? [String: Any], let useUIThread = data[LynxKeys.useUIThread] as? Bool {
             self.useUIThread = useUIThread
         } else if let useUIThread = rawData[LynxKeys.useUIThread] as? Bool {

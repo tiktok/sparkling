@@ -21,7 +21,7 @@ extension LynxView {
         static var spk_pipeEngine: UInt8 = 0
         static var spk_isLynxViewDestroying: UInt8 = 0
     }
-    
+
     var spk_pipeEngine: LynxPipeEngine? {
         get {
             var pipeEngine = objc_getAssociatedObject(self, &AssociatedKeys.spk_pipeEngine) as? LynxPipeEngine ?? LynxPipeEnginePool.engine(for: self.containerID)
@@ -36,7 +36,7 @@ extension LynxView {
             objc_setAssociatedObject(self, &AssociatedKeys.spk_pipeEngine, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
-    
+
     var spk_isLynxViewDestorying: Bool {
         get {
             return (objc_getAssociatedObject(self, &AssociatedKeys.spk_isLynxViewDestroying) as? NSNumber)?.boolValue ?? false
@@ -45,7 +45,7 @@ extension LynxView {
             objc_setAssociatedObject(self, &AssociatedKeys.spk_isLynxViewDestroying, NSNumber(value: newValue), .OBJC_ASSOCIATION_RETAIN)
         }
     }
-    
+
     func spk_clearModuleForDestroy() {
         if !spk_isLynxViewDestorying {
             if let lynxContext = self.getLynxContext() as? LynxContext {

@@ -9,7 +9,7 @@ public typealias SPKLoadErrorRefreshBlock = () -> Void
 @objc
 public protocol SPKLoadErrorViewProtocol {
     @objc optional func register(refreshBlock: SPKLoadErrorRefreshBlock)
-    
+
     @objc optional func container(_ contianer: SPKContainerProtocol, didReceiveError error: Error?)
-    
+
 }

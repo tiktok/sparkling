@@ -6,11 +6,11 @@ import Foundation
 
 extension URL: SPKKitCompatibleValue {}
 
-public extension SPKKitWrapper where Base == URL {
-    static func url(string: String, relativeTo url: URL? = nil) -> URL? {
+extension SPKKitWrapper where Base == URL {
+    public static func url(string: String, relativeTo url: URL? = nil) -> URL? {
         return _url(string: string, relativeTo: url)
     }
-    static func url(string: String, queryItems: [AnyHashable: Any]? = nil, fragment: String? = nil) -> URL? {
+    public static func url(string: String, queryItems: [AnyHashable: Any]? = nil, fragment: String? = nil) -> URL? {
         return _url(string: string, queryItems: queryItems, fragment: fragment)
     }
     internal static let urlValid: CharacterSet = CharacterSet.urlUserAllowed
@@ -122,7 +122,7 @@ public extension SPKKitWrapper where Base == URL {
         let url = self.url(string: resultURL)
         return url
     }
-    var queryItems: [String: String]? {
+    public var queryItems: [String: String]? {
         guard let query = base.query, query.count > 0 else {
             return nil
         }
@@ -138,7 +138,7 @@ public extension SPKKitWrapper where Base == URL {
         }
         return queries
     }
-    var decodedQueryItems: [String: String]? {
+    public var decodedQueryItems: [String: String]? {
         let components = URLComponents(string: base.absoluteString)
         guard let queryItems = components?.queryItems, queryItems.count > 0 else {
             return nil
@@ -149,10 +149,10 @@ public extension SPKKitWrapper where Base == URL {
         }
         return queries
     }
-    func merging(query key: String, value: String, encode: Bool = false) -> URL {
+    public func merging(query key: String, value: String, encode: Bool = false) -> URL {
         return merging(queries: [key: value], encode: encode)
     }
-    func merging(queries: [String: String], encode: Bool = false) -> URL {
+    public func merging(queries: [String: String], encode: Bool = false) -> URL {
         guard var components = URLComponents(string: base.absoluteString) else { return base }
         let oldPairs = decodedQueryItems ?? [:]
         let newPairs = queries
@@ -167,7 +167,7 @@ public extension SPKKitWrapper where Base == URL {
         }
         return components.url ?? base
     }
-    
+
     internal func mergeOrderedPairs<K: Hashable, V>(_ oldPairs: [K: V], _ newPairs: [K: V]) -> [(K, V)] {
         var newPairs = newPairs
         var mergePairs: [(K, V)] = []

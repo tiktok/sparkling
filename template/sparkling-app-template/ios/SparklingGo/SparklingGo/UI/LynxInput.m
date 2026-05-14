@@ -10,16 +10,19 @@
 
 @implementation LynxTextField
 
-- (UIEditingInteractionConfiguration)editingInteractionConfiguration API_AVAILABLE(ios(13.0)) {
+- (UIEditingInteractionConfiguration)editingInteractionConfiguration API_AVAILABLE(ios(13.0))
+{
   return UIEditingInteractionConfigurationNone;
 }
 
-- (void)setPadding:(UIEdgeInsets)padding {
+- (void)setPadding:(UIEdgeInsets)padding
+{
   _padding = padding;
   [self setNeedsLayout];
 }
 
-- (CGRect)textRectForBounds:(CGRect)bounds {
+- (CGRect)textRectForBounds:(CGRect)bounds
+{
   CGFloat x = self.padding.left;
   CGFloat y = self.padding.top;
   CGFloat width = bounds.size.width - self.padding.left - self.padding.right;
@@ -28,15 +31,17 @@
   return CGRectMake(x, y, width, height);
 }
 
-- (CGRect)editingRectForBounds:(CGRect)bounds {
+- (CGRect)editingRectForBounds:(CGRect)bounds
+{
   return [self textRectForBounds:bounds];
 }
 @end
 
 @implementation LynxInput
 
-- (UITextField *)createView {
-  UITextField *textField = [[LynxTextField alloc] init];
+- (UITextField*)createView
+{
+  UITextField* textField = [[LynxTextField alloc] init];
   textField.autoresizesSubviews = NO;
   textField.clipsToBounds = YES;
   textField.delegate = self;
@@ -50,50 +55,68 @@
   return textField;
 }
 
-- (void)layoutDidFinished {
+- (void)layoutDidFinished
+{
   self.view.padding = self.padding;
 }
 
-LYNX_PROP_SETTER("value", setValue, NSString *) { self.view.text = value; }
+LYNX_PROP_SETTER("value", setValue, NSString*)
+{
+  self.view.text = value;
+}
 
-LYNX_PROP_SETTER("placeholder", setPlaceholder, NSString *) { self.view.placeholder = value; }
+LYNX_PROP_SETTER("placeholder", setPlaceholder, NSString*)
+{
+  self.view.placeholder = value;
+}
 
-LYNX_PROP_SETTER("text-color", setTextColor, NSString *) {
-  UIColor *textColor = [UIHelper colorWithHexString:value];
+LYNX_PROP_SETTER("text-color", setTextColor, NSString*)
+{
+  UIColor* textColor = [UIHelper colorWithHexString:value];
   self.view.textColor = textColor;
 
-  UIColor *placeholderColor = [textColor colorWithAlphaComponent:0.25];
-  if (@available(iOS 13.0, *)) {
-    NSAttributedString *attributedPlaceholder = [[NSAttributedString alloc]
+  UIColor* placeholderColor = [textColor colorWithAlphaComponent:0.25];
+  if (@available(iOS 13.0, *))
+  {
+    NSAttributedString* attributedPlaceholder = [[NSAttributedString alloc]
         initWithString:self.view.placeholder ?: @""
             attributes:@{NSForegroundColorAttributeName : placeholderColor}];
     self.view.attributedPlaceholder = attributedPlaceholder;
-  } else {
+  }
+  else
+  {
     [self.view setValue:placeholderColor forKeyPath:@"_placeholderLabel.textColor"];
   }
 }
 
-- (void)textFieldDidChange:(NSNotification *)notification {
+- (void)textFieldDidChange:(NSNotification*)notification
+{
   [self emitEvent:@"input"
            detail:@{
              @"value" : [self.view text] ?: @"",
            }];
 }
 
-LYNX_UI_METHOD(focus) {
-  if ([self.view becomeFirstResponder]) {
+LYNX_UI_METHOD(focus)
+{
+  if ([self.view becomeFirstResponder])
+  {
     callback(kUIMethodSuccess, nil);
-  } else {
+  }
+  else
+  {
     callback(kUIMethodUnknown, @"fail to focus");
   }
 }
 
-- (void)textFieldDidEndEditing:(UITextField *)textField {
+- (void)textFieldDidEndEditing:(UITextField*)textField
+{
   [self emitEvent:@"blur" detail:@{@"value" : [self.view text] ?: @""}];
 }
 
-- (void)emitEvent:(NSString *)name detail:(NSDictionary *)detail {
-  LynxCustomEvent *eventInfo = [[LynxDetailEvent alloc] initWithName:name
+- (void)emitEvent:(NSString*)name detail:(NSDictionary*)detail
+{
+  LynxCustomEvent* eventInfo = [[LynxDetailEvent alloc] initWithName:name
                                                           targetSign:[self sign]
                                                               detail:detail];
   [self.context.eventEmitter dispatchCustomEvent:eventInfo];

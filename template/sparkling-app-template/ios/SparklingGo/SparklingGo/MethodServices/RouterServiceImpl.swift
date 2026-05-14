@@ -15,11 +15,11 @@ class RouterServiceImpl: RouterService {
             completion(.failed(message: "Unable to close the container"), nil)
         }
     }
-    
+
     func openScheme(withParams params: Sparkling_Router.OpenMethodParamModel, completion: @escaping SparklingMethod.PipeMethod.CompletionBlock) {
         let urlString = params.scheme
         let context = SPKContext()
-        
+
         DispatchQueue.main.async {
             func openWithRouter(completionHandler: ((Bool) -> Void)? = nil) {
                 if let (_, success) = SPKRouter.open(withURL: urlString, context: context), success {
@@ -30,7 +30,7 @@ class RouterServiceImpl: RouterService {
                     completion(.failed(message: "Failed to open URL"), nil)
                 }
             }
-            
+
             if params.useSysBrowser == true {
                 let success = SPKRouter.openInSystemBrowser(withURL: urlString)
                 if success {
