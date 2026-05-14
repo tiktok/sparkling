@@ -3,5 +3,4 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.hybridkit.config
 
-class WebConfig : IWebConfig {
-}
+class WebConfig : IWebConfig

@@ -2,13 +2,12 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core.exception
 
 import org.junit.Assert.*
 import org.junit.Test
-class IDLMethodExceptionTest {
 
+class IDLMethodExceptionTest {
     @Test
     fun testIDLMethodExceptionWithMessage() {
         // Given
@@ -86,8 +85,10 @@ class IDLMethodExceptionTest {
         // Then
         assertNotNull("Stack trace should not be null", stackTrace)
         assertTrue("Stack trace should not be empty", stackTrace.isNotEmpty())
-        assertTrue("First stack trace element should contain test method", 
-            stackTrace[0].methodName.contains("testIDLMethodExceptionStackTrace"))
+        assertTrue(
+            "First stack trace element should contain test method",
+            stackTrace[0].methodName.contains("testIDLMethodExceptionStackTrace"),
+        )
     }
 
     @Test
@@ -101,10 +102,14 @@ class IDLMethodExceptionTest {
 
         // Then
         assertNotNull("String representation should not be null", stringRepresentation)
-        assertTrue("String should contain class name", 
-            stringRepresentation.contains("IDLMethodException"))
-        assertTrue("String should contain error message", 
-            stringRepresentation.contains(errorMessage))
+        assertTrue(
+            "String should contain class name",
+            stringRepresentation.contains("IDLMethodException"),
+        )
+        assertTrue(
+            "String should contain error message",
+            stringRepresentation.contains(errorMessage),
+        )
     }
 
     @Test
@@ -128,7 +133,6 @@ class IDLMethodExceptionTest {
 }
 
 class IllegalInputParamExceptionTest {
-
     @Test
     fun testIllegalInputParamExceptionWithMessage() {
         // Given
@@ -189,7 +193,6 @@ class IllegalInputParamExceptionTest {
 }
 
 class IllegalOperationExceptionTest {
-
     @Test
     fun testIllegalOperationExceptionWithMessage() {
         // Given
@@ -250,7 +253,6 @@ class IllegalOperationExceptionTest {
 }
 
 class IllegalOutputParamExceptionTest {
-
     @Test
     fun testIllegalOutputParamExceptionWithMessage() {
         // Given

@@ -39,17 +39,29 @@ object SchemeParser {
      * For a given [key], looks up [key]_light / [key]_dark based on the
      * resolved theme, falling back to the base [key] value.
      */
-    private fun resolveThemedColor(uri: Uri, key: String, forceThemeStyle: String?): String? {
+    private fun resolveThemedColor(
+        uri: Uri,
+        key: String,
+        forceThemeStyle: String?,
+    ): String? {
         val baseValue = uri.safeGetQueryParameter(key)
-        val isDark = when (forceThemeStyle?.lowercase()) {
-            "dark" -> true
-            "light" -> false
-            else -> {
-                val nightMode = ColorUtil.appContext.resources.configuration.uiMode and
-                        Configuration.UI_MODE_NIGHT_MASK
-                nightMode == Configuration.UI_MODE_NIGHT_YES
+        val isDark =
+            when (forceThemeStyle?.lowercase()) {
+                "dark" -> {
+                    true
+                }
+
+                "light" -> {
+                    false
+                }
+
+                else -> {
+                    val nightMode =
+                        ColorUtil.appContext.resources.configuration.uiMode and
+                            Configuration.UI_MODE_NIGHT_MASK
+                    nightMode == Configuration.UI_MODE_NIGHT_YES
+                }
             }
-        }
         val suffix = if (isDark) "_dark" else "_light"
         return uri.safeGetQueryParameter("$key$suffix") ?: baseValue
     }
@@ -62,18 +74,23 @@ object SchemeParser {
 
         val uri = scheme.toUri()
         val viewTypeString = uri.host?.lowercase()
-        val engineType = when {
-            viewTypeString == SchemeConstants.Host.WEB_VIEW -> HybridKitType.WEB
-            viewTypeString?.startsWith(SchemeConstants.Host.LYNX_VIEW) == true -> HybridKitType.LYNX
-            else -> HybridKitType.UNKNOWN
-        }
+        val engineType =
+            when {
+                viewTypeString == SchemeConstants.Host.WEB_VIEW -> HybridKitType.WEB
+                viewTypeString?.startsWith(SchemeConstants.Host.LYNX_VIEW) == true -> HybridKitType.LYNX
+                else -> HybridKitType.UNKNOWN
+            }
 
-        val containerType = when (viewTypeString) {
-            SchemeConstants.Host.LYNX_VIEW_CARD -> HybridContainerType.CARD
-            SchemeConstants.Host.LYNX_VIEW_PAGE,
-            SchemeConstants.Host.LYNX_VIEW -> HybridContainerType.PAGE
-            else -> HybridContainerType.UNKNOWN
-        }
+        val containerType =
+            when (viewTypeString) {
+                SchemeConstants.Host.LYNX_VIEW_CARD -> HybridContainerType.CARD
+
+                SchemeConstants.Host.LYNX_VIEW_PAGE,
+                SchemeConstants.Host.LYNX_VIEW,
+                -> HybridContainerType.PAGE
+
+                else -> HybridContainerType.UNKNOWN
+            }
 
         if (engineType == HybridKitType.UNKNOWN) {
             return null

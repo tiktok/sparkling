@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.protocol.utils
 
 import com.tiktok.sparkling.method.registry.api.stringify
@@ -30,17 +29,21 @@ object BridgeConverter {
                     ReadableType.Array -> {
                         obj.putOpt(nextKey, revertJavaOnlyArray2JSONArray(nextValue as JavaOnlyArray))
                     }
+
                     ReadableType.Map -> {
                         obj.putOpt(nextKey, revertJavaOnlyMap2JSONObject(nextValue as JavaOnlyMap))
                     }
+
                     ReadableType.Number -> {
                         val num = nextValue as Number
                         obj.put(nextKey, getNumber(num))
                     }
+
                     ReadableType.PiperData -> {
                         val jsonObject = (nextValue as PiperData).stringify()
                         obj.put(nextKey, jsonObject)
                     }
+
                     else -> {
                         obj.putOpt(nextKey, nextValue)
                     }
@@ -48,7 +51,6 @@ object BridgeConverter {
             } catch (ex: Throwable) {
                 LogUtils.e(TAG, "revertJavaOnlyMap2JSONObject $ex")
             }
-
         }
         return obj
     }
@@ -62,17 +64,21 @@ object BridgeConverter {
                     ReadableType.Map -> {
                         result.put(revertJavaOnlyMap2JSONObject(value as JavaOnlyMap))
                     }
+
                     ReadableType.Array -> {
                         result.put(revertJavaOnlyArray2JSONArray(value as JavaOnlyArray))
                     }
+
                     ReadableType.Number -> {
                         val num = value as Number
                         result.put(getNumber(num))
                     }
+
                     ReadableType.PiperData -> {
                         val jsonObject = (value as PiperData).stringify()
                         result.put(jsonObject)
                     }
+
                     else -> {
                         result.put(value)
                     }
@@ -108,13 +114,15 @@ object BridgeConverter {
                 is JSONObject -> {
                     result[key] = convertJSONObject2JavaOnlyMap(sonValue)
                 }
+
                 is JSONArray -> {
                     result[key] = convertJSONArray2JavaOnlyArray(sonValue)
                 }
+
                 else -> {
-                    if(sonValue == JSONObject.NULL) {
+                    if (sonValue == JSONObject.NULL) {
                         result[key] = null
-                    }else {
+                    } else {
                         result[key] = sonValue
                     }
                 }
@@ -123,9 +131,6 @@ object BridgeConverter {
         return result
     }
 
-
-
-
     private fun convertJSONArray2JavaOnlyArray(arrays: JSONArray): JavaOnlyArray {
         val result = JavaOnlyArray()
         for (i in 0 until arrays.length()) {
@@ -133,9 +138,11 @@ object BridgeConverter {
                 is JSONArray -> {
                     result.add(convertJSONArray2JavaOnlyArray(sonValue))
                 }
+
                 is JSONObject -> {
                     result.add(convertJSONObject2JavaOnlyMap(sonValue))
                 }
+
                 else -> {
                     result.add(sonValue)
                 }
@@ -143,5 +150,4 @@ object BridgeConverter {
         }
         return result
     }
-
 }

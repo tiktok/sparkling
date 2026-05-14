@@ -5,7 +5,6 @@ package com.tiktok.sparkling.method.runtime.depend
 
 import android.content.Context
 
-
 object BridgeBaseRuntime {
     var applicationContext: Context? = null
 }

@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.protocol.entity
 
 import com.tiktok.sparkling.method.protocol.utils.BridgeConverter
@@ -12,8 +11,9 @@ import com.tiktok.sparkling.method.registry.api.Utils
 import com.lynx.react.bridge.JavaOnlyMap
 import org.json.JSONObject
 
-class BridgeResult(val parcel: Any) {
-
+class BridgeResult(
+    val parcel: Any,
+) {
     override fun toString(): String {
         if (SparklingBridge.isDebugEnv) {
             return toJSONObject().toString()
@@ -23,7 +23,11 @@ class BridgeResult(val parcel: Any) {
     }
 
     companion object {
-        fun toJsonResult(code: Int, msg: String = "", data: JSONObject? = null): BridgeResult {
+        fun toJsonResult(
+            code: Int,
+            msg: String = "",
+            data: JSONObject? = null,
+        ): BridgeResult {
             val json = JSONObject()
             json.apply {
                 put("code", code)
@@ -56,13 +60,16 @@ class BridgeResult(val parcel: Any) {
         }
     }
 
-    fun toJSONObject(call: BridgeCall?): JSONObject {
-        return (if (parcel is JSONObject) {
-            parcel
-        } else if (parcel is Map<*, *>) {
-            Utils.mapToJSON(parcel as Map<String, Any?>)
-        } else if (parcel is JavaOnlyMap) {
-            BridgeConverter.revertJavaOnlyMap2JSONObject(parcel)
-        } else JSONObject())
-    }
+    fun toJSONObject(call: BridgeCall?): JSONObject =
+        (
+            if (parcel is JSONObject) {
+                parcel
+            } else if (parcel is Map<*, *>) {
+                Utils.mapToJSON(parcel as Map<String, Any?>)
+            } else if (parcel is JavaOnlyMap) {
+                BridgeConverter.revertJavaOnlyMap2JSONObject(parcel)
+            } else {
+                JSONObject()
+            }
+        )
 }

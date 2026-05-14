@@ -11,25 +11,24 @@ import com.tiktok.sparkling.method.registry.core.IBridgeContext
 import com.tiktok.sparkling.method.registry.core.BridgePlatformType
 import com.tiktok.sparkling.method.router.utils.IHostRouterDepend
 
-class SparklingHostRouterDepend: IHostRouterDepend {
-
+class SparklingHostRouterDepend : IHostRouterDepend {
     override fun openScheme(
         bridgeContext: IBridgeContext?,
         scheme: String,
         extraParams: Map<String, Any>,
         platformType: BridgePlatformType,
-        context: Context?
+        context: Context?,
     ): Boolean {
         val sparklingContext = SparklingContext()
         sparklingContext.scheme = scheme
         val rawExtra = extraParams["extra"] as? Map<*, *>
-        sparklingContext.extra = rawExtra
-            ?.mapNotNull { (key, value) ->
-                val k = key?.toString() ?: return@mapNotNull null
-                k to (value?.toString() ?: "")
-            }
-            ?.toMap()
-        context?.let {  Sparkling.Companion.build(it, sparklingContext).navigate() }
+        sparklingContext.extra =
+            rawExtra
+                ?.mapNotNull { (key, value) ->
+                    val k = key?.toString() ?: return@mapNotNull null
+                    k to (value?.toString() ?: "")
+                }?.toMap()
+        context?.let { Sparkling.Companion.build(it, sparklingContext).navigate() }
         return true
     }
 
@@ -37,7 +36,7 @@ class SparklingHostRouterDepend: IHostRouterDepend {
         bridgeContext: IBridgeContext?,
         type: BridgePlatformType,
         containerID: String?,
-        animated: Boolean?
+        animated: Boolean?,
     ): Boolean {
         val ownerActivity = bridgeContext?.ownerActivity
         if (ownerActivity != null) {

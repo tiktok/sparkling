@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.protocol
 
 import android.content.Context
@@ -29,10 +28,15 @@ internal class InnerBridge {
 
     companion object {
         private val hasInitMonitor: AtomicBoolean = AtomicBoolean(false)
-        var globalMonitor : BridgeSDKMonitor? = null
-        fun initSDKMonitor(context: Context, appInfo: BridgeSDKMonitor.APPInfo4Monitor) {
-            if (hasInitMonitor.compareAndSet(false, true))
+        var globalMonitor: BridgeSDKMonitor? = null
+
+        fun initSDKMonitor(
+            context: Context,
+            appInfo: BridgeSDKMonitor.APPInfo4Monitor,
+        ) {
+            if (hasInitMonitor.compareAndSet(false, true)) {
                 globalMonitor = BridgeSDKMonitor(context, appInfo)
+            }
         }
     }
 
@@ -43,12 +47,21 @@ internal class InnerBridge {
     /**
      * use this to pass the bridge to mBridgeContext, to and you can use the custom auth ability.
      */
-    fun init(view: View, containerId: String?, jsBridgeProtocols: Int? = null, bridge: SparklingBridge) {
+    fun init(
+        view: View,
+        containerId: String?,
+        jsBridgeProtocols: Int? = null,
+        bridge: SparklingBridge,
+    ) {
         mBridgeContext.sparklingBridge = bridge
         init(view, containerId, jsBridgeProtocols)
     }
 
-    fun init(view: View, containerId: String?, jsBridgeProtocols: Int? = null) {
+    fun init(
+        view: View,
+        containerId: String?,
+        jsBridgeProtocols: Int? = null,
+    ) {
         if (view is LynxView) {
             mBridgeContext.lynxView = view
             mBridgeContext.platform = BridgePlatformType.LYNX
@@ -62,7 +75,12 @@ internal class InnerBridge {
         mBridgeContext.containerId = containerId
     }
 
-    fun initLynxJSRuntime(containerId: String, options: LynxBackgroundRuntimeOptions, context: Context, sparklingBridge: SparklingBridge) {
+    fun initLynxJSRuntime(
+        containerId: String,
+        options: LynxBackgroundRuntimeOptions,
+        context: Context,
+        sparklingBridge: SparklingBridge,
+    ) {
         mBridgeContext.sparklingBridge = sparklingBridge
         mBridgeContext.platform = BridgePlatformType.LYNX
         mBridgeContext.registerProtocol(LynxBridgeProtocol(mBridgeContext))
@@ -72,7 +90,10 @@ internal class InnerBridge {
         registerLynxJSRuntimeModule(options, containerId)
     }
 
-    private fun registerLynxJSRuntimeModule(options: LynxBackgroundRuntimeOptions, containerId: String?) {
+    private fun registerLynxJSRuntimeModule(
+        options: LynxBackgroundRuntimeOptions,
+        containerId: String?,
+    ) {
         LynxViewImpl(mBridgeContext).initJSRuntime(options)
         mBridgeContext.containerId = containerId
     }
@@ -81,8 +102,10 @@ internal class InnerBridge {
         mBridgeContext.registerIBridgeLifeClient(bridgeLifeClient)
     }
 
-
-    fun registerLynxModule(builder: LynxViewBuilder, containerId: String?) {
+    fun registerLynxModule(
+        builder: LynxViewBuilder,
+        containerId: String?,
+    ) {
         LynxViewImpl(mBridgeContext).apply {
             init(builder)
         }
@@ -93,15 +116,16 @@ internal class InnerBridge {
         mBridgeContext.dispatcher?.registerHandler(handler)
     }
 
-    fun getBridgeContext(): BridgeContext {
-        return mBridgeContext
-    }
+    fun getBridgeContext(): BridgeContext = mBridgeContext
 
     fun registerMonitor(monitor: IBridgeMonitor) {
         mBridgeContext.monitor.add(monitor)
     }
 
-    fun sendEvent(event: String, data: JSONObject?) {
+    fun sendEvent(
+        event: String,
+        data: JSONObject?,
+    ) {
         mBridgeContext.monitor.forEach {
             runCatching {
                 it.onBridgeEvent(event, data)
@@ -110,11 +134,14 @@ internal class InnerBridge {
             }
         }
         mBridgeContext.protocols.forEach {
-            it.sendEvent(event,data)
+            it.sendEvent(event, data)
         }
     }
 
-    fun sendJSRuntimeEvent(event: String, data: JSONObject?) {
+    fun sendJSRuntimeEvent(
+        event: String,
+        data: JSONObject?,
+    ) {
         mBridgeContext.monitor.forEach {
             runCatching {
                 it.onBridgeEvent(event, data)
@@ -123,12 +150,11 @@ internal class InnerBridge {
             }
         }
         mBridgeContext.protocols.forEach {
-            it.sendJSRuntimeEvent(event,data)
+            it.sendJSRuntimeEvent(event, data)
         }
     }
 
     fun bindLynxJSRuntime(lynxBackgroundRuntime: LynxBackgroundRuntime) {
         mBridgeContext.lynxBackgroundRuntime = lynxBackgroundRuntime
     }
-
 }

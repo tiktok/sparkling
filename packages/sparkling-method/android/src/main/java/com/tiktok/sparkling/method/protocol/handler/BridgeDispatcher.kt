@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.protocol.handler
 
 import android.os.Handler
@@ -39,20 +38,22 @@ class BridgeDispatcher {
         call: BridgeCall,
         callback: IBridgeCallback,
         context: BridgeContext,
-        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder? = null
+        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder? = null,
     ) {
         if (context.jsbMockInterceptor != null) {
             if (!shouldInvokeResult(context, call, callback)) {
                 val bridgeCall = context.jsbMockInterceptor!!.interceptBridgeCall(call)
                 realDispatchBridgeMethod(bridgeCall, callback, context, monitorBuilder)
             }
-        } else realDispatchBridgeMethod(call, callback, context, monitorBuilder)
+        } else {
+            realDispatchBridgeMethod(call, callback, context, monitorBuilder)
+        }
     }
 
     private fun shouldInvokeResult(
         context: BridgeContext,
         call: BridgeCall,
-        callback: IBridgeCallback
+        callback: IBridgeCallback,
     ): Boolean {
         val result = context.jsbMockInterceptor!!.invokeBridgeResult(call)
         result?.let {
@@ -66,7 +67,7 @@ class BridgeDispatcher {
         call: BridgeCall,
         callback: IBridgeCallback,
         context: BridgeContext,
-        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?
+        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?,
     ) {
         LogUtils.d(TAG, "realDispatchBridgeMethod: ${Thread.currentThread()} and call is \n$call")
 
@@ -77,14 +78,16 @@ class BridgeDispatcher {
         val result = client.shouldInterceptRequest(call)
 
         if (result != null && (
-                    result.toJSONObject()
-                        .optInt("code") == BridgeConstants.ERROR_BRIDGE_NO_AUTHORITY)
+                result
+                    .toJSONObject()
+                    .optInt("code") == BridgeConstants.ERROR_BRIDGE_NO_AUTHORITY
+            )
         ) {
             client.onBridgeCallback()
             callback.onBridgeResult(
                 context.jsbMockInterceptor?.interceptBridgeResult(call, result) ?: result,
                 call,
-                monitorBuilder
+                monitorBuilder,
             )
             if (getToastSetting()) toastJsbError(call, result.toJSONObject(), context)
             return
@@ -97,31 +100,32 @@ class BridgeDispatcher {
                 BridgeResult.toJsonResult(
                     IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED,
                     IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED_MSG + ", reason: " + shouldHandleBridgeCallResultModel.reason,
-                    null
+                    null,
                 ),
                 call,
-                monitorBuilder
+                monitorBuilder,
             )
             return
         }
 
-        val callbackHandler = object : IBridgeMethodCallback {
-            override fun onBridgeResult(parcel: Any) {
-                client.onBridgeCallback()
-                val result =
-                    context.jsbMockInterceptor?.interceptBridgeResult(call, BridgeResult(parcel))
-                        ?: BridgeResult(parcel)
-                callback.onBridgeResult(result, call, monitorBuilder)
-                if (getToastSetting()) toastJsbError(call, result.toJSONObject(), context)
+        val callbackHandler =
+            object : IBridgeMethodCallback {
+                override fun onBridgeResult(parcel: Any) {
+                    client.onBridgeCallback()
+                    val result =
+                        context.jsbMockInterceptor?.interceptBridgeResult(call, BridgeResult(parcel))
+                            ?: BridgeResult(parcel)
+                    callback.onBridgeResult(result, call, monitorBuilder)
+                    if (getToastSetting()) toastJsbError(call, result.toJSONObject(), context)
+                }
             }
-        }
 
         if (context.shouldHandleWithBusinessHandler(call)) {
             call.hitBusinessHandler = true
             context.businessCallHandler!!.handle(context, call, callbackHandler)
             LogUtils.d(
                 TAG,
-                "[JSBHit] Business JSB Handler(${context.businessCallHandler?.nameSpace}), $call"
+                "[JSBHit] Business JSB Handler(${context.businessCallHandler?.nameSpace}), $call",
             )
         } else {
             call.hitBusinessHandler = false
@@ -130,68 +134,92 @@ class BridgeDispatcher {
         }
     }
 
-    fun handleRawJSBCall(call: BridgeCall, context: BridgeContext, callback: IBridgeCallback) {
+    fun handleRawJSBCall(
+        call: BridgeCall,
+        context: BridgeContext,
+        callback: IBridgeCallback,
+    ) {
         runCatching {
-            bridgeHandler?.handle(context, call, object : IBridgeMethodCallback {
-                override fun onBridgeResult(parcel: Any) {
-                    callback.onBridgeResult(BridgeResult(parcel), call, null)
-                }
-            })
+            bridgeHandler?.handle(
+                context,
+                call,
+                object : IBridgeMethodCallback {
+                    override fun onBridgeResult(parcel: Any) {
+                        callback.onBridgeResult(BridgeResult(parcel), call, null)
+                    }
+                },
+            )
         }.onFailure {
             it.printStackTrace()
             LogUtils.i(TAG, "handleRawJSBCall ${call.bridgeName} fail, msg: ${it.message}")
         }
     }
 
-    private fun toastJsbError(call: BridgeCall, json: JSONObject, context: BridgeContext) {
+    private fun toastJsbError(
+        call: BridgeCall,
+        json: JSONObject,
+        context: BridgeContext,
+    ) {
         val appContext = context.lynxView?.context
         appContext?.let {
             handler.post {
                 if (json.length() == 0) {
-                    Toast.makeText(
-                        it,
-                        "bridgeName: ${call.bridgeName}, callback info is null, check it!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast
+                        .makeText(
+                            it,
+                            "bridgeName: ${call.bridgeName}, callback info is null, check it!",
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 }
 
                 val code = json.optInt("code", -2345)
                 if (code != -1234 && code != BridgeConstants.BRIDGE_CALL_SUCCESS) {
                     when (code) {
-                        BridgeConstants.BRIDGE_CALL_FAIL ->
-                            Toast.makeText(
-                                it,
-                                "${call.bridgeName}, code=$code, bridge call fail",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                        BridgeConstants.BRIDGE_CALL_FAIL -> {
+                            Toast
+                                .makeText(
+                                    it,
+                                    "${call.bridgeName}, code=$code, bridge call fail",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
 
-                        BridgeConstants.ERROR_BRIDGE_NO_AUTHORITY ->
-                            Toast.makeText(
-                                it,
-                                "${call.bridgeName}, code=$code, no authority",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                        BridgeConstants.ERROR_BRIDGE_NO_AUTHORITY -> {
+                            Toast
+                                .makeText(
+                                    it,
+                                    "${call.bridgeName}, code=$code, no authority",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
 
-                        BridgeConstants.BRIDGE_NOT_FOUND ->
-                            Toast.makeText(
-                                it,
-                                "${call.bridgeName}, code=$code, bridge not found",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                        BridgeConstants.BRIDGE_NOT_FOUND -> {
+                            Toast
+                                .makeText(
+                                    it,
+                                    "${call.bridgeName}, code=$code, bridge not found",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
 
-                        else -> Toast.makeText(
-                            it,
-                            "${call.bridgeName}, code=$code, may not success, check it.",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        else -> {
+                            Toast
+                                .makeText(
+                                    it,
+                                    "${call.bridgeName}, code=$code, may not success, check it.",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
                     }
                 }
-                if (code == -2345)
-                    Toast.makeText(
-                        it,
-                        "${call.bridgeName}, seems no code callback",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                if (code == -2345) {
+                    Toast
+                        .makeText(
+                            it,
+                            "${call.bridgeName}, seems no code callback",
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                }
             }
         }
     }

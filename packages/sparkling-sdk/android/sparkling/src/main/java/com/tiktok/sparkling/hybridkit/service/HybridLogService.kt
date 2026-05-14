@@ -8,32 +8,39 @@ import com.tiktok.sparkling.hybridkit.utils.HybridLogger
 import com.tiktok.sparkling.hybridkit.utils.LogLevel
 
 class HybridLogService : HybridLogger {
-
     override fun onLog(
         msg: String,
         logLevel: LogLevel,
-        tag: String
+        tag: String,
     ) {
         when (logLevel) {
             LogLevel.D -> {
                 Log.d(tag, msg)
             }
+
             LogLevel.V -> {
                 Log.v(tag, msg)
             }
+
             LogLevel.I -> {
                 Log.i(tag, msg)
             }
+
             LogLevel.W -> {
                 Log.w(tag, msg)
             }
+
             LogLevel.E -> {
                 Log.e(tag, msg)
             }
         }
     }
 
-    override fun onReject(e: Throwable, extraMsg: String, tag: String) {
+    override fun onReject(
+        e: Throwable,
+        extraMsg: String,
+        tag: String,
+    ) {
         Log.e(tag, extraMsg)
     }
 }

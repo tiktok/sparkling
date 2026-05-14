@@ -40,13 +40,12 @@ import java.util.concurrent.TimeUnit
  * Host-side network depend demo using Retrofit/OkHttp.
  */
 class AppNetworkDepend : IHostNetworkDepend {
-
     private interface HostNetworkApi {
         @GET("{path}")
         fun getString(
             @Path(value = "path", encoded = true) path: String,
             @QueryMap(encoded = true) query: Map<String, String>,
-            @HeaderMap headers: Map<String, String>
+            @HeaderMap headers: Map<String, String>,
         ): Call<ResponseBody>
 
         @Streaming
@@ -54,7 +53,7 @@ class AppNetworkDepend : IHostNetworkDepend {
         fun getStream(
             @Path(value = "path", encoded = true) path: String,
             @QueryMap(encoded = true) query: Map<String, String>,
-            @HeaderMap headers: Map<String, String>
+            @HeaderMap headers: Map<String, String>,
         ): Call<ResponseBody>
 
         @FormUrlEncoded
@@ -63,7 +62,7 @@ class AppNetworkDepend : IHostNetworkDepend {
             @Path(value = "path", encoded = true) path: String,
             @QueryMap(encoded = true) query: Map<String, String>,
             @HeaderMap headers: Map<String, String>,
-            @FieldMap(encoded = true) fields: Map<String, String>
+            @FieldMap(encoded = true) fields: Map<String, String>,
         ): Call<ResponseBody>
 
         @POST("{path}")
@@ -71,7 +70,7 @@ class AppNetworkDepend : IHostNetworkDepend {
             @Path(value = "path", encoded = true) path: String,
             @QueryMap(encoded = true) query: Map<String, String>,
             @HeaderMap headers: Map<String, String>,
-            @Body body: RequestBody
+            @Body body: RequestBody,
         ): Call<ResponseBody>
 
         @Multipart
@@ -80,7 +79,7 @@ class AppNetworkDepend : IHostNetworkDepend {
             @Path(value = "path", encoded = true) path: String,
             @QueryMap(encoded = true) query: Map<String, String>,
             @HeaderMap headers: Map<String, String>,
-            @Part parts: List<MultipartBody.Part>
+            @Part parts: List<MultipartBody.Part>,
         ): Call<ResponseBody>
 
         @PUT("{path}")
@@ -88,14 +87,14 @@ class AppNetworkDepend : IHostNetworkDepend {
             @Path(value = "path", encoded = true) path: String,
             @QueryMap(encoded = true) query: Map<String, String>,
             @HeaderMap headers: Map<String, String>,
-            @Body body: RequestBody
+            @Body body: RequestBody,
         ): Call<ResponseBody>
 
         @DELETE("{path}")
         fun deleteCall(
             @Path(value = "path", encoded = true) path: String,
             @QueryMap(encoded = true) query: Map<String, String>,
-            @HeaderMap headers: Map<String, String>
+            @HeaderMap headers: Map<String, String>,
         ): Call<ResponseBody>
 
         @Streaming
@@ -103,65 +102,93 @@ class AppNetworkDepend : IHostNetworkDepend {
         fun download(
             @Path(value = "path", encoded = true) path: String,
             @QueryMap(encoded = true) query: Map<String, String>,
-            @HeaderMap headers: Map<String, String>
+            @HeaderMap headers: Map<String, String>,
         ): Call<ResponseBody>
     }
 
     override fun getAPIParams(): Map<String, Any>? = emptyMap()
 
-    override fun requestForString(method: RequestMethod, request: HttpRequest): AbsStringConnection {
+    override fun requestForString(
+        method: RequestMethod,
+        request: HttpRequest,
+    ): AbsStringConnection {
         val parsed = parseUrl(request.getUrl()) ?: return errorString("Invalid url: ${request.getUrl()}")
         val service = createService(parsed.baseUrl) ?: return errorString("Retrofit unavailable for ${parsed.baseUrl}")
         val headers = buildHeaders(request)
         val query = LinkedHashMap(parsed.query)
 
-        val call: Call<ResponseBody>? = when (method) {
-            RequestMethod.GET -> service.getString(parsed.relativePath, query, headers)
-            RequestMethod.POST -> {
-                val body = buildBody(request)
-                when {
-                    body is MultipartBody -> service.postMultipart(parsed.relativePath, query, headers, body.parts)
-                    body != null -> service.postBody(parsed.relativePath, query, headers, body)
-                    else -> service.postForm(parsed.relativePath, query, headers, request.params ?: emptyMap())
+        val call: Call<ResponseBody>? =
+            when (method) {
+                RequestMethod.GET -> {
+                    service.getString(parsed.relativePath, query, headers)
+                }
+
+                RequestMethod.POST -> {
+                    val body = buildBody(request)
+                    when {
+                        body is MultipartBody -> service.postMultipart(parsed.relativePath, query, headers, body.parts)
+                        body != null -> service.postBody(parsed.relativePath, query, headers, body)
+                        else -> service.postForm(parsed.relativePath, query, headers, request.params ?: emptyMap())
+                    }
+                }
+
+                RequestMethod.PUT -> {
+                    val body = buildBody(request) ?: RequestBody.create(null, ByteArray(0))
+                    service.putBody(parsed.relativePath, query, headers, body)
+                }
+
+                RequestMethod.DELETE -> {
+                    service.deleteCall(parsed.relativePath, query, headers)
+                }
+
+                RequestMethod.DOWNLOAD -> {
+                    service.download(parsed.relativePath, query, headers)
                 }
             }
-            RequestMethod.PUT -> {
-                val body = buildBody(request) ?: RequestBody.create(null, ByteArray(0))
-                service.putBody(parsed.relativePath, query, headers, body)
-            }
-            RequestMethod.DELETE -> service.deleteCall(parsed.relativePath, query, headers)
-            RequestMethod.DOWNLOAD -> service.download(parsed.relativePath, query, headers)
-        }
 
         return executeString(call)
     }
 
-    override fun requestForStream(method: RequestMethod, request: HttpRequest): AbsStreamConnection {
+    override fun requestForStream(
+        method: RequestMethod,
+        request: HttpRequest,
+    ): AbsStreamConnection {
         val parsed = parseUrl(request.getUrl()) ?: return errorStream("Invalid url: ${request.getUrl()}", null)
         val service = createService(parsed.baseUrl) ?: return errorStream("Retrofit unavailable for ${parsed.baseUrl}", null)
         val headers = buildHeaders(request)
         val query = LinkedHashMap(parsed.query)
 
-        val call: Call<ResponseBody>? = when (method) {
-            RequestMethod.GET -> service.getStream(parsed.relativePath, query, headers)
-            RequestMethod.POST -> {
-                val body = buildBody(request)
-                when {
-                    body is MultipartBody -> service.postMultipart(parsed.relativePath, query, headers, body.parts)
-                    body != null -> service.postBody(parsed.relativePath, query, headers, body)
-                    else -> service.postForm(parsed.relativePath, query, headers, request.params ?: emptyMap())
+        val call: Call<ResponseBody>? =
+            when (method) {
+                RequestMethod.GET -> {
+                    service.getStream(parsed.relativePath, query, headers)
+                }
+
+                RequestMethod.POST -> {
+                    val body = buildBody(request)
+                    when {
+                        body is MultipartBody -> service.postMultipart(parsed.relativePath, query, headers, body.parts)
+                        body != null -> service.postBody(parsed.relativePath, query, headers, body)
+                        else -> service.postForm(parsed.relativePath, query, headers, request.params ?: emptyMap())
+                    }
+                }
+
+                RequestMethod.DOWNLOAD -> {
+                    service.download(parsed.relativePath, query, headers)
+                }
+
+                else -> {
+                    null
                 }
             }
-            RequestMethod.DOWNLOAD -> service.download(parsed.relativePath, query, headers)
-            else -> null
-        }
 
         return executeStream(call)
     }
 
-    private fun createService(baseUrl: String): HostNetworkApi? {
-        return try {
-            Retrofit.Builder()
+    private fun createService(baseUrl: String): HostNetworkApi? =
+        try {
+            Retrofit
+                .Builder()
                 .baseUrl(baseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(defaultClient)
@@ -170,13 +197,14 @@ class AppNetworkDepend : IHostNetworkDepend {
         } catch (_: Throwable) {
             null
         }
-    }
 
     private val defaultClient: OkHttpClient by lazy {
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BASIC
-        }
-        OkHttpClient.Builder()
+        val logging =
+            HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BASIC
+            }
+        OkHttpClient
+            .Builder()
             .addInterceptor(logging)
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
@@ -184,21 +212,22 @@ class AppNetworkDepend : IHostNetworkDepend {
             .build()
     }
 
-    private fun parseUrl(raw: String): ParsedUrl? = runCatching {
-        val uri = URI(raw)
-        val base = "${uri.scheme}://${uri.authority}/"
-        val rel = uri.rawPath.trimStart('/').ifEmpty { "" }
-        val query = LinkedHashMap<String, String>()
-        uri.rawQuery?.split("&")?.forEach { pair ->
-            if (pair.isNotEmpty()) {
-                val parts = pair.split("=", limit = 2)
-                val key = parts[0]
-                val value = if (parts.size > 1) parts[1] else ""
-                query[key] = value
+    private fun parseUrl(raw: String): ParsedUrl? =
+        runCatching {
+            val uri = URI(raw)
+            val base = "${uri.scheme}://${uri.authority}/"
+            val rel = uri.rawPath.trimStart('/').ifEmpty { "" }
+            val query = LinkedHashMap<String, String>()
+            uri.rawQuery?.split("&")?.forEach { pair ->
+                if (pair.isNotEmpty()) {
+                    val parts = pair.split("=", limit = 2)
+                    val key = parts[0]
+                    val value = if (parts.size > 1) parts[1] else ""
+                    query[key] = value
+                }
             }
-        }
-        ParsedUrl(base, rel, query)
-    }.getOrNull()
+            ParsedUrl(base, rel, query)
+        }.getOrNull()
 
     private fun buildHeaders(request: HttpRequest): LinkedHashMap<String, String> {
         val headers = LinkedHashMap<String, String>()
@@ -229,15 +258,19 @@ class AppNetworkDepend : IHostNetworkDepend {
         return try {
             if (call == null) return errorString("call is null")
             response = call.execute()
-            val headers = LinkedHashMap<String, String>().apply {
-                response?.headers()?.forEach { pair -> put(pair.first, pair.second) }
-            }
+            val headers =
+                LinkedHashMap<String, String>().apply {
+                    response?.headers()?.forEach { pair -> put(pair.first, pair.second) }
+                }
             val code = response?.code() ?: -1
             val body = response?.body()?.string()
             object : AbsStringConnection() {
                 override fun getResponseHeader(): LinkedHashMap<String, String> = headers
+
                 override fun getResponseCode(): Int = code
+
                 override fun getStringResponseBody(): String? = body
+
                 override fun getErrorMsg(): String = ""
             }
         } catch (e: Throwable) {
@@ -245,7 +278,8 @@ class AppNetworkDepend : IHostNetworkDepend {
         } finally {
             try {
                 response?.body()?.close()
-            } catch (_: Throwable) {}
+            } catch (_: Throwable) {
+            }
         }
     }
 
@@ -253,26 +287,34 @@ class AppNetworkDepend : IHostNetworkDepend {
         return try {
             if (call == null) return errorStream("call is null", null)
             val response = call.execute()
-            val headers = LinkedHashMap<String, String>().apply {
-                response.headers().forEach { pair -> put(pair.first, pair.second) }
-            }
+            val headers =
+                LinkedHashMap<String, String>().apply {
+                    response.headers().forEach { pair -> put(pair.first, pair.second) }
+                }
             val code = response.code()
             val stream = response.body()?.byteStream()
             object : AbsStreamConnection() {
                 override fun getResponseHeader(): LinkedHashMap<String, String> = headers
+
                 override fun getResponseCode(): Int = code
+
                 override fun getInputStreamResponseBody(): InputStream? = stream
+
                 override fun getErrorMsg(): String = ""
+
                 override fun cancel() {
                     try {
                         stream?.close()
-                    } catch (_: Throwable) {}
+                    } catch (_: Throwable) {
+                    }
                     try {
                         response.body()?.close()
-                    } catch (_: Throwable) {}
+                    } catch (_: Throwable) {
+                    }
                     try {
                         call.cancel()
-                    } catch (_: Throwable) {}
+                    } catch (_: Throwable) {
+                    }
                 }
             }
             // NOTE: Do NOT close the response body here - the caller needs
@@ -282,23 +324,29 @@ class AppNetworkDepend : IHostNetworkDepend {
         }
     }
 
-    private fun errorString(msg: String, throwable: Throwable? = null): AbsStringConnection {
-        return object : AbsStringConnection() {
+    private fun errorString(
+        msg: String,
+        throwable: Throwable? = null,
+    ): AbsStringConnection =
+        object : AbsStringConnection() {
             override fun getErrorMsg(): String = msg
-            override fun getException(): Throwable? = throwable
-        }
-    }
 
-    private fun errorStream(msg: String, throwable: Throwable?): AbsStreamConnection {
-        return object : AbsStreamConnection() {
-            override fun getErrorMsg(): String = msg
             override fun getException(): Throwable? = throwable
         }
-    }
+
+    private fun errorStream(
+        msg: String,
+        throwable: Throwable?,
+    ): AbsStreamConnection =
+        object : AbsStreamConnection() {
+            override fun getErrorMsg(): String = msg
+
+            override fun getException(): Throwable? = throwable
+        }
 
     private data class ParsedUrl(
         val baseUrl: String,
         val relativePath: String,
-        val query: LinkedHashMap<String, String>
+        val query: LinkedHashMap<String, String>,
     )
 }

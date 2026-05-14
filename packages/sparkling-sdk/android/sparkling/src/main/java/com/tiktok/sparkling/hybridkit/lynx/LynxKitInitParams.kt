@@ -17,31 +17,22 @@ import kotlinx.coroutines.Deferred
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
-
 open class LynxKitInitParams(
     open var lynxModules: MutableMap<String, SparklingLynxModuleWrapper>? = null,
-
     open var lynxBehaviors: MutableList<Behavior>? = null,
-
     open var initData: LynxInitData? = null,
-
     open var preloadFonts: String? = "",
-
     open override var loadUri: Uri?,
-
     open var templateBundle: TemplateBundle? = null,
-
     open var templateBundleDeferred: (() -> Deferred<TemplateBundle?>?)? = null,
-
     open var templateArray: ByteArray? = null,
-
-    ) : IKitInitParam {
+) : IKitInitParam {
     constructor(
         lynxModules: MutableMap<String, SparklingLynxModuleWrapper>? = null,
         lynxBehaviors: MutableList<Behavior>? = null,
         initData: LynxInitData? = null,
         preloadFonts: String? = "",
-        loadUri: Uri?
+        loadUri: Uri?,
     ) : this(lynxModules, lynxBehaviors, initData, preloadFonts, loadUri, null, null)
 
     override var type: HybridKitType = HybridKitType.LYNX
@@ -56,17 +47,14 @@ open class LynxKitInitParams(
     var kitBridgeService: IKitBridgeService? = null
     var hybridSchemaParams: HybridSchemeParam? = null
     var lynxBackgroundRuntime: LynxBackgroundRuntime? = null
-    private val globalProps = ConcurrentHashMap<String,Any>()
+    private val globalProps = ConcurrentHashMap<String, Any>()
     private var lynxClientDelegate: CopyOnWriteArrayList<LynxViewClient> = CopyOnWriteArrayList()
-
 
     override fun applyHybridSchemeParam(hybridSchemeParams: HybridSchemeParam?) {
         this.hybridSchemaParams = hybridSchemeParams
     }
 
-    override fun getHybridSchemeParam(): HybridSchemeParam? {
-        return hybridSchemaParams
-    }
+    override fun getHybridSchemeParam(): HybridSchemeParam? = hybridSchemaParams
 
     override fun setGlobalProps(_globalProps: Map<String, Any>?) {
         _globalProps?.let {
@@ -80,17 +68,13 @@ open class LynxKitInitParams(
         }
     }
 
-    override fun obtainGlobalProps(): Map<String, Any>? {
-        return globalProps
-    }
+    override fun obtainGlobalProps(): Map<String, Any>? = globalProps
 
     fun addLynxClientDelegate(lynxClientDelegate: LynxViewClient) {
         this.lynxClientDelegate.add(lynxClientDelegate)
     }
 
-    fun lynxClientDelegate(): CopyOnWriteArrayList<LynxViewClient> {
-        return lynxClientDelegate
-    }
+    fun lynxClientDelegate(): CopyOnWriteArrayList<LynxViewClient> = lynxClientDelegate
 
     fun addBehaviours(behaviors: MutableList<Behavior>) {
         if (this.lynxBehaviors == null) {
@@ -109,8 +93,6 @@ open class LynxKitInitParams(
             templateBundle
         }
     }
-
-
 }
 
 open class ExtraInfoCallback {

@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.hybridkit.api
 
 /**
@@ -14,9 +13,9 @@ package com.tiktok.sparkling.hybridkit.api
  */
 abstract class AbsDependencyIterator<T> : IDependencyIterator<T> {
     var next: T? = null
-    override fun next(): T? {
-        return next
-    }
+
+    override fun next(): T? = next
+
     override fun next(t: T?) {
         next = t
     }
@@ -24,11 +23,12 @@ abstract class AbsDependencyIterator<T> : IDependencyIterator<T> {
 
 interface IDependencyIterator<T> {
     fun next(): T?
+
     fun next(t: T?)
 }
 
 inline fun <reified T> IDependencyIterator<T>?.iterator(action: (T) -> Unit) {
-    if(this == null) return
+    if (this == null) return
     var element = this.takeIf { it is T }?.let { it as T }
     while (element != null) {
         action(element)
@@ -37,5 +37,3 @@ inline fun <reified T> IDependencyIterator<T>?.iterator(action: (T) -> Unit) {
         }
     }
 }
-
-

@@ -27,7 +27,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -46,7 +46,7 @@ android {
                 it.systemProperty("robolectric.logging.enabled", "true")
                 it.systemProperty(
                     "user.home",
-                    buildDir.resolve("robolectric-home").absolutePath
+                    buildDir.resolve("robolectric-home").absolutePath,
                 )
             }
         }
@@ -95,28 +95,31 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         html.required.set(true)
     }
 
-    val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*"
-    )
+    val fileFilter =
+        listOf(
+            "**/R.class",
+            "**/R$*.class",
+            "**/BuildConfig.*",
+            "**/Manifest*.*",
+            "**/*Test*.*",
+            "android/**/*.*",
+        )
 
     val mainSrc = "${project.projectDir}/src/main/java"
     sourceDirectories.setFrom(files(mainSrc))
 
-    val debugJavaTree = layout.buildDirectory.dir("intermediates/javac/debug").map { dir ->
-        dir.asFileTree.matching {
-            exclude(fileFilter)
+    val debugJavaTree =
+        layout.buildDirectory.dir("intermediates/javac/debug").map { dir ->
+            dir.asFileTree.matching {
+                exclude(fileFilter)
+            }
         }
-    }
-    val debugKotlinTree = layout.buildDirectory.dir("tmp/kotlin-classes/debug").map { dir ->
-        dir.asFileTree.matching {
-            exclude(fileFilter)
+    val debugKotlinTree =
+        layout.buildDirectory.dir("tmp/kotlin-classes/debug").map { dir ->
+            dir.asFileTree.matching {
+                exclude(fileFilter)
+            }
         }
-    }
     classDirectories.setFrom(debugJavaTree, debugKotlinTree)
 
     val unitTestCoverageExec = layout.buildDirectory.file("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
@@ -129,16 +132,22 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     outputs.upToDateWhen { false }
 }
 
-val publishingGroupId = (findProperty("SPARKLING_PUBLISHING_GROUP_ID") as? String)
-    ?: System.getenv("SPARKLING_PUBLISHING_GROUP_ID")
-    ?: "com.tiktok.sparkling"
-val publishingVersion = (findProperty("SPARKLING_PUBLISHING_VERSION") as? String)
-    ?: System.getenv("SPARKLING_PUBLISHING_VERSION")
-    ?: "2.0.0"
+val publishingGroupId =
+    (findProperty("SPARKLING_PUBLISHING_GROUP_ID") as? String)
+        ?: System.getenv("SPARKLING_PUBLISHING_GROUP_ID")
+        ?: "com.tiktok.sparkling"
+val publishingVersion =
+    (findProperty("SPARKLING_PUBLISHING_VERSION") as? String)
+        ?: System.getenv("SPARKLING_PUBLISHING_VERSION")
+        ?: "2.0.0"
 
 val androidSourcesJar by tasks.register<Jar>("androidSourcesJar") {
     archiveClassifier.set("sources")
-    from(android.sourceSets.getByName("main").java.srcDirs)
+    from(
+        android.sourceSets
+            .getByName("main")
+            .java.srcDirs,
+    )
 }
 
 val emptyJavadocJar by tasks.register<Jar>("javadocJar") {
@@ -190,9 +199,10 @@ afterEvaluate {
             maven {
                 name = "MavenCentral"
                 // Central Portal staging API (replaces legacy s01.oss.sonatype.org shut down June 2025)
-                val repoUrl = (findProperty("mavenCentralRepoUrl") as? String)
-                    ?: System.getenv("MAVEN_CENTRAL_REPO_URL")
-                    ?: "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
+                val repoUrl =
+                    (findProperty("mavenCentralRepoUrl") as? String)
+                        ?: System.getenv("MAVEN_CENTRAL_REPO_URL")
+                        ?: "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
                 url = uri(repoUrl)
                 credentials {
                     username = (findProperty("mavenCentralUsername") as? String)
@@ -209,12 +219,15 @@ afterEvaluate {
 
 // Signing configuration
 signing {
-    val signingKeyId = (findProperty("signing.keyId") as? String)
-        ?: System.getenv("SIGNING_KEY_ID")
-    val signingPassword = (findProperty("signing.password") as? String)
-        ?: System.getenv("SIGNING_PASSWORD")
-    val signingSecretKeyRingFile = (findProperty("signing.secretKeyRingFile") as? String)
-        ?: System.getenv("SIGNING_SECRET_KEY_RING_FILE")
+    val signingKeyId =
+        (findProperty("signing.keyId") as? String)
+            ?: System.getenv("SIGNING_KEY_ID")
+    val signingPassword =
+        (findProperty("signing.password") as? String)
+            ?: System.getenv("SIGNING_PASSWORD")
+    val signingSecretKeyRingFile =
+        (findProperty("signing.secretKeyRingFile") as? String)
+            ?: System.getenv("SIGNING_SECRET_KEY_RING_FILE")
     val signingKey = System.getenv("SIGNING_KEY")
 
     if (!signingKeyId.isNullOrBlank() && !signingPassword.isNullOrBlank()) {
@@ -237,8 +250,11 @@ signing {
 // Sign publications after they are configured
 afterEvaluate {
     signing {
-        val hasSigningConfig = !(System.getenv("SIGNING_KEY_ID").isNullOrBlank() || 
-                                  System.getenv("SIGNING_PASSWORD").isNullOrBlank())
+        val hasSigningConfig =
+            !(
+                System.getenv("SIGNING_KEY_ID").isNullOrBlank() ||
+                    System.getenv("SIGNING_PASSWORD").isNullOrBlank()
+            )
         if (hasSigningConfig) {
             sign(extensions.getByType<PublishingExtension>().publications["release"])
         } else {

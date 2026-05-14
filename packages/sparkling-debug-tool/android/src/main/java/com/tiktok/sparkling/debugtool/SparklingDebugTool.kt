@@ -36,16 +36,23 @@ object SparklingDebugTool {
     }
 
     @JvmStatic
-    fun getDevUrl(context: Context, fallback: String): String {
-        val stored = context.applicationContext
-            .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(KEY_DEV_URL, null)
-            ?.trim()
+    fun getDevUrl(
+        context: Context,
+        fallback: String,
+    ): String {
+        val stored =
+            context.applicationContext
+                .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getString(KEY_DEV_URL, null)
+                ?.trim()
         return if (stored.isNullOrEmpty()) fallback else stored
     }
 
     @JvmStatic
-    fun setDevUrl(context: Context, url: String) {
+    fun setDevUrl(
+        context: Context,
+        url: String,
+    ) {
         context.applicationContext
             .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .edit()
@@ -64,25 +71,32 @@ object SparklingDebugTool {
             return
         }
 
-        val input = EditText(activity).apply {
-            setText(initialUrl ?: "")
-            hint = "http://10.0.2.2:5969/main.lynx.bundle"
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
-            setSelection(text.length)
-        }
+        val input =
+            EditText(activity).apply {
+                setText(initialUrl ?: "")
+                hint = "http://10.0.2.2:5969/main.lynx.bundle"
+                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+                setSelection(text.length)
+            }
 
-        val dialog = AlertDialog.Builder(activity)
-            .setTitle("Set Sparkling Dev URL")
-            .setMessage("Update the main Lynx bundle URL for debug mode.")
-            .setView(input)
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Save", null)
-            .create()
+        val dialog =
+            AlertDialog
+                .Builder(activity)
+                .setTitle("Set Sparkling Dev URL")
+                .setMessage("Update the main Lynx bundle URL for debug mode.")
+                .setView(input)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Save", null)
+                .create()
 
         dialog.setOnShowListener {
             val saveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             saveButton.setOnClickListener {
-                val value = input.text?.toString()?.trim().orEmpty()
+                val value =
+                    input.text
+                        ?.toString()
+                        ?.trim()
+                        .orEmpty()
                 if (value.isEmpty()) {
                     Toast.makeText(activity, "Dev URL cannot be empty", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener

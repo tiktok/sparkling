@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.hybridkit.base
 
 import android.content.Context
@@ -10,10 +9,14 @@ import android.view.View
 import com.tiktok.sparkling.hybridkit.HybridContext
 import org.json.JSONObject
 
-
 interface IPerformanceView {
-    enum class LoadStatus(status: Int) {
-        INIT(0), LOADING(1), SUCCESS(2), FAIL(3)
+    enum class LoadStatus(
+        status: Int,
+    ) {
+        INIT(0),
+        LOADING(1),
+        SUCCESS(2),
+        FAIL(3),
     }
 
     /**
@@ -27,13 +30,17 @@ interface IPerformanceView {
      * The framework will actively call this method to perform the loadUrl operation before preloading.
      */
     fun loadUrl()
+
     /**
      * The business side needs to implement this method to perform targeted operations for data updates after fetching.
      * The framework will actively call this method when fetching.
      * @param context The context is the real context passed in when fetching.
      * @param customData The custom data for other usages
      */
-    fun refreshData(context: Context, hybridContext: HybridContext? = null)
+    fun refreshData(
+        context: Context,
+        hybridContext: HybridContext? = null,
+    )
 
     fun processAfterUseCached(hybridContext: HybridContext?)
 
@@ -42,7 +49,10 @@ interface IPerformanceView {
     // update global props, for lynx it only works above version 2.3.
     fun updateGlobalPropsByIncrement(data: Map<String, Any>)
 
-    fun sendEventByJSON(eventName: String, params: JSONObject?)
+    fun sendEventByJSON(
+        eventName: String,
+        params: JSONObject?,
+    )
 
     fun actualView(): View
 
@@ -61,14 +71,12 @@ interface IPerformanceView {
     fun hasRelease(): Boolean
 }
 
-interface IHybridView : IPerformanceView{
-
+interface IHybridView : IPerformanceView {
     // determine whether the page is loaded successfully
     fun isLoadSuccess(): Boolean
-
 }
 
 enum class Theme {
     LIGHT,
-    DARK
+    DARK,
 }

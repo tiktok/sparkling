@@ -12,16 +12,18 @@ import com.tiktok.sparkling.method.protocol.impl.errors.JSBErrorReportModel
 import com.tiktok.sparkling.method.protocol.impl.lifecycle.fe.FeCallMonitorModel
 import org.json.JSONObject
 
-class BridgeCall(val context: BridgeContext) {
-
+class BridgeCall(
+    val context: BridgeContext,
+) {
     companion object {
         const val DEFAULT_NAMESPACE = "DEFAULT"
     }
 
     enum class PlatForm {
-        Lynx, Web, Other,
+        Lynx,
+        Web,
+        Other,
     }
-
 
     var callbackId = ""
     var bridgeName = ""
@@ -47,11 +49,12 @@ class BridgeCall(val context: BridgeContext) {
      */
     val jsbSDKErrorReportModel: JSBErrorReportModel = JSBErrorReportModel()
 
-    //for lifeClient
+    // for lifeClient
     internal var callBeginTime: Long = 0
+
 //    var protocolVersion: Int = ProtocolVersion.UNKNOWN
     internal var monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder? = null
-    internal var invocation: String = "" //same as rawReq
+    internal var invocation: String = "" // same as rawReq
     internal var beginCreateCallBaskMsgTime: Long = 0
     internal var endCreateCallBaskMsgTime: Long = 0
     internal var callbackMsg: String? = null
@@ -60,7 +63,7 @@ class BridgeCall(val context: BridgeContext) {
     internal var feCallMonitorModel = FeCallMonitorModel()
     internal var jsbEngine: String = ""
 
-    //for call to get invocation's jsonObject
+    // for call to get invocation's jsonObject
     internal var invocationJson: JSONObject? = null
 
     override fun toString(): String {
@@ -69,11 +72,11 @@ class BridgeCall(val context: BridgeContext) {
         } else {
             return "BridgeCall(callbackId='$callbackId', bridgeName='$bridgeName', hitBusinessHandler='$hitBusinessHandler', url='$url', msgType='$msgType', params='$params', sdkVersion=$sdkVersion, nameSpace='$nameSpace', frameUrl='$frameUrl')"
         }
-
     }
-
 }
 
 enum class CancelCallbackType {
-    NONE, ALL, ONLY_SUCCESS
+    NONE,
+    ALL,
+    ONLY_SUCCESS,
 }

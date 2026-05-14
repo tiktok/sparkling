@@ -4,5 +4,7 @@
 package com.tiktok.sparkling.hybridkit.base
 
 enum class HybridKitType {
-    UNKNOWN, WEB, LYNX
+    UNKNOWN,
+    WEB,
+    LYNX,
 }

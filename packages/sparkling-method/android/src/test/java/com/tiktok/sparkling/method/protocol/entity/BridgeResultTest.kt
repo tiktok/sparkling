@@ -17,7 +17,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
 class BridgeResultTest {
-
     @Before
     fun setUp() {
         // Mock Android dependencies for testing

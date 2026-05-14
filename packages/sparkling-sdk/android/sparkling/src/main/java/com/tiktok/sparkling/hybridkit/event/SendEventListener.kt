@@ -6,9 +6,14 @@ package com.tiktok.sparkling.hybridkit.event
 import com.tiktok.sparkling.hybridkit.api.AbsDependencyIterator
 import com.tiktok.sparkling.hybridkit.base.IKitView
 
+typealias SendEventListener = ((kitView: IKitView, eventName: String, params: Any?) -> Unit)
 
-typealias SendEventListener = ((kitView:IKitView, eventName: String, params: Any?) -> Unit)
-
-abstract class AbsSendEventListener : AbsDependencyIterator<AbsSendEventListener>(), SendEventListener {
-    abstract override fun invoke(kitView: IKitView, eventName: String, params: Any?)
+abstract class AbsSendEventListener :
+    AbsDependencyIterator<AbsSendEventListener>(),
+    SendEventListener {
+    abstract override fun invoke(
+        kitView: IKitView,
+        eventName: String,
+        params: Any?,
+    )
 }

@@ -25,7 +25,10 @@ object AppFileUtils {
      * @param filePath String
      * @return String?
      */
-    fun getOrCopiedFilePath(context: Context, filePath: String): String? {
+    fun getOrCopiedFilePath(
+        context: Context,
+        filePath: String,
+    ): String? {
         val uri = Uri.parse(filePath)
         uri ?: return null
         val scheme = uri.scheme
@@ -56,18 +59,22 @@ object AppFileUtils {
             }
 
             resultUri =
-                if (TextUtils.isEmpty(split[1])) return null else contentUri?.let {
-                    ContentUris.withAppendedId(
-                        it,
-                        split[1].toLong()
-                    )
+                if (TextUtils.isEmpty(split[1])) {
+                    return null
+                } else {
+                    contentUri?.let {
+                        ContentUris.withAppendedId(
+                            it,
+                            split[1].toLong(),
+                        )
+                    }
                 }
         }
         if (scheme == ContentResolver.SCHEME_CONTENT && "media" == uri.authority) {
             resultUri = uri
         }
         if (resultUri != null) {
-            var temPath = context.cacheDir.absolutePath  + "/tools/temMedia/" + System.currentTimeMillis()
+            var temPath = context.cacheDir.absolutePath + "/tools/temMedia/" + System.currentTimeMillis()
             if (!checkFileExists(temPath)) {
                 createFile(temPath, true)
             }
@@ -124,11 +131,12 @@ object AppFileUtils {
         return BdFileUtils.convertUriToPath(context, uri)
     }
 
-    private fun checkFileExists(path: String): Boolean {
-        return if (path.isEmpty()) false else File(path).exists()
-    }
+    private fun checkFileExists(path: String): Boolean = if (path.isEmpty()) false else File(path).exists()
 
-    private fun createFile(path: String, isFile: Boolean): File? {
+    private fun createFile(
+        path: String,
+        isFile: Boolean,
+    ): File? {
         if (path.isNotEmpty()) {
             val file = File(path)
             if (!file.exists()) {
@@ -150,7 +158,5 @@ object AppFileUtils {
         }
     }
 
-    private fun isAndroidQOrLater(): Boolean {
-        return Build.VERSION.SDK_INT >= 29
-    }
+    private fun isAndroidQOrLater(): Boolean = Build.VERSION.SDK_INT >= 29
 }

@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core
 
 import com.tiktok.sparkling.method.registry.core.model.context.ContextProviderFactory
@@ -14,7 +13,6 @@ import org.junit.Before
 import org.junit.Test
 
 class SparklingBridgeManagerTest {
-
     private lateinit var mockRegistry: IDLMethodRegistry
 
     @Before
@@ -45,15 +43,19 @@ class SparklingBridgeManagerTest {
         // Given - Create a concrete test class instead of mocking
         class TestIDLMethod : IDLBridgeMethod {
             override val name: String = "testMethod"
-            
-            override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {
+
+            override fun realHandle(
+                params: Map<String, Any?>,
+                callback: IDLBridgeMethod.Callback,
+                type: BridgePlatformType,
+            ) {
                 // Test implementation
             }
-            
+
             override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {
                 // Test implementation
             }
-            
+
             override fun setBridgeContext(bridgeContext: IBridgeContext) {
                 // Test implementation
             }
@@ -71,15 +73,19 @@ class SparklingBridgeManagerTest {
         // Given
         class TestIDLMethodCustom : IDLBridgeMethod {
             override val name: String = "testMethodCustom"
-            
-            override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {
+
+            override fun realHandle(
+                params: Map<String, Any?>,
+                callback: IDLBridgeMethod.Callback,
+                type: BridgePlatformType,
+            ) {
                 // Test implementation
             }
-            
+
             override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {
                 // Test implementation
             }
-            
+
             override fun setBridgeContext(bridgeContext: IBridgeContext) {
                 // Test implementation
             }
@@ -170,7 +176,7 @@ class SparklingBridgeManagerTest {
     fun testMultiplePlatformTypeSupport() {
         // Given
         val methodName = "testMethod"
-        
+
         // When & Then - Test all platform types
         val allResult = SparklingBridgeManager.findIDLMethodClass(BridgePlatformType.ALL, methodName)
         val webResult = SparklingBridgeManager.findIDLMethodClass(BridgePlatformType.WEB, methodName)

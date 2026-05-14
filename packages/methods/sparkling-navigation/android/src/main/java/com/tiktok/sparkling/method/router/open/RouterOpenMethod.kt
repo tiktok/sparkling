@@ -2,9 +2,7 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.router.open
-
 
 import android.util.Log
 import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
@@ -14,25 +12,21 @@ import com.tiktok.sparkling.method.registry.core.utils.createXModel
 import com.tiktok.sparkling.method.router.utils.IHostRouterDepend
 import com.tiktok.sparkling.method.router.utils.RouterProvider
 
-
 /**
  * Router open method implementation.
  * Handles opening new pages/routes with various configuration options.
  */
 class RouterOpenMethod : AbsRouterOpenMethodIDL() {
-
     companion object {
         private const val TAG = "RouterOpenMethod"
     }
 
-    private fun getRouterDependInstance(): IHostRouterDepend? {
-        return RouterProvider.hostRouterDepend
-    }
+    private fun getRouterDependInstance(): IHostRouterDepend? = RouterProvider.hostRouterDepend
 
     override fun handle(
         params: IDLMethodOpenParamModel,
         callback: CompletionBlock<IDLMethodOpenResultModel>,
-        type: BridgePlatformType
+        type: BridgePlatformType,
     ) {
         // Validate scheme is not null or empty
         val scheme = params.scheme
@@ -43,21 +37,22 @@ class RouterOpenMethod : AbsRouterOpenMethodIDL() {
         }
 
         // Validate replaceType if provided
-        val replaceType: ReplaceType? = if (!params.replaceType.isNullOrBlank()) {
-            try {
-                ReplaceType.valueOf(params.replaceType!!)
-            } catch (e: IllegalArgumentException) {
-                Log.w(TAG, "Invalid replaceType: ${params.replaceType}")
-                callback.onFailure(
-                    IDLBridgeMethod.INVALID_PARAM,
-                    "Invalid replaceType: ${params.replaceType}. Valid values are: ${ReplaceType.values().joinToString()}",
-                    null
-                )
-                return
+        val replaceType: ReplaceType? =
+            if (!params.replaceType.isNullOrBlank()) {
+                try {
+                    ReplaceType.valueOf(params.replaceType!!)
+                } catch (e: IllegalArgumentException) {
+                    Log.w(TAG, "Invalid replaceType: ${params.replaceType}")
+                    callback.onFailure(
+                        IDLBridgeMethod.INVALID_PARAM,
+                        "Invalid replaceType: ${params.replaceType}. Valid values are: ${ReplaceType.values().joinToString()}",
+                        null,
+                    )
+                    return
+                }
+            } else {
+                ReplaceType.onlyCloseAfterOpenSucceed
             }
-        } else {
-            ReplaceType.onlyCloseAfterOpenSucceed
-        }
 
         // Get and validate context
         val context = getSDKContext()?.context
@@ -79,19 +74,21 @@ class RouterOpenMethod : AbsRouterOpenMethodIDL() {
         val useSysBrowser = params.useSysBrowser ?: false
         val extra = params.extra
 
-        val extraInfo = mutableMapOf<String, Any>(
-            "useSysBrowser" to useSysBrowser,
-            "extra" to (extra ?: emptyMap<Any, Any>())
-        )
+        val extraInfo =
+            mutableMapOf<String, Any>(
+                "useSysBrowser" to useSysBrowser,
+                "extra" to (extra ?: emptyMap<Any, Any>()),
+            )
 
         // Handle non-replace open
         if (!replace) {
-            val success = try {
-                routerDepend.openScheme(getSDKContext(), scheme, extraInfo, type, context = context)
-            } catch (e: Exception) {
-                Log.e(TAG, "Exception while opening scheme: ${e.message}")
-                false
-            }
+            val success =
+                try {
+                    routerDepend.openScheme(getSDKContext(), scheme, extraInfo, type, context = context)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Exception while opening scheme: ${e.message}")
+                    false
+                }
 
             if (success) {
                 callback.onSuccess(IDLMethodOpenResultModel::class.java.createXModel())
@@ -102,30 +99,36 @@ class RouterOpenMethod : AbsRouterOpenMethodIDL() {
         }
 
         // Handle replace open with different replace types
-        val success: Boolean = try {
-            when (replaceType) {
-                ReplaceType.alwaysCloseBeforeOpen -> {
-                    routerDepend.closeView(getSDKContext(), type)
-                    routerDepend.openScheme(getSDKContext(), scheme, extraInfo, type, context = context)
-                }
-                ReplaceType.alwaysCloseAfterOpen -> {
-                    val opened = routerDepend.openScheme(getSDKContext(), scheme, extraInfo, type, context = context)
-                    routerDepend.closeView(getSDKContext(), type)
-                    opened
-                }
-                ReplaceType.onlyCloseAfterOpenSucceed -> {
-                    val opened = routerDepend.openScheme(getSDKContext(), scheme, extraInfo, type, context = context)
-                    if (opened) {
+        val success: Boolean =
+            try {
+                when (replaceType) {
+                    ReplaceType.alwaysCloseBeforeOpen -> {
                         routerDepend.closeView(getSDKContext(), type)
+                        routerDepend.openScheme(getSDKContext(), scheme, extraInfo, type, context = context)
                     }
-                    opened
+
+                    ReplaceType.alwaysCloseAfterOpen -> {
+                        val opened = routerDepend.openScheme(getSDKContext(), scheme, extraInfo, type, context = context)
+                        routerDepend.closeView(getSDKContext(), type)
+                        opened
+                    }
+
+                    ReplaceType.onlyCloseAfterOpenSucceed -> {
+                        val opened = routerDepend.openScheme(getSDKContext(), scheme, extraInfo, type, context = context)
+                        if (opened) {
+                            routerDepend.closeView(getSDKContext(), type)
+                        }
+                        opened
+                    }
+
+                    null -> {
+                        false
+                    }
                 }
-                null -> false
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception during replace open: ${e.message}")
+                false
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Exception during replace open: ${e.message}")
-            false
-        }
 
         if (success) {
             callback.onSuccess(IDLMethodOpenResultModel::class.java.createXModel())
@@ -134,8 +137,9 @@ class RouterOpenMethod : AbsRouterOpenMethodIDL() {
         }
     }
 }
+
 enum class ReplaceType {
     alwaysCloseAfterOpen,
     alwaysCloseBeforeOpen,
-    onlyCloseAfterOpenSucceed
+    onlyCloseAfterOpenSucceed,
 }

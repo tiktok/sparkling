@@ -10,18 +10,27 @@ import okhttp3.Request
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
-class BuiltinTemplateProvider(context: Context) : AbsTemplateProvider() {
-
+class BuiltinTemplateProvider(
+    context: Context,
+) : AbsTemplateProvider() {
     private var mContext: Context = context.applicationContext
     private val httpClient = OkHttpClient()
 
-    override fun loadTemplate(uri: String, callback: Callback) {
+    override fun loadTemplate(
+        uri: String,
+        callback: Callback,
+    ) {
         Thread {
             try {
                 // Debug mode supports remote HTTP bundle URLs as well as local asset bundles.
                 // Release paths use bundle=... and therefore stay on assets only.
                 if (isRemoteUrl(uri)) {
-                    val request = Request.Builder().url(uri).get().build()
+                    val request =
+                        Request
+                            .Builder()
+                            .url(uri)
+                            .get()
+                            .build()
                     httpClient.newCall(request).execute().use { response ->
                         if (!response.isSuccessful) {
                             callback.onFailed("HTTP ${response.code}")

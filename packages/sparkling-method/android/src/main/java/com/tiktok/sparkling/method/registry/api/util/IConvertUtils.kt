@@ -11,11 +11,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 interface IConvertUtils {
-
     fun toStringOrJson(data: Any?): String
 
     fun mapToJSON(map: Map<String, Any?>): JSONObject
-
 
     fun mapSupportPiperdataToJSON(map: Map<String, Any?>): JSONObject
 
@@ -26,7 +24,6 @@ interface IConvertUtils {
     fun jsonToMap(json: JSONObject): Map<String, Any?>
 
     fun jsonToList(json: JSONArray): List<Any?>
-
 
     fun convertJsonToMap(jsonObject: JSONObject): WritableMap
 

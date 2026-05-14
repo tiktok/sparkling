@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit
  * Utility object to manage asynchronous tasks.
  */
 object AsyncUtils {
-
     private val sequenceExecutor = Executors.newSingleThreadExecutor()
     private val blockedExecutor =
         ThreadPoolExecutor(10, 10, 3, TimeUnit.SECONDS, LinkedBlockingQueue()).apply { allowCoreThreadTimeOut(true) }
@@ -25,7 +24,11 @@ object AsyncUtils {
      *        If false, exceptions will be rethrown and must be handled by the caller.
      * @param task The runnable task to be submitted to an executor service.
      */
-    fun submit(type: TaskType, ignoreException: Boolean = true, task: Runnable) {
+    fun submit(
+        type: TaskType,
+        ignoreException: Boolean = true,
+        task: Runnable,
+    ) {
         runCatching {
             getExecutor(type).submit(task)
         }.onFailure {
@@ -40,13 +43,11 @@ object AsyncUtils {
      * @param type The type of task associated with the executor to retrieve.
      * @return The executor service associated with the specified type.
      */
-    fun getExecutor(type: TaskType): ExecutorService {
-        return when (type) {
+    fun getExecutor(type: TaskType): ExecutorService =
+        when (type) {
             TaskType.Sequence -> sequenceExecutor
             TaskType.Blocked -> blockedExecutor
         }
-    }
-
 }
 
 /**
@@ -66,5 +67,5 @@ enum class TaskType {
      * This type of executor allows multiple tasks to run in parallel with a larger pool,
      * which is useful when tasks involve blocking I/O operations.
      */
-    Blocked;
+    Blocked,
 }

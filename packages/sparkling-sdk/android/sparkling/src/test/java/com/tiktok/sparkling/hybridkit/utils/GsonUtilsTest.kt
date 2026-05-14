@@ -10,14 +10,16 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class GsonUtilsTest {
-
-    data class TestData(val name: String, val value: Int)
+    data class TestData(
+        val name: String,
+        val value: Int,
+    )
 
     @Test
     fun testToJsonWithValidObject() {
         val testData = TestData("test", 42)
         val result = GsonUtils.toJson(testData)
-        
+
         assertNotNull(result)
         assertTrue(result!!.contains("test"))
         assertTrue(result.contains("42"))
@@ -33,7 +35,7 @@ class GsonUtilsTest {
     fun testFromJsonWithValidJsonString() {
         val jsonString = """{"name":"test","value":42}"""
         val result = GsonUtils.fromJson(jsonString, TestData::class.java)
-        
+
         assertEquals("test", result.name)
         assertEquals(42, result.value)
     }
@@ -43,7 +45,7 @@ class GsonUtilsTest {
         val jsonString = """{"name":"test","value":42}"""
         val jsonElement: JsonElement = JsonParser.parseString(jsonString)
         val result = GsonUtils.fromJson(jsonElement, TestData::class.java)
-        
+
         assertEquals("test", result.name)
         assertEquals(42, result.value)
     }

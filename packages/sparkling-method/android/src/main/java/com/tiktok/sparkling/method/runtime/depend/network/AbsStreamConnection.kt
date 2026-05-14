@@ -5,31 +5,18 @@ package com.tiktok.sparkling.method.runtime.depend.network
 
 import java.io.InputStream
 
-
 abstract class AbsStreamConnection {
-    open fun getInputStreamResponseBody(): InputStream? {
-        return null
-    }
+    open fun getInputStreamResponseBody(): InputStream? = null
 
-    open fun getResponseHeader(): LinkedHashMap<String, String> {
-        return LinkedHashMap<String, String>()
-    }
+    open fun getResponseHeader(): LinkedHashMap<String, String> = LinkedHashMap<String, String>()
 
-    open fun getResponseCode(): Int {
-        return 0
-    }
+    open fun getResponseCode(): Int = 0
 
-    open fun getClientCode(): Int {
-        return 0
-    }
+    open fun getClientCode(): Int = 0
 
-    open fun getErrorMsg(): String {
-        return ""
-    }
+    open fun getErrorMsg(): String = ""
 
-    open fun getException(): Throwable? {
-        return null
-    }
+    open fun getException(): Throwable? = null
 
     open fun cancel() {
     }

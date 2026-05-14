@@ -23,7 +23,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -43,16 +43,22 @@ dependencies {
     implementation(libs.lynx.devtool)
 }
 
-val publishingGroupId = (findProperty("SPARKLING_PUBLISHING_GROUP_ID") as? String)
-    ?: System.getenv("SPARKLING_PUBLISHING_GROUP_ID")
-    ?: "com.tiktok.sparkling"
-val publishingVersion = (findProperty("SPARKLING_PUBLISHING_VERSION") as? String)
-    ?: System.getenv("SPARKLING_PUBLISHING_VERSION")
-    ?: "2.0.0"
+val publishingGroupId =
+    (findProperty("SPARKLING_PUBLISHING_GROUP_ID") as? String)
+        ?: System.getenv("SPARKLING_PUBLISHING_GROUP_ID")
+        ?: "com.tiktok.sparkling"
+val publishingVersion =
+    (findProperty("SPARKLING_PUBLISHING_VERSION") as? String)
+        ?: System.getenv("SPARKLING_PUBLISHING_VERSION")
+        ?: "2.0.0"
 
 val androidSourcesJar by tasks.register<Jar>("androidSourcesJar") {
     archiveClassifier.set("sources")
-    from(android.sourceSets.getByName("main").java.srcDirs)
+    from(
+        android.sourceSets
+            .getByName("main")
+            .java.srcDirs,
+    )
 }
 
 val emptyJavadocJar by tasks.register<Jar>("javadocJar") {
@@ -103,9 +109,10 @@ afterEvaluate {
         repositories {
             maven {
                 name = "MavenCentral"
-                val repoUrl = (findProperty("mavenCentralRepoUrl") as? String)
-                    ?: System.getenv("MAVEN_CENTRAL_REPO_URL")
-                    ?: "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
+                val repoUrl =
+                    (findProperty("mavenCentralRepoUrl") as? String)
+                        ?: System.getenv("MAVEN_CENTRAL_REPO_URL")
+                        ?: "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
                 url = uri(repoUrl)
                 credentials {
                     username = (findProperty("mavenCentralUsername") as? String)
@@ -121,12 +128,15 @@ afterEvaluate {
 }
 
 signing {
-    val signingKeyId = (findProperty("signing.keyId") as? String)
-        ?: System.getenv("SIGNING_KEY_ID")
-    val signingPassword = (findProperty("signing.password") as? String)
-        ?: System.getenv("SIGNING_PASSWORD")
-    val signingSecretKeyRingFile = (findProperty("signing.secretKeyRingFile") as? String)
-        ?: System.getenv("SIGNING_SECRET_KEY_RING_FILE")
+    val signingKeyId =
+        (findProperty("signing.keyId") as? String)
+            ?: System.getenv("SIGNING_KEY_ID")
+    val signingPassword =
+        (findProperty("signing.password") as? String)
+            ?: System.getenv("SIGNING_PASSWORD")
+    val signingSecretKeyRingFile =
+        (findProperty("signing.secretKeyRingFile") as? String)
+            ?: System.getenv("SIGNING_SECRET_KEY_RING_FILE")
     val signingKey = System.getenv("SIGNING_KEY")
 
     if (!signingKeyId.isNullOrBlank() && !signingPassword.isNullOrBlank()) {
@@ -146,8 +156,11 @@ signing {
 
 afterEvaluate {
     signing {
-        val hasSigningConfig = !(System.getenv("SIGNING_KEY_ID").isNullOrBlank() ||
-            System.getenv("SIGNING_PASSWORD").isNullOrBlank())
+        val hasSigningConfig =
+            !(
+                System.getenv("SIGNING_KEY_ID").isNullOrBlank() ||
+                    System.getenv("SIGNING_PASSWORD").isNullOrBlank()
+            )
         if (hasSigningConfig) {
             sign(extensions.getByType<PublishingExtension>().publications["release"])
         } else {

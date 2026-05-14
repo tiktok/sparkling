@@ -4,7 +4,12 @@
 package com.tiktok.sparkling.method.media.depend
 
 class ChooseMediaResults {
-    class FileInfo(val tempFilePath: String, val size: Long, val mediaType: String, val binaryData : ByteArray?= null) {
+    class FileInfo(
+        val tempFilePath: String,
+        val size: Long,
+        val mediaType: String,
+        val binaryData: ByteArray? = null,
+    ) {
         var base64Data: String? = null
         var mimeType: String? = null
     }

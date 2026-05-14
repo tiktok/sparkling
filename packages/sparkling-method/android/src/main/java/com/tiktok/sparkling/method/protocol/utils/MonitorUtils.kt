@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.protocol.utils
 
 import org.json.JSONObject
@@ -12,11 +11,18 @@ import org.json.JSONObject
  */
 class MonitorUtils {
     companion object {
-        fun customReport(eventName: String, eventInfo: JSONObject?) {
+        fun customReport(
+            eventName: String,
+            eventInfo: JSONObject?,
+        ) {
             customReport(eventName, null, eventInfo)
         }
 
-        fun customReport(eventName: String, category: JSONObject?, metrics: JSONObject?) {
+        fun customReport(
+            eventName: String,
+            category: JSONObject?,
+            metrics: JSONObject?,
+        ) {
             customReport(eventName, category, metrics, null)
         }
 
@@ -24,7 +30,7 @@ class MonitorUtils {
             eventName: String,
             category: JSONObject?,
             metrics: JSONObject?,
-            extraInfo: String?
+            extraInfo: String?,
         ) {
             // TODO: implement by injection
         }
@@ -36,6 +42,5 @@ class MonitorUtils {
         fun lifecycleReportPerf(params: HashMap<String, Any>) {
             // TODO: implement by injection
         }
-
     }
 }

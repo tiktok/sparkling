@@ -8,7 +8,7 @@ object SchemeConstants {
     object Scheme {
         const val PREFIX = "hybrid://"
     }
-    
+
     object Host {
         const val LYNX_VIEW = "lynxview"
         const val LYNX_VIEW_PAGE = "lynxview_page"
@@ -39,7 +39,7 @@ object SchemeConstants {
         const val HIDE_ERROR = "hide_error"
         const val FORCE_THEME_STYLE = "force_theme_style"
     }
-    
+
     object Value {
         const val ENABLED = "1"
     }

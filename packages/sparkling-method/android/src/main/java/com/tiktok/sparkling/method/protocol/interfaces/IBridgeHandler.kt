@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.protocol.interfaces
 
 import com.tiktok.sparkling.method.protocol.BridgeContext
@@ -12,8 +11,9 @@ interface IBridgeHandler {
     fun handle(
         bridgeContext: BridgeContext,
         call: BridgeCall,
-        callback: IBridgeMethodCallback
+        callback: IBridgeMethodCallback,
     )
+
     fun onRelease()
 
     /**

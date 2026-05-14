@@ -13,7 +13,13 @@ import com.tiktok.sparkling.method.runtime.depend.network.RequestMethod
 interface IHostNetworkDepend {
     fun getAPIParams(): Map<String, Any>? = null
 
-    fun requestForString(method: RequestMethod, request: HttpRequest): AbsStringConnection
+    fun requestForString(
+        method: RequestMethod,
+        request: HttpRequest,
+    ): AbsStringConnection
 
-    fun requestForStream(method: RequestMethod, request: HttpRequest): AbsStreamConnection
+    fun requestForStream(
+        method: RequestMethod,
+        request: HttpRequest,
+    ): AbsStreamConnection
 }

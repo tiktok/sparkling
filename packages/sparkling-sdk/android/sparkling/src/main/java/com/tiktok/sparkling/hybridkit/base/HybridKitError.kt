@@ -9,9 +9,7 @@ class HybridKitError {
     var originCode: Int? = null
     var originReason: String? = null
 
-    fun printErrorMsg() : String{
-        return "errorCode = $errorCode, errorReason = $errorReason"
-    }
+    fun printErrorMsg(): String = "errorCode = $errorCode, errorReason = $errorReason"
 }
 
 object HybridErrorConstantCode {

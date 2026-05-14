@@ -14,7 +14,6 @@ import org.junit.Test
 import org.mockito.Mockito
 
 class DefaultBridgeLifeClientImpTest {
-
     private lateinit var lifeClient: DefaultBridgeLifeClientImp
     private lateinit var mockBridgeContext: BridgeContext
     private lateinit var mockBridgeCall: BridgeCall
@@ -27,12 +26,12 @@ class DefaultBridgeLifeClientImpTest {
         mockBridgeCall = Mockito.mock(BridgeCall::class.java)
         mockErrorReportModel = Mockito.mock(JSBErrorReportModel::class.java)
         mockFeCallMonitorModel = Mockito.mock(FeCallMonitorModel::class.java)
-        
+
         // Set up the BridgeCall mock
         Mockito.`when`(mockBridgeCall.context).thenReturn(mockBridgeContext)
         Mockito.`when`(mockBridgeCall.jsbSDKErrorReportModel).thenReturn(mockErrorReportModel)
         Mockito.`when`(mockBridgeCall.feCallMonitorModel).thenReturn(mockFeCallMonitorModel)
-        
+
         lifeClient = DefaultBridgeLifeClientImp(mockBridgeContext)
     }
 
@@ -57,9 +56,9 @@ class DefaultBridgeLifeClientImpTest {
         Mockito.`when`(mockBridgeCall.url).thenReturn("http://test.com")
         Mockito.`when`(mockBridgeCall.bridgeName).thenReturn("testBridge")
         Mockito.`when`(mockBridgeCall.jsbEngine).thenReturn("testEngine")
-        
+
         lifeClient.onBridgeCalledStart(mockBridgeCall, mockBridgeContext)
-        
+
         // Verify the error report model was set up
         Mockito.verify(mockErrorReportModel).setJsbBridgeSdk("SparklingBridge")
         Mockito.verify(mockErrorReportModel).setJsbUrl("http://test.com")

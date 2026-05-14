@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core
 
 import com.tiktok.sparkling.method.registry.api.BridgeSettings
@@ -14,107 +13,176 @@ import org.junit.Before
 import org.junit.Test
 
 class IDLMethodRegistryTest {
-
     private lateinit var registry: IDLMethodRegistry
     private lateinit var mockBridgeContext: IBridgeContext
-    
+
     // Create concrete test classes for different method names
     private class TestMethod1 : IDLBridgeMethod {
         override val name: String = "testMethod"
         override val compatibility: IDLBridgeMethod.Compatibility = IDLBridgeMethod.Compatibility.Compatible
-        override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {}
+
+        override fun realHandle(
+            params: Map<String, Any?>,
+            callback: IDLBridgeMethod.Callback,
+            type: BridgePlatformType,
+        ) {}
+
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {}
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) {}
     }
-    
+
     private class TestMethod2 : IDLBridgeMethod {
         override val name: String = "webMethod"
         override val compatibility: IDLBridgeMethod.Compatibility = IDLBridgeMethod.Compatibility.Compatible
-        override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {}
+
+        override fun realHandle(
+            params: Map<String, Any?>,
+            callback: IDLBridgeMethod.Callback,
+            type: BridgePlatformType,
+        ) {}
+
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {}
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) {}
     }
-    
+
     private class TestMethod3 : IDLBridgeMethod {
         override val name: String = "optimizedMethod"
         override val compatibility: IDLBridgeMethod.Compatibility = IDLBridgeMethod.Compatibility.Compatible
-        override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {}
+
+        override fun realHandle(
+            params: Map<String, Any?>,
+            callback: IDLBridgeMethod.Callback,
+            type: BridgePlatformType,
+        ) {}
+
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {}
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) {}
     }
-    
+
     private class TestMethod4 : IDLBridgeMethod {
         override val name: String = "findableMethod"
         override val compatibility: IDLBridgeMethod.Compatibility = IDLBridgeMethod.Compatibility.Compatible
-        override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {}
+
+        override fun realHandle(
+            params: Map<String, Any?>,
+            callback: IDLBridgeMethod.Callback,
+            type: BridgePlatformType,
+        ) {}
+
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {}
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) {}
     }
-    
+
     private class TestMethod5 : IDLBridgeMethod {
         override val name: String = "existingMethod"
         override val compatibility: IDLBridgeMethod.Compatibility = IDLBridgeMethod.Compatibility.Compatible
-        override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {}
+
+        override fun realHandle(
+            params: Map<String, Any?>,
+            callback: IDLBridgeMethod.Callback,
+            type: BridgePlatformType,
+        ) {}
+
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {}
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) {}
     }
-    
+
     private class TestMethod6 : IDLBridgeMethod {
         override val name: String = "method1"
         override val compatibility: IDLBridgeMethod.Compatibility = IDLBridgeMethod.Compatibility.Compatible
-        override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {}
+
+        override fun realHandle(
+            params: Map<String, Any?>,
+            callback: IDLBridgeMethod.Callback,
+            type: BridgePlatformType,
+        ) {}
+
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {}
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) {}
     }
-    
+
     private class TestMethod7 : IDLBridgeMethod {
         override val name: String = "method2"
         override val compatibility: IDLBridgeMethod.Compatibility = IDLBridgeMethod.Compatibility.Compatible
-        override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {}
+
+        override fun realHandle(
+            params: Map<String, Any?>,
+            callback: IDLBridgeMethod.Callback,
+            type: BridgePlatformType,
+        ) {}
+
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {}
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) {}
     }
-    
+
     private class TestMethod8 : IDLBridgeMethod {
         override val name: String = "nullCacheMethod"
         override val compatibility: IDLBridgeMethod.Compatibility = IDLBridgeMethod.Compatibility.Compatible
-        override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {}
+
+        override fun realHandle(
+            params: Map<String, Any?>,
+            callback: IDLBridgeMethod.Callback,
+            type: BridgePlatformType,
+        ) {}
+
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {}
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) {}
     }
-    
+
     private class TestMethod9 : IDLBridgeMethod {
         override val name: String = "localMethod"
         override val compatibility: IDLBridgeMethod.Compatibility = IDLBridgeMethod.Compatibility.Compatible
-        override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {}
+
+        override fun realHandle(
+            params: Map<String, Any?>,
+            callback: IDLBridgeMethod.Callback,
+            type: BridgePlatformType,
+        ) {}
+
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {}
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) {}
     }
-    
+
     private class TestMethodEmpty : IDLBridgeMethod {
         override val name: String = ""
         override val compatibility: IDLBridgeMethod.Compatibility = IDLBridgeMethod.Compatibility.Compatible
-        override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {}
+
+        override fun realHandle(
+            params: Map<String, Any?>,
+            callback: IDLBridgeMethod.Callback,
+            type: BridgePlatformType,
+        ) {}
+
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {}
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) {}
     }
 
     @Before
     fun setUp() {
         mockBridgeContext = mockk()
-        
+
         // Mock BridgeSettings
         mockkObject(BridgeSettings)
         every { BridgeSettings.bridgeRegistryOptimize } returns false
-        
+
         // Mock IDLMethodRegistryCacheManager
         mockkObject(IDLMethodRegistryCacheManager)
         every { IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(any()) } returns null
         every { IDLMethodRegistryCacheManager.registerIDLMethodRegistryCache(any(), any()) } returns Unit
         every { IDLMethodRegistryCacheManager.unregisterIDLMethodRegistryCache(any()) } returns Unit
-        
+
         every { mockBridgeContext.containerID } returns "test_container"
-        
+
         registry = IDLMethodRegistry()
     }
 
@@ -235,7 +303,7 @@ class IDLMethodRegistryTest {
         val testMethod2 = createMockIDLMethod("method2")
         every { IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(null) } returns createMockRegistryCache("method1")
         registry.registerMethod(testMethod1, BridgePlatformType.WEB)
-        
+
         every { IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(null) } returns createMockRegistryCache("method2")
         registry.registerMethod(testMethod2, BridgePlatformType.WEB)
 
@@ -281,7 +349,7 @@ class IDLMethodRegistryTest {
         // Given
         val localRegistry = IDLMethodRegistry(isLocalBridgeRegistry = true, bridgeContext = mockBridgeContext)
         val testMethod = createMockIDLMethod("localMethod")
-        
+
         // Mock the local registry cache
         val mockCache = mockk<IDLMethodRegistryCache>()
         every { mockCache.find(testMethod) } returns "localMethod"
@@ -307,8 +375,8 @@ class IDLMethodRegistryTest {
         assertFalse("Empty method name should not be registered", registry.isMethodExists("", BridgePlatformType.ALL))
     }
 
-    private fun createMockIDLMethod(methodName: String): Class<out IDLBridgeMethod> {
-        return when (methodName) {
+    private fun createMockIDLMethod(methodName: String): Class<out IDLBridgeMethod> =
+        when (methodName) {
             "testMethod" -> TestMethod1::class.java
             "webMethod" -> TestMethod2::class.java
             "optimizedMethod" -> TestMethod3::class.java
@@ -321,7 +389,6 @@ class IDLMethodRegistryTest {
             "" -> TestMethodEmpty::class.java
             else -> TestMethod1::class.java // fallback
         }
-    }
 
     private fun createMockRegistryCache(methodName: String): IDLMethodRegistryCache {
         val mockCache = mockk<IDLMethodRegistryCache>()

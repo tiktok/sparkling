@@ -40,10 +40,11 @@ val Context.statusBarHeightDp: Double
  * @return The safe area height in dp as a Double
  */
 fun Activity.safeAreaHeight(statusBarHeightDp: Number = this.statusBarHeightDp): Double {
-    val bottom = try {
-        window?.run { Rect().also(decorView::getWindowVisibleDisplayFrame).bottom }
-    } catch (e: NullPointerException) {
-        null
-    } ?: resources.displayMetrics.heightPixels
+    val bottom =
+        try {
+            window?.run { Rect().also(decorView::getWindowVisibleDisplayFrame).bottom }
+        } catch (e: NullPointerException) {
+            null
+        } ?: resources.displayMetrics.heightPixels
     return bottom / this - statusBarHeightDp.toDouble()
 }

@@ -2,25 +2,29 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.storage.utils
 
 interface INativeStorage {
-
-    fun setStorageItem(key: String?, data: Any?): Boolean
+    fun setStorageItem(
+        key: String?,
+        data: Any?,
+    ): Boolean
 
     fun getStorageItem(key: String?): Any?
 
     fun removeStorageItem(key: String?): Boolean
 
-    fun getStorageInfo() : Set<String>
+    fun getStorageInfo(): Set<String>
 
     /**
      * @param biz String?
      * @param key String?
      * @return Any?
      */
-    fun tryGetBizStorageItem(biz: String?, key: String?): Any? {
+    fun tryGetBizStorageItem(
+        biz: String?,
+        key: String?,
+    ): Any? {
         if (!biz.isNullOrEmpty() && (this is IBizNativeStorage)) {
             return getBizStorageItem(biz, key)
         } else {
@@ -33,7 +37,10 @@ interface INativeStorage {
      * @param key String?
      * @return Boolean
      */
-    fun tryRemoveBizStorageItem(biz: String?, key: String?): Boolean {
+    fun tryRemoveBizStorageItem(
+        biz: String?,
+        key: String?,
+    ): Boolean {
         if (!biz.isNullOrEmpty() && (this is IBizNativeStorage)) {
             return removeBizStorageItem(biz, key)
         } else {
@@ -47,7 +54,11 @@ interface INativeStorage {
      * @param data Any?
      * @return Boolean
      */
-    fun trySetBizStorageItem(biz: String?, key: String?, data: Any?): Boolean {
+    fun trySetBizStorageItem(
+        biz: String?,
+        key: String?,
+        data: Any?,
+    ): Boolean {
         if (!biz.isNullOrEmpty() && (this is IBizNativeStorage)) {
             return setBizStorageItem(biz, key, data)
         } else {

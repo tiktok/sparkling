@@ -33,7 +33,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -44,14 +44,14 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
-    
+
     buildTypes {
         debug {
             enableAndroidTestCoverage = true
             enableUnitTestCoverage = true
         }
     }
-    
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
@@ -86,7 +86,7 @@ dependencies {
     listOf(
         project(":sparkling-media"),
         project(":sparkling-navigation"),
-        project(":sparkling-storage")
+        project(":sparkling-storage"),
     ).forEach { dep -> add("implementation", dep) }
     debugImplementation(project(":sparkling-debug-tool"))
     // END SPARKLING AUTOLINK
@@ -101,25 +101,27 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         html.required.set(true)
     }
 
-    val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*",
-        "**/build/**",
-        "**/res/**",
-        "**/tmp/**"
-    )
-    
+    val fileFilter =
+        listOf(
+            "**/R.class",
+            "**/R$*.class",
+            "**/BuildConfig.*",
+            "**/Manifest*.*",
+            "**/*Test*.*",
+            "android/**/*.*",
+            "**/build/**",
+            "**/res/**",
+            "**/tmp/**",
+        )
+
     val mainSrc = "${project.projectDir}/src/main/java"
     sourceDirectories.setFrom(files(mainSrc))
-    val debugJavaTree = layout.buildDirectory.dir("intermediates/javac/debug").map { dir ->
-        dir.asFileTree.matching {
-            exclude(fileFilter)
+    val debugJavaTree =
+        layout.buildDirectory.dir("intermediates/javac/debug").map { dir ->
+            dir.asFileTree.matching {
+                exclude(fileFilter)
+            }
         }
-    }
     classDirectories.setFrom(debugJavaTree)
 
     val unitTestCoverageExec = layout.buildDirectory.file("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")

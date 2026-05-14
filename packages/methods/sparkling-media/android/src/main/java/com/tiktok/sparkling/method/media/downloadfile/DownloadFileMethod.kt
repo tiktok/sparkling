@@ -36,30 +36,30 @@ import java.io.IOException
 class DownloadFileMethod : AbsDownloadFileMethodIDL() {
     private val tag = "DownloadFileMethod"
 
-    private fun getNetworkDependInstance(): IHostNetworkDepend? {
-        return CommonDependsProvider.hostNetworkDepend
-    }
+    private fun getNetworkDependInstance(): IHostNetworkDepend? = CommonDependsProvider.hostNetworkDepend
 
-    private fun getPermissionDepend(): IHostPermissionDepend? {
-        return CommonDependsProvider.hostPermissionDepend
-    }
+    private fun getPermissionDepend(): IHostPermissionDepend? = CommonDependsProvider.hostPermissionDepend
 
     override fun handle(
         params: DownloadFileInputModel,
         callback: CompletionBlock<DownloadFileResultModel>,
-        type: BridgePlatformType
+        type: BridgePlatformType,
     ) {
-        val context = getSDKContext()?.context ?: return callback.onFailure(
-            IDLBridgeMethod.FAIL, "Context not provided in host"
-        )
+        val context =
+            getSDKContext()?.context ?: return callback.onFailure(
+                IDLBridgeMethod.FAIL,
+                "Context not provided in host",
+            )
         if (params.url.isEmpty()) {
             return callback.onFailure(
-                IDLBridgeMethod.INVALID_PARAM, "The url in params is empty."
+                IDLBridgeMethod.INVALID_PARAM,
+                "The url in params is empty.",
             )
         }
         if (params.extension.isEmpty()) {
             return callback.onFailure(
-                IDLBridgeMethod.INVALID_PARAM, "The extension in params is empty."
+                IDLBridgeMethod.INVALID_PARAM,
+                "The extension in params is empty.",
             )
         }
         handleDownloadFile(context, params, callback, type)
@@ -69,21 +69,23 @@ class DownloadFileMethod : AbsDownloadFileMethodIDL() {
         context: Context,
         downloadParams: DownloadFileInputModel,
         callback: CompletionBlock<DownloadFileResultModel>,
-        type: BridgePlatformType
+        type: BridgePlatformType,
     ) {
-        val xBridgeType = when (type) {
-            BridgePlatformType.WEB -> BridgePlatformType.WEB
-            BridgePlatformType.LYNX -> BridgePlatformType.LYNX
-            BridgePlatformType.ALL -> BridgePlatformType.ALL
-            else -> BridgePlatformType.ALL
-        }
+        val xBridgeType =
+            when (type) {
+                BridgePlatformType.WEB -> BridgePlatformType.WEB
+                BridgePlatformType.LYNX -> BridgePlatformType.LYNX
+                BridgePlatformType.ALL -> BridgePlatformType.ALL
+                else -> BridgePlatformType.ALL
+            }
         val prefix = Md5Utils.hexDigest(downloadParams.url) + System.currentTimeMillis()
         val extension = downloadParams.extension
         val fileName = "$prefix.$extension"
-        val saveFolder = getCacheDir(context)?.absolutePath ?: return callback.onFailure(
-            IDLBridgeMethod.FAIL,
-            "cacheDir is null"
-        )
+        val saveFolder =
+            getCacheDir(context)?.absolutePath ?: return callback.onFailure(
+                IDLBridgeMethod.FAIL,
+                "cacheDir is null",
+            )
         val filePath = "$saveFolder/$fileName"
         if (File(filePath).exists()) {
             ThreadPool.runInMain {
@@ -93,164 +95,168 @@ class DownloadFileMethod : AbsDownloadFileMethodIDL() {
         }
 
         ThreadPool.runInBackGround {
-            val targetUrl = BridgeAPIRequestUtils.addParametersToUrl(
-                downloadParams.url,
-                downloadParams.params,
-                xBridgeType
-            )
+            val targetUrl =
+                BridgeAPIRequestUtils.addParametersToUrl(
+                    downloadParams.url,
+                    downloadParams.params,
+                    xBridgeType,
+                )
             val headers = BridgeAPIRequestUtils.filterHeaderEmptyValue(downloadParams.header)
 
-            val responseCallback = object : IStreamResponseCallback {
-                override fun handleConnection(connection: AbsStreamConnection?) {
-                    if (connection == null) {
-                        Log.d(tag, "connection is null")
-                        ThreadPool.runInMain {
-                            callback.onFailure(IDLBridgeMethod.FAIL, "connection failed")
+            val responseCallback =
+                object : IStreamResponseCallback {
+                    override fun handleConnection(connection: AbsStreamConnection?) {
+                        if (connection == null) {
+                            Log.d(tag, "connection is null")
+                            ThreadPool.runInMain {
+                                callback.onFailure(IDLBridgeMethod.FAIL, "connection failed")
+                            }
+                            return
                         }
-                        return
-                    }
 
-                    val errorMsg: String? = connection.getErrorMsg().takeIf { it.isNotEmpty() }
-                        ?: connection.getException()?.message?.takeIf { it.isNotEmpty() }
-                    val body = connection.getInputStreamResponseBody()
+                        val errorMsg: String? =
+                            connection.getErrorMsg().takeIf { it.isNotEmpty() }
+                                ?: connection.getException()?.message?.takeIf { it.isNotEmpty() }
+                        val body = connection.getInputStreamResponseBody()
 
-                    if (body == null) {
-                        Log.d(tag, "body is null")
-                        ThreadPool.runInMain {
-                            callback.onFailure(IDLBridgeMethod.FAIL, errorMsg ?: "body is null")
+                        if (body == null) {
+                            Log.d(tag, "body is null")
+                            ThreadPool.runInMain {
+                                callback.onFailure(IDLBridgeMethod.FAIL, errorMsg ?: "body is null")
+                            }
+                            return
                         }
-                        return
-                    }
-                    val respCode = connection.getResponseCode()
-                    val respHeader = connection.getResponseHeader()
-                    val clientCode = connection.getClientCode()
-                    var bufferedInputStream: BufferedInputStream? = null
-                    val outputStream: FileOutputStream
-                    var bufferedOutputStream: BufferedOutputStream? = null
+                        val respCode = connection.getResponseCode()
+                        val respHeader = connection.getResponseHeader()
+                        val clientCode = connection.getClientCode()
+                        var bufferedInputStream: BufferedInputStream? = null
+                        val outputStream: FileOutputStream
+                        var bufferedOutputStream: BufferedOutputStream? = null
 
-                    try {
-                        bufferedInputStream = BufferedInputStream(body)
-                        outputStream = FileOutputStream(filePath)
-                        bufferedOutputStream = BufferedOutputStream(outputStream)
+                        try {
+                            bufferedInputStream = BufferedInputStream(body)
+                            outputStream = FileOutputStream(filePath)
+                            bufferedOutputStream = BufferedOutputStream(outputStream)
 
-                        var len: Int
-                        val bytes = ByteArray(4096)
+                            var len: Int
+                            val bytes = ByteArray(4096)
 
-                        while (bufferedInputStream.read(bytes).also { len = it } != -1) {
-                            bufferedOutputStream.write(bytes, 0, len)
-                        }
-                        bufferedOutputStream.flush()
-                        if (downloadParams.saveToAlbum != null) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU || ContextCompat.checkSelfPermission(
-                                    context,
-                                    WRITE_EXTERNAL_STORAGE
-                                ) == PackageManager.PERMISSION_GRANTED
-                            ) {
-                                handleAndCallbackSuccess(
-                                    context,
-                                    filePath,
-                                    downloadParams.saveToAlbum,
-                                    respCode,
-                                    clientCode,
-                                    respHeader,
-                                    callback
-                                )
-                                return
-                            } else {
-                                val act =
-                                    getSDKContext()?.ownerActivity ?: return callback.onFailure(
-                                        IDLBridgeMethod.FAIL,
-                                        "activity is null"
-                                    )
-                                val permissionDepend = getPermissionDepend()
-                                permissionDepend?.let {
-                                    permissionDepend.requestPermissions(
-                                        act,
-                                        object : OnPermissionsGrantCallback {
-                                            override fun onResult(onPermissionsGrantResults: Array<OnPermissionsGrantResult>) {
-                                                if (onPermissionsGrantResults.isNotEmpty()
-                                                    && onPermissionsGrantResults[0].result == PackageManager.PERMISSION_GRANTED
-                                                ) {
-                                                    handleWhenGranted()
-                                                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-                                                    && onPermissionsGrantResults.size == 2
-                                                    && getPermissionDepend()?.hasPermission(
-                                                        act,
-                                                        Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
-                                                    ) == true
-                                                ) {
-                                                    handleWhenGranted()
-                                                } else {
-                                                    ThreadPool.runInMain {
-                                                        callback.onFailure(
-                                                            IDLBridgeMethod.UNAUTHORIZED_ACCESS,
-                                                            "no permission for album"
-                                                        )
-                                                    }
-                                                }
-                                            }
-
-                                            fun handleWhenGranted() {
-                                                try {
-                                                    handleAndCallbackSuccess(
-                                                        context,
-                                                        filePath,
-                                                        downloadParams.saveToAlbum,
-                                                        respCode,
-                                                        clientCode,
-                                                        respHeader,
-                                                        callback
-                                                    )
-                                                    return
-                                                } catch (e: Exception) {
-                                                    ThreadPool.runInMain {
-                                                        callback.onFailure(
-                                                            IDLBridgeMethod.FAIL,
-                                                            e.message ?: "store file exception"
-                                                        )
-                                                    }
-                                                }
-                                            }
-
-                                        }, arrayOf(WRITE_EXTERNAL_STORAGE)
+                            while (bufferedInputStream.read(bytes).also { len = it } != -1) {
+                                bufferedOutputStream.write(bytes, 0, len)
+                            }
+                            bufferedOutputStream.flush()
+                            if (downloadParams.saveToAlbum != null) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU || ContextCompat.checkSelfPermission(
+                                        context,
+                                        WRITE_EXTERNAL_STORAGE,
+                                    ) == PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    handleAndCallbackSuccess(
+                                        context,
+                                        filePath,
+                                        downloadParams.saveToAlbum,
+                                        respCode,
+                                        clientCode,
+                                        respHeader,
+                                        callback,
                                     )
                                     return
-                                }
-                                ThreadPool.runInMain {
-                                    callback.onFailure(
-                                        IDLBridgeMethod.UNAUTHORIZED_ACCESS,
-                                        "no permission for album"
-                                    )
+                                } else {
+                                    val act =
+                                        getSDKContext()?.ownerActivity ?: return callback.onFailure(
+                                            IDLBridgeMethod.FAIL,
+                                            "activity is null",
+                                        )
+                                    val permissionDepend = getPermissionDepend()
+                                    permissionDepend?.let {
+                                        permissionDepend.requestPermissions(
+                                            act,
+                                            object : OnPermissionsGrantCallback {
+                                                override fun onResult(onPermissionsGrantResults: Array<OnPermissionsGrantResult>) {
+                                                    if (onPermissionsGrantResults.isNotEmpty() &&
+                                                        onPermissionsGrantResults[0].result == PackageManager.PERMISSION_GRANTED
+                                                    ) {
+                                                        handleWhenGranted()
+                                                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+                                                        onPermissionsGrantResults.size == 2 &&
+                                                        getPermissionDepend()?.hasPermission(
+                                                            act,
+                                                            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
+                                                        ) == true
+                                                    ) {
+                                                        handleWhenGranted()
+                                                    } else {
+                                                        ThreadPool.runInMain {
+                                                            callback.onFailure(
+                                                                IDLBridgeMethod.UNAUTHORIZED_ACCESS,
+                                                                "no permission for album",
+                                                            )
+                                                        }
+                                                    }
+                                                }
+
+                                                fun handleWhenGranted() {
+                                                    try {
+                                                        handleAndCallbackSuccess(
+                                                            context,
+                                                            filePath,
+                                                            downloadParams.saveToAlbum,
+                                                            respCode,
+                                                            clientCode,
+                                                            respHeader,
+                                                            callback,
+                                                        )
+                                                        return
+                                                    } catch (e: Exception) {
+                                                        ThreadPool.runInMain {
+                                                            callback.onFailure(
+                                                                IDLBridgeMethod.FAIL,
+                                                                e.message ?: "store file exception",
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            arrayOf(WRITE_EXTERNAL_STORAGE),
+                                        )
+                                        return
+                                    }
+                                    ThreadPool.runInMain {
+                                        callback.onFailure(
+                                            IDLBridgeMethod.UNAUTHORIZED_ACCESS,
+                                            "no permission for album",
+                                        )
+                                    }
                                 }
                             }
-                        }
-                        ThreadPool.runInMain {
-                            callback.onSuccess(
-                                DownloadFileResultModel::class.java.createXModel().apply {
-                                    this.httpCode = respCode
-                                    this.clientCode = clientCode
-                                    this.header = respHeader
-                                    this.filePath = filePath
-                                })
-                        }
-                    } catch (e: Exception) {
-                        ThreadPool.runInMain {
-                            callback.onFailure(
-                                IDLBridgeMethod.FAIL,
-                                e.message ?: "store file exception"
-                            )
-                        }
-                    } finally {
-                        try {
-                            connection.cancel()
-                            bufferedInputStream?.close()
-                            bufferedOutputStream?.close()
-                        } catch (e: IOException) {
-                            e.printStackTrace()
+                            ThreadPool.runInMain {
+                                callback.onSuccess(
+                                    DownloadFileResultModel::class.java.createXModel().apply {
+                                        this.httpCode = respCode
+                                        this.clientCode = clientCode
+                                        this.header = respHeader
+                                        this.filePath = filePath
+                                    },
+                                )
+                            }
+                        } catch (e: Exception) {
+                            ThreadPool.runInMain {
+                                callback.onFailure(
+                                    IDLBridgeMethod.FAIL,
+                                    e.message ?: "store file exception",
+                                )
+                            }
+                        } finally {
+                            try {
+                                connection.cancel()
+                                bufferedInputStream?.close()
+                                bufferedOutputStream?.close()
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                            }
                         }
                     }
                 }
-            }
 
             val hostNetworkDepend = getNetworkDependInstance()
             if (hostNetworkDepend == null) {
@@ -264,7 +270,7 @@ class DownloadFileMethod : AbsDownloadFileMethodIDL() {
                     headers,
                     downloadParams.needCommonParams,
                     responseCallback,
-                    hostNetworkDepend
+                    hostNetworkDepend,
                 )
             }
         }
@@ -277,17 +283,18 @@ class DownloadFileMethod : AbsDownloadFileMethodIDL() {
         respCode: Int,
         clientCode: Int,
         respHeader: Map<String, String>,
-        callback: CompletionBlock<DownloadFileResultModel>
+        callback: CompletionBlock<DownloadFileResultModel>,
     ) {
         val uri = BDMediaFileUtils.copyFileToGallery(context, filePath, saveToAlbum == "image")
         ThreadPool.runInMain {
-            callback.onSuccess(DownloadFileResultModel::class.java.createXModel().apply {
-                this.httpCode = respCode
-                this.clientCode = clientCode
-                this.header = respHeader
-                this.filePath = uri.toString()
-            })
+            callback.onSuccess(
+                DownloadFileResultModel::class.java.createXModel().apply {
+                    this.httpCode = respCode
+                    this.clientCode = clientCode
+                    this.header = respHeader
+                    this.filePath = uri.toString()
+                },
+            )
         }
     }
 }
-

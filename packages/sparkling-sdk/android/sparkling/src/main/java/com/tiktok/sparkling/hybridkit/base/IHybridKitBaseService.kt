@@ -16,7 +16,12 @@ interface IHybridKitBaseService {
     // remove callback
     fun removeHybridInitCallback(callback: HybridKitInitCallback)
 
-    fun open(context: Context, url: String, targetHandlerName: String? = null, bundle: Bundle? = null)
+    fun open(
+        context: Context,
+        url: String,
+        targetHandlerName: String? = null,
+        bundle: Bundle? = null,
+    )
 
     /**
      * must init
@@ -27,7 +32,7 @@ interface IHybridKitBaseService {
 enum class HybridKitInitStatus {
     INIT,
     LOADING,
-    FINISHED
+    FINISHED,
 }
 
 interface HybridKitInitCallback {

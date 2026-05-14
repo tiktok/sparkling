@@ -9,10 +9,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.junit.Assert.*
+
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class FeCallMonitorModelTest {
-
     private lateinit var feCallMonitorModel: FeCallMonitorModel
 
     @Before

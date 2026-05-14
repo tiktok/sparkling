@@ -7,20 +7,20 @@ import android.content.Context
 import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
 
-interface IKitViewProvider<T: IKitView?> {
+interface IKitViewProvider<T : IKitView?> {
     val viewType: HybridKitType
 
     fun createKitView(
         scheme: HybridSchemeParam,
         hybridContext: HybridContext,
         context: Context,
-        lifeCycle: IHybridKitLifeCycle?
+        lifeCycle: IHybridKitLifeCycle?,
     ): T
 
     fun createKitView(
         url: String,
         param: HybridContext,
         context: Context,
-        lifeCycle: IHybridKitLifeCycle? = null
+        lifeCycle: IHybridKitLifeCycle? = null,
     ): T
 }

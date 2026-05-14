@@ -9,7 +9,13 @@ import com.tiktok.sparkling.method.registry.core.BridgePlatformType
 import com.tiktok.sparkling.method.registry.core.model.context.ContextProviderFactory
 
 interface IHostRouterDepend {
-    fun openScheme(bridgeContext: IBridgeContext?, scheme: String, extraParams: Map<String, Any>, platformType: BridgePlatformType, context: Context?): Boolean {
+    fun openScheme(
+        bridgeContext: IBridgeContext?,
+        scheme: String,
+        extraParams: Map<String, Any>,
+        platformType: BridgePlatformType,
+        context: Context?,
+    ): Boolean {
         var handled = false
         val contextProviderFactory = ContextProviderFactory()
         val headHandlerNode = assembleHandlerChain(contextProviderFactory) ?: return false
@@ -30,11 +36,20 @@ interface IHostRouterDepend {
             }
         }
 
-        return  handled
+        return handled
     }
-    fun closeView(bridgeContext: IBridgeContext?, type: BridgePlatformType, containerID: String? = null, animated: Boolean? = false): Boolean
+
+    fun closeView(
+        bridgeContext: IBridgeContext?,
+        type: BridgePlatformType,
+        containerID: String? = null,
+        animated: Boolean? = false,
+    ): Boolean
+
     fun provideRouteOpenHandlerList(contextProviderFactory: ContextProviderFactory?): List<AbsRouteOpenHandler> = listOf()
+
     fun provideRouteOpenExceptionHandler(contextProviderFactory: ContextProviderFactory?): AbsRouteOpenHandler? = null
+
     private fun assembleHandlerChain(contextProviderFactory: ContextProviderFactory?): AbsRouteOpenHandler? {
         val chainHandlerList = provideRouteOpenHandlerList(contextProviderFactory)
         val exceptionHandlerNode = provideRouteOpenExceptionHandler(contextProviderFactory)

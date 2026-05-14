@@ -25,9 +25,7 @@ interface IKitView {
     /**
      * set default value as true to release cache storage
      */
-    fun readyToSendEvent(): Boolean {
-        return true
-    }
+    fun readyToSendEvent(): Boolean = true
 
     fun load()
 
@@ -41,7 +39,8 @@ interface IKitView {
      */
     fun reload()
 
-    fun refreshSchemeParam(hybridSchemeParam: HybridSchemeParam){}
+    fun refreshSchemeParam(hybridSchemeParam: HybridSchemeParam) {}
+
     fun refreshContext(context: Context) {}
 
     /**
@@ -50,7 +49,10 @@ interface IKitView {
      */
     @Deprecated("deprecated, replace with sendEventByJSON", ReplaceWith("sendEventByJSON"))
     @CallSuper
-    fun sendEvent(eventName: String, params: List<Any>?) {
+    fun sendEvent(
+        eventName: String,
+        params: List<Any>?,
+    ) {
         hybridContext.sendEventListener?.let { it(this, eventName, params) }
         hybridContext.absSendEventListener?.iterator { it(this, eventName, params) }
     }
@@ -59,7 +61,10 @@ interface IKitView {
      * send event
      */
     @CallSuper
-    fun sendEventByJSON(eventName: String, params: JSONObject?) {
+    fun sendEventByJSON(
+        eventName: String,
+        params: JSONObject?,
+    ) {
         hybridContext.sendEventListener?.let { it(this, eventName, params) }
         hybridContext.absSendEventListener?.iterator { it(this, eventName, params) }
     }
@@ -69,7 +74,10 @@ interface IKitView {
      * This method doesn't work in Lynx page, please use sendEventByJSON instead.
      */
     @CallSuper
-    fun sendEventByMap(eventName: String, params: Map<String, Any?>?) {
+    fun sendEventByMap(
+        eventName: String,
+        params: Map<String, Any?>?,
+    ) {
         hybridContext.sendEventListener?.let { it(this, eventName, params) }
         hybridContext.absSendEventListener?.iterator { it(this, eventName, params) }
     }
@@ -77,29 +85,41 @@ interface IKitView {
     /**
      * update date, the main purpose of adding to the interface is to decouple the plug-in scene and LynxView
      */
-    fun updateData(data: Map<String, Any>){}
+    fun updateData(data: Map<String, Any>) {}
 
-    fun updateDataByJson(data: String){}
+    fun updateDataByJson(data: String) {}
 
-    fun updateDataWithExtra(data: String, extra: Map<String, Any>){}
+    fun updateDataWithExtra(
+        data: String,
+        extra: Map<String, Any>,
+    ) {}
 
-    fun updateDataWithExtra(dataList: List<String>, extra: Map<String, Any>?){}
+    fun updateDataWithExtra(
+        dataList: List<String>,
+        extra: Map<String, Any>?,
+    ) {}
 
     /**
      * clear current data and update with the given data in LynxView
      */
-    fun resetData(data: Map<String, Any>){}
+    fun resetData(data: Map<String, Any>) {}
 
-    fun resetDataByJson(data: String){}
+    fun resetDataByJson(data: String) {}
 
-    fun resetDataWithExtra(data: String, extra: Map<String, Any>){}
+    fun resetDataWithExtra(
+        data: String,
+        extra: Map<String, Any>,
+    ) {}
 
-    fun resetDataWithExtra(dataList: List<String>, extra: Map<String, Any>?){}
+    fun resetDataWithExtra(
+        dataList: List<String>,
+        extra: Map<String, Any>?,
+    ) {}
 
     // update global props by increment, for lynx it only works above version 2.3.
-    fun updateGlobalPropsByIncrement(data: Map<String, Any>){}
+    fun updateGlobalPropsByIncrement(data: Map<String, Any>) {}
 
-    fun getCurrentData(callback: IGetDataCallback?){}
+    fun getCurrentData(callback: IGetDataCallback?) {}
 
     /**
      * show LynxView, the business side needs to call
@@ -132,12 +152,11 @@ interface IKitView {
 
     fun onLoadSuccess()
 
-    fun getAndRemoveForestResponse(): Any? {
-        return null
-    }
+    fun getAndRemoveForestResponse(): Any? = null
 }
 
 interface IGetDataCallback {
     fun onSuccess(data: HashMap<String, Any>?)
+
     fun onFail(msg: String?)
 }

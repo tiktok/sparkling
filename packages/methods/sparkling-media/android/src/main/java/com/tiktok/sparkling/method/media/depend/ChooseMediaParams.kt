@@ -3,7 +3,6 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.method.media.depend
 
-
 class ChooseMediaParams(
     val mediaTypes: List<String>,
     val sourceType: String,
@@ -11,9 +10,9 @@ class ChooseMediaParams(
     val compressImage: Boolean = false,
     val saveToPhotoAlbum: Boolean = false,
     val cameraType: String = "",
-    val compressWidth: Int = 216, //image witdth after compress, default 1080 / 5
-    val compressHeight: Int = 384, //image height after compress, default 1920 / 5
-    val compressQuality: Int = 0
+    val compressWidth: Int = 216, // image witdth after compress, default 1080 / 5
+    val compressHeight: Int = 384, // image height after compress, default 1920 / 5
+    val compressQuality: Int = 0,
 ) {
     var isNeedCut: Boolean = false
     var cropRatioWidth: Int = 0

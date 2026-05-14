@@ -13,7 +13,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class JSBErrorReportModelTest {
-
     private lateinit var errorReportModel: JSBErrorReportModel
 
     @Before

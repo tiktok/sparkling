@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.hybridkit.utils
 
 import android.os.Handler
@@ -16,7 +15,6 @@ import java.util.concurrent.ConcurrentHashMap
  * viewDisappearedWithType. The reason we converge all the events here is to unify management.*
  */
 object ViewEventUtils {
-
     const val VIEW_APPEARED = "viewAppeared"
     const val VIEW_DISAPPEARED = "viewDisappeared"
 
@@ -35,7 +33,9 @@ object ViewEventUtils {
      * Resumed state is only assigned when container is paused before
      */
     private enum class State {
-        PAUSED, DESTROYED, RESUMED
+        PAUSED,
+        DESTROYED,
+        RESUMED,
     }
 
     private val containerStateMap: ConcurrentHashMap<String, State> = ConcurrentHashMap()
@@ -45,14 +45,16 @@ object ViewEventUtils {
     fun onPause(hybridContext: HybridContext?) {
         val containerId = hybridContext?.containerId ?: return
         hybridContext.sendEvent(VIEW_DISAPPEARED, null)
-        when(containerStateMap[containerId]) {
+        when (containerStateMap[containerId]) {
             State.DESTROYED, State.PAUSED -> {
                 return
             }
+
             State.RESUMED -> {
                 containerStateMap[containerId] = State.PAUSED
                 return
             }
+
             else -> {}
         }
         containerStateMap[containerId] = State.PAUSED
@@ -60,36 +62,44 @@ object ViewEventUtils {
 
         handler.postDelayed({
             val state = containerStateMap[containerId] ?: return@postDelayed
-            when(state) {
+            when (state) {
                 State.PAUSED -> {
-                    if (isBackground)
+                    if (isBackground) {
                         hybridContext.sendEvent(
-                            VIEW_DISAPPEARED_WITH_TYPE, JSONObject().apply {
+                            VIEW_DISAPPEARED_WITH_TYPE,
+                            JSONObject().apply {
                                 put(TYPE, APP_BACKGROUND)
-                            }
+                            },
                         )
-                    else
+                    } else {
                         hybridContext.sendEvent(
-                            VIEW_DISAPPEARED_WITH_TYPE, JSONObject().apply {
+                            VIEW_DISAPPEARED_WITH_TYPE,
+                            JSONObject().apply {
                                 put(TYPE, HIDDEN)
-                            }
+                            },
                         )
+                    }
                 }
+
                 State.RESUMED -> {
-                    if (isBackgroundNow)
+                    if (isBackgroundNow) {
                         hybridContext.sendEvent(
-                            VIEW_DISAPPEARED_WITH_TYPE, JSONObject().apply {
+                            VIEW_DISAPPEARED_WITH_TYPE,
+                            JSONObject().apply {
                                 put(TYPE, APP_BACKGROUND)
-                            }
+                            },
                         )
-                    else
+                    } else {
                         hybridContext.sendEvent(
-                            VIEW_DISAPPEARED_WITH_TYPE, JSONObject().apply {
+                            VIEW_DISAPPEARED_WITH_TYPE,
+                            JSONObject().apply {
                                 put(TYPE, HIDDEN)
-                            }
+                            },
                         )
+                    }
                     hybridContext.sendEvent(VIEW_APPEARED, null)
                 }
+
                 else -> {}
             }
             containerStateMap.remove(containerId)
@@ -100,25 +110,27 @@ object ViewEventUtils {
         val containerId = hybridContext?.containerId ?: return
         containerStateMap[containerId] = State.DESTROYED
         hybridContext.sendEvent(
-            VIEW_DISAPPEARED_WITH_TYPE, JSONObject().apply {
+            VIEW_DISAPPEARED_WITH_TYPE,
+            JSONObject().apply {
                 put(TYPE, DESTROY)
-            }
+            },
         )
     }
 
     fun onShow(hybridContext: HybridContext?) {
         val containerId = hybridContext?.containerId ?: return
-        when(containerStateMap[containerId]) {
+        when (containerStateMap[containerId]) {
             State.DESTROYED -> {
                 return
             }
+
             State.PAUSED, State.RESUMED -> {
                 containerStateMap[containerId] = State.RESUMED
             }
+
             else -> {
                 hybridContext.sendEvent(VIEW_APPEARED, null)
             }
         }
-
     }
 }

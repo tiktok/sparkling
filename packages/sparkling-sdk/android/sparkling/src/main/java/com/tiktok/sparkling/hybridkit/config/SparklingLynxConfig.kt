@@ -20,13 +20,17 @@ class SparklingLynxConfig private constructor(
     val globalModules: MutableMap<String, SparklingLynxModuleWrapper>,
     val additionInit: LynxEnv.() -> Unit,
     val logLevel: Int = LLog.INFO,
-): ILynxConfig {
+) : ILynxConfig {
     companion object {
-        inline fun build(context: Application, block: Builder.() -> Unit) =
-            Builder(context).apply(block).build()
+        inline fun build(
+            context: Application,
+            block: Builder.() -> Unit,
+        ) = Builder(context).apply(block).build()
     }
 
-    class Builder(var context: Application) {
+    class Builder(
+        var context: Application,
+    ) {
         private var isCheckPropsSetter = true
         private var libraryLoader: INativeLibraryLoader? = null
         private var templateProvider: AbsTemplateProvider? = null
@@ -66,7 +70,7 @@ class SparklingLynxConfig private constructor(
                 templateProvider,
                 globalBehaviors,
                 globalModules,
-                additionInit
+                additionInit,
             )
     }
 }

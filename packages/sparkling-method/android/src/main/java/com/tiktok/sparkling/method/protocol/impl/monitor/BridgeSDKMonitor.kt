@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.protocol.impl.monitor
 
 import android.content.Context
@@ -47,7 +46,7 @@ class BridgeSDKMonitor {
      */
     fun monitorEvent(data: MonitorModel) {
         val category = JSONObject() // enumerable
-        val metric = JSONObject()   // not enumerable
+        val metric = JSONObject() // not enumerable
 
         category.put("code", data.code)
         category.put("url", data.url)
@@ -71,41 +70,39 @@ class BridgeSDKMonitor {
         MonitorUtils.customReport(SERVICE_NAME, category, metric, null)
     }
 
-
     data class APPInfo4Monitor(
         val appVersion: String? = null,
         val update_version_code: String? = null,
         val channel: String? = null,
-        val sdkVersion: String? = null
+        val sdkVersion: String? = null,
     )
 
-    enum class ContainerType(val type: String) {
-        LYNX("lynx"), H5("h5")
+    enum class ContainerType(
+        val type: String,
+    ) {
+        LYNX("lynx"),
+        H5("h5"),
     }
 
     data class MonitorModel(
         val method: String?, // not enumerable
-        val code: Int?,      // enumerable
+        val code: Int?, // enumerable
         val channel: String?, // enumerable
         val containerType: String?, // enumerable
-
         val duration: Long?, // not enumerable response.receive_timestamp - request.send_timestamp, unit: ms
-        val url: String?,    // not enumerable
-
-        val request_data_length: Int?,        // input parameter data size, unit: byte
-        val request_send_timestamp: Long?,    // send time of fe, unit: ms
+        val url: String?, // not enumerable
+        val request_data_length: Int?, // input parameter data size, unit: byte
+        val request_send_timestamp: Long?, // send time of fe, unit: ms
         val request_receive_timestamp: Long?, // client receiving timing, unit: ms
-        val request_decode_duration: Long?,   // data deserialization time, unit: ms
-        val request_duration: Long?,            // receive_timestamp - send_timestamp, unit: ms
-
-        val response_data_length: Int?,        // return parameter data size, unit: byte
-        val response_encode_duration: Long?,   // data serialization time, unit:ms
-        val response_send_timestamp: Long?,    // client sending timing, unit: ms
+        val request_decode_duration: Long?, // data deserialization time, unit: ms
+        val request_duration: Long?, // receive_timestamp - send_timestamp, unit: ms
+        val response_data_length: Int?, // return parameter data size, unit: byte
+        val response_encode_duration: Long?, // data serialization time, unit:ms
+        val response_send_timestamp: Long?, // client sending timing, unit: ms
         val response_receive_timestamp: Long?, // front-end reception timing, unit: ms
-        val response_duration: Long?            // receive_timestamp - send_timestamp, unit: ms
+        val response_duration: Long?, // receive_timestamp - send_timestamp, unit: ms
     ) {
-
-        class Builder() {
+        class Builder {
             private var method: String? = null
             private var code: Int? = null
             private var channel: String? = null
@@ -152,8 +149,9 @@ class BridgeSDKMonitor {
             }
 
             fun setDuration(): Builder {
-                if (response_receive_timestamp != null && request_send_timestamp != null)
+                if (response_receive_timestamp != null && request_send_timestamp != null) {
                     this.duration = response_receive_timestamp!! - request_send_timestamp!!
+                }
                 return this
             }
 
@@ -173,8 +171,9 @@ class BridgeSDKMonitor {
             }
 
             fun setRequestDuration(): Builder {
-                if (request_receive_timestamp != null && request_send_timestamp != null)
+                if (request_receive_timestamp != null && request_send_timestamp != null) {
                     this.request_duration = request_receive_timestamp!! - request_send_timestamp!!
+                }
                 return this
             }
 
@@ -183,7 +182,7 @@ class BridgeSDKMonitor {
                 return this
             }
 
-            ///
+            // /
 
             fun setResponseDataLength(length: Int): Builder {
                 this.response_data_length = length
@@ -201,9 +200,10 @@ class BridgeSDKMonitor {
             }
 
             fun setResponseDuration(): Builder {
-                if (response_receive_timestamp != null && response_send_timestamp != null)
+                if (response_receive_timestamp != null && response_send_timestamp != null) {
                     this.response_duration =
                         response_receive_timestamp!! - response_send_timestamp!!
+                }
                 return this
             }
 
@@ -212,8 +212,8 @@ class BridgeSDKMonitor {
                 return this
             }
 
-            fun build(): MonitorModel {
-                return MonitorModel(
+            fun build(): MonitorModel =
+                MonitorModel(
                     method,
                     code,
                     channel,
@@ -229,11 +229,8 @@ class BridgeSDKMonitor {
                     response_encode_duration,
                     response_send_timestamp,
                     response_receive_timestamp,
-                    response_duration
+                    response_duration,
                 )
-            }
-
         }
     }
-
 }

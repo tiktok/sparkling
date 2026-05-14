@@ -13,12 +13,11 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class UriExtTest {
-
     @Test
     fun testSafeToUriWithValidUrl() {
         val validUrl = "https://example.com/path?param=value"
         val result = validUrl.safeToUri()
-        
+
         assertNotNull(result)
         assertEquals("https", result.scheme)
         assertEquals("example.com", result.host)
@@ -29,7 +28,7 @@ class UriExtTest {
     fun testSafeToUriWithInvalidUrl() {
         val invalidUrl = "not-a-valid-url"
         val result = invalidUrl.safeToUri()
-        
+
         assertNotNull(result)
         assertEquals("not-a-valid-url", result.toString())
     }
@@ -38,7 +37,7 @@ class UriExtTest {
     fun testSafeToUriWithNullString() {
         val nullString: String? = null
         val result = nullString.safeToUri()
-        
+
         assertEquals(Uri.EMPTY, result)
     }
 
@@ -46,7 +45,7 @@ class UriExtTest {
     fun testSafeToUriWithEmptyString() {
         val emptyString = ""
         val result = emptyString.safeToUri()
-        
+
         assertNotNull(result)
         assertEquals("", result.toString())
     }
@@ -55,7 +54,7 @@ class UriExtTest {
     fun testSafeGetQueryParameterWithValidParameter() {
         val uri = Uri.parse("https://example.com?param1=value1&param2=value2")
         val result = uri.safeGetQueryParameter("param1")
-        
+
         assertEquals("value1", result)
     }
 
@@ -63,14 +62,14 @@ class UriExtTest {
     fun testSafeGetQueryParameterWithNonExistentParameter() {
         val uri = Uri.parse("https://example.com?param1=value1")
         val result = uri.safeGetQueryParameter("nonexistent")
-        
+
         assertNull(result)
     }
 
     @Test
     fun testSafeGetQueryParameterWithEmptyUri() {
         val result = Uri.EMPTY.safeGetQueryParameter("param")
-        
+
         assertNull(result)
     }
 
@@ -78,7 +77,7 @@ class UriExtTest {
     fun testSafeGetQueryParameterWithEncodedValues() {
         val uri = Uri.parse("https://example.com?param=hello%20world")
         val result = uri.safeGetQueryParameter("param")
-        
+
         assertEquals("hello world", result)
     }
 
@@ -86,7 +85,7 @@ class UriExtTest {
     fun testSafeGetQueryParameterWithMultipleValues() {
         val uri = Uri.parse("https://example.com?param=value1&param=value2")
         val result = uri.safeGetQueryParameter("param")
-        
+
         assertEquals("value1", result)
     }
 
@@ -94,7 +93,7 @@ class UriExtTest {
     fun testSafeGetQueryParameterWithEmptyValue() {
         val uri = Uri.parse("https://example.com?param=")
         val result = uri.safeGetQueryParameter("param")
-        
+
         assertEquals("", result)
     }
 }

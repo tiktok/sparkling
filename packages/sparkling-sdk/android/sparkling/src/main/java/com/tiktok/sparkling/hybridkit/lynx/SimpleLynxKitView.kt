@@ -24,7 +24,9 @@ import com.tiktok.sparkling.hybridkit.utils.ViewEventUtils
 import org.json.JSONObject
 
 @SuppressLint("ViewConstructor")
-class SimpleLynxKitView : LynxView, IKitView {
+class SimpleLynxKitView :
+    LynxView,
+    IKitView {
     companion object {
         private const val TAG = "SimpleLynxKitView"
     }
@@ -35,13 +37,12 @@ class SimpleLynxKitView : LynxView, IKitView {
     var lynxKitInitParams: LynxKitInitParams? = null
     private var hasDestroyed = false
 
-
     constructor(
         context: Context,
         hybridContext: HybridContext,
         builder: LynxViewBuilder,
         lynxKitInitParams: LynxKitInitParams?,
-        lifeCycle: IHybridKitLifeCycle?
+        lifeCycle: IHybridKitLifeCycle?,
     ) : super(context, builder) {
         this.hybridContext = hybridContext
         this.lynxKitLifeCycle = lifeCycle
@@ -50,9 +51,7 @@ class SimpleLynxKitView : LynxView, IKitView {
         rawUrl = hybridContext.hybridSchemeParam?.bundle
     }
 
-    override fun realView(): View? {
-        return this
-    }
+    override fun realView(): View? = this
 
     override fun load() {
         val target = rawUrl
@@ -97,7 +96,10 @@ class SimpleLynxKitView : LynxView, IKitView {
         super<LynxView>.updateData(data)
     }
 
-    override fun updateData(json: String?, processorName: String?) {
+    override fun updateData(
+        json: String?,
+        processorName: String?,
+    ) {
         val templateData = TemplateData.fromString(json)
         templateData.markState(processorName)
         templateData.markReadOnly()
@@ -106,7 +108,10 @@ class SimpleLynxKitView : LynxView, IKitView {
 
     override fun updateDataByJson(data: String) = updateData(data, null)
 
-    override fun updateDataWithExtra(data: String, extra: Map<String, Any>){
+    override fun updateDataWithExtra(
+        data: String,
+        extra: Map<String, Any>,
+    ) {
         val templateData = TemplateData.fromString(data)
         extra.entries.forEach {
             templateData.put(it.key, it.value)
@@ -115,7 +120,10 @@ class SimpleLynxKitView : LynxView, IKitView {
         updateData(templateData)
     }
 
-    override fun updateDataWithExtra(dataList: List<String>, extra: Map<String, Any>?) {
+    override fun updateDataWithExtra(
+        dataList: List<String>,
+        extra: Map<String, Any>?,
+    ) {
         if (dataList.isEmpty()) {
             return
         }
@@ -145,7 +153,10 @@ class SimpleLynxKitView : LynxView, IKitView {
         resetData(TemplateData.fromString(data))
     }
 
-    override fun resetDataWithExtra(data: String, extra: Map<String, Any>) {
+    override fun resetDataWithExtra(
+        data: String,
+        extra: Map<String, Any>,
+    ) {
         val templateData = TemplateData.fromString(data)
         data.apply {
             extra.entries.forEach {
@@ -155,7 +166,10 @@ class SimpleLynxKitView : LynxView, IKitView {
         resetData(templateData)
     }
 
-    override fun resetDataWithExtra(dataList: List<String>, extra: Map<String, Any>?) {
+    override fun resetDataWithExtra(
+        dataList: List<String>,
+        extra: Map<String, Any>?,
+    ) {
         if (dataList.isEmpty()) {
             return
         }
@@ -173,7 +187,6 @@ class SimpleLynxKitView : LynxView, IKitView {
         }
         resetData(templateData)
     }
-
 
     override fun onShow() {
         ViewEventUtils.onShow(hybridContext)
@@ -198,17 +211,11 @@ class SimpleLynxKitView : LynxView, IKitView {
         KitViewManager.removeKitView(hybridContext.containerId)
     }
 
-    override fun hasDestroyed(): Boolean {
-        return hasDestroyed
-    }
+    override fun hasDestroyed(): Boolean = hasDestroyed
 
-    override fun getGlobalProps(): MutableMap<String, Any>? {
-        return hybridContext.globalProps
-    }
+    override fun getGlobalProps(): MutableMap<String, Any>? = hybridContext.globalProps
 
-    override fun getScheme(): String? {
-        return hybridContext.resolveFullScheme()
-    }
+    override fun getScheme(): String? = hybridContext.resolveFullScheme()
 
     override fun onLoadSuccess() {
         lynxKitLifeCycle?.onLoadFinish(this)
@@ -218,22 +225,32 @@ class SimpleLynxKitView : LynxView, IKitView {
         super<LynxView>.updateData(data)
     }
 
-    override fun sendEvent(eventName: String, params: List<Any>?) {
+    override fun sendEvent(
+        eventName: String,
+        params: List<Any>?,
+    ) {
         super.sendEvent(eventName, params)
         sendGlobalEventInternal(eventName, params)
     }
 
-    override fun sendEventByJSON(eventName: String, params: JSONObject?) {
+    override fun sendEventByJSON(
+        eventName: String,
+        params: JSONObject?,
+    ) {
         super.sendEventByJSON(eventName, params)
         hybridContext.bridge?.sendEvent(eventName, params)
     }
 
-    private fun sendGlobalEventInternal(eventName: String, params: List<Any>?) {
-        val data = if (params != null) {
-            JavaOnlyArray.from(params)
-        } else {
-            JavaOnlyArray()
-        }
+    private fun sendGlobalEventInternal(
+        eventName: String,
+        params: List<Any>?,
+    ) {
+        val data =
+            if (params != null) {
+                JavaOnlyArray.from(params)
+            } else {
+                JavaOnlyArray()
+            }
         sendGlobalEvent(eventName, data)
     }
 
@@ -248,16 +265,16 @@ class SimpleLynxKitView : LynxView, IKitView {
     }
 
     override fun getCurrentData(callback: IGetDataCallback?) {
-        this.getCurrentData(object:LynxGetDataCallback{
-            override fun onSuccess(data: JavaOnlyMap?) {
-                callback?.onSuccess(data as HashMap<String, Any>?)
-            }
+        this.getCurrentData(
+            object : LynxGetDataCallback {
+                override fun onSuccess(data: JavaOnlyMap?) {
+                    callback?.onSuccess(data as HashMap<String, Any>?)
+                }
 
-            override fun onFail(msg: String?) {
-                callback?.onFail(msg)
-            }
-        })
+                override fun onFail(msg: String?) {
+                    callback?.onFail(msg)
+                }
+            },
+        )
     }
-
-
 }

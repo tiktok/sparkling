@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.protocol
 
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
@@ -16,7 +15,9 @@ import org.json.JSONObject
 /**
  *  default implementation
  */
-class DefaultBridgeClientImp(val bridgeContext: BridgeContext): IBridgeClient {
+class DefaultBridgeClientImp(
+    val bridgeContext: BridgeContext,
+) : IBridgeClient {
     private val TAG = "DefaultBridgeClientImp"
 
     override fun shouldInterceptRequest(call: BridgeCall): BridgeResult? {
@@ -24,7 +25,10 @@ class DefaultBridgeClientImp(val bridgeContext: BridgeContext): IBridgeClient {
         return null
     }
 
-    override fun onBridgeInvoked(protocol: IBridgeProtocol, detail: JSONObject) {
+    override fun onBridgeInvoked(
+        protocol: IBridgeProtocol,
+        detail: JSONObject,
+    ) {
         // FIXME pending
     }
 
@@ -32,7 +36,11 @@ class DefaultBridgeClientImp(val bridgeContext: BridgeContext): IBridgeClient {
         LogUtils.e(TAG, "onBridgeCallback: bridgeName: ${call.bridgeName}")
     }
 
-    override fun onBridgeResultReceived(name: String, handler: IBridgeHandler, detail: JSONObject) {
+    override fun onBridgeResultReceived(
+        name: String,
+        handler: IBridgeHandler,
+        detail: JSONObject,
+    ) {
         LogUtils.e(TAG, "onBridgeCallback: bridgeName: $name")
     }
 
@@ -43,5 +51,4 @@ class DefaultBridgeClientImp(val bridgeContext: BridgeContext): IBridgeClient {
     override fun onBridgeRejected() {
         LogUtils.e(TAG, "onBridgeRejected")
     }
-
 }

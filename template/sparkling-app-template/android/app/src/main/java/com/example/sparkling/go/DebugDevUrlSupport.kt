@@ -24,9 +24,7 @@ object DebugDevUrlSupport {
     // Examples:
     // - http://127.0.0.1:5969/main.lynx.bundle
     // - main.lynx.bundle
-    fun currentMainBundleSource(context: Context): String {
-        return SparklingDebugBridge.getDevUrl(context, DEFAULT_MAIN_DEV_BUNDLE_URL)
-    }
+    fun currentMainBundleSource(context: Context): String = SparklingDebugBridge.getDevUrl(context, DEFAULT_MAIN_DEV_BUNDLE_URL)
 
     fun buildMainPageScheme(context: Context): String {
         val source = currentMainBundleSource(context)
@@ -62,19 +60,17 @@ class DebugSparklingUiProvider(
     private val initialDataJson: String,
     private val currentScheme: String,
 ) : SparklingUIProvider {
-    override fun getLoadingView(context: Context): View {
-        return ProgressBar(context).apply {
-            layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT,
-                Gravity.CENTER,
-            )
+    override fun getLoadingView(context: Context): View =
+        ProgressBar(context).apply {
+            layoutParams =
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    Gravity.CENTER,
+                )
         }
-    }
 
-    override fun getErrorView(context: Context): View {
-        return DebugDevUrlErrorView(context, initialDataJson, currentScheme)
-    }
+    override fun getErrorView(context: Context): View = DebugDevUrlErrorView(context, initialDataJson, currentScheme)
 
     override fun getToolBar(context: Context): Toolbar? = null
 }
@@ -88,18 +84,22 @@ private class DebugDevUrlErrorView(
 
     init {
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-        val textView = TextView(context).apply {
-            text = "Failed to load remote bundle. Please update Dev URL."
-            gravity = Gravity.CENTER
-            setPadding(48, 48, 48, 48)
-        }
+        val textView =
+            TextView(context).apply {
+                text = "Failed to load remote bundle. Please update Dev URL."
+                gravity = Gravity.CENTER
+                setPadding(48, 48, 48, 48)
+            }
         addView(
             textView,
             LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT),
         )
     }
 
-    override fun onVisibilityChanged(changedView: View, visibility: Int) {
+    override fun onVisibilityChanged(
+        changedView: View,
+        visibility: Int,
+    ) {
         super.onVisibilityChanged(changedView, visibility)
         if (visibility == VISIBLE) {
             maybePromptDevUrl()
@@ -115,11 +115,12 @@ private class DebugDevUrlErrorView(
         prompted = true
 
         SparklingDebugBridge.showDevUrlDialog(activity, currentUrl) { updatedUrl ->
-            val nextContext = SparklingContext().apply {
-                scheme = DebugDevUrlSupport.buildMainPageSchemeWithSource(updatedUrl)
-                withInitData(initialDataJson)
-                sparklingUIProvider = DebugSparklingUiProvider(initialDataJson, scheme ?: "")
-            }
+            val nextContext =
+                SparklingContext().apply {
+                    scheme = DebugDevUrlSupport.buildMainPageSchemeWithSource(updatedUrl)
+                    withInitData(initialDataJson)
+                    sparklingUIProvider = DebugSparklingUiProvider(initialDataJson, scheme ?: "")
+                }
             Sparkling.build(activity, nextContext).navigate()
             activity.finish()
         }

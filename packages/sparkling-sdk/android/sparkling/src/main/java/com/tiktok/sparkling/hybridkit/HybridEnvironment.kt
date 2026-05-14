@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.hybridkit
 
 import android.app.Application
@@ -16,6 +15,7 @@ import com.tiktok.sparkling.hybridkit.config.IWebConfig
 
 class HybridEnvironment {
     var isDebug: Boolean = false
+
     @Volatile
     lateinit var context: Application
     var dependencyProviders = HashMap<String, IDependencyProvider>()
@@ -64,23 +64,35 @@ class HybridEnvironment {
         return false
     }
 
-    fun <T> putDependency(containerId: String, clazz: Class<T>, instance: T?) {
+    fun <T> putDependency(
+        containerId: String,
+        clazz: Class<T>,
+        instance: T?,
+    ) {
         if (dependencyProviders[containerId] == null) {
             dependencyProviders[containerId] = DefaultDependencyProvider()
         }
         dependencyProviders[containerId]?.put(clazz, instance)
     }
 
-    fun <T> getDependency(containerId: String, clazz: Class<T>): T? {
-        return dependencyProviders[containerId]?.get(clazz)
-    }
+    fun <T> getDependency(
+        containerId: String,
+        clazz: Class<T>,
+    ): T? = dependencyProviders[containerId]?.get(clazz)
 
-    fun <T> removeDependency(containerId: String, clazz: Class<T>) {
+    fun <T> removeDependency(
+        containerId: String,
+        clazz: Class<T>,
+    ) {
         val dependencyProvider = dependencyProviders[containerId]
         dependencyProvider?.remove(clazz)
     }
 
-    fun <T> removeDependency(containerId: String, clazz: Class<T>, instance: T) {
+    fun <T> removeDependency(
+        containerId: String,
+        clazz: Class<T>,
+        instance: T,
+    ) {
         val dependencyProvider = dependencyProviders[containerId]
         dependencyProvider ?: return
         val headInstance = dependencyProvider.get(clazz)
@@ -105,7 +117,10 @@ class HybridEnvironment {
         }
     }
 
-    fun removeDependency(containerId: String, clearContext: Boolean) {
+    fun removeDependency(
+        containerId: String,
+        clearContext: Boolean,
+    ) {
         if (clearContext) {
             dependencyProviders.remove(containerId)
         } else {
@@ -114,7 +129,10 @@ class HybridEnvironment {
         }
     }
 
-    fun cloneDependency(oldContainerId: String, newContainerId: String) {
+    fun cloneDependency(
+        oldContainerId: String,
+        newContainerId: String,
+    ) {
         dependencyProviders[newContainerId] = dependencyProviders[oldContainerId]?.cloneDependency() ?: DefaultDependencyProvider()
     }
 }

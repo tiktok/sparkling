@@ -10,9 +10,8 @@ import com.tiktok.sparkling.utils.SchemeParser
 
 class Sparkling private constructor(
     private val context: Context,
-    private val sparklingContext: SparklingContext
+    private val sparklingContext: SparklingContext,
 ) {
-
     companion object {
         private const val TAG = "Sparkling"
 
@@ -30,7 +29,10 @@ class Sparkling private constructor(
          * @throws IllegalArgumentException if context is null
          */
         @JvmStatic
-        fun build(context: Context?, sparklingContext: SparklingContext?): Sparkling {
+        fun build(
+            context: Context?,
+            sparklingContext: SparklingContext?,
+        ): Sparkling {
             requireNotNull(context) { "Context must not be null" }
             requireNotNull(sparklingContext) { "SparklingContext must not be null" }
             return Sparkling(context, sparklingContext)
@@ -41,8 +43,8 @@ class Sparkling private constructor(
      * Navigate to a Sparkling activity.
      * @return true if navigation was successful, false otherwise
      */
-    fun navigate(): Boolean {
-        return try {
+    fun navigate(): Boolean =
+        try {
             processSparklingContext(sparklingContext)
             val intent = Intent(context, SparklingActivity::class.java)
             intent.putExtra(SPARKLING_CONTEXT_CONTAINER_ID, sparklingContext.containerId)
@@ -54,7 +56,6 @@ class Sparkling private constructor(
             Log.e(TAG, "Failed to navigate: ${e.message}")
             false
         }
-    }
 
     /**
      * Process the Sparkling context and parse the scheme if available.
@@ -76,8 +77,8 @@ class Sparkling private constructor(
      * @param withoutPrepare If true, skip the prepare step
      * @return SparklingView instance, or null if creation fails
      */
-    fun createView(withoutPrepare: Boolean = false): SparklingView? {
-        return try {
+    fun createView(withoutPrepare: Boolean = false): SparklingView? =
+        try {
             val view = SparklingView(context)
             if (!withoutPrepare) {
                 view.prepare(sparklingContext)
@@ -87,5 +88,4 @@ class Sparkling private constructor(
             Log.e(TAG, "Failed to create view: ${e.message}")
             null
         }
-    }
 }

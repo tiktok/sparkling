@@ -10,60 +10,80 @@ import com.lynx.react.bridge.JavaOnlyArray
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
 import org.json.JSONObject
 
-class LynxBridgeProtocol(val context: BridgeContext) : IBridgeProtocol(context) {
-
-    override fun sendEvent(name: String, params: Any?) {
-        if(params is JavaOnlyArray){
+class LynxBridgeProtocol(
+    val context: BridgeContext,
+) : IBridgeProtocol(context) {
+    override fun sendEvent(
+        name: String,
+        params: Any?,
+    ) {
+        if (params is JavaOnlyArray) {
             context.bridgeLifeClientImp.onBridgeEventStart(name, params)
             sendEvent(name, (params as? JavaOnlyArray))
             context.bridgeLifeClientImp.onBridgeEventEnd(name, params)
-        }else if (params is JSONObject?){
-            var array = JavaOnlyArray().apply {
-                pushMap(BridgeConverter.convertJSONObject2JavaOnlyMap(JSONObject().apply {
-                    put("data",params)
-                    put("containerID",context.containerId)
-                    put("protocolVersion","1.0")
-                    put("code", 1)
-                }))
-            }
+        } else if (params is JSONObject?) {
+            var array =
+                JavaOnlyArray().apply {
+                    pushMap(
+                        BridgeConverter.convertJSONObject2JavaOnlyMap(
+                            JSONObject().apply {
+                                put("data", params)
+                                put("containerID", context.containerId)
+                                put("protocolVersion", "1.0")
+                                put("code", 1)
+                            },
+                        ),
+                    )
+                }
             context.bridgeLifeClientImp.onBridgeEventStart(name, array)
-            sendEvent(name,array)
+            sendEvent(name, array)
             context.bridgeLifeClientImp.onBridgeEventEnd(name, array)
         }
     }
 
-    override fun sendJSRuntimeEvent(name: String, params: Any?) {
-        if(params is JavaOnlyArray){
+    override fun sendJSRuntimeEvent(
+        name: String,
+        params: Any?,
+    ) {
+        if (params is JavaOnlyArray) {
             context.bridgeLifeClientImp.onBridgeEventStart(name, params)
             sendJSRuntimeEvent(name, (params as? JavaOnlyArray))
             context.bridgeLifeClientImp.onBridgeEventEnd(name, params)
-        }else if (params is JSONObject?){
-            var array = JavaOnlyArray().apply {
-                pushMap(BridgeConverter.convertJSONObject2JavaOnlyMap(JSONObject().apply {
-                    put("data",params)
-                    put("containerID",context.containerId)
-                    put("protocolVersion","1.0")
-                    put("code", 1)
-                }))
-            }
+        } else if (params is JSONObject?) {
+            var array =
+                JavaOnlyArray().apply {
+                    pushMap(
+                        BridgeConverter.convertJSONObject2JavaOnlyMap(
+                            JSONObject().apply {
+                                put("data", params)
+                                put("containerID", context.containerId)
+                                put("protocolVersion", "1.0")
+                                put("code", 1)
+                            },
+                        ),
+                    )
+                }
             context.bridgeLifeClientImp.onBridgeEventStart(name, array)
-            sendJSRuntimeEvent(name,array)
+            sendJSRuntimeEvent(name, array)
             context.bridgeLifeClientImp.onBridgeEventEnd(name, array)
         }
     }
 
-    private fun sendJSRuntimeEvent(method: String, params: JavaOnlyArray?) {
+    private fun sendJSRuntimeEvent(
+        method: String,
+        params: JavaOnlyArray?,
+    ) {
         context.lynxBackgroundRuntime?.sendGlobalEvent(method, params)
     }
 
-    private fun sendEvent(method: String, params: JavaOnlyArray?) {
+    private fun sendEvent(
+        method: String,
+        params: JavaOnlyArray?,
+    ) {
         context.lynxView?.sendGlobalEvent(method, params)
     }
 
     override fun init() {}
 
-    override fun createBridgeCall(msg: String): BridgeCall {
-        return BridgeCall(context)
-    }
-
+    override fun createBridgeCall(msg: String): BridgeCall = BridgeCall(context)
 }

@@ -4,27 +4,15 @@
 package com.tiktok.sparkling.method.runtime.depend.network
 
 abstract class AbsStringConnection {
-    open fun getStringResponseBody(): String? {
-        return null
-    }
+    open fun getStringResponseBody(): String? = null
 
-    open fun getResponseHeader(): LinkedHashMap<String, String> {
-        return LinkedHashMap()
-    }
+    open fun getResponseHeader(): LinkedHashMap<String, String> = LinkedHashMap()
 
-    open fun getResponseCode(): Int? {
-        return null
-    }
+    open fun getResponseCode(): Int? = null
 
-    open fun getErrorMsg(): String {
-        return ""
-    }
+    open fun getErrorMsg(): String = ""
 
-    open fun getException(): Throwable? {
-        return null
-    }
+    open fun getException(): Throwable? = null
 
-    open fun getClientCode(): Int? {
-        return null
-    }
+    open fun getClientCode(): Int? = null
 }

@@ -7,4 +7,3 @@ object PermissionDenyActionConstants {
     const val DEFAULT = 0
     const val DENY_TIPS_NOT_SHOW = 1
 }
-

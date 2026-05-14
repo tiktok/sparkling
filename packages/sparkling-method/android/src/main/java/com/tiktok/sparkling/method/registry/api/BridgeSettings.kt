@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.api
 
 /**
@@ -10,10 +9,8 @@ package com.tiktok.sparkling.method.registry.api
  * and after your data has been recycled, you must delete it.
  */
 object BridgeSettings {
-
     var bridgeRegistryOptimize: Boolean = false
     var bridgeDisableLongToDouble: Boolean = false
-    var bridgeNewInputNumberTypeChange : Boolean = false
+    var bridgeNewInputNumberTypeChange: Boolean = false
     var bridgeCallToStringOptimization: Boolean = false
-
 }

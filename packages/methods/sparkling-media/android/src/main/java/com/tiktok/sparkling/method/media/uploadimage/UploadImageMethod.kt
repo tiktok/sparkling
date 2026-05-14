@@ -34,94 +34,97 @@ import java.util.concurrent.ExecutorService
 class UploadImageMethod : AbsUploadImageMethodIDL() {
     private final val tag = "UploadImageMethod"
 
-    private fun getExecutorService(): ExecutorService {
-        return ThreadPool.getExecutorService()
-    }
+    private fun getExecutorService(): ExecutorService = ThreadPool.getExecutorService()
 
-    private fun getPermissionDependInstance(): IHostPermissionDepend? =
-        CommonDependsProvider.hostPermissionDepend
+    private fun getPermissionDependInstance(): IHostPermissionDepend? = CommonDependsProvider.hostPermissionDepend
 
-    private fun getNetworkDependInstance(): IHostNetworkDepend? =
-        CommonDependsProvider.hostNetworkDepend
+    private fun getNetworkDependInstance(): IHostNetworkDepend? = CommonDependsProvider.hostNetworkDepend
 
     override fun handle(
         params: UploadImageParamModel,
         callback: CompletionBlock<UploadImageResultModel>,
-        type: BridgePlatformType
+        type: BridgePlatformType,
     ) {
-        val context = getSDKContext()?.context ?: return callback.onFailure(
-            IDLBridgeMethod.FAIL, "Context not provided in host"
-        )
-        val activity = IDLMethodHelper.getActivity(context) ?: return callback.onFailure(
-            IDLBridgeMethod.FAIL,
-            "context can not convert to activity"
-        )
+        val context =
+            getSDKContext()?.context ?: return callback.onFailure(
+                IDLBridgeMethod.FAIL,
+                "Context not provided in host",
+            )
+        val activity =
+            IDLMethodHelper.getActivity(context) ?: return callback.onFailure(
+                IDLBridgeMethod.FAIL,
+                "context can not convert to activity",
+            )
 
         if (params.filePath.isNullOrEmpty() && params.formDataBody == null) {
             return callback.onFailure(
                 IDLBridgeMethod.INVALID_PARAM,
-                "Invalid params: no filepath or formDataBody"
+                "Invalid params: no filepath or formDataBody",
             )
         }
 
-        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            getPermissionDependInstance()?.hasPermission(
-                activity,
-                Manifest.permission.READ_MEDIA_IMAGES
-            ) ?: false
-        } else {
-            getPermissionDependInstance()?.hasPermission(
-                activity,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) ?: false
-        }
+        val hasPermission =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                getPermissionDependInstance()?.hasPermission(
+                    activity,
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                ) ?: false
+            } else {
+                getPermissionDependInstance()?.hasPermission(
+                    activity,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                ) ?: false
+            }
 
         if (hasPermission) {
             handleUploadFile(context, params, callback)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-            && getPermissionDependInstance()?.hasPermission(
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            getPermissionDependInstance()?.hasPermission(
                 activity,
-                Manifest.permission.READ_MEDIA_IMAGES
+                Manifest.permission.READ_MEDIA_IMAGES,
             ) == true
         ) {
             handleUploadFile(context, params, callback)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-            && getPermissionDependInstance()?.hasPermission(
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+            getPermissionDependInstance()?.hasPermission(
                 activity,
-                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
             ) == true
         ) {
             handleUploadFile(context, params, callback)
         } else {
-            val realPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                arrayOf(
-                    Manifest.permission.READ_MEDIA_IMAGES,
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED else null
-                ).filterNotNull().toTypedArray()
-            } else {
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-            }
-
-
-            getPermissionDependInstance()?.requestPermissions(activity, object :
-                OnPermissionsGrantCallback {
-                override fun onResult(onPermissionsGrantResults: Array<OnPermissionsGrantResult>) {
-                    if (onPermissionsGrantResults.isNotEmpty() && onPermissionsGrantResults[0].result == PackageManager.PERMISSION_GRANTED) {
-                        handleUploadFile(context, params, callback)
-                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-                        && onPermissionsGrantResults.size == 2
-                        && getPermissionDependInstance()?.hasPermission(
-                            activity,
-                            Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
-                        ) == true
-                    ) {
-                        handleUploadFile(context, params, callback)
-                    } else {
-                        callback.onFailure(IDLBridgeMethod.FAIL, "request permission denied")
-                    }
+            val realPermissions =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    arrayOf(
+                        Manifest.permission.READ_MEDIA_IMAGES,
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED else null,
+                    ).filterNotNull().toTypedArray()
+                } else {
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
                 }
 
-            }, realPermissions) ?: run {
+            getPermissionDependInstance()?.requestPermissions(
+                activity,
+                object :
+                    OnPermissionsGrantCallback {
+                    override fun onResult(onPermissionsGrantResults: Array<OnPermissionsGrantResult>) {
+                        if (onPermissionsGrantResults.isNotEmpty() && onPermissionsGrantResults[0].result == PackageManager.PERMISSION_GRANTED) {
+                            handleUploadFile(context, params, callback)
+                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+                            onPermissionsGrantResults.size == 2 &&
+                            getPermissionDependInstance()?.hasPermission(
+                                activity,
+                                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
+                            ) == true
+                        ) {
+                            handleUploadFile(context, params, callback)
+                        } else {
+                            callback.onFailure(IDLBridgeMethod.FAIL, "request permission denied")
+                        }
+                    }
+                },
+                realPermissions,
+            ) ?: run {
                 callback.onFailure(IDLBridgeMethod.FAIL, "uploadImageDepend is null")
             }
         }
@@ -130,7 +133,7 @@ class UploadImageMethod : AbsUploadImageMethodIDL() {
     private fun handleUploadFile(
         context: Context,
         uploadParams: UploadImageParamModel,
-        callback: CompletionBlock<UploadImageResultModel>
+        callback: CompletionBlock<UploadImageResultModel>,
     ) {
         val postFilePart = getPostFilePart(context, uploadParams, callback) ?: return
         getExecutorService().execute {
@@ -138,46 +141,56 @@ class UploadImageMethod : AbsUploadImageMethodIDL() {
             val params = BridgeAPIRequestUtils.convertParamValueToString(uploadParams.params)
             val paramsOption = uploadParams.paramsOption
 
-            val responseCallback = object : IResponseCallback {
-                override fun onSuccess(
-                    body: JSONObject,
-                    responseHeader: LinkedHashMap<String, String>,
-                    statusCode: Int?,
-                    clientCode: Int?
-                ) {
-                    try {
-                        val uploadImageResponse = JsonUtils.fromJson(
-                            body.toString(), UploadImageResponse::class.java
-                        )
-                        val avatarUri = uploadImageResponse.data
-                        val response = mutableMapOf<String, Any>().apply {
-                            body.keys().forEach { key ->
-                                this[key] = body.get(key)
-                            }
+            val responseCallback =
+                object : IResponseCallback {
+                    override fun onSuccess(
+                        body: JSONObject,
+                        responseHeader: LinkedHashMap<String, String>,
+                        statusCode: Int?,
+                        clientCode: Int?,
+                    ) {
+                        try {
+                            val uploadImageResponse =
+                                JsonUtils.fromJson(
+                                    body.toString(),
+                                    UploadImageResponse::class.java,
+                                )
+                            val avatarUri = uploadImageResponse.data
+                            val response =
+                                mutableMapOf<String, Any>().apply {
+                                    body.keys().forEach { key ->
+                                        this[key] = body.get(key)
+                                    }
+                                }
+                            val url = avatarUri?.urlList?.takeIf { it.isNotEmpty() }?.firstOrNull()
+                            callback.onSuccess(
+                                UploadImageResultModel::class.createXModel().apply {
+                                    this.url = url
+                                    uri = avatarUri?.uri
+                                    this.response = response
+                                    this.clientCode = clientCode
+                                },
+                            )
+                        } catch (throwable: Throwable) {
+                            Log.e(tag, "parse post reponse body failed", throwable)
                         }
-                        val url = avatarUri?.urlList?.takeIf { it.isNotEmpty() }?.firstOrNull()
-                        callback.onSuccess(
+                    }
+
+                    override fun onFailed(
+                        errorCode: Int?,
+                        clientCode: Int?,
+                        throwable: Throwable,
+                    ) {
+                        callback.onFailure(
+                            IDLBridgeMethod.FAIL,
+                            throwable.message ?: "",
                             UploadImageResultModel::class.createXModel().apply {
                                 this.url = url
-                                uri = avatarUri?.uri
-                                this.response = response
                                 this.clientCode = clientCode
-                            })
-                    } catch (throwable: Throwable) {
-                        Log.e(tag, "parse post reponse body failed", throwable)
+                            },
+                        )
                     }
                 }
-
-                override fun onFailed(errorCode: Int?, clientCode: Int?, throwable: Throwable) {
-                    callback.onFailure(
-                        IDLBridgeMethod.FAIL,
-                        throwable.message ?: "",
-                        UploadImageResultModel::class.createXModel().apply {
-                            this.url = url
-                            this.clientCode = clientCode
-                        })
-                }
-            }
             val networkDepend = getNetworkDependInstance()
             if (networkDepend == null) {
                 callback.onFailure(IDLBridgeMethod.FAIL, "networkDepend is null")
@@ -187,7 +200,12 @@ class UploadImageMethod : AbsUploadImageMethodIDL() {
                 paramsOption == UploadImageParamsOptionConstant.ADD_TO_REQUEST
             ) {
                 BridgeAPIRequestUtils.post(
-                    uploadParams.url, headers, postFilePart, params, responseCallback, networkDepend
+                    uploadParams.url,
+                    headers,
+                    postFilePart,
+                    params,
+                    responseCallback,
+                    networkDepend,
                 )
             } else {
                 BridgeAPIRequestUtils.post(
@@ -196,25 +214,25 @@ class UploadImageMethod : AbsUploadImageMethodIDL() {
                     postFilePart,
                     HashMap<String, String>(),
                     responseCallback,
-                    networkDepend
+                    networkDepend,
                 )
             }
-
         }
     }
 
     private fun getPostFilePart(
         context: Context,
         uploadParams: UploadImageParamModel,
-        callback: CompletionBlock<UploadImageResultModel>
+        callback: CompletionBlock<UploadImageResultModel>,
     ): LinkedHashMap<String, File>? {
         val dataBody = uploadParams.formDataBody
         when {
             dataBody !== null -> {
-                val pairList = dataBody.map {
-                    val file = checkPath(context, it.value, callback, it.key) ?: return null
-                    Pair(it.key, file)
-                }
+                val pairList =
+                    dataBody.map {
+                        val file = checkPath(context, it.value, callback, it.key) ?: return null
+                        Pair(it.key, file)
+                    }
                 val map = linkedMapOf<String, File>()
                 pairList.forEach {
                     map[it.first] = it.second
@@ -231,7 +249,7 @@ class UploadImageMethod : AbsUploadImageMethodIDL() {
             else -> {
                 callback.onFailure(
                     IDLBridgeMethod.INVALID_PARAM,
-                    "filePath or formDataBody can not be null."
+                    "filePath or formDataBody can not be null.",
                 )
                 return null
             }
@@ -242,12 +260,12 @@ class UploadImageMethod : AbsUploadImageMethodIDL() {
         context: Context,
         url: String?,
         callback: CompletionBlock<UploadImageResultModel>,
-        key: String
+        key: String,
     ): File? {
         if (url.isNullOrEmpty()) {
             callback.onFailure(
                 IDLBridgeMethod.INVALID_PARAM,
-                "The file path should not be empty.The key is $key"
+                "The file path should not be empty.The key is $key",
             )
             return null
         }

@@ -13,13 +13,11 @@ import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseModel
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseParamModel
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseResultModel
 
-abstract class AbsUploadFileMethodIDL :
-    AbsSparklingIDLMethod<AbsUploadFileMethodIDL.UploadFileParamModel, AbsUploadFileMethodIDL.UploadFileResultModel>() {
-
+abstract class AbsUploadFileMethodIDL : AbsSparklingIDLMethod<AbsUploadFileMethodIDL.UploadFileParamModel, AbsUploadFileMethodIDL.UploadFileResultModel>() {
     @IDLMethodName(
         name = "media.uploadFile",
         params = ["url", "filePath", "params", "header", "paramsOption", "formDataBody"],
-        results = ["url", "uri", "response", "clientCode"]
+        results = ["url", "uri", "response", "clientCode"],
     )
     final override val name: String = "media.uploadFile"
 
@@ -53,7 +51,6 @@ abstract class AbsUploadFileMethodIDL :
 
     @IDLMethodResultModel
     interface UploadFileResultModel : IDLMethodBaseResultModel {
-
         @get:IDLMethodParamField(required = false, isGetter = true, keyPath = "url")
         @set:IDLMethodParamField(required = false, isGetter = false, keyPath = "url")
         var url: String?
@@ -79,4 +76,3 @@ abstract class AbsUploadFileMethodIDL :
         val value: String
     }
 }
-

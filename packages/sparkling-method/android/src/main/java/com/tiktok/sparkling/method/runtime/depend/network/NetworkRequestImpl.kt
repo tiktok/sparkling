@@ -13,16 +13,12 @@ object NetworkRequestImpl {
     fun requestForString(
         method: RequestMethod,
         request: HttpRequest,
-        hostNetworkDepend: IHostNetworkDepend
-    ): AbsStringConnection {
-        return hostNetworkDepend.requestForString(method, request)
-    }
+        hostNetworkDepend: IHostNetworkDepend,
+    ): AbsStringConnection = hostNetworkDepend.requestForString(method, request)
 
     fun requestForStream(
         method: RequestMethod,
         request: HttpRequest,
-        hostNetworkDepend: IHostNetworkDepend
-    ): AbsStreamConnection {
-        return hostNetworkDepend.requestForStream(method, request)
-    }
+        hostNetworkDepend: IHostNetworkDepend,
+    ): AbsStreamConnection = hostNetworkDepend.requestForStream(method, request)
 }

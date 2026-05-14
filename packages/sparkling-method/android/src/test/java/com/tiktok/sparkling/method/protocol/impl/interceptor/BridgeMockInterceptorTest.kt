@@ -13,7 +13,6 @@ import org.junit.Test
 import org.mockito.Mockito
 
 class BridgeMockInterceptorTest {
-
     private lateinit var interceptor: BridgeMockInterceptor
     private val mockBridgeCall = Mockito.mock(BridgeCall::class.java)
     private val mockBridgeResult = Mockito.mock(BridgeResult::class.java)

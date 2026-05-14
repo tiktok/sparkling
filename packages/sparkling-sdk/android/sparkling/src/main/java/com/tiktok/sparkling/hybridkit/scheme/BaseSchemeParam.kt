@@ -5,5 +5,6 @@ package com.tiktok.sparkling.hybridkit.scheme
 
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
 
-
-abstract class BaseSchemeParam(open var engineType: HybridKitType)
+abstract class BaseSchemeParam(
+    open var engineType: HybridKitType,
+)

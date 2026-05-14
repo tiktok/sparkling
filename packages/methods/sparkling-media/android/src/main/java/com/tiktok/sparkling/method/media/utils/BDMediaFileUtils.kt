@@ -20,11 +20,17 @@ import java.io.InputStream
 import java.io.OutputStream
 
 object BDMediaFileUtils {
-    fun createImageUri(context: Context?, name: String?, mimeType: String?): Uri? {
-        val file = File(
-            Environment.getExternalStorageDirectory()
-                .getPath() + "/" + Environment.DIRECTORY_DCIM + "/Camera"
-        )
+    fun createImageUri(
+        context: Context?,
+        name: String?,
+        mimeType: String?,
+    ): Uri? {
+        val file =
+            File(
+                Environment
+                    .getExternalStorageDirectory()
+                    .getPath() + "/" + Environment.DIRECTORY_DCIM + "/Camera",
+            )
         if (!file.exists()) {
             file.mkdirs()
         }
@@ -38,7 +44,7 @@ object BDMediaFileUtils {
         name: String?,
         mimeType: String?,
         dirName: String?,
-        value: ContentValues? = null as ContentValues?
+        value: ContentValues? = null as ContentValues?,
     ): Uri? {
         var dirName = dirName
         if (context != null && !TextUtils.isEmpty(name) && !TextUtils.isEmpty(dirName)) {
@@ -63,9 +69,10 @@ object BDMediaFileUtils {
                 values?.put(
                     "_data",
                     removeDupSlash(
-                        Environment.getExternalStorageDirectory()
-                            .getPath() + "/" + dirName + "/" + name
-                    )
+                        Environment
+                            .getExternalStorageDirectory()
+                            .getPath() + "/" + dirName + "/" + name,
+                    ),
                 )
             }
 
@@ -76,15 +83,22 @@ object BDMediaFileUtils {
         }
     }
 
-    fun createVideoUri(context: Context?, name: String?): Uri? {
-        return createVideoUri(context, name, "video/mp4")
-    }
+    fun createVideoUri(
+        context: Context?,
+        name: String?,
+    ): Uri? = createVideoUri(context, name, "video/mp4")
 
-    fun createVideoUri(context: Context?, name: String?, mimeType: String?): Uri? {
-        val file = File(
-            Environment.getExternalStorageDirectory()
-                .getPath() + "/" + Environment.DIRECTORY_DCIM + "/Camera"
-        )
+    fun createVideoUri(
+        context: Context?,
+        name: String?,
+        mimeType: String?,
+    ): Uri? {
+        val file =
+            File(
+                Environment
+                    .getExternalStorageDirectory()
+                    .getPath() + "/" + Environment.DIRECTORY_DCIM + "/Camera",
+            )
         if (!file.exists()) {
             file.mkdirs()
         }
@@ -96,17 +110,15 @@ object BDMediaFileUtils {
         context: Context?,
         name: String?,
         mimeType: String?,
-        dirName: String?
-    ): Uri? {
-        return createVideoUri(context, name, mimeType, dirName, null as ContentValues?)
-    }
+        dirName: String?,
+    ): Uri? = createVideoUri(context, name, mimeType, dirName, null as ContentValues?)
 
     fun createVideoUri(
         context: Context?,
         name: String?,
         mimeType: String?,
         dirName: String?,
-        value: ContentValues?
+        value: ContentValues?,
     ): Uri? {
         var dirName = dirName
         if (context != null && !TextUtils.isEmpty(name) && !TextUtils.isEmpty(dirName)) {
@@ -131,9 +143,10 @@ object BDMediaFileUtils {
                 values?.put(
                     "_data",
                     removeDupSlash(
-                        Environment.getExternalStorageDirectory()
-                            .getPath() + "/" + dirName + "/" + name
-                    )
+                        Environment
+                            .getExternalStorageDirectory()
+                            .getPath() + "/" + dirName + "/" + name,
+                    ),
                 )
             }
 
@@ -187,7 +200,10 @@ object BDMediaFileUtils {
             }
         }
 
-    fun isUriExists(context: Context?, uri: Uri?): Boolean {
+    fun isUriExists(
+        context: Context?,
+        uri: Uri?,
+    ): Boolean {
         if (null != context && null != uri) {
             val cr = context.getContentResolver()
 
@@ -212,7 +228,10 @@ object BDMediaFileUtils {
     }
 
     @Throws(IOException::class)
-    fun copyFile(inputStream: InputStream, outputStream: OutputStream) {
+    fun copyFile(
+        inputStream: InputStream,
+        outputStream: OutputStream,
+    ) {
         try {
             val buffer = ByteArray(4096)
             if (inputStream == null || outputStream == null) {
@@ -247,7 +266,7 @@ object BDMediaFileUtils {
         context: Context,
         path: String,
         isImage: Boolean,
-        mimeType: String? = "image/jpeg"
+        mimeType: String? = "image/jpeg",
     ): Uri? {
         val file = File(path)
         val uri: Uri?

@@ -15,7 +15,6 @@ import org.junit.Test
 import org.junit.After
 
 class BridgeContextTest {
-
     private lateinit var bridgeContext: BridgeContext
 
     @Before
@@ -58,7 +57,7 @@ class BridgeContextTest {
         // Mock the getNameSpace method which is called by getNamespace()
         every { businessCallHandler.nameSpace } returns "testNamespace"
         every { businessCallHandler.getBridge(bridgeContext, "testBridge") } returns null
-        
+
         assertFalse(bridgeContext.shouldHandleWithBusinessHandler(bridgeCall))
     }
 
@@ -69,9 +68,9 @@ class BridgeContextTest {
 
         val bridgeCall = BridgeCall(bridgeContext)
         bridgeCall.platform = BridgeCall.PlatForm.Web // Initialize platform
-        
+
         every { lifeClient.onBridgeCalledStart(any(), any()) } just Runs
-        
+
         bridgeContext.bridgeLifeClientImp.onBridgeCalledStart(bridgeCall, bridgeContext)
 
         verify { lifeClient.onBridgeCalledStart(bridgeCall, bridgeContext) }
@@ -81,7 +80,7 @@ class BridgeContextTest {
     fun testGetCurrentUrl() {
         // Test without lynxView (should return null since getCurrentUrl returns String?)
         assertNull(bridgeContext.getCurrentUrl())
-        
+
         // Test with lynxView = null explicitly
         bridgeContext.lynxView = null
         assertNull(bridgeContext.getCurrentUrl())

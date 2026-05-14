@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.hybridkit.base
 
 import com.tiktok.sparkling.hybridkit.HybridEnvironment
@@ -12,11 +11,13 @@ import com.tiktok.sparkling.hybridkit.api.IInstanceProvider
 import com.tiktok.sparkling.method.registry.core.interfaces.IReleasable
 import java.util.concurrent.ConcurrentHashMap
 
-class DefaultDependencyProvider:
-    IDependencyProvider {
+class DefaultDependencyProvider : IDependencyProvider {
     private val providers = ConcurrentHashMap<Class<*>, IInstanceProvider<*>>()
 
-    override fun <T> put(clazz: Class<T>, instance: T?) {
+    override fun <T> put(
+        clazz: Class<T>,
+        instance: T?,
+    ) {
         if (instance != null) {
             if (instance is IDependencyIterator<*>) {
                 if (providers[clazz] == null) {
@@ -35,15 +36,15 @@ class DefaultDependencyProvider:
         }
     }
 
-    override fun <T> get(clazz: Class<T>): T? {
-        return providers[clazz]?.run {
-            provideInstance()
-        }?.takeIf {
-            clazz.isAssignableFrom(it::class.java)
-        }?.let {
-            it as T
-        }
-    }
+    override fun <T> get(clazz: Class<T>): T? =
+        providers[clazz]
+            ?.run {
+                provideInstance()
+            }?.takeIf {
+                clazz.isAssignableFrom(it::class.java)
+            }?.let {
+                it as T
+            }
 
     override fun <T> remove(clazz: Class<T>) {
         providers.remove(clazz)
@@ -72,7 +73,7 @@ class DefaultDependencyProvider:
                 value.release()
             } else if (HybridEnvironment.instance.shouldKeepDependencyWhenRecreate(value)) {
                 // do nothing
-            }else {
+            } else {
                 iterator.remove()
             }
         }
@@ -90,10 +91,10 @@ class DefaultDependencyProvider:
         }
         return dependencyProvider
     }
-
 }
 
-class DefaultInstanceProvider<out T>(val instance: T):
-    IInstanceProvider<T> {
+class DefaultInstanceProvider<out T>(
+    val instance: T,
+) : IInstanceProvider<T> {
     override fun provideInstance() = instance
 }

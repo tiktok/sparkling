@@ -20,7 +20,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
 class DefaultBridgeClientImpTest {
-
     private lateinit var bridgeClient: DefaultBridgeClientImp
     private val mockBridgeContext = Mockito.mock(BridgeContext::class.java)
 

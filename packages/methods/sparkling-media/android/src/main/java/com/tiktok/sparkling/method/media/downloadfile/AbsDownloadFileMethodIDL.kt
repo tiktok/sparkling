@@ -18,17 +18,15 @@ import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseResultMo
  */
 
 abstract class AbsDownloadFileMethodIDL : AbsSparklingIDLMethod<AbsDownloadFileMethodIDL.DownloadFileInputModel, AbsDownloadFileMethodIDL.DownloadFileResultModel>() {
-
     @IDLMethodName(
         name = "media.downloadFile",
         params = ["url", "params", "header", "extension", "saveToAlbum", "needCommonParams", "timeoutInterval"],
-        results = ["httpCode", "clientCode", "header", "filePath", "response"]
+        results = ["httpCode", "clientCode", "header", "filePath", "response"],
     )
     final override val name: String = "media.downloadFile"
 
     @IDLMethodParamModel
     interface DownloadFileInputModel : IDLMethodBaseParamModel {
-
         @get:IDLMethodParamField(required = true, isGetter = true, keyPath = "url")
         val url: String
 
@@ -48,7 +46,7 @@ abstract class AbsDownloadFileMethodIDL : AbsSparklingIDLMethod<AbsDownloadFileM
             required = false,
             isGetter = true,
             keyPath = "needCommonParams",
-            defaultValue = MethodParamDefaultValue(type = DefaultType.BOOL, boolValue = true)
+            defaultValue = MethodParamDefaultValue(type = DefaultType.BOOL, boolValue = true),
         )
         val needCommonParams: Boolean
 
@@ -58,7 +56,6 @@ abstract class AbsDownloadFileMethodIDL : AbsSparklingIDLMethod<AbsDownloadFileM
 
     @IDLMethodResultModel
     interface DownloadFileResultModel : IDLMethodBaseResultModel {
-
         @get:IDLMethodParamField(required = true, isGetter = true, keyPath = "httpCode")
         @set:IDLMethodParamField(required = true, isGetter = false, keyPath = "httpCode")
         var httpCode: Number? // you can't set a Number type to this param, only support Int/Double/Long/Float

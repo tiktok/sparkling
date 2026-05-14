@@ -28,7 +28,6 @@ import com.tiktok.sparkling.hybridkit.utils.LogUtils
 import com.tiktok.sparkling.method.registry.api.SparklingBridge
 import com.tiktok.sparkling.method.registry.api.util.BridgeProtocolConstants
 
-
 object HybridLynxKit {
     private const val TAG = "HybridLynxKit"
 
@@ -49,26 +48,29 @@ object HybridLynxKit {
         }
 
         val lynxConfig = HybridCommon.hybridConfig?.lynxConfig as SparklingLynxConfig?
-        val libraryLoader = lynxConfig?.libraryLoader
-            ?: INativeLibraryLoader {
-                try {
-                    // load by default
-                    System.loadLibrary(it)
-                } catch (e: Throwable) {
-                    e.message?.let { message ->
-                        LogUtils.printLog(
-                            message, LogLevel.E,
-                            TAG
-                        )
+        val libraryLoader =
+            lynxConfig?.libraryLoader
+                ?: INativeLibraryLoader {
+                    try {
+                        // load by default
+                        System.loadLibrary(it)
+                    } catch (e: Throwable) {
+                        e.message?.let { message ->
+                            LogUtils.printLog(
+                                message,
+                                LogLevel.E,
+                                TAG,
+                            )
+                        }
                     }
                 }
-            }
 
-        val behaviorBundle = BehaviorBundle {
-            ArrayList<Behavior>().apply {
-                lynxConfig?.globalBehaviors?.let { addAll(it) }
+        val behaviorBundle =
+            BehaviorBundle {
+                ArrayList<Behavior>().apply {
+                    lynxConfig?.globalBehaviors?.let { addAll(it) }
+                }
             }
-        }
 
         LynxEnv.inst().isCheckPropsSetter = lynxConfig?.isCheckPropsSetter ?: true
 
@@ -76,7 +78,7 @@ object HybridLynxKit {
             application,
             libraryLoader,
             lynxConfig?.templateProvider,
-            behaviorBundle
+            behaviorBundle,
         )
 
         // register global LynxModule
@@ -87,12 +89,11 @@ object HybridLynxKit {
         lynxConfig?.additionInit?.invoke(LynxEnv.inst())
     }
 
-
     fun createKitView(
         scheme: HybridSchemeParam,
         hybridContext: HybridContext,
         context: Context,
-        lifeCycle: IHybridKitLifeCycle? = null
+        lifeCycle: IHybridKitLifeCycle? = null,
     ): SimpleLynxKitView {
         val createStart = System.currentTimeMillis()
         hybridContext.tryResetTemplateResData(createStart)
@@ -101,8 +102,9 @@ object HybridLynxKit {
 
         GlobalPropsUtils.instance.init(hybridContext, context)
 
-        var kitInitParams: LynxKitInitParams = (hybridContext.hybridParams as? LynxKitInitParams)
-            ?: LynxKitInitParams(loadUri = null)
+        var kitInitParams: LynxKitInitParams =
+            (hybridContext.hybridParams as? LynxKitInitParams)
+                ?: LynxKitInitParams(loadUri = null)
         if (kitInitParams.loadUri == null) {
             kitInitParams.loadUri = hybridContext.resolveFullScheme()?.toUri()
         }
@@ -115,13 +117,11 @@ object HybridLynxKit {
         bridge.init(
             lynxView,
             hybridContext.containerId,
-            BridgeProtocolConstants.BRIDGE_LYNX_PROTOCOL
+            BridgeProtocolConstants.BRIDGE_LYNX_PROTOCOL,
         )
         hybridContext.bridge = bridge
 
         lifeCycle?.onPostKitCreated(lynxView)
         return lynxView
     }
-
-
 }

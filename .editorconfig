@@ -7,3 +7,20 @@ end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = false
 insert_final_newline = true
+
+[*.{kt,kts}]
+indent_size = 4
+ktlint_code_style = ktlint_official
+max_line_length = off
+ktlint_standard_max-line-length = disabled
+ktlint_standard_property-naming = disabled
+ktlint_standard_backing-property-naming = disabled
+ktlint_standard_no-wildcard-imports = disabled
+ktlint_standard_kdoc = disabled
+ktlint_standard_no-consecutive-comments = disabled
+ktlint_standard_enum-entry-name-case = disabled
+ktlint_standard_no-empty-file = disabled
+ktlint_standard_filename = disabled
+ktlint_standard_import-ordering = disabled
+ktlint_standard_value-parameter-comment = disabled
+ktlint_standard_comment-wrapping = disabled

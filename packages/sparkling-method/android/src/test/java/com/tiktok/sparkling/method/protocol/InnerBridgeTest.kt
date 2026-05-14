@@ -24,7 +24,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
 class InnerBridgeTest {
-
     private lateinit var innerBridge: InnerBridge
     private val mockContext = Mockito.mock(Context::class.java)
     private val mockSparklingBridge = Mockito.mock(SparklingBridge::class.java)

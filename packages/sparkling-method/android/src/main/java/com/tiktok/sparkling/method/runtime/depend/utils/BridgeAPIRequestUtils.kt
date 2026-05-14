@@ -17,9 +17,27 @@ import org.json.JSONObject
 import java.io.File
 
 interface IResponseCallback {
-    fun onSuccess(body: JSONObject, responseHeader: LinkedHashMap<String, String>, statusCode: Int?, clientCode: Int?)
-    fun onParsingFailed(body: JSONObject, responseHeader: LinkedHashMap<String, String>, rawResponse: String, throwable: Throwable, statusCode: Int?, clientCode: Int?): Unit? = null
-    fun onFailed(errorCode: Int?, clientCode: Int?, throwable: Throwable)
+    fun onSuccess(
+        body: JSONObject,
+        responseHeader: LinkedHashMap<String, String>,
+        statusCode: Int?,
+        clientCode: Int?,
+    )
+
+    fun onParsingFailed(
+        body: JSONObject,
+        responseHeader: LinkedHashMap<String, String>,
+        rawResponse: String,
+        throwable: Throwable,
+        statusCode: Int?,
+        clientCode: Int?,
+    ): Unit? = null
+
+    fun onFailed(
+        errorCode: Int?,
+        clientCode: Int?,
+        throwable: Throwable,
+    )
 }
 
 interface IStreamResponseCallback {
@@ -27,27 +45,28 @@ interface IStreamResponseCallback {
 }
 
 object BridgeAPIRequestUtils {
-
     private var TAG = BridgeAPIRequestUtils::class.java.simpleName
-    
+
     const val REQUEST_TAG_FROM = "request_tag_from"
     private const val CONTENT_TYPE_JSON = "application/json"
     const val ERROR_CODE_408 = -408
 
     fun addParametersToUrl(
-            url: String,
-            params: Map<String, Any>?,
-            type: BridgePlatformType
+        url: String,
+        params: Map<String, Any>?,
+        type: BridgePlatformType,
     ): String {
         val urlBuilder = HttpUrlBuilder(url)
         params?.forEach {
             if (it.value is Map<*, *>) {
                 urlBuilder.addParam(
-                    it.key, JsonUtils.toJSONObject(it.value as Map<String, Any>).toString()
+                    it.key,
+                    JsonUtils.toJSONObject(it.value as Map<String, Any>).toString(),
                 )
             } else if (it.value is List<*>) {
                 urlBuilder.addParam(
-                    it.key, JsonUtils.toJSONArray(it.value as List<*>).toString()
+                    it.key,
+                    JsonUtils.toJSONArray(it.value as List<*>).toString(),
                 )
             } else {
                 urlBuilder.addParam(it.key, it.value.toString())
@@ -66,31 +85,33 @@ object BridgeAPIRequestUtils {
     }
 
     fun get(
-            targetUrl: String,
-            headers: Map<String, String>,
-            disableRedirect: Boolean,
-            addCommonParams: Boolean?,
-            callback: IResponseCallback,
-            hostNetworkDepend: IHostNetworkDepend
+        targetUrl: String,
+        headers: Map<String, String>,
+        disableRedirect: Boolean,
+        addCommonParams: Boolean?,
+        callback: IResponseCallback,
+        hostNetworkDepend: IHostNetworkDepend,
     ) {
-        val connection = HttpRequest(targetUrl)
-            .headers(headers as LinkedHashMap<String, String>)
-            .needAddCommonParams(addCommonParams ?: true)
-            .disableRedirect(disableRedirect)
-            .doGetForString(hostNetworkDepend)
+        val connection =
+            HttpRequest(targetUrl)
+                .headers(headers as LinkedHashMap<String, String>)
+                .needAddCommonParams(addCommonParams ?: true)
+                .disableRedirect(disableRedirect)
+                .doGetForString(hostNetworkDepend)
         handleConnection(connection, callback)
     }
 
     // upload image
     fun post(
-            targetUrl: String,
-            headers: LinkedHashMap<String, String>,
-            postFilePart:  LinkedHashMap<String, File>,
-            params: Map<String, String>,
-            callback: IResponseCallback,
-            hostNetworkDepend: IHostNetworkDepend
+        targetUrl: String,
+        headers: LinkedHashMap<String, String>,
+        postFilePart: LinkedHashMap<String, File>,
+        params: Map<String, String>,
+        callback: IResponseCallback,
+        hostNetworkDepend: IHostNetworkDepend,
     ) {
-        val connection = HttpRequest(targetUrl)
+        val connection =
+            HttpRequest(targetUrl)
                 .headers(headers)
                 .postFilePart(postFilePart)
                 .params(params)
@@ -107,18 +128,21 @@ object BridgeAPIRequestUtils {
         addCommonParams: Boolean?,
         postData: ByteArray,
         callback: IStreamResponseCallback,
-        hostNetworkDepend: IHostNetworkDepend
+        hostNetworkDepend: IHostNetworkDepend,
     ) {
         try {
-            val linkedHashMap = LinkedHashMap<String, String>().apply {
-                putAll(headers)
-            }
-            val connection = HttpRequest(targetUrl).headers(linkedHashMap)
-                .contentType(contentType)
-                .needAddCommonParams(addCommonParams ?: true)
-                .sendData(postData)
-                .disableRedirect(disableRedirect)
-                .doPostForStream(hostNetworkDepend)
+            val linkedHashMap =
+                LinkedHashMap<String, String>().apply {
+                    putAll(headers)
+                }
+            val connection =
+                HttpRequest(targetUrl)
+                    .headers(linkedHashMap)
+                    .contentType(contentType)
+                    .needAddCommonParams(addCommonParams ?: true)
+                    .sendData(postData)
+                    .disableRedirect(disableRedirect)
+                    .doPostForStream(hostNetworkDepend)
 
             callback.handleConnection(connection)
         } catch (throwable: Throwable) {
@@ -134,18 +158,21 @@ object BridgeAPIRequestUtils {
         addCommonParams: Boolean?,
         postData: ByteArray,
         callback: IResponseCallback,
-        hostNetworkDepend: IHostNetworkDepend
+        hostNetworkDepend: IHostNetworkDepend,
     ) {
         try {
-            val linkedHashMap = LinkedHashMap<String, String>().apply {
-                putAll(headers)
-            }
-            val connection = HttpRequest(targetUrl).headers(linkedHashMap)
-                .contentType(contentType)
-                .needAddCommonParams(addCommonParams ?: true)
-                .sendData(postData)
-                .disableRedirect(disableRedirect)
-                .doPostForString(hostNetworkDepend)
+            val linkedHashMap =
+                LinkedHashMap<String, String>().apply {
+                    putAll(headers)
+                }
+            val connection =
+                HttpRequest(targetUrl)
+                    .headers(linkedHashMap)
+                    .contentType(contentType)
+                    .needAddCommonParams(addCommonParams ?: true)
+                    .sendData(postData)
+                    .disableRedirect(disableRedirect)
+                    .doPostForString(hostNetworkDepend)
 
             handleConnection(connection, callback)
         } catch (throwable: Throwable) {
@@ -162,27 +189,31 @@ object BridgeAPIRequestUtils {
         postData: JSONObject,
         callback: IResponseCallback,
         hostNetworkDepend: IHostNetworkDepend,
-        jsonFormatOption: Int?
+        jsonFormatOption: Int?,
     ) {
         try {
-            val linkedHashMap = LinkedHashMap<String, String>().apply {
-                putAll(headers)
-            }
+            val linkedHashMap =
+                LinkedHashMap<String, String>().apply {
+                    putAll(headers)
+                }
             val connection: AbsStringConnection?
             if (contentType == CONTENT_TYPE_JSON) {
-                var sendData :ByteArray? = null
-                if (jsonFormatOption ==  RequestJsonFormatOptionConstants.DEFAULT ||
-                        jsonFormatOption == RequestJsonFormatOptionConstants.DONT_FORMAT) {
+                var sendData: ByteArray? = null
+                if (jsonFormatOption == RequestJsonFormatOptionConstants.DEFAULT ||
+                    jsonFormatOption == RequestJsonFormatOptionConstants.DONT_FORMAT
+                ) {
                     sendData = postData.toString().toByteArray(charset("UTF-8"))
                 } else if (jsonFormatOption == RequestJsonFormatOptionConstants.DO_FORMAT) {
                     sendData = postData.toString(2).toByteArray(charset("UTF-8"))
                 }
-                connection = HttpRequest(targetUrl).headers(linkedHashMap)
-                    .contentType(contentType)
-                    .needAddCommonParams(addCommonParams?: true)
-                    .disableRedirect(disableRedirect)
-                    .sendData(sendData)
-                    .doPostForString(hostNetworkDepend)
+                connection =
+                    HttpRequest(targetUrl)
+                        .headers(linkedHashMap)
+                        .contentType(contentType)
+                        .needAddCommonParams(addCommonParams ?: true)
+                        .disableRedirect(disableRedirect)
+                        .sendData(sendData)
+                        .doPostForString(hostNetworkDepend)
             } else {
                 val map = LinkedHashMap<String, String>()
                 val iterator = postData.keys()
@@ -191,11 +222,13 @@ object BridgeAPIRequestUtils {
                     val value = postData.optString(key, "")
                     map[key] = value
                 }
-                connection = HttpRequest(targetUrl).headers(linkedHashMap)
-                    .params(map)
-                    .needAddCommonParams(addCommonParams?: true)
-                    .disableRedirect(disableRedirect)
-                    .doPostForString(hostNetworkDepend)
+                connection =
+                    HttpRequest(targetUrl)
+                        .headers(linkedHashMap)
+                        .params(map)
+                        .needAddCommonParams(addCommonParams ?: true)
+                        .disableRedirect(disableRedirect)
+                        .doPostForString(hostNetworkDepend)
             }
 
             handleConnection(connection, callback)
@@ -212,15 +245,16 @@ object BridgeAPIRequestUtils {
         addCommonParams: Boolean?,
         postData: JSONObject,
         callback: IResponseCallback,
-        hostNetworkDepend: IHostNetworkDepend
+        hostNetworkDepend: IHostNetworkDepend,
     ) {
-        val connection = HttpRequest(targetUrl)
-            .headers(headers as LinkedHashMap<String, String>)
-            .contentType(contentType)
-            .needAddCommonParams(addCommonParams?: true)
-            .disableRedirect(disableRedirect)
-            .sendData(postData.toString().toByteArray(charset("UTF-8")))
-            .doPutForString(hostNetworkDepend)
+        val connection =
+            HttpRequest(targetUrl)
+                .headers(headers as LinkedHashMap<String, String>)
+                .contentType(contentType)
+                .needAddCommonParams(addCommonParams ?: true)
+                .disableRedirect(disableRedirect)
+                .sendData(postData.toString().toByteArray(charset("UTF-8")))
+                .doPutForString(hostNetworkDepend)
 
         handleConnection(connection, callback)
     }
@@ -231,25 +265,27 @@ object BridgeAPIRequestUtils {
         disableRedirect: Boolean,
         addCommonParams: Boolean?,
         callback: IResponseCallback,
-        hostNetworkDepend: IHostNetworkDepend
+        hostNetworkDepend: IHostNetworkDepend,
     ) {
-        val connection = HttpRequest(targetUrl)
-            .headers(headers as LinkedHashMap<String, String>)
-            .needAddCommonParams(addCommonParams?: true)
-            .disableRedirect(disableRedirect)
-            .doDeleteForString(hostNetworkDepend)
+        val connection =
+            HttpRequest(targetUrl)
+                .headers(headers as LinkedHashMap<String, String>)
+                .needAddCommonParams(addCommonParams ?: true)
+                .disableRedirect(disableRedirect)
+                .doDeleteForString(hostNetworkDepend)
 
         handleConnection(connection, callback)
     }
 
     fun downloadFile(
-            targetUrl: String,
-            headers: LinkedHashMap<String, String>,
-            needAddCommonParams: Boolean,
-            callback: IStreamResponseCallback,
-            hostNetworkDepend: IHostNetworkDepend
+        targetUrl: String,
+        headers: LinkedHashMap<String, String>,
+        needAddCommonParams: Boolean,
+        callback: IStreamResponseCallback,
+        hostNetworkDepend: IHostNetworkDepend,
     ) {
-        val connection = HttpRequest(targetUrl)
+        val connection =
+            HttpRequest(targetUrl)
                 .headers(headers)
                 .needAddCommonParams(needAddCommonParams)
                 .doDownloadFile(hostNetworkDepend)
@@ -257,14 +293,13 @@ object BridgeAPIRequestUtils {
         callback.handleConnection(connection)
     }
 
-
     private fun handleConnection(
-            connection: AbsStringConnection?,
-            callback: IResponseCallback
+        connection: AbsStringConnection?,
+        callback: IResponseCallback,
     ) {
         if (connection == null) {
             Log.d(TAG, "connection is null")
-            handleError(ERROR_CODE_408, null,"connection failed", null, callback)
+            handleError(ERROR_CODE_408, null, "connection failed", null, callback)
             return
         }
 
@@ -284,12 +319,18 @@ object BridgeAPIRequestUtils {
         }
     }
 
-    private fun handleError(errorCode: Int?, clientCode: Int?, errorMsg: String?, throwable: Throwable?, callback: IResponseCallback): Boolean {
+    private fun handleError(
+        errorCode: Int?,
+        clientCode: Int?,
+        errorMsg: String?,
+        throwable: Throwable?,
+        callback: IResponseCallback,
+    ): Boolean {
         if (throwable != null || !TextUtils.isEmpty(errorMsg)) {
             val nonNullErrMsg = errorMsg?.takeIf { it.isNotEmpty() } ?: throwable?.message ?: ""
             ThreadPool.runInMain {
                 runCatching {
-                    callback.onFailed(errorCode, clientCode,throwable ?: Throwable(nonNullErrMsg))
+                    callback.onFailed(errorCode, clientCode, throwable ?: Throwable(nonNullErrMsg))
                 }
             }
             Log.d(TAG, "handle error finish")
@@ -298,7 +339,13 @@ object BridgeAPIRequestUtils {
         return false
     }
 
-    private fun handleSuccess(body: String?, respHeader: LinkedHashMap<String, String>, respCode: Int?, clientCode: Int?, callback: IResponseCallback) {
+    private fun handleSuccess(
+        body: String?,
+        respHeader: LinkedHashMap<String, String>,
+        respCode: Int?,
+        clientCode: Int?,
+        callback: IResponseCallback,
+    ) {
         ThreadPool.runInMain {
             runCatching {
                 var response: JSONObject
@@ -327,7 +374,7 @@ object BridgeAPIRequestUtils {
         respHeader: LinkedHashMap<String, String>,
         respCode: Int?,
         clientCode: Int?,
-        callback: IResponseCallback
+        callback: IResponseCallback,
     ) {
         ThreadPool.runInMain {
             runCatching {
@@ -355,10 +402,11 @@ object BridgeAPIRequestUtils {
      * @return Map<String, String>
      */
     fun convertParamValueToString(params: Map<String, Any>?): Map<String, String> {
-        val resultParams = params?.filter { (_, value) ->
-            value is Int || value is Number || value is Boolean || value is String
-        }
-            ?.mapValues { (_, value) -> value.toString() }
+        val resultParams =
+            params
+                ?.filter { (_, value) ->
+                    value is Int || value is Number || value is Boolean || value is String
+                }?.mapValues { (_, value) -> value.toString() }
 
         return resultParams ?: LinkedHashMap<String, String>()
     }

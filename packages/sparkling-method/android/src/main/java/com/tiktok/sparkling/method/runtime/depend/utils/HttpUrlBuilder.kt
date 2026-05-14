@@ -2,21 +2,21 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.runtime.depend.utils
 
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 
 class HttpUrlBuilder {
-
     companion object {
         private const val PARAMETER_SEPARATOR = "&"
         private const val NAME_VALUE_SEPARATOR = "="
         private const val ENCODING_UTF_8 = "UTF-8"
 
-
-        private fun formatUrl(parameters: Map<String, String?>, encoding: String?): String {
+        private fun formatUrl(
+            parameters: Map<String, String?>,
+            encoding: String?,
+        ): String {
             val result = StringBuilder()
             val keySet = parameters.keys
             if (keySet == null || keySet.isEmpty()) return ""
@@ -32,8 +32,11 @@ class HttpUrlBuilder {
             return result.toString()
         }
 
-        private fun encode(content: String, encoding: String?): String {
-            return try {
+        private fun encode(
+            content: String,
+            encoding: String?,
+        ): String =
+            try {
                 if (encoding == null) {
                     URLEncoder.encode(content, "ISO_8859_1")
                 } else {
@@ -46,7 +49,6 @@ class HttpUrlBuilder {
             } catch (problem: UnsupportedEncodingException) {
                 throw IllegalArgumentException(problem)
             }
-        }
     }
 
     private val params = HashMap<String, String>()
@@ -57,22 +59,34 @@ class HttpUrlBuilder {
         this.url = url
     }
 
-    fun addParam(name: String, value: Int): HttpUrlBuilder {
+    fun addParam(
+        name: String,
+        value: Int,
+    ): HttpUrlBuilder {
         params[name] = value.toString()
         return this
     }
 
-    fun addParam(name: String, value: Long): HttpUrlBuilder {
+    fun addParam(
+        name: String,
+        value: Long,
+    ): HttpUrlBuilder {
         params[name] = value.toString()
         return this
     }
 
-    fun addParam(name: String, value: Double): HttpUrlBuilder {
+    fun addParam(
+        name: String,
+        value: Double,
+    ): HttpUrlBuilder {
         params[name] = value.toString()
         return this
     }
 
-    fun addParam(name: String, value: String): HttpUrlBuilder {
+    fun addParam(
+        name: String,
+        value: String,
+    ): HttpUrlBuilder {
         params[name] = value
         return this
     }
@@ -91,7 +105,5 @@ class HttpUrlBuilder {
         }
     }
 
-    override fun toString(): String {
-        return build()
-    }
+    override fun toString(): String = build()
 }

@@ -11,14 +11,16 @@ import android.text.TextUtils
 import com.tiktok.sparkling.method.registry.core.XReadableType
 import com.tiktok.sparkling.method.registry.core.utils.JsonUtils
 
-
 internal const val PREFERENCE_NAME = "sparkling-storage"
 
-internal class NativeStorageImpl private constructor(val context: Context) : IBizNativeStorage {
-
-    private val sharedPreferences: SharedPreferences? = context.getSharedPreferences(
-        PREFERENCE_NAME, Context.MODE_PRIVATE
-    )
+internal class NativeStorageImpl private constructor(
+    val context: Context,
+) : IBizNativeStorage {
+    private val sharedPreferences: SharedPreferences? =
+        context.getSharedPreferences(
+            PREFERENCE_NAME,
+            Context.MODE_PRIVATE,
+        )
 
     companion object {
         @SuppressLint("StaticFieldLeak")
@@ -47,26 +49,20 @@ internal class NativeStorageImpl private constructor(val context: Context) : IBi
         }
     }
 
-    private fun getSharedPreferencesInternal(): SharedPreferences? {
-        return sharedPreferences
-    }
+    private fun getSharedPreferencesInternal(): SharedPreferences? = sharedPreferences
 
-    private fun getBizSharedPreferencesInternal(biz: String): SharedPreferences? {
-        return context?.getSharedPreferences(
-            biz + "-sparkling-storage", Context.MODE_PRIVATE
+    private fun getBizSharedPreferencesInternal(biz: String): SharedPreferences? =
+        context?.getSharedPreferences(
+            biz + "-sparkling-storage",
+            Context.MODE_PRIVATE,
         )
-    }
 
-    private fun getEditorInternal(): SharedPreferences.Editor? {
-        return sharedPreferences?.edit()
-    }
+    private fun getEditorInternal(): SharedPreferences.Editor? = sharedPreferences?.edit()
 
-    private fun getBizEditorInternal(biz: String): SharedPreferences.Editor? {
-        return getBizSharedPreferencesInternal(biz)?.edit()
-    }
+    private fun getBizEditorInternal(biz: String): SharedPreferences.Editor? = getBizSharedPreferencesInternal(biz)?.edit()
 
-    private fun wrapValueWithType(value: Any): String {
-        return mutableMapOf<String, Any>().let {
+    private fun wrapValueWithType(value: Any): String =
+        mutableMapOf<String, Any>().let {
             when (value) {
                 is Boolean -> {
                     JsonUtils.toJson(StorageValue(XReadableType.Boolean.name, value.toString()))
@@ -88,8 +84,8 @@ internal class NativeStorageImpl private constructor(val context: Context) : IBi
                     JsonUtils.toJson(
                         StorageValue(
                             XReadableType.Array.name,
-                            JsonUtils.toJson(value)
-                        )
+                            JsonUtils.toJson(value),
+                        ),
                     )
                 }
 
@@ -102,7 +98,6 @@ internal class NativeStorageImpl private constructor(val context: Context) : IBi
                 }
             }
         }
-    }
 
     private fun unwrapValue(value: String): Any? {
         if (value.isBlank()) {
@@ -117,11 +112,12 @@ internal class NativeStorageImpl private constructor(val context: Context) : IBi
 
             val wrappedValue = storageVal.value ?: return null
 
-            val typeEnum = try {
-                XReadableType.valueOf(storageVal.type)
-            } catch (e: IllegalArgumentException) {
-                return null
-            }
+            val typeEnum =
+                try {
+                    XReadableType.valueOf(storageVal.type)
+                } catch (e: IllegalArgumentException) {
+                    return null
+                }
 
             when (typeEnum) {
                 XReadableType.Boolean -> wrappedValue.toBooleanStrictOrNull()
@@ -137,7 +133,10 @@ internal class NativeStorageImpl private constructor(val context: Context) : IBi
         }
     }
 
-    override fun setStorageItem(key: String?, data: Any?): Boolean {
+    override fun setStorageItem(
+        key: String?,
+        data: Any?,
+    ): Boolean {
         key?.let { k ->
             data?.let { v ->
                 getEditorInternal()?.putString(k, wrapValueWithType(v))?.apply() ?: return false
@@ -148,7 +147,11 @@ internal class NativeStorageImpl private constructor(val context: Context) : IBi
         return false
     }
 
-    override fun setBizStorageItem(biz: String, key: String?, data: Any?): Boolean {
+    override fun setBizStorageItem(
+        biz: String,
+        key: String?,
+        data: Any?,
+    ): Boolean {
         key?.let { k ->
             data?.let { v ->
                 getBizEditorInternal(biz)?.putString(k, wrapValueWithType(v))?.apply()
@@ -169,7 +172,10 @@ internal class NativeStorageImpl private constructor(val context: Context) : IBi
         return false
     }
 
-    override fun removeBizStorageItem(biz: String, key: String?): Boolean {
+    override fun removeBizStorageItem(
+        biz: String,
+        key: String?,
+    ): Boolean {
         key?.let {
             getBizEditorInternal(biz)?.remove(it)?.apply() ?: return false
             return true
@@ -192,7 +198,10 @@ internal class NativeStorageImpl private constructor(val context: Context) : IBi
         return wrappedValue?.let { unwrapValue(wrappedValue) }
     }
 
-    override fun getBizStorageItem(biz: String, key: String?): Any? {
+    override fun getBizStorageItem(
+        biz: String,
+        key: String?,
+    ): Any? {
         key ?: return null
         val bizSharedPreferencesInternal = getBizSharedPreferencesInternal(biz) ?: return null
         if (!bizSharedPreferencesInternal.contains(key)) {
@@ -206,11 +215,7 @@ internal class NativeStorageImpl private constructor(val context: Context) : IBi
         return wrappedValue?.let { unwrapValue(wrappedValue) }
     }
 
-    override fun getStorageInfo(): Set<String> {
-        return getSharedPreferencesInternal()?.all?.keys ?: setOf()
-    }
+    override fun getStorageInfo(): Set<String> = getSharedPreferencesInternal()?.all?.keys ?: setOf()
 
-    override fun getBizStorageInfo(biz: String): Set<String> {
-        return getBizSharedPreferencesInternal(biz)?.all?.keys ?: setOf()
-    }
+    override fun getBizStorageInfo(biz: String): Set<String> = getBizSharedPreferencesInternal(biz)?.all?.keys ?: setOf()
 }

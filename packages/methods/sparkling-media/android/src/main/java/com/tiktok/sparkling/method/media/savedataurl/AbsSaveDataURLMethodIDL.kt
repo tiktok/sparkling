@@ -16,13 +16,11 @@ import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseResultMo
  */
 
 abstract class AbsSaveDataURLMethodIDL : AbsSparklingIDLMethod<AbsSaveDataURLMethodIDL.SaveDataURLInputModel, AbsSaveDataURLMethodIDL.SaveDataURLResultModel>() {
-
     @IDLMethodName(name = "media.saveDataURL", params = ["dataURL", "filename", "extension", "saveToAlbum"], results = ["filePath"])
     final override val name: String = "media.saveDataURL"
 
     @IDLMethodParamModel
     interface SaveDataURLInputModel : IDLMethodBaseParamModel {
-
         @get:IDLMethodParamField(required = true, isGetter = true, keyPath = "dataURL")
         val dataURL: String
 
@@ -38,7 +36,6 @@ abstract class AbsSaveDataURLMethodIDL : AbsSparklingIDLMethod<AbsSaveDataURLMet
 
     @IDLMethodResultModel
     interface SaveDataURLResultModel : IDLMethodBaseResultModel {
-
         @get:IDLMethodParamField(required = false, isGetter = true, keyPath = "filePath")
         @set:IDLMethodParamField(required = false, isGetter = false, keyPath = "filePath")
         var filePath: String?

@@ -23,9 +23,7 @@ import com.tiktok.sparkling.method.router.utils.RouterProvider
 import com.example.sparkling.go.LynxInputComponent
 import com.example.sparkling.go.BuiltinTemplateProvider
 
-
 class SparklingApplication : Application() {
-
     override fun onCreate() {
         super.onCreate()
         initFresco()
@@ -46,23 +44,24 @@ class SparklingApplication : Application() {
         initSparklingMethods()
     }
 
-
     private fun initHybridKit() {
         HybridKit.init(this)
         val baseInfoConfig = BaseInfoConfig(isDebug = BuildConfig.DEBUG)
-        val lynxConfig = SparklingLynxConfig.build(this) {
-            addBehaviors(listOf(
-                object : Behavior("input", false) {
-                    override fun createUI(context: LynxContext?): LynxUI<*>? {
-                        return LynxInputComponent(context)
-                    }
-                }
-            ))
-            setTemplateProvider(BuiltinTemplateProvider(this@SparklingApplication))
-        }
-        val hybridConfig = SparklingHybridConfig.build(baseInfoConfig) {
-            setLynxConfig(lynxConfig)
-        }
+        val lynxConfig =
+            SparklingLynxConfig.build(this) {
+                addBehaviors(
+                    listOf(
+                        object : Behavior("input", false) {
+                            override fun createUI(context: LynxContext?): LynxUI<*>? = LynxInputComponent(context)
+                        },
+                    ),
+                )
+                setTemplateProvider(BuiltinTemplateProvider(this@SparklingApplication))
+            }
+        val hybridConfig =
+            SparklingHybridConfig.build(baseInfoConfig) {
+                setLynxConfig(lynxConfig)
+            }
         HybridKit.setHybridConfig(hybridConfig, this)
         HybridKit.initLynxKit()
     }

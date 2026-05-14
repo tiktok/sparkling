@@ -3,7 +3,6 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.method.router.utils
 
-
 object RouterProvider {
     var hostRouterDepend: IHostRouterDepend? = null
 }

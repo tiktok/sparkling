@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core.model.context
 
 import com.tiktok.sparkling.method.registry.core.interfaces.IReleasable
@@ -13,9 +12,8 @@ interface IContextProvider<out T> : IReleasable {
 }
 
 class ContextHolder<out T>(
-    t: T?
+    t: T?,
 ) : IContextProvider<T> {
-
     private var ref: T? = t
 
     override fun provideInstance(): T? = ref
@@ -26,14 +24,14 @@ class ContextHolder<out T>(
 }
 
 class WeakContextHolder<out T>(
-    t: T?
+    t: T?,
 ) : IContextProvider<T> {
-
-    private var ref = if (t == null) {
-        null
-    } else {
-        WeakReference(t)
-    }
+    private var ref =
+        if (t == null) {
+            null
+        } else {
+            WeakReference(t)
+        }
 
     override fun provideInstance(): T? = ref?.get()
 
@@ -45,9 +43,8 @@ class WeakContextHolder<out T>(
 
 class WeakHostContextHolder<out T, out R>(
     host: T,
-    private val provider: T.() -> R?
+    private val provider: T.() -> R?,
 ) : IContextProvider<R> {
-
     private var ref: WeakReference<T>? = WeakReference(host)
 
     override fun provideInstance(): R? = ref?.get()?.run(provider)
@@ -57,43 +54,56 @@ class WeakHostContextHolder<out T, out R>(
         ref = null
     }
 }
-class ContextProviderFactory {
 
+class ContextProviderFactory {
     private val providers: MutableMap<Class<*>, IContextProvider<*>> = mutableMapOf()
 
     fun <T> has(clazz: Class<T>): Boolean = providers.containsKey(clazz)
 
-    fun <T> registerProvider(clazz: Class<T>, provider: () -> T?) {
+    fun <T> registerProvider(
+        clazz: Class<T>,
+        provider: () -> T?,
+    ) {
         providers[clazz]?.release()
-        providers[clazz] = object :
-            IContextProvider<T> {
+        providers[clazz] =
+            object :
+                IContextProvider<T> {
+                override fun provideInstance(): T? = provider()
 
-            override fun provideInstance(): T? = provider()
-
-            override fun release() {}
-        }
+                override fun release() {}
+            }
     }
 
-    fun <T> registerProvider(clazz: Class<T>, provider: IContextProvider<T>) {
-        providers[clazz]?.takeUnless {
-            it === provider
-        }?.apply {
-            release()
-        }
+    fun <T> registerProvider(
+        clazz: Class<T>,
+        provider: IContextProvider<T>,
+    ) {
+        providers[clazz]
+            ?.takeUnless {
+                it === provider
+            }?.apply {
+                release()
+            }
         providers[clazz] = provider
     }
 
-    fun <T> registerWeakHolder(clazz: Class<T>, item: T?) {
+    fun <T> registerWeakHolder(
+        clazz: Class<T>,
+        item: T?,
+    ) {
         registerProvider(
             clazz = clazz,
-            provider = WeakContextHolder(item)
+            provider = WeakContextHolder(item),
         )
     }
 
-    fun <T> registerHolder(clazz: Class<T>, item: T?) {
+    fun <T> registerHolder(
+        clazz: Class<T>,
+        item: T?,
+    ) {
         registerProvider(
             clazz = clazz,
-            provider = ContextHolder(item)
+            provider = ContextHolder(item),
         )
     }
 
@@ -106,18 +116,18 @@ class ContextProviderFactory {
         providers.clear()
     }
 
-    fun <T> getProvider(clazz: Class<T>): IContextProvider<T>? =
-        providers[clazz]?.let { it as IContextProvider<T> }
+    fun <T> getProvider(clazz: Class<T>): IContextProvider<T>? = providers[clazz]?.let { it as IContextProvider<T> }
 
     fun <T> provideInstance(clazz: Class<T>): T? {
-
-        val ret = providers[clazz]?.run {
-            provideInstance()
-        }?.takeIf {
-            clazz.isAssignableFrom(it::class.java)
-        }?.let {
-            it as T
-        }
+        val ret =
+            providers[clazz]
+                ?.run {
+                    provideInstance()
+                }?.takeIf {
+                    clazz.isAssignableFrom(it::class.java)
+                }?.let {
+                    it as T
+                }
         return ret
     }
 
@@ -127,7 +137,8 @@ class ContextProviderFactory {
         providers.putAll(other.providers)
     }
 
-    fun copy(): ContextProviderFactory = ContextProviderFactory().also {
-        it.merge(this)
-    }
+    fun copy(): ContextProviderFactory =
+        ContextProviderFactory().also {
+            it.merge(this)
+        }
 }

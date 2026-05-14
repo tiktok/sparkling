@@ -23,12 +23,12 @@ import com.tiktok.sparkling.hybridkit.base.IPerformanceView
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 import org.json.JSONObject
 
-
 class SparklingView(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0,
-) : FrameLayout(context, attrs, defStyleAttr), IHybridView{
-
-
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+) : FrameLayout(context, attrs, defStyleAttr),
+    IHybridView {
     private var loadingView: View? = null
     private var errorView: View? = null
     private var loadingViewBgColor: Int? = null
@@ -50,18 +50,20 @@ class SparklingView(
             loadingView = uiProvider.getLoadingView(context)
             errorView = uiProvider.getErrorView(context)
         } else {
-            loadingView = ProgressBar(context).apply {
-                layoutParams =
-                    LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
-                        gravity = Gravity.CENTER
-                    }
-            }
-            errorView = TextView(context).apply {
-                text = defaultErrorText
-                setTextColor(Color.BLACK)
-                gravity = Gravity.CENTER
-                layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-            }
+            loadingView =
+                ProgressBar(context).apply {
+                    layoutParams =
+                        LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
+                            gravity = Gravity.CENTER
+                        }
+                }
+            errorView =
+                TextView(context).apply {
+                    text = defaultErrorText
+                    setTextColor(Color.BLACK)
+                    gravity = Gravity.CENTER
+                    layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+                }
         }
         val hybridSchemeParam = sparklingContext.hybridSchemeParam
         if (hybridSchemeParam == null) {
@@ -85,70 +87,70 @@ class SparklingView(
             loadingView?.setBackgroundColor(color)
         }
 
-
-        val kitView = HybridKit.createKitView(
-            hybridSchemeParam,
-            sparklingContext,
-            context,
-            object : IHybridKitLifeCycle() {
-                override fun onLoadStart(view: IKitView, url: String) {
-                    super.onLoadStart(view, url)
-                    if (Looper.myLooper() != Looper.getMainLooper()) {
-                        post {
+        val kitView =
+            HybridKit.createKitView(
+                hybridSchemeParam,
+                sparklingContext,
+                context,
+                object : IHybridKitLifeCycle() {
+                    override fun onLoadStart(
+                        view: IKitView,
+                        url: String,
+                    ) {
+                        super.onLoadStart(view, url)
+                        if (Looper.myLooper() != Looper.getMainLooper()) {
+                            post {
+                                showLoadingView()
+                            }
+                        } else {
                             showLoadingView()
                         }
-                    } else {
-                        showLoadingView()
                     }
-                }
 
-
-                override fun onLoadFailed(view: IKitView, url: String, reason: String?) {
-                    super.onLoadFailed(view, url, reason)
-                    updateErrorMessage(url, reason)
-                    if (Looper.myLooper() != Looper.getMainLooper()) {
-                        post {
+                    override fun onLoadFailed(
+                        view: IKitView,
+                        url: String,
+                        reason: String?,
+                    ) {
+                        super.onLoadFailed(view, url, reason)
+                        updateErrorMessage(url, reason)
+                        if (Looper.myLooper() != Looper.getMainLooper()) {
+                            post {
+                                showErrorView()
+                            }
+                        } else {
                             showErrorView()
                         }
-                    } else {
-                        showErrorView()
                     }
-                }
 
-                override fun onLoadFinish(view: IKitView) {
-                    super.onLoadFinish(view)
-                    if (loadStatus ==  IPerformanceView.LoadStatus.LOADING || loadStatus ==  IPerformanceView.LoadStatus.INIT) {
-                        loadStatus = IPerformanceView.LoadStatus.SUCCESS
+                    override fun onLoadFinish(view: IKitView) {
+                        super.onLoadFinish(view)
+                        if (loadStatus == IPerformanceView.LoadStatus.LOADING || loadStatus == IPerformanceView.LoadStatus.INIT) {
+                            loadStatus = IPerformanceView.LoadStatus.SUCCESS
+                        }
+                        loadingView?.visibility = GONE
+                        errorView?.visibility = GONE
                     }
-                    loadingView?.visibility = GONE
-                    errorView?.visibility = GONE
-                }
-            }
-        )
+                },
+            )
         kitViewDelegate = kitView
         addView(kitView?.realView())
 
         handleUI()
-
     }
 
-    override fun getHybridViewContext(): Context {
-        return context
-    }
+    override fun getHybridViewContext(): Context = context
 
     override fun loadUrl() {
         loadStatus = IPerformanceView.LoadStatus.LOADING
         kitViewDelegate?.load()
     }
 
-    fun loadStatus(): IPerformanceView.LoadStatus {
-        return loadStatus
-    }
-
+    fun loadStatus(): IPerformanceView.LoadStatus = loadStatus
 
     override fun refreshData(
         context: Context,
-        hybridContext: HybridContext?
+        hybridContext: HybridContext?,
     ) {
         kitViewDelegate?.refreshContext(context)
         (hybridContext as? SparklingContext)?.let { updatedContext ->
@@ -162,21 +164,20 @@ class SparklingView(
         // No-op: reserved for future cache processing logic
     }
 
-    override fun obtainHybridContext(): HybridContext? {
-        return sparklingContext
-    }
+    override fun obtainHybridContext(): HybridContext? = sparklingContext
 
     override fun updateGlobalPropsByIncrement(data: Map<String, Any>) {
         kitViewDelegate?.updateGlobalPropsByIncrement(data)
     }
 
-    override fun sendEventByJSON(eventName: String, params: JSONObject?) {
+    override fun sendEventByJSON(
+        eventName: String,
+        params: JSONObject?,
+    ) {
         kitViewDelegate?.sendEventByJSON(eventName, params)
     }
 
-    override fun actualView(): View {
-        return this
-    }
+    override fun actualView(): View = this
 
     override fun onShowEvent() {
         kitViewDelegate?.onShow()
@@ -195,24 +196,19 @@ class SparklingView(
         sparklingContext = null
     }
 
-    override fun getPerformanceViewHybridContext(): HybridContext? {
-        return sparklingContext
-    }
+    override fun getPerformanceViewHybridContext(): HybridContext? = sparklingContext
 
-    override fun hasRelease(): Boolean {
-        return isReleased
-    }
+    override fun hasRelease(): Boolean = isReleased
 
-    fun getKitView(): IKitView? {
-        return kitViewDelegate
-    }
+    fun getKitView(): IKitView? = kitViewDelegate
 
     fun handleUI() {
         if (sparklingContext?.hybridSchemeParam?.containerBgColor == null) {
             kitViewDelegate?.realView()?.setBackgroundColor(Color.WHITE)
         } else {
             sparklingContext?.hybridSchemeParam?.containerBgColor?.let {
-                kitViewDelegate?.realView()
+                kitViewDelegate
+                    ?.realView()
                     ?.setBackgroundColor(ColorUtil.parseColorSafely(it))
             }
         }
@@ -236,9 +232,7 @@ class SparklingView(
             addView(debugInfoTag)
         }
     }
-    */
-
-    
+     */
 
     fun showLoadingView() {
         if (hideLoading) return
@@ -263,24 +257,24 @@ class SparklingView(
         }
     }
 
+    override fun isLoadSuccess(): Boolean = loadStatus == IPerformanceView.LoadStatus.SUCCESS
 
-    override fun isLoadSuccess(): Boolean {
-        return loadStatus == IPerformanceView.LoadStatus.SUCCESS
-    }
-
-    private fun updateErrorMessage(url: String, reason: String?) {
+    private fun updateErrorMessage(
+        url: String,
+        reason: String?,
+    ) {
         val view = errorView as? TextView ?: return
-        val suffix = buildString {
-            if (!reason.isNullOrBlank()) {
-                append('\n')
-                append(reason)
+        val suffix =
+            buildString {
+                if (!reason.isNullOrBlank()) {
+                    append('\n')
+                    append(reason)
+                }
+                if (url.isNotBlank()) {
+                    append("\nURL: ")
+                    append(url)
+                }
             }
-            if (url.isNotBlank()) {
-                append("\nURL: ")
-                append(url)
-            }
-        }
         view.text = defaultErrorText + suffix
     }
-
 }

@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.protocol.impl.lifecycle.fe
 
 import android.view.View
@@ -12,7 +11,6 @@ import org.json.JSONObject
 /**
  */
 class FeCallMonitorModel {
-
     companion object {
         const val _JSB_CALLER_INFO = "_jsb_caller_info"
         const val _JSB_PERF_METRICS = "_jsb_perf_metrics"
@@ -40,16 +38,19 @@ class FeCallMonitorModel {
     var jsbCallbackEnd: Long = 0
     var jsbNativeCallStart: Long = 0
 
-
     private var category = JSONObject()
 
-    fun addCategory(key: String, value: Any) {
+    fun addCategory(
+        key: String,
+        value: Any,
+    ) {
         category.put(key, value)
     }
 
     fun reportFeCallInfo() {
         MonitorUtils.customReport(
-            JSB_FE_CALL_MONITOR_EVENT, JSONObject().apply {
+            JSB_FE_CALL_MONITOR_EVENT,
+            JSONObject().apply {
                 put(BRIDGE_METHOD_NAME, bridgeName)
 
                 if (jsbFuncCallStart == 0L) {
@@ -61,6 +62,7 @@ class FeCallMonitorModel {
                 }
                 put(JSB_CALLBACK_CALL, jsbCallbackEnd - jsbCallbackStart)
                 put(JSB_CLIENT_CALL, jsbCallbackEnd - jsbNativeCallStart)
-            })
+            },
+        )
     }
 }

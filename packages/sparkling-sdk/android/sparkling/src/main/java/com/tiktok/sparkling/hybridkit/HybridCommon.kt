@@ -16,11 +16,11 @@ object HybridCommon {
     var hybridConfig: SparklingHybridConfig? = null
         private set
     private var prepareBlockCalled = AtomicBoolean(false)
+
     @Volatile
     private var prepareBlock: (() -> Unit)? = null
     private var postBlockCalled = AtomicBoolean(false)
     private var postBlock: (() -> Unit)? = null
-
 
     fun init(application: Application) {
         ColorUtil.appContext = application
@@ -31,7 +31,10 @@ object HybridCommon {
      * must be called before initLynxKit
      * @param hybridConfig cannot be null
      */
-    fun setHybridConfig(hybridConfig: SparklingHybridConfig, application: Application) {
+    fun setHybridConfig(
+        hybridConfig: SparklingHybridConfig,
+        application: Application,
+    ) {
         this.hybridConfig = hybridConfig
         HybridEnvironment.instance.apply {
             baseInfoConfig = hybridConfig.baseInfoConfig
@@ -51,11 +54,9 @@ object HybridCommon {
         postBlockCalled.set(false)
     }
 
-
     @Synchronized
     fun initCommon() {
-
-        //init jsb
+        // init jsb
 //        hybridConfig?.bridgeConfig?.let {
 //            HybridService.instance().bind(
 //                IBridgeService::class.java,
@@ -66,7 +67,6 @@ object HybridCommon {
         hybridConfig?.logConfig?.let {
             LogUtils.logger = it.logger
         }
-
     }
 
     /**
@@ -79,9 +79,7 @@ object HybridCommon {
         this.prepareBlock = prepareBlock
     }
 
-    fun hasPrepareBlock() : Boolean {
-        return prepareBlock != null
-    }
+    fun hasPrepareBlock(): Boolean = prepareBlock != null
 
     fun setPostBlock(postBlock: () -> Unit) {
         this.postBlock = postBlock
@@ -96,7 +94,8 @@ object HybridCommon {
             postBlock?.let { it() }
             true
         } catch (e: Exception) {
-            Log.e(TAG,
+            Log.e(
+                TAG,
                 "Call PostBlock failed, please check your code.",
             )
             reset()
@@ -116,14 +115,18 @@ object HybridCommon {
         } catch (e: Exception) {
             LogUtils.printLog(
                 "Call PrepareBlock failed, please check your code.",
-                LogLevel.E, TAG
+                LogLevel.E,
+                TAG,
             )
             reset()
             false
         }
     }
 
-    fun updateGlobalProps(key: String, value: Any) {
+    fun updateGlobalProps(
+        key: String,
+        value: Any,
+    ) {
 //        HybridEnvironment.instance.baseInfoConfig?.put(key, value)
     }
 }

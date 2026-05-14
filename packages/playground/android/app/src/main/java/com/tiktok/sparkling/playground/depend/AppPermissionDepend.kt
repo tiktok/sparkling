@@ -13,11 +13,16 @@ import com.tiktok.sparkling.method.runtime.depend.common.OnPermissionsGrantCallb
 import com.tiktok.sparkling.method.runtime.depend.common.OnPermissionsGrantResult
 
 class AppPermissionDepend : IHostPermissionDepend {
-    override fun hasPermission(activity: Activity, permission: String): Boolean {
-        return ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED
-    }
+    override fun hasPermission(
+        activity: Activity,
+        permission: String,
+    ): Boolean = ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED
 
-    override fun requestPermission(activity: Activity, callback: OnPermissionGrantCallback, permission: String) {
+    override fun requestPermission(
+        activity: Activity,
+        callback: OnPermissionGrantCallback,
+        permission: String,
+    ) {
         ActivityCompat.requestPermissions(activity, arrayOf(permission), PERMISSION_REQUEST_CODE)
         // Result handled via requestPermissions to callback: best-effort immediate check
         if (hasPermission(activity, permission)) {
@@ -27,12 +32,18 @@ class AppPermissionDepend : IHostPermissionDepend {
         }
     }
 
-    override fun requestPermissions(activity: Activity, callback: OnPermissionsGrantCallback, permissions: Array<String>) {
+    override fun requestPermissions(
+        activity: Activity,
+        callback: OnPermissionsGrantCallback,
+        permissions: Array<String>,
+    ) {
         ActivityCompat.requestPermissions(activity, permissions, PERMISSION_REQUEST_CODE)
-        val results = permissions.map { perm ->
-            val granted = hasPermission(activity, perm)
-            OnPermissionsGrantResult(perm, if (granted) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED)
-        }.toTypedArray()
+        val results =
+            permissions
+                .map { perm ->
+                    val granted = hasPermission(activity, perm)
+                    OnPermissionsGrantResult(perm, if (granted) PackageManager.PERMISSION_GRANTED else PackageManager.PERMISSION_DENIED)
+                }.toTypedArray()
         callback.onResult(results)
     }
 
@@ -40,4 +51,3 @@ class AppPermissionDepend : IHostPermissionDepend {
         private const val PERMISSION_REQUEST_CODE = 0x527
     }
 }
-

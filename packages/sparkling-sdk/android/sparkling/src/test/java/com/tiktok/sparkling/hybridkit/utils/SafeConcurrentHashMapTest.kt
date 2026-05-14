@@ -9,7 +9,6 @@ import org.junit.Before
 import org.junit.Test
 
 class SafeConcurrentHashMapTest {
-
     private lateinit var safeConcurrentHashMap: SafeConcurrentHashMap<String, String>
 
     @Before
@@ -20,7 +19,7 @@ class SafeConcurrentHashMapTest {
     @Test
     fun testPutWithValidKeyValue() {
         val result = safeConcurrentHashMap.put("key1", "value1")
-        
+
         assertNull(result)
         assertEquals("value1", safeConcurrentHashMap["key1"])
         assertEquals(1, safeConcurrentHashMap.size)
@@ -30,7 +29,7 @@ class SafeConcurrentHashMapTest {
     fun testPutWithExistingKey() {
         safeConcurrentHashMap.put("key1", "value1")
         val result = safeConcurrentHashMap.put("key1", "value2")
-        
+
         assertEquals("value1", result)
         assertEquals("value2", safeConcurrentHashMap["key1"])
         assertEquals(1, safeConcurrentHashMap.size)
@@ -39,7 +38,7 @@ class SafeConcurrentHashMapTest {
     @Test
     fun testPutIfAbsentWithValidKeyValue() {
         val result = safeConcurrentHashMap.putIfAbsent("key1", "value1")
-        
+
         assertNull(result)
         assertEquals("value1", safeConcurrentHashMap["key1"])
         assertEquals(1, safeConcurrentHashMap.size)
@@ -49,7 +48,7 @@ class SafeConcurrentHashMapTest {
     fun testPutIfAbsentWithExistingKey() {
         safeConcurrentHashMap.put("key1", "value1")
         val result = safeConcurrentHashMap.putIfAbsent("key1", "value2")
-        
+
         assertEquals("value1", result)
         assertEquals("value1", safeConcurrentHashMap["key1"])
         assertEquals(1, safeConcurrentHashMap.size)
@@ -57,14 +56,15 @@ class SafeConcurrentHashMapTest {
 
     @Test
     fun testPutAllWithValidMap() {
-        val mapToPut = mapOf(
-            "key1" to "value1",
-            "key2" to "value2",
-            "key3" to "value3"
-        )
-        
+        val mapToPut =
+            mapOf(
+                "key1" to "value1",
+                "key2" to "value2",
+                "key3" to "value3",
+            )
+
         safeConcurrentHashMap.putAll(mapToPut)
-        
+
         assertEquals(3, safeConcurrentHashMap.size)
         assertEquals("value1", safeConcurrentHashMap["key1"])
         assertEquals("value2", safeConcurrentHashMap["key2"])
@@ -73,13 +73,14 @@ class SafeConcurrentHashMapTest {
 
     @Test
     fun testPutAllWithNullValues() {
-        val mapToPut: Map<String, String> = mapOf(
-            "key1" to "value1",
-            "key3" to "value3"
-        )
-        
+        val mapToPut: Map<String, String> =
+            mapOf(
+                "key1" to "value1",
+                "key3" to "value3",
+            )
+
         safeConcurrentHashMap.putAll(mapToPut)
-        
+
         assertEquals(2, safeConcurrentHashMap.size)
         assertEquals("value1", safeConcurrentHashMap["key1"])
         assertFalse(safeConcurrentHashMap.containsKey("key2"))
@@ -89,21 +90,22 @@ class SafeConcurrentHashMapTest {
     @Test
     fun testPutAllWithEmptyMap() {
         val emptyMap = emptyMap<String, String>()
-        
+
         safeConcurrentHashMap.putAll(emptyMap)
-        
+
         assertEquals(0, safeConcurrentHashMap.size)
     }
 
     @Test
     fun testPutAllWithMixedValidAndNullEntries() {
-        val mapToPut: Map<String, String> = mapOf(
-            "key1" to "value1",
-            "key3" to "value3"
-        )
-        
+        val mapToPut: Map<String, String> =
+            mapOf(
+                "key1" to "value1",
+                "key3" to "value3",
+            )
+
         safeConcurrentHashMap.putAll(mapToPut)
-        
+
         assertEquals(2, safeConcurrentHashMap.size)
         assertTrue(safeConcurrentHashMap.containsKey("key1"))
         assertTrue(safeConcurrentHashMap.containsKey("key3"))
@@ -116,7 +118,7 @@ class SafeConcurrentHashMapTest {
         safeConcurrentHashMap.put("key1", "value1")
         safeConcurrentHashMap.putIfAbsent("key2", "value2")
         safeConcurrentHashMap.putAll(mapOf("key3" to "value3", "key4" to "value4"))
-        
+
         assertEquals(4, safeConcurrentHashMap.size)
         assertEquals("value1", safeConcurrentHashMap["key1"])
         assertEquals("value2", safeConcurrentHashMap["key2"])

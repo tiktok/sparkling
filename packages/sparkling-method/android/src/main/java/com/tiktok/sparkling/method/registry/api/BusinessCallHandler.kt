@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.api
 
 import com.lynx.react.bridge.ReadableMap
@@ -20,15 +19,18 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  */
-class BusinessCallHandler(val nameSpace: String): IBridgeHandler {
-    private var context : IBridgeContext? = null
+class BusinessCallHandler(
+    val nameSpace: String,
+) : IBridgeHandler {
+    private var context: IBridgeContext? = null
     private var registry = IDLMethodRegistry().apply { namespace = nameSpace }
     private var pool: ConcurrentHashMap<BridgePlatformType, ConcurrentHashMap<String, IDLBridgeMethod>> = ConcurrentHashMap()
     private var isRelease = false
+
     override fun handle(
         bridgeContext: BridgeContext,
         call: BridgeCall,
-        callback: IBridgeMethodCallback
+        callback: IBridgeMethodCallback,
     ) {
         val bridge = getBridge(bridgeContext, call.bridgeName) ?: return BridgeMethodCallbackHelper.bridgeNotFound(callback)
 
@@ -40,9 +42,11 @@ class BusinessCallHandler(val nameSpace: String): IBridgeHandler {
             is JSONObject -> {
                 JsonProcessor(bridge, params, call.platform)
             }
+
             is ReadableMap -> {
                 ReadableMapProcessor(bridge, unWrapperParams(params) ?: params)
             }
+
             else -> {
                 return
             }
@@ -51,12 +55,15 @@ class BusinessCallHandler(val nameSpace: String): IBridgeHandler {
 
     fun registerMethod(
         clazz: Class<out IDLBridgeMethod>,
-        scope: BridgePlatformType = BridgePlatformType.ALL
+        scope: BridgePlatformType = BridgePlatformType.ALL,
     ) {
         registry.registerMethod(clazz, scope)
     }
 
-    fun getBridge(bridgeContext: BridgeContext, bridgeName: String) : IDLBridgeMethod? {
+    fun getBridge(
+        bridgeContext: BridgeContext,
+        bridgeName: String,
+    ): IDLBridgeMethod? {
         val platformType = BridgeContext.getPlatformByBridgeContext(bridgeContext)
         val clazz = registry.findMethodClass(platformType, bridgeName) ?: return null
         val newInstance = clazz.newInstance()
@@ -66,10 +73,8 @@ class BusinessCallHandler(val nameSpace: String): IBridgeHandler {
 
     fun isMethodExists(
         name: String,
-        platformType: BridgePlatformType = BridgePlatformType.ALL
-    ): Boolean {
-        return registry.isMethodExists(name, platformType)
-    }
+        platformType: BridgePlatformType = BridgePlatformType.ALL,
+    ): Boolean = registry.isMethodExists(name, platformType)
 
     fun setBridgeContext(bridgeContext: IBridgeContext) {
         context = bridgeContext
@@ -85,16 +90,12 @@ class BusinessCallHandler(val nameSpace: String): IBridgeHandler {
         }
     }
 
-    private fun unWrapperParams(params: ReadableMap?) : ReadableMap? {
-        return params?.getMap("data") ?: params
-    }
+    private fun unWrapperParams(params: ReadableMap?): ReadableMap? = params?.getMap("data") ?: params
 
     override fun onRelease() {
         pool.clear()
         isRelease = true
     }
 
-    override fun isReleased(): Boolean {
-        return isRelease
-    }
+    override fun isReleased(): Boolean = isRelease
 }

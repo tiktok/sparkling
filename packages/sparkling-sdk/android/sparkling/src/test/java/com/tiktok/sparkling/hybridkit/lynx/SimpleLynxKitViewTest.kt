@@ -26,10 +26,9 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(
     sdk = [33],
-    packageName = "com.tiktok.sparkling"
+    packageName = "com.tiktok.sparkling",
 )
 class SimpleLynxKitViewTest {
-
     private lateinit var context: Context
     private lateinit var mockLifeCycle: IHybridKitLifeCycle
     private lateinit var mockHybridContext: HybridContext
@@ -40,7 +39,7 @@ class SimpleLynxKitViewTest {
         context = RuntimeEnvironment.getApplication()
         mockLifeCycle = mockk(relaxed = true)
         mockHybridContext = mockk(relaxed = true)
-        
+
         every { mockHybridContext.containerId } returns "test_container"
         every { mockHybridContext.hybridSchemeParam } returns null
     }
@@ -55,16 +54,17 @@ class SimpleLynxKitViewTest {
         // Create a mock IKitView that tracks onLoadSuccess calls
         val mockKitView = mockk<IKitView>(relaxed = true)
         val capturedKitView = mutableListOf<IKitView>()
-        
-        val lifeCycle = object : IHybridKitLifeCycle() {
-            override fun onLoadFinish(view: IKitView) {
-                capturedKitView.add(view)
+
+        val lifeCycle =
+            object : IHybridKitLifeCycle() {
+                override fun onLoadFinish(view: IKitView) {
+                    capturedKitView.add(view)
+                }
             }
-        }
-        
+
         // Verify the lifecycle callback would be called
         lifeCycle.onLoadFinish(mockKitView)
-        
+
         assertEquals(1, capturedKitView.size)
         assertEquals(mockKitView, capturedKitView[0])
     }
@@ -73,17 +73,18 @@ class SimpleLynxKitViewTest {
     fun testLifecycleOnLoadFinishIntegration() {
         var onLoadFinishCalled = false
         var capturedView: IKitView? = null
-        
-        val lifeCycle = object : IHybridKitLifeCycle() {
-            override fun onLoadFinish(view: IKitView) {
-                onLoadFinishCalled = true
-                capturedView = view
+
+        val lifeCycle =
+            object : IHybridKitLifeCycle() {
+                override fun onLoadFinish(view: IKitView) {
+                    onLoadFinishCalled = true
+                    capturedView = view
+                }
             }
-        }
-        
+
         val mockKitView = mockk<IKitView>(relaxed = true)
         lifeCycle.onLoadFinish(mockKitView)
-        
+
         assertEquals(true, onLoadFinishCalled)
         assertNotNull(capturedView)
     }
@@ -92,17 +93,21 @@ class SimpleLynxKitViewTest {
     fun testLifecycleOnLoadStartCallback() {
         var onLoadStartCalled = false
         var capturedUrl: String? = null
-        
-        val lifeCycle = object : IHybridKitLifeCycle() {
-            override fun onLoadStart(view: IKitView, url: String) {
-                onLoadStartCalled = true
-                capturedUrl = url
+
+        val lifeCycle =
+            object : IHybridKitLifeCycle() {
+                override fun onLoadStart(
+                    view: IKitView,
+                    url: String,
+                ) {
+                    onLoadStartCalled = true
+                    capturedUrl = url
+                }
             }
-        }
-        
+
         val mockKitView = mockk<IKitView>(relaxed = true)
         lifeCycle.onLoadStart(mockKitView, "https://example.com")
-        
+
         assertEquals(true, onLoadStartCalled)
         assertEquals("https://example.com", capturedUrl)
     }
@@ -111,17 +116,22 @@ class SimpleLynxKitViewTest {
     fun testLifecycleOnLoadFailedCallback() {
         var onLoadFailedCalled = false
         var capturedReason: String? = null
-        
-        val lifeCycle = object : IHybridKitLifeCycle() {
-            override fun onLoadFailed(view: IKitView, url: String, reason: String?) {
-                onLoadFailedCalled = true
-                capturedReason = reason
+
+        val lifeCycle =
+            object : IHybridKitLifeCycle() {
+                override fun onLoadFailed(
+                    view: IKitView,
+                    url: String,
+                    reason: String?,
+                ) {
+                    onLoadFailedCalled = true
+                    capturedReason = reason
+                }
             }
-        }
-        
+
         val mockKitView = mockk<IKitView>(relaxed = true)
         lifeCycle.onLoadFailed(mockKitView, "https://example.com", "Network error")
-        
+
         assertEquals(true, onLoadFailedCalled)
         assertEquals("Network error", capturedReason)
     }
@@ -129,16 +139,17 @@ class SimpleLynxKitViewTest {
     @Test
     fun testLifecycleOnDestroyCallback() {
         var onDestroyCalled = false
-        
-        val lifeCycle = object : IHybridKitLifeCycle() {
-            override fun onDestroy(view: IKitView) {
-                onDestroyCalled = true
+
+        val lifeCycle =
+            object : IHybridKitLifeCycle() {
+                override fun onDestroy(view: IKitView) {
+                    onDestroyCalled = true
+                }
             }
-        }
-        
+
         val mockKitView = mockk<IKitView>(relaxed = true)
         lifeCycle.onDestroy(mockKitView)
-        
+
         assertEquals(true, onDestroyCalled)
     }
 

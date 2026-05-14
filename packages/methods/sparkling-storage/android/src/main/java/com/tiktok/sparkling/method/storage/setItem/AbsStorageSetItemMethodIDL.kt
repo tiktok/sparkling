@@ -11,7 +11,6 @@ import com.tiktok.sparkling.method.registry.core.base.AbsSparklingIDLMethod
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseParamModel
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseResultModel
 
-
 /** anycode-lint-ignore */
 
 /**
@@ -19,15 +18,11 @@ import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseResultMo
  * DO NOT MODIFY!!!
  */
 abstract class AbsStorageSetItemMethodIDL : AbsSparklingIDLMethod<AbsStorageSetItemMethodIDL.IDLMethodSetStorageItemParamModel, AbsStorageSetItemMethodIDL.IDLMethodSetStorageItemResultModel>() {
-
-
     @IDLMethodName(name = "storage.setItem", params = ["key", "data", "biz", "validDuration"])
     final override val name: String = "storage.setItem"
 
-
     @IDLMethodParamModel
     interface IDLMethodSetStorageItemParamModel : IDLMethodBaseParamModel {
-
         @get:IDLMethodParamField(required = true, isGetter = true, keyPath = "key")
         val key: String
 
@@ -42,6 +37,5 @@ abstract class AbsStorageSetItemMethodIDL : AbsSparklingIDLMethod<AbsStorageSetI
     }
 
     @IDLMethodResultModel
-    interface IDLMethodSetStorageItemResultModel: IDLMethodBaseResultModel {
-    }
+    interface IDLMethodSetStorageItemResultModel : IDLMethodBaseResultModel
 }

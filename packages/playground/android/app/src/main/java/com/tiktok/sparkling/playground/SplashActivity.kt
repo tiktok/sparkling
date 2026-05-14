@@ -23,13 +23,14 @@ class SplashActivity : AppCompatActivity() {
         val initialDataJson = "{ \"initial_data\":$initialData}"
 
         val context = SparklingContext()
-        context.scheme = if (BuildConfig.DEBUG) {
-            val debugScheme = DebugDevUrlSupport.buildMainPageScheme(this)
-            context.sparklingUIProvider = DebugSparklingUiProvider(initialDataJson, debugScheme)
-            debugScheme
-        } else {
-            "hybrid://lynxview_page?bundle=main.lynx.bundle&hide_nav_bar=1&screen_orientation=portrait"
-        }
+        context.scheme =
+            if (BuildConfig.DEBUG) {
+                val debugScheme = DebugDevUrlSupport.buildMainPageScheme(this)
+                context.sparklingUIProvider = DebugSparklingUiProvider(initialDataJson, debugScheme)
+                debugScheme
+            } else {
+                "hybrid://lynxview_page?bundle=main.lynx.bundle&hide_nav_bar=1&screen_orientation=portrait"
+            }
         context.withInitData(initialDataJson)
         Sparkling.build(this, context).navigate()
         finish()

@@ -5,19 +5,24 @@ package com.tiktok.sparkling.hybridkit.base
 
 import com.tiktok.sparkling.hybridkit.api.IDependencyIterator
 
-abstract class AbsHybridKitLifeCycle(override var loadStatusLifeCycle: ILoadStatusLifeCycle? = null) : IHybridKitLifeCycle(loadStatusLifeCycle),
+abstract class AbsHybridKitLifeCycle(
+    override var loadStatusLifeCycle: ILoadStatusLifeCycle? = null,
+) : IHybridKitLifeCycle(loadStatusLifeCycle),
     IDependencyIterator<AbsHybridKitLifeCycle> {
     var next: AbsHybridKitLifeCycle? = null
-    override fun next(): AbsHybridKitLifeCycle? {
-        return next
-    }
+
+    override fun next(): AbsHybridKitLifeCycle? = next
+
     override fun next(t: AbsHybridKitLifeCycle?) {
         next = t
     }
 }
 
-abstract class IHybridKitLifeCycle(open var loadStatusLifeCycle: ILoadStatusLifeCycle? = null) {
+abstract class IHybridKitLifeCycle(
+    open var loadStatusLifeCycle: ILoadStatusLifeCycle? = null,
+) {
     private var hasFailed = false
+
     /**
      * callback before KitView created
      */
@@ -31,23 +36,37 @@ abstract class IHybridKitLifeCycle(open var loadStatusLifeCycle: ILoadStatusLife
     /**
      * callback when KitView start loading
      */
-    open fun onLoadStart(view: IKitView, url: String) {
+    open fun onLoadStart(
+        view: IKitView,
+        url: String,
+    ) {
     }
 
     /**
      * callback when KitView load failed
      */
-    open fun onLoadFailed(view: IKitView, url: String) {
+    open fun onLoadFailed(
+        view: IKitView,
+        url: String,
+    ) {
     }
 
     /**
      * callback when KitView load failed
      */
-    open fun onLoadFailed(view: IKitView, url: String, reason: String?) {
+    open fun onLoadFailed(
+        view: IKitView,
+        url: String,
+        reason: String?,
+    ) {
         onLoadFailed(view, url)
     }
 
-    open fun onLoadFailed(view: IKitView, url: String, hybridKitError: HybridKitError){
+    open fun onLoadFailed(
+        view: IKitView,
+        url: String,
+        hybridKitError: HybridKitError,
+    ) {
         onLoadFailed(view, url, hybridKitError.errorReason)
     }
 
@@ -69,22 +88,24 @@ abstract class IHybridKitLifeCycle(open var loadStatusLifeCycle: ILoadStatusLife
      */
     open fun onDestroy(kitView: IKitView) {}
 
-
     /**
      * from finish, we need to clean context
      */
     open fun onClearContext() {
-
     }
 
     /**
      * now only for webview security, can add to Lynx if needed
      */
-    open fun onLoadUrlCheck(view: IKitView, willLoadUrl: String): LoadUrlCheck? {
-        return null
-    }
+    open fun onLoadUrlCheck(
+        view: IKitView,
+        willLoadUrl: String,
+    ): LoadUrlCheck? = null
 
-    open fun onResourceLoadFinish(templateArray: ByteArray?, baseUrl: String?) {}
+    open fun onResourceLoadFinish(
+        templateArray: ByteArray?,
+        baseUrl: String?,
+    ) {}
 
     /**
      * this callback would be invoked when first dispatchDraw after load/reload/updateData/updateGlobalProps/updateMetaData
@@ -93,10 +114,21 @@ abstract class IHybridKitLifeCycle(open var loadStatusLifeCycle: ILoadStatusLife
 }
 
 interface ILoadStatusLifeCycle {
-    fun onLoadStart(view: IKitView, url: String)
+    fun onLoadStart(
+        view: IKitView,
+        url: String,
+    )
+
     fun onLoadSuccess(view: IKitView)
-    fun onLoadFailed(view: IKitView, url: String, hybridKitError: HybridKitError)
+
+    fun onLoadFailed(
+        view: IKitView,
+        url: String,
+        hybridKitError: HybridKitError,
+    )
 }
 
-
-class LoadUrlCheck(val modified: Boolean, val changedUrl: String)
+class LoadUrlCheck(
+    val modified: Boolean,
+    val changedUrl: String,
+)

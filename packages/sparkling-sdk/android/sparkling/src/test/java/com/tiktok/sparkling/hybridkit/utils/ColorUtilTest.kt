@@ -16,7 +16,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class ColorUtilTest {
-
     private lateinit var mockContext: Context
 
     @Before
@@ -71,12 +70,12 @@ class ColorUtilTest {
     fun testGetColor() {
         val resourceId = 123
         val expectedColor = Color.BLUE
-        
+
         mockkStatic(ContextCompat::class)
         every { ContextCompat.getColor(mockContext, resourceId) } returns expectedColor
-        
+
         val result = ColorUtil.getColor(resourceId)
-        
+
         assertEquals(expectedColor, result)
         verify { ContextCompat.getColor(mockContext, resourceId) }
     }

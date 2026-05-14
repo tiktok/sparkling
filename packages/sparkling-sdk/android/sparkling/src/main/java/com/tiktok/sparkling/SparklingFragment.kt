@@ -12,7 +12,6 @@ import com.tiktok.sparkling.Sparkling.Companion.SPARKLING_CONTEXT_CONTAINER_ID
 import com.tiktok.sparkling.hybridkit.base.IPerformanceView
 
 class SparklingFragment : Fragment() {
-
     companion object {
         fun newInstance() = SparklingFragment()
     }
@@ -20,10 +19,10 @@ class SparklingFragment : Fragment() {
     private var sparklingView: SparklingView? = null
     private var hasLoad = false
 
-
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View? {
         val containerId = activity?.intent?.getStringExtra(SPARKLING_CONTEXT_CONTAINER_ID)
         val sparklingContext = SparklingContextTransferStation.getSparklingContext(containerId)
@@ -41,7 +40,10 @@ class SparklingFragment : Fragment() {
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         sparklingView?.loadStatus()?.let {
             hasLoad = it != IPerformanceView.LoadStatus.INIT
@@ -64,5 +66,4 @@ class SparklingFragment : Fragment() {
     fun loadUrl() {
         sparklingView?.loadUrl()
     }
-
 }

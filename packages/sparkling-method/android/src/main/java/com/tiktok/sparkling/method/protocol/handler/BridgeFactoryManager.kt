@@ -12,5 +12,8 @@ import com.tiktok.sparkling.method.protocol.entity.BridgeCall
  * @Description:
  */
 open class BridgeFactoryManager {
-    open fun checkAndInitBridge(bridgeContext: BridgeContext, call: BridgeCall){}
+    open fun checkAndInitBridge(
+        bridgeContext: BridgeContext,
+        call: BridgeCall,
+    ) {}
 }

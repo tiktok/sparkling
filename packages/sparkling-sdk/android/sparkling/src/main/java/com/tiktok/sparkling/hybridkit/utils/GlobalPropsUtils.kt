@@ -15,14 +15,12 @@ import com.tiktok.sparkling.hybridkit.scheme.SparklingUriParser
 import androidx.core.net.toUri
 import java.util.concurrent.ConcurrentHashMap
 
-
 /**
  * When setting globalprops, consider whether the props will change throughout the app lifecycle
  * will change -> setUnstableProps -> unstableMap
  * will not change -> setStableProps -> stableMap
  */
 class GlobalPropsUtils {
-
     /** for global eg. screen size or OS or app version */
     private val stableMap = SafeConcurrentHashMap<String, Any>()
 
@@ -35,83 +33,93 @@ class GlobalPropsUtils {
             GlobalPropsUtils()
         }
 
-        val builtInStableFields = mapOf<String, () -> Any>(
-            RuntimeInfo.LYNX_SDK_VERSION to { LynxEnv.inst().lynxVersion },
-            RuntimeInfo.SPARKLING_VERSION to { RuntimeInfo.SPARKLING_VERSION_VALUE },
-            RuntimeInfo.SCREEN_WIDTH to {
-                DevicesUtil.px2dp(
-                    DevicesUtil.getScreenWidth(HybridEnvironment.instance.context).toDouble(),
-                    HybridEnvironment.instance.context
-                )
-            },
-            RuntimeInfo.SCREEN_HEIGHT to {
-                DevicesUtil.px2dp(
-                    DevicesUtil.getScreenHeight(HybridEnvironment.instance.context).toDouble(),
-                    HybridEnvironment.instance.context
-                )
-            },
-            RuntimeInfo.STATUS_BAR_HEIGHT to {
-                DevicesUtil.px2dp(
-                    DevicesUtil.getStatusBarHeight(HybridEnvironment.instance.context).toDouble(),
-                    HybridEnvironment.instance.context
-                )
-            },
-            RuntimeInfo.SCREEN_ORIENTATION to {
-                val isPortrait = DevicesUtil.isScreenPortrait(HybridEnvironment.instance.context)
-                if (isPortrait) "Portrait" else "Landscape"
-            },
-            RuntimeInfo.ORIENTATION to {
-                val isPortrait = DevicesUtil.isScreenPortrait(HybridEnvironment.instance.context)
-                if (isPortrait) 0 else 1
-            },
-            RuntimeInfo.DEVICE_MODEL to { DevicesUtil.model },
-            RuntimeInfo.OS to { DevicesUtil.platform },
-            RuntimeInfo.OS_VERSION to { DevicesUtil.system },
-            RuntimeInfo.LANGUAGE to { DevicesUtil.language },
-            RuntimeInfo.IS_LOW_POWER_MODE to { if (DevicesUtil.isLowPowerMode(HybridEnvironment.instance.context)) 1 else 0 },
-            RuntimeInfo.A11Y_MODE to { if (DevicesUtil.isTalkBackEnabled(HybridEnvironment.instance.context)) 1 else 0 },
-            RuntimeInfo.SAFEAREA_HEIGHT to {
-                val ctx = HybridEnvironment.instance.context
-                val activity = ctx as? Activity
-                if (activity != null) {
-                    val statusBarHeightDp = DevicesUtil.px2dp(
-                        DevicesUtil.getStatusBarHeight(activity).toDouble(), activity
-                    )
-                    DevicesUtil.safeAreaHeight(statusBarHeightDp, activity)
-                } else {
+        val builtInStableFields =
+            mapOf<String, () -> Any>(
+                RuntimeInfo.LYNX_SDK_VERSION to { LynxEnv.inst().lynxVersion },
+                RuntimeInfo.SPARKLING_VERSION to { RuntimeInfo.SPARKLING_VERSION_VALUE },
+                RuntimeInfo.SCREEN_WIDTH to {
                     DevicesUtil.px2dp(
-                        DevicesUtil.getScreenHeight(ctx).toDouble(), ctx
-                    ) - DevicesUtil.px2dp(
-                        DevicesUtil.getStatusBarHeight(ctx).toDouble(), ctx
+                        DevicesUtil.getScreenWidth(HybridEnvironment.instance.context).toDouble(),
+                        HybridEnvironment.instance.context,
                     )
-                }
-            },
-            RuntimeInfo.IS_PAD to {
-                if (DevicesUtil.isPad(HybridEnvironment.instance.context)) 1 else 0
-            },
-            RuntimeInfo.NAVIGATION_BAR_HEIGHT to {
-                DevicesUtil.px2dp(
-                    DevicesUtil.getNavigationBarHeight(HybridEnvironment.instance.context).toDouble(),
-                    HybridEnvironment.instance.context
-                )
-            },
-            RuntimeInfo.PIXEL_RATIO to {
-                DevicesUtil.getPixelRadio(HybridEnvironment.instance.context)
-            }
-        )
+                },
+                RuntimeInfo.SCREEN_HEIGHT to {
+                    DevicesUtil.px2dp(
+                        DevicesUtil.getScreenHeight(HybridEnvironment.instance.context).toDouble(),
+                        HybridEnvironment.instance.context,
+                    )
+                },
+                RuntimeInfo.STATUS_BAR_HEIGHT to {
+                    DevicesUtil.px2dp(
+                        DevicesUtil.getStatusBarHeight(HybridEnvironment.instance.context).toDouble(),
+                        HybridEnvironment.instance.context,
+                    )
+                },
+                RuntimeInfo.SCREEN_ORIENTATION to {
+                    val isPortrait = DevicesUtil.isScreenPortrait(HybridEnvironment.instance.context)
+                    if (isPortrait) "Portrait" else "Landscape"
+                },
+                RuntimeInfo.ORIENTATION to {
+                    val isPortrait = DevicesUtil.isScreenPortrait(HybridEnvironment.instance.context)
+                    if (isPortrait) 0 else 1
+                },
+                RuntimeInfo.DEVICE_MODEL to { DevicesUtil.model },
+                RuntimeInfo.OS to { DevicesUtil.platform },
+                RuntimeInfo.OS_VERSION to { DevicesUtil.system },
+                RuntimeInfo.LANGUAGE to { DevicesUtil.language },
+                RuntimeInfo.IS_LOW_POWER_MODE to { if (DevicesUtil.isLowPowerMode(HybridEnvironment.instance.context)) 1 else 0 },
+                RuntimeInfo.A11Y_MODE to { if (DevicesUtil.isTalkBackEnabled(HybridEnvironment.instance.context)) 1 else 0 },
+                RuntimeInfo.SAFEAREA_HEIGHT to {
+                    val ctx = HybridEnvironment.instance.context
+                    val activity = ctx as? Activity
+                    if (activity != null) {
+                        val statusBarHeightDp =
+                            DevicesUtil.px2dp(
+                                DevicesUtil.getStatusBarHeight(activity).toDouble(),
+                                activity,
+                            )
+                        DevicesUtil.safeAreaHeight(statusBarHeightDp, activity)
+                    } else {
+                        DevicesUtil.px2dp(
+                            DevicesUtil.getScreenHeight(ctx).toDouble(),
+                            ctx,
+                        ) -
+                            DevicesUtil.px2dp(
+                                DevicesUtil.getStatusBarHeight(ctx).toDouble(),
+                                ctx,
+                            )
+                    }
+                },
+                RuntimeInfo.IS_PAD to {
+                    if (DevicesUtil.isPad(HybridEnvironment.instance.context)) 1 else 0
+                },
+                RuntimeInfo.NAVIGATION_BAR_HEIGHT to {
+                    DevicesUtil.px2dp(
+                        DevicesUtil.getNavigationBarHeight(HybridEnvironment.instance.context).toDouble(),
+                        HybridEnvironment.instance.context,
+                    )
+                },
+                RuntimeInfo.PIXEL_RATIO to {
+                    DevicesUtil.getPixelRadio(HybridEnvironment.instance.context)
+                },
+            )
     }
 
-    fun init(hybridContext: HybridContext, context: Context) {
+    fun init(
+        hybridContext: HybridContext,
+        context: Context,
+    ) {
         val containerID = hybridContext.containerId
 
         hybridContext.scheme?.let { scheme ->
             runCatching {
                 val uri = scheme.toUri()
-                val queryMap = SparklingUriParser.parseQueryMap(
-                    uri,
-                    hybridContext.extra,
-                    hybridContext.bundle
-                )
+                val queryMap =
+                    SparklingUriParser.parseQueryMap(
+                        uri,
+                        hybridContext.extra,
+                        hybridContext.bundle,
+                    )
                 SparklingUriParser.saveUriAndQueries(containerID, queryMap)
                 hybridContext.fullScheme =
                     SparklingUriParser.appendExtraQueryToUri(uri, queryMap).toString()
@@ -130,7 +138,8 @@ class GlobalPropsUtils {
             stablePropsSupplier()
         }
 
-        HybridEnvironment.instance.baseInfoConfig?.getUnstableProps(context, hybridContext)
+        HybridEnvironment.instance.baseInfoConfig
+            ?.getUnstableProps(context, hybridContext)
             ?.let { map ->
                 findContainerProps(containerID).putAll(map)
             }
@@ -144,10 +153,8 @@ class GlobalPropsUtils {
 
     fun updateUnstablePropsSupplier(
         hybridContext: HybridContext,
-        context: Context
-    ): ConcurrentHashMap<String, Any> {
-        return unstablePropsSupplier(hybridContext, context)
-    }
+        context: Context,
+    ): ConcurrentHashMap<String, Any> = unstablePropsSupplier(hybridContext, context)
 
     fun setStableProps(props: Map<String, Any>) {
         props.let {
@@ -155,29 +162,34 @@ class GlobalPropsUtils {
         }
     }
 
-    fun setUnstableProps(containerID: String, props: Map<String, Any>) {
+    fun setUnstableProps(
+        containerID: String,
+        props: Map<String, Any>,
+    ) {
         props.let {
             findContainerProps(containerID).putAll(it)
         }
     }
 
-
-    fun getGlobalProps(containerID: String): MutableMap<String, Any> {
-        return (stableMap + findContainerProps(containerID)).apply {
-            val removableKeys = removableGlobalKeys[containerID]
-            if (removableKeys != null) {
-                filterNot {
-                    removableKeys.contains(it.key)
+    fun getGlobalProps(containerID: String): MutableMap<String, Any> =
+        (stableMap + findContainerProps(containerID))
+            .apply {
+                val removableKeys = removableGlobalKeys[containerID]
+                if (removableKeys != null) {
+                    filterNot {
+                        removableKeys.contains(it.key)
+                    }
                 }
-            }
-        }.toMutableMap()
-    }
+            }.toMutableMap()
 
     fun flushGlobalProps(containerID: String) {
         unstableMap.remove(containerID)
     }
 
-    fun removeGlobalProps(containerID: String, list: List<String>?) {
+    fun removeGlobalProps(
+        containerID: String,
+        list: List<String>?,
+    ) {
         list?.forEach {
             unstableMap[containerID]?.remove(it)
         }
@@ -206,12 +218,11 @@ class GlobalPropsUtils {
 
     private fun unstablePropsSupplier(
         hybridContext: HybridContext,
-        context: Context?
+        context: Context?,
     ): ConcurrentHashMap<String, Any> {
         val unstableMap = ConcurrentHashMap<String, Any>()
         findContainerProps(hybridContext.containerId).apply {
             unstableMap.apply {
-
                 put(RuntimeInfo.CONTAINER_ID, hybridContext.containerId)
                 put(RuntimeInfo.TEMPLATE_RES_DATA, hybridContext.templateResData)
                 put(RuntimeInfo.QUERY_ITEMS, parseQueryMap(hybridContext))
@@ -227,13 +238,13 @@ class GlobalPropsUtils {
         return unstableMap
     }
 
-    private fun parseQueryMap(hybridContext: HybridContext): MutableMap<String, String> {
-        return SparklingUriParser.queryParsedParams(hybridContext.containerId).apply {
-            val openTime = hybridContext.getDependency(HybridLoadSession::class.java)?.openTime
-                ?: System.currentTimeMillis()
+    private fun parseQueryMap(hybridContext: HybridContext): MutableMap<String, String> =
+        SparklingUriParser.queryParsedParams(hybridContext.containerId).apply {
+            val openTime =
+                hybridContext.getDependency(HybridLoadSession::class.java)?.openTime
+                    ?: System.currentTimeMillis()
             put("containerInitTime", openTime.toString())
         }
-    }
 
     private fun reGenerateCheck(): Boolean {
         builtInStableFields.keys.forEach { key ->
@@ -247,7 +258,5 @@ class GlobalPropsUtils {
     /**
      * @return Map<String, Any>
      */
-    fun getStableGlobalProps(): Map<String, Any> {
-        return stableMap
-    }
+    fun getStableGlobalProps(): Map<String, Any> = stableMap
 }

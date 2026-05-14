@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core
 
 import android.app.Activity
@@ -22,12 +21,20 @@ interface IBridgeContext {
     val ownerActivity: Activity?
     val containerID: String?
     val context: Context?
-    fun sendEvent(name: String, obj: JSONObject)
+
+    fun sendEvent(
+        name: String,
+        obj: JSONObject,
+    )
+
     fun <T> getObject(clazz: Class<T>): T?
 }
 
 interface JSEventDelegate {
-    fun sendJSEvent(eventName: String, params: JSONObject?)
+    fun sendJSEvent(
+        eventName: String,
+        params: JSONObject?,
+    )
 }
 
 class BridgeContextWrapper : IBridgeContext {
@@ -37,6 +44,7 @@ class BridgeContextWrapper : IBridgeContext {
     private var _containerID: String? = null
     private var _jsEvent: JSEventDelegate? = null
     private var __bridge: WeakReference<SparklingBridge>? = null
+
     /**
      * register object to JSBSDKContext, you can use getSDKContext().getObject(clazz) in JSB method to get it.
      * there is two-ways to register object to JSBSDKContext: registerObject & registerWeakObject
@@ -46,9 +54,13 @@ class BridgeContextWrapper : IBridgeContext {
      * 3. registerWeakObject has higher priority than registerObject,
      *    so if you register the same class with object and weakObject, you only can get the weakObject.
      */
-    fun <T> registerWeakObject(clazz: Class<T>, t: T?) {
+    fun <T> registerWeakObject(
+        clazz: Class<T>,
+        t: T?,
+    ) {
         providers[clazz] = WeakContextHolder(t)
     }
+
     /**
      * register object to JSBSDKContext, you can use getSDKContext().getObject(clazz) in JSB method to get it.
      * there is two-ways to register object to JSBSDKContext: registerObject & registerWeakObject
@@ -58,9 +70,13 @@ class BridgeContextWrapper : IBridgeContext {
      * 3. registerWeakObject has higher priority than registerObject,
      *    so if you register the same class with object and weakObject, you only can get the weakObject.
      */
-    fun <T> registerObject(clazz: Class<T>, t: T?) {
+    fun <T> registerObject(
+        clazz: Class<T>,
+        t: T?,
+    ) {
         providers[clazz] = ContextHolder(t)
     }
+
     /**
      * register object to JSBSDKContext, you can use getSDKContext().getObject(clazz) in JSB method to get it.
      * there is two-ways to register object to JSBSDKContext: registerObject & registerWeakObject
@@ -73,6 +89,7 @@ class BridgeContextWrapper : IBridgeContext {
     fun registerWeakObjects(map: Map<Class<*>, WeakContextHolder<*>>) {
         providers.putAll(map)
     }
+
     /**
      * register object to JSBSDKContext, you can use getSDKContext().getObject(clazz) in JSB method to get it.
      * there is two-ways to register object to JSBSDKContext: registerObject & registerWeakObject
@@ -108,7 +125,7 @@ class BridgeContextWrapper : IBridgeContext {
         }
     }
 
-    fun setBridge(bridge:SparklingBridge) {
+    fun setBridge(bridge: SparklingBridge) {
         if (__bridge?.get() == null) {
             __bridge = WeakReference(bridge)
         }
@@ -124,14 +141,15 @@ class BridgeContextWrapper : IBridgeContext {
     override val context: Context?
         get() = _view?.get()?.context ?: getObject(Context::class.java)
 
-    override fun sendEvent(name: String, obj: JSONObject) {
+    override fun sendEvent(
+        name: String,
+        obj: JSONObject,
+    ) {
         _jsEvent?.sendJSEvent(name, obj)
     }
 
     override val containerID: String?
         get() = _containerID
 
-    override fun <T> getObject(clazz: Class<T>): T? {
-        return providers[clazz]?.provideInstance() as T?
-    }
+    override fun <T> getObject(clazz: Class<T>): T? = providers[clazz]?.provideInstance() as T?
 }

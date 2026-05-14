@@ -12,9 +12,10 @@ import com.tiktok.sparkling.hybridkit.base.HybridErrorConstantCode
 import com.tiktok.sparkling.hybridkit.base.HybridKitError
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
 
-
-class SimpleLynxViewClient(var kitView: SimpleLynxKitView, val hybridLifeCycle: IHybridKitLifeCycle?) : LynxViewClient() {
-
+class SimpleLynxViewClient(
+    var kitView: SimpleLynxKitView,
+    val hybridLifeCycle: IHybridKitLifeCycle?,
+) : LynxViewClient() {
     var uri: Uri? = null
 
     override fun onPageStart(url: String?) {
@@ -30,12 +31,16 @@ class SimpleLynxViewClient(var kitView: SimpleLynxKitView, val hybridLifeCycle: 
     override fun onReceivedError(error: LynxError?) {
         super.onReceivedError(error)
         if (error != null && error.isFatal() && uri != null) {
-            hybridLifeCycle?.onLoadFailed(kitView, uri.toString(), HybridKitError().apply {
-                errorCode = HybridErrorConstantCode.LynxLoadError
-                errorReason = "LynxReceiveError"
-                originCode = error.errorCode
-                originReason = error.msg
-            })
+            hybridLifeCycle?.onLoadFailed(
+                kitView,
+                uri.toString(),
+                HybridKitError().apply {
+                    errorCode = HybridErrorConstantCode.LynxLoadError
+                    errorReason = "LynxReceiveError"
+                    originCode = error.errorCode
+                    originReason = error.msg
+                },
+            )
         }
     }
 

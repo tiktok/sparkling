@@ -6,13 +6,10 @@ package com.tiktok.sparkling.method.storage.utils
 import android.content.Context
 
 object NativeProviderFactory {
-
     /**
      * @param context Context
      * @return INativeStorage
      */
     @JvmStatic
-    fun providerNativeStorage(context: Context): INativeStorage {
-        return NativeStorageImpl.Companion.getInstance(context.applicationContext)
-    }
+    fun providerNativeStorage(context: Context): INativeStorage = NativeStorageImpl.Companion.getInstance(context.applicationContext)
 }

@@ -23,6 +23,11 @@ abstract class AbsRouteOpenHandler {
         this.exceptionHandler = handler
     }
 
-    abstract fun openScheme(scheme: String, extraInfo: Map<String, Any>, context: Context?): Boolean
+    abstract fun openScheme(
+        scheme: String,
+        extraInfo: Map<String, Any>,
+        context: Context?,
+    ): Boolean
+
     abstract fun getSupportPlatformTypeList(): List<BridgePlatformType>
 }

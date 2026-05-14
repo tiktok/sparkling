@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.api
 
 import com.lynx.react.bridge.ReadableMap
@@ -24,11 +23,12 @@ class DefaultCallHandler : IBridgeHandler {
     override fun handle(
         bridgeContext: BridgeContext,
         call: BridgeCall,
-        callback: IBridgeMethodCallback
+        callback: IBridgeMethodCallback,
     ) {
         val platform = BridgeContext.getPlatformByBridgeContext(bridgeContext)
-        val bridge = pool.getBridge(call.bridgeName, platform)
-            ?: return BridgeMethodCallbackHelper.bridgeNotFound(callback)
+        val bridge =
+            pool.getBridge(call.bridgeName, platform)
+                ?: return BridgeMethodCallbackHelper.bridgeNotFound(callback)
 
         val params = call.params
 
@@ -41,19 +41,22 @@ class DefaultCallHandler : IBridgeHandler {
                 is JSONObject -> {
                     JsonProcessor(bridge, params, call.platform).apply { this@apply.context = this@DefaultCallHandler.context }
                 }
+
                 is ReadableMap -> {
                     ReadableMapProcessor(bridge, unWrapperParams(params) ?: params).apply { this@apply.context = this@DefaultCallHandler.context }
                 }
+
                 else -> {
                     return
                 }
             }.handle(callback)
-        } else {      // compatible bridge
-            val idlCallback = object : IDLBridgeMethod.Callback {
-                override fun invoke(data: Map<String, Any?>) {
-                    callback.onBridgeResult(data)
+        } else { // compatible bridge
+            val idlCallback =
+                object : IDLBridgeMethod.Callback {
+                    override fun invoke(data: Map<String, Any?>) {
+                        callback.onBridgeResult(data)
+                    }
                 }
-            }
             when (params) {
                 is JSONObject -> {
                     bridge.realHandle(Utils.jsonToMap(params), idlCallback, BridgePlatformType.ALL)
@@ -63,7 +66,7 @@ class DefaultCallHandler : IBridgeHandler {
                     bridge.realHandle(
                         (unWrapperParams(params) ?: params).toHashMap(),
                         idlCallback,
-                        BridgePlatformType.ALL
+                        BridgePlatformType.ALL,
                     )
                 }
 
@@ -76,7 +79,7 @@ class DefaultCallHandler : IBridgeHandler {
 
     fun registerLocalIDLMethod(
         clazz: Class<out IDLBridgeMethod>?,
-        scope: BridgePlatformType = BridgePlatformType.ALL
+        scope: BridgePlatformType = BridgePlatformType.ALL,
     ) {
         pool.registerLocalIDLMethod(clazz, scope)
     }
@@ -86,7 +89,10 @@ class DefaultCallHandler : IBridgeHandler {
         this.pool.setBridgeContext(context)
     }
 
-    fun getBridge(bridgeContext: BridgeContext, bridgeName: String) : IDLBridgeMethod? {
+    fun getBridge(
+        bridgeContext: BridgeContext,
+        bridgeName: String,
+    ): IDLBridgeMethod? {
         val platform = BridgeContext.getPlatformByBridgeContext(bridgeContext)
         return pool.getBridge(bridgeName, platform)
     }
@@ -96,11 +102,7 @@ class DefaultCallHandler : IBridgeHandler {
         isReleased = true
     }
 
-    override fun isReleased(): Boolean {
-        return isReleased
-    }
+    override fun isReleased(): Boolean = isReleased
 
-    private fun unWrapperParams(params: ReadableMap?) : ReadableMap? {
-        return params?.getMap("data") ?: params
-    }
+    private fun unWrapperParams(params: ReadableMap?): ReadableMap? = params?.getMap("data") ?: params
 }

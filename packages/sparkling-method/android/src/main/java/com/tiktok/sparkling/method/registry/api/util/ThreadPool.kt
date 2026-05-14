@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.api.util
 
 import android.os.Handler
@@ -13,9 +12,7 @@ import com.tiktok.sparkling.method.registry.api.util.ThreadPool.runInBackGround
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-
 object ThreadPool {
-
     private const val TAG = "ThreadPool"
 
     private var executor: ExecutorService? = null
@@ -69,5 +66,4 @@ object ThreadPool {
         Log.d(TAG, "jsb thread pool size: $threadPoolSize")
         return Executors.newFixedThreadPool(threadPoolSize)
     }
-
 }

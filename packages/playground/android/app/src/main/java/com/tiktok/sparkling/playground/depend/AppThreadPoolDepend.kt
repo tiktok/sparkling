@@ -9,6 +9,6 @@ import java.util.concurrent.Executors
 
 class AppThreadPoolDepend : IHostThreadPoolExecutorDepend {
     private val executor: ExecutorService by lazy { Executors.newCachedThreadPool() }
+
     override fun getNormalThreadExecutor(): ExecutorService = executor
 }
-

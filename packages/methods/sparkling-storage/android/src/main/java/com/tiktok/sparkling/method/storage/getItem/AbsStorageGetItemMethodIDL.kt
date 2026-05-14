@@ -11,7 +11,6 @@ import com.tiktok.sparkling.method.registry.core.base.AbsSparklingIDLMethod
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseParamModel
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseResultModel
 
-
 /** anycode-lint-ignore */
 
 /**
@@ -19,13 +18,11 @@ import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseResultMo
  * DO NOT MODIFY!!!
  */
 abstract class AbsStorageGetItemMethodIDL : AbsSparklingIDLMethod<AbsStorageGetItemMethodIDL.IDLMethodGetStorageItemParamModel, AbsStorageGetItemMethodIDL.IDLMethodGetStorageItemResultModel>() {
-
     @IDLMethodName(name = "storage.getItem", params = ["key", "biz"], results = ["data"])
     final override val name: String = "storage.getItem"
 
     @IDLMethodParamModel
     interface IDLMethodGetStorageItemParamModel : IDLMethodBaseParamModel {
-
         @get:IDLMethodParamField(required = true, isGetter = true, keyPath = "key")
         val key: String
 
@@ -34,8 +31,7 @@ abstract class AbsStorageGetItemMethodIDL : AbsSparklingIDLMethod<AbsStorageGetI
     }
 
     @IDLMethodResultModel
-    interface IDLMethodGetStorageItemResultModel: IDLMethodBaseResultModel {
-
+    interface IDLMethodGetStorageItemResultModel : IDLMethodBaseResultModel {
         @get:IDLMethodParamField(required = false, isGetter = true, keyPath = "data")
         @set:IDLMethodParamField(required = false, isGetter = false, keyPath = "data")
         var data: Any?

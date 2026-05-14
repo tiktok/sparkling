@@ -30,17 +30,16 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class HybridKitTest {
-
     private lateinit var mockApplication: Application
     private lateinit var mockContext: Context
 
     @Before
     fun setUp() {
         clearAllMocks()
-        
+
         mockApplication = mockk(relaxed = true)
         mockContext = mockk(relaxed = true)
-        
+
         // Mock WindowManager for DevicesUtil - this is needed because GlobalPropsUtils
         // calls DevicesUtil.isScreenPortrait(HybridEnvironment.instance.context)
         val mockWindowManager = mockk<WindowManager>(relaxed = true)
@@ -49,12 +48,12 @@ class HybridKitTest {
         every { mockWindowManager.defaultDisplay } returns mockDisplay
         every { mockContext.getSystemService(Context.WINDOW_SERVICE) } returns mockWindowManager
         every { mockApplication.getSystemService(Context.WINDOW_SERVICE) } returns mockWindowManager
-        
+
         // Mock AccessibilityManager for LynxView accessibility system
         val mockAccessibilityManager = mockk<AccessibilityManager>(relaxed = true)
         every { mockContext.getSystemService(Context.ACCESSIBILITY_SERVICE) } returns mockAccessibilityManager
         every { mockApplication.getSystemService(Context.ACCESSIBILITY_SERVICE) } returns mockAccessibilityManager
-        
+
         // Initialize HybridEnvironment to prevent UninitializedPropertyAccessException
         HybridEnvironment.instance.context = mockApplication
     }
@@ -74,25 +73,28 @@ class HybridKitTest {
 
     @Test
     fun testCreateKitViewWithLynxType() {
-        val scheme = mockk<HybridSchemeParam> {
-            every { engineType } returns HybridKitType.LYNX
-        }
-        
+        val scheme =
+            mockk<HybridSchemeParam> {
+                every { engineType } returns HybridKitType.LYNX
+            }
+
         // Create a mock HybridLoadSession
-        val mockLoadSession = mockk<HybridLoadSession> {
-            every { openTime } returns System.currentTimeMillis()
-        }
-        
-        val param = mockk<HybridContext>(relaxed = true) {
-            every { containerId } returns "test-container-id"
-            every { getDependency(HybridLoadSession::class.java) } returns mockLoadSession
-        }
-        
+        val mockLoadSession =
+            mockk<HybridLoadSession> {
+                every { openTime } returns System.currentTimeMillis()
+            }
+
+        val param =
+            mockk<HybridContext>(relaxed = true) {
+                every { containerId } returns "test-container-id"
+                every { getDependency(HybridLoadSession::class.java) } returns mockLoadSession
+            }
+
         // Ensure HybridEnvironment is properly initialized
         HybridEnvironment.instance.context = mockApplication
-        
+
         val result = HybridKit.createKitView(scheme, param, mockContext)
-        
+
         assertNotNull(scheme.engineType)
         assertEquals(HybridKitType.LYNX, scheme.engineType)
         // The result should not be null for LYNX type
@@ -101,20 +103,20 @@ class HybridKitTest {
 
     @Test
     fun testCreateKitViewWithUnsupportedType() {
-        val scheme = mockk<HybridSchemeParam> {
-            every { engineType } returns mockk()
-        }
+        val scheme =
+            mockk<HybridSchemeParam> {
+                every { engineType } returns mockk()
+            }
         val param = mockk<HybridContext>(relaxed = true)
-        
+
         val result = HybridKit.createKitView(scheme, param, mockContext)
-        
+
         assertNull(result)
     }
 }
 
 @RunWith(RobolectricTestRunner::class)
 class HybridContextTest {
-
     private lateinit var hybridContext: HybridContext
     private lateinit var mockContext: Context
     private lateinit var mockResources: Resources
@@ -126,7 +128,7 @@ class HybridContextTest {
         mockContext = mockk(relaxed = true)
         mockResources = mockk(relaxed = true)
         mockConfiguration = mockk(relaxed = true)
-        
+
         every { mockContext.resources } returns mockResources
         every { mockResources.configuration } returns mockConfiguration
     }
@@ -135,7 +137,7 @@ class HybridContextTest {
     fun testContainerIdGeneration() {
         val hybridContext1 = HybridContext()
         val hybridContext2 = HybridContext()
-        
+
         assertNotEquals(hybridContext1.containerId, hybridContext2.containerId)
         assertTrue(hybridContext1.containerId.contains("-"))
     }
@@ -144,7 +146,7 @@ class HybridContextTest {
     fun testWithInitData() {
         val testData = "test_init_data"
         hybridContext.withInitData(testData)
-        
+
         assertEquals(testData, hybridContext.initData())
     }
 
@@ -152,7 +154,7 @@ class HybridContextTest {
     fun testWithLynxViewConfig() {
         val config = mutableMapOf("key1" to "value1", "key2" to "value2")
         val result = hybridContext.withLynxViewConfig(config)
-        
+
         assertEquals(hybridContext, result)
         assertEquals(config, hybridContext.getLynxViewConfig())
     }
@@ -161,7 +163,7 @@ class HybridContextTest {
     fun testTryResetTemplateResDataWithEmptyData() {
         val loadTime = 1000L
         hybridContext.tryResetTemplateResData(loadTime)
-        
+
         assertEquals(loadTime, hybridContext.templateResData.getLong("container_init_cost"))
     }
 
@@ -169,43 +171,43 @@ class HybridContextTest {
     fun testTryResetTemplateResDataWithExistingData() {
         hybridContext.templateResData.put("existing_key", "existing_value")
         val loadTime = 2000L
-        
+
         hybridContext.tryResetTemplateResData(loadTime)
-        
+
         assertEquals(loadTime, hybridContext.templateResData.getLong("container_init_cost"))
         assertFalse(hybridContext.templateResData.has("existing_key"))
     }
 
     @Test
     fun testGetThemeWithForceLightTheme() {
-        val schemeParam = mockk<HybridSchemeParam> {
-            every { forceThemeStyle } returns "light"
-        }
+        val schemeParam =
+            mockk<HybridSchemeParam> {
+                every { forceThemeStyle } returns "light"
+            }
         hybridContext.hybridSchemeParam = schemeParam
-        
+
         val theme = hybridContext.getTheme(mockContext)
-        
+
         assertEquals(Theme.LIGHT, theme)
     }
 
     @Test
     fun testGetThemeWithForceDarkTheme() {
-        val schemeParam = mockk<HybridSchemeParam> {
-            every { forceThemeStyle } returns "dark"
-        }
+        val schemeParam =
+            mockk<HybridSchemeParam> {
+                every { forceThemeStyle } returns "dark"
+            }
         hybridContext.hybridSchemeParam = schemeParam
-        
+
         val theme = hybridContext.getTheme(mockContext)
-        
+
         assertEquals(Theme.DARK, theme)
     }
-
-
 
     @Test
     fun testGlobalPropsManipulation() {
         hybridContext.globalProps["test_key"] = "test_value"
-        
+
         assertEquals("test_value", hybridContext.globalProps["test_key"])
         assertTrue(hybridContext.globalProps.containsKey("test_key"))
     }
@@ -215,9 +217,9 @@ class HybridContextTest {
         val mockKitView = mockk<com.tiktok.sparkling.hybridkit.base.IKitView>(relaxed = true)
         mockkObject(KitViewManager)
         every { KitViewManager.getKitView(any()) } returns mockKitView
-        
+
         hybridContext.sendEvent("test_event", null)
-        
+
         verify { mockKitView.sendEvent("test_event", null) }
     }
 
@@ -226,10 +228,10 @@ class HybridContextTest {
         val mockKitView = mockk<com.tiktok.sparkling.hybridkit.base.IKitView>(relaxed = true)
         mockkObject(KitViewManager)
         every { KitViewManager.getKitView(any()) } returns mockKitView
-        
+
         val params = listOf("param1", "param2")
         hybridContext.sendEvent("test_event", params)
-        
+
         verify { mockKitView.sendEvent("test_event", params) }
     }
 
@@ -238,10 +240,10 @@ class HybridContextTest {
         val mockKitView = mockk<com.tiktok.sparkling.hybridkit.base.IKitView>(relaxed = true)
         mockkObject(KitViewManager)
         every { KitViewManager.getKitView(any()) } returns mockKitView
-        
+
         val params = JSONObject().apply { put("key", "value") }
         hybridContext.sendEvent("test_event", params)
-        
+
         verify { mockKitView.sendEventByJSON("test_event", params) }
     }
 
@@ -250,10 +252,10 @@ class HybridContextTest {
         val mockKitView = mockk<com.tiktok.sparkling.hybridkit.base.IKitView>(relaxed = true)
         mockkObject(KitViewManager)
         every { KitViewManager.getKitView(any()) } returns mockKitView
-        
+
         val params = mapOf("key" to "value")
         hybridContext.sendEvent("test_event", params)
-        
+
         verify { mockKitView.sendEventByMap("test_event", params) }
     }
 }

@@ -11,7 +11,6 @@ import org.junit.Test
 import org.mockito.Mockito.mock
 
 class BridgeCallTest {
-
     private lateinit var bridgeCall: BridgeCall
     private val mockContext = mock(BridgeContext::class.java)
 

@@ -2,9 +2,7 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.api
-
 
 import com.tiktok.sparkling.method.registry.core.IBridgeContext
 import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
@@ -29,20 +27,23 @@ class BridgeLocalPool : IReleasable {
 
     fun registerLocalIDLMethod(
         clazz: Class<out IDLBridgeMethod>?,
-        scope: BridgePlatformType = BridgePlatformType.ALL
+        scope: BridgePlatformType = BridgePlatformType.ALL,
     ) {
         localBridge.registerIDLMethod(clazz, scope)
     }
 
-    fun getBridge(bridgeName: String, platformType: BridgePlatformType): IDLBridgeMethod? {
+    fun getBridge(
+        bridgeName: String,
+        platformType: BridgePlatformType,
+    ): IDLBridgeMethod? {
         val method = map[platformType]?.get(bridgeName) ?: map[BridgePlatformType.ALL]?.get(bridgeName)
         if (method != null) {
             return method
         } else {
             val clazz =
-                localBridge.findIDLMethodClass(platformType, bridgeName) ?:
-                SparklingBridgeManager.findIDLMethodClass(platformType, bridgeName) ?:
-                return null
+                localBridge.findIDLMethodClass(platformType, bridgeName)
+                    ?: SparklingBridgeManager.findIDLMethodClass(platformType, bridgeName)
+                    ?: return null
             val newInstance = clazz.newInstance()
             getPlatformTypeCache(platformType)[bridgeName] = newInstance
             return newInstance
@@ -61,7 +62,7 @@ class BridgeLocalPool : IReleasable {
 
     override fun release() {
         map.forEach { entry ->
-            entry.value.forEach{
+            entry.value.forEach {
                 it.value.release()
             }
         }

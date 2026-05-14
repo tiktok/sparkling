@@ -38,21 +38,20 @@ open class HybridContext {
     open var absSendEventListener: AbsSendEventListener? = null
 
     private var initData: String? = null
+
     // init_data_url works only Lynx
     var initDataUrlDeferred: Deferred<Map<String, Any>?>? = null
     private val initDataRes = AtomicReference<Map<String, Any>?>(null)
 
     var bridge: SparklingBridge? = null
 
-    fun initData() : String? = initData
+    fun initData(): String? = initData
 
-    fun withInitData(initData: String){
+    fun withInitData(initData: String) {
         this.initData = initData
     }
 
-    private fun generateID(): String {
-        return System.currentTimeMillis().toString() + "-" + UUID.randomUUID().toString()
-    }
+    private fun generateID(): String = System.currentTimeMillis().toString() + "-" + UUID.randomUUID().toString()
 
     fun withLynxViewConfig(lynxViewConfig: MutableMap<String, String>?): HybridContext {
         this.lynxViewConfig = lynxViewConfig
@@ -83,7 +82,6 @@ open class HybridContext {
 
     fun getLynxViewConfig() = lynxViewConfig
 
-
     /**
      * initialize template res data and append <code>container_init_cost</code> field to <code>templateResData</code>
      */
@@ -98,27 +96,33 @@ open class HybridContext {
             ) {
                 // if templateResData is not empty and container_init_cost not set, reset
                 // templateResData and append container_init_cost
-                templateResData = JSONObject().apply {
-                    put("container_init_cost", loadTime)
-                }
-            } else
+                templateResData =
+                    JSONObject().apply {
+                        put("container_init_cost", loadTime)
+                    }
+            } else {
                 return
+            }
         }
     }
 
-    fun <T> putDependency(clazz: Class<T>, instance: T?) {
+    fun <T> putDependency(
+        clazz: Class<T>,
+        instance: T?,
+    ) {
         HybridEnvironment.instance.putDependency(this.containerId, clazz, instance)
     }
 
-    fun <T> getDependency(clazz: Class<T>): T? {
-        return HybridEnvironment.instance.getDependency(this.containerId, clazz)
-    }
+    fun <T> getDependency(clazz: Class<T>): T? = HybridEnvironment.instance.getDependency(this.containerId, clazz)
 
     fun <T> removeDependency(clazz: Class<T>) {
         HybridEnvironment.instance.removeDependency(this.containerId, clazz)
     }
 
-    fun <T> removeDependency(clazz: Class<T>, instance: T) {
+    fun <T> removeDependency(
+        clazz: Class<T>,
+        instance: T,
+    ) {
         HybridEnvironment.instance.removeDependency(this.containerId, clazz, instance)
     }
 
@@ -129,29 +133,40 @@ open class HybridContext {
         HybridEnvironment.instance.removeDependency(containerId, true)
     }
 
-    fun kitView(): IKitView? {
-        return KitViewManager.getKitView(containerId)
-    }
+    fun kitView(): IKitView? = KitViewManager.getKitView(containerId)
 
-    fun getTheme(context: Context?): Theme {
-        return when (hybridSchemeParam?.forceThemeStyle?.lowercase()) {
-            "light" -> Theme.LIGHT
-            "dark" -> Theme.DARK
+    fun getTheme(context: Context?): Theme =
+        when (hybridSchemeParam?.forceThemeStyle?.lowercase()) {
+            "light" -> {
+                Theme.LIGHT
+            }
+
+            "dark" -> {
+                Theme.DARK
+            }
+
             else -> {
-                val nightModeFlags = context?.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK)
+                val nightModeFlags =
+                    context
+                        ?.resources
+                        ?.configuration
+                        ?.uiMode
+                        ?.and(Configuration.UI_MODE_NIGHT_MASK)
                 when (nightModeFlags) {
                     Configuration.UI_MODE_NIGHT_YES -> Theme.DARK
                     else -> Theme.LIGHT
                 }
             }
         }
-    }
 
     /**
      * send event to JS
      * @param params must be List, Map or JSONObject
      */
-    fun sendEvent(eventName: String, params: Any?) {
+    fun sendEvent(
+        eventName: String,
+        params: Any?,
+    ) {
         kitView()?.let {
             when (params) {
                 null -> it.sendEvent(eventName, null)
@@ -162,5 +177,4 @@ open class HybridContext {
             return
         }
     }
-
 }

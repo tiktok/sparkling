@@ -11,29 +11,19 @@ import com.tiktok.sparkling.method.registry.core.base.AbsSparklingIDLMethod
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseParamModel
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseResultModel
 
-
 abstract class AbsRouterCloseMethodIDL : AbsSparklingIDLMethod<AbsRouterCloseMethodIDL.IDLMethodCloseParamModel, AbsRouterCloseMethodIDL.IDLMethodCloseResultModel>() {
-
     @IDLMethodName(name = "router.close", params = ["containerID", "animated"])
     final override val name: String = "router.close"
 
-
     @IDLMethodParamModel
     interface IDLMethodCloseParamModel : IDLMethodBaseParamModel {
-
         @get:IDLMethodParamField(required = false, isGetter = true, keyPath = "containerID")
         val containerID: String
 
-
         @get:IDLMethodParamField(required = false, isGetter = true, keyPath = "animated")
         val animated: Boolean?
-
-
     }
 
     @IDLMethodResultModel
-    interface IDLMethodCloseResultModel: IDLMethodBaseResultModel {
-    }
-
-
+    interface IDLMethodCloseResultModel : IDLMethodBaseResultModel
 }

@@ -39,20 +39,20 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
 class SparklingBridge : IReleasable {
-
     internal val innerBridge: InnerBridge = InnerBridge()
     private val closedSubscribers = mutableListOf<Pair<String, JSONObject?>>()
     private val TAG = "SparklingBridge"
     private val bridgeSdkContext = BridgeContextWrapper()
 
     companion object {
-
         var bridgeFactoryManager: BridgeFactoryManager? = null
-        
+
         private var _bridgeThreadDispatcher: BridgeThreadDispatcher? = null
         var bridgeThreadDispatcher: BridgeThreadDispatcher
             get() = _bridgeThreadDispatcher ?: BridgeThreadDispatcher().also { _bridgeThreadDispatcher = it }
-            set(value) { _bridgeThreadDispatcher = value }
+            set(value) {
+                _bridgeThreadDispatcher = value
+            }
 
         /**
          * Whether the host is a debug environment
@@ -68,29 +68,23 @@ class SparklingBridge : IReleasable {
         val cancelCallbackConfig: CancelCallbackConfig =
             CancelCallbackConfig().apply { enable = false }
 
-
         /**
          * switch enableToast to true will invoke a toast when jsb callback with an error code
          */
         private var enableToast = false
+
         fun enableToast(isEnable: Boolean) {
             enableToast = isEnable
         }
 
-        fun getToastSetting(): Boolean {
-            return enableToast
-        }
+        fun getToastSetting(): Boolean = enableToast
 
         fun attachInitListener(listener: BridgeInitListener) {
             BridgeManager.attachInitListener(listener)
         }
-
     }
 
-
-    fun getErrorReportModel(): JSBErrorReportModel {
-        return innerBridge.getBridgeContext().errorReportModel
-    }
+    fun getErrorReportModel(): JSBErrorReportModel = innerBridge.getBridgeContext().errorReportModel
 
     /**
      * prepareLynxJSRuntime
@@ -99,39 +93,47 @@ class SparklingBridge : IReleasable {
     fun prepareLynxJSRuntime(
         containerId: String,
         options: LynxBackgroundRuntimeOptions,
-        context: Context
+        context: Context,
     ) {
         BridgeManager.insert(containerId, this)
         innerBridge.initLynxJSRuntime(containerId, options, context, this)
         bridgeSdkContext.registerWeakObject(
             BridgeContext::class.java,
-            innerBridge.getBridgeContext()
+            innerBridge.getBridgeContext(),
         )
         bridgeSdkContext.setContainerID(containerId)
 //        bridgeSdkContext.setView(view)
         bridgeSdkContext.setBridge(this)
-        bridgeSdkContext.setJSEventDelegate(object : JSEventDelegate {
-            override fun sendJSEvent(eventName: String, params: JSONObject?) {
-                sendJSRuntimeEvent(eventName, params)
-            }
-        })
+        bridgeSdkContext.setJSEventDelegate(
+            object : JSEventDelegate {
+                override fun sendJSEvent(
+                    eventName: String,
+                    params: JSONObject?,
+                ) {
+                    sendJSRuntimeEvent(eventName, params)
+                }
+            },
+        )
         bridgeSdkContext.registerObject(
             IDLBridgeMethod.JSEventDelegate::class.java,
             object : IDLBridgeMethod.JSEventDelegate {
-                override fun sendJSEvent(eventName: String, params: Map<String, Any?>?) {
+                override fun sendJSEvent(
+                    eventName: String,
+                    params: Map<String, Any?>?,
+                ) {
                     sendJSRuntimeEvent(
                         eventName,
-                        params?.let { Utils.mapToJSON(params) } ?: JSONObject())
+                        params?.let { Utils.mapToJSON(params) } ?: JSONObject(),
+                    )
                 }
-            }
+            },
         )
         bridgeSdkContext.registerObject(
             IContainerIDProvider::class.java,
             object : IContainerIDProvider {
-                override fun provideContainerID(): String? {
-                    return containerId
-                }
-            })
+                override fun provideContainerID(): String? = containerId
+            },
+        )
         val handler = getBridgeContext().defaultCallHandler
         handler.setBridgeContext(bridgeSdkContext)
         innerBridge.registerHandler(handler)
@@ -144,56 +146,69 @@ class SparklingBridge : IReleasable {
         innerBridge.bindLynxJSRuntime(lynxBackgroundRuntime)
     }
 
-    fun sendJSRuntimeEvent(eventName: String, jsonObject: JSONObject?) {
+    fun sendJSRuntimeEvent(
+        eventName: String,
+        jsonObject: JSONObject?,
+    ) {
         innerBridge.sendJSRuntimeEvent(eventName, jsonObject)
     }
-
 
     /**
      * The first step of protocol layer initialization
      * @jsBridgeProtocols bridge protocol for control injection
      * @see BridgeProtocolConstants specific protocol constant reference
      */
-    fun init(view: View, containerId: String?, jsBridgeProtocols: Int) {
+    fun init(
+        view: View,
+        containerId: String?,
+        jsBridgeProtocols: Int,
+    ) {
         BridgeManager.insert(view, this)
         innerBridge.init(view, containerId, jsBridgeProtocols, this)
         bridgeSdkContext.registerWeakObject(
             BridgeContext::class.java,
-            innerBridge.getBridgeContext()
+            innerBridge.getBridgeContext(),
         )
         bridgeSdkContext.setContainerID(containerId)
         bridgeSdkContext.setView(view)
         bridgeSdkContext.setBridge(this)
-        bridgeSdkContext.setJSEventDelegate(object : JSEventDelegate {
-            override fun sendJSEvent(eventName: String, params: JSONObject?) {
-                sendEvent(eventName, params)
-            }
-        })
+        bridgeSdkContext.setJSEventDelegate(
+            object : JSEventDelegate {
+                override fun sendJSEvent(
+                    eventName: String,
+                    params: JSONObject?,
+                ) {
+                    sendEvent(eventName, params)
+                }
+            },
+        )
         bridgeSdkContext.registerObject(
             IDLBridgeMethod.JSEventDelegate::class.java,
             object : IDLBridgeMethod.JSEventDelegate {
-                override fun sendJSEvent(eventName: String, params: Map<String, Any?>?) {
+                override fun sendJSEvent(
+                    eventName: String,
+                    params: Map<String, Any?>?,
+                ) {
                     sendEvent(eventName, params?.let { Utils.mapToJSON(params) } ?: JSONObject())
                 }
-            }
+            },
         )
         bridgeSdkContext.registerObject(
             IContainerIDProvider::class.java,
             object : IContainerIDProvider {
-                override fun provideContainerID(): String? {
-                    return containerId
-                }
-            })
+                override fun provideContainerID(): String? = containerId
+            },
+        )
         val handler = getBridgeContext().defaultCallHandler
         handler.setBridgeContext(bridgeSdkContext)
         innerBridge.registerHandler(handler)
     }
 
-
     fun bindWithBusinessNamespace(namespace: String) {
-        getBridgeContext().businessCallHandler = BusinessCallHandler(namespace).apply {
-            setBridgeContext(bridgeSdkContext)
-        }
+        getBridgeContext().businessCallHandler =
+            BusinessCallHandler(namespace).apply {
+                setBridgeContext(bridgeSdkContext)
+            }
     }
 
     /**
@@ -201,7 +216,7 @@ class SparklingBridge : IReleasable {
      */
     fun registerBusinessIDLMethod(
         clazz: Class<out IDLBridgeMethod>,
-        scope: BridgePlatformType = BridgePlatformType.ALL
+        scope: BridgePlatformType = BridgePlatformType.ALL,
     ) {
         getBridgeContext().getNamespace()?.let {
             getBridgeContext().businessCallHandler?.registerMethod(clazz, scope)
@@ -209,15 +224,16 @@ class SparklingBridge : IReleasable {
     }
 
     fun registerIDLMethod(
-        clazz: Class<out IDLBridgeMethod>?, scope: BridgePlatformType = BridgePlatformType.ALL,
-        namespace:String = DEFAULT_NAMESPACE
+        clazz: Class<out IDLBridgeMethod>?,
+        scope: BridgePlatformType = BridgePlatformType.ALL,
+        namespace: String = DEFAULT_NAMESPACE,
     ) {
         SparklingBridgeManager.registerIDLMethod(clazz, scope, namespace)
     }
 
     fun isBusinessIDLMethodExists(
         name: String,
-        platformType: BridgePlatformType = BridgePlatformType.ALL
+        platformType: BridgePlatformType = BridgePlatformType.ALL,
     ): Boolean {
         if (getBridgeContext().getNamespace().isNullOrEmpty()) {
             return false
@@ -228,19 +244,15 @@ class SparklingBridge : IReleasable {
 
     fun registerLocalIDLMethod(
         clazz: Class<out IDLBridgeMethod>?,
-        scope: BridgePlatformType = BridgePlatformType.ALL
+        scope: BridgePlatformType = BridgePlatformType.ALL,
     ) {
         innerBridge.getBridgeContext().defaultCallHandler.registerLocalIDLMethod(clazz, scope)
     }
 
-    fun getBridgeSDKContext(): IBridgeContext {
-        return bridgeSdkContext
-    }
+    fun getBridgeSDKContext(): IBridgeContext = bridgeSdkContext
 
 //    @Deprecated("don't use this method")
-    fun getBridgeContext(): BridgeContext {
-        return innerBridge.getBridgeContext()
-    }
+    fun getBridgeContext(): BridgeContext = innerBridge.getBridgeContext()
 
     fun registerMonitor(monitor: IBridgeMonitor) {
         innerBridge.registerMonitor(monitor)
@@ -250,11 +262,17 @@ class SparklingBridge : IReleasable {
         innerBridge.getBridgeContext().jsbMockInterceptor = interceptor
     }
 
-    fun initSDKMonitor(context: Context, appInfo: BridgeSDKMonitor.APPInfo4Monitor) {
+    fun initSDKMonitor(
+        context: Context,
+        appInfo: BridgeSDKMonitor.APPInfo4Monitor,
+    ) {
         InnerBridge.initSDKMonitor(context, appInfo)
     }
 
-    fun registerLynxModule(builder: LynxViewBuilder, containerId: String?) {
+    fun registerLynxModule(
+        builder: LynxViewBuilder,
+        containerId: String?,
+    ) {
         innerBridge.registerLynxModule(builder, containerId)
     }
 
@@ -262,11 +280,17 @@ class SparklingBridge : IReleasable {
         innerBridge.registerIBridgeLifeClient(bridgeLifeClient)
     }
 
-    fun sendEvent(event: String, data: JSONObject?) {
+    fun sendEvent(
+        event: String,
+        data: JSONObject?,
+    ) {
         innerBridge.sendEvent(event, data)
     }
 
-    fun addClosedEventObserver(bridgeNames: List<String>, params: List<JSONObject?>) {
+    fun addClosedEventObserver(
+        bridgeNames: List<String>,
+        params: List<JSONObject?>,
+    ) {
         bridgeNames.forEachIndexed { index, s ->
             this.closedSubscribers.add(Pair(bridgeNames[index], params[index]))
         }
@@ -280,26 +304,27 @@ class SparklingBridge : IReleasable {
         BridgeManager.remove(this)
         bridgeSdkContext.containerID?.let {
             IDLMethodRegistryCacheManager.unregisterIDLMethodRegistryCache(
-                it
+                it,
             )
         }
     }
 
     private fun dealWithCloseEvent() {
         closedSubscribers.forEach { pair ->
-            val curPlatform = when (getBridgeContext().platform) {
-                BridgePlatformType.LYNX -> {
-                    BridgeCall.PlatForm.Lynx
-                }
+            val curPlatform =
+                when (getBridgeContext().platform) {
+                    BridgePlatformType.LYNX -> {
+                        BridgeCall.PlatForm.Lynx
+                    }
 
-                BridgePlatformType.WEB -> {
-                    BridgeCall.PlatForm.Web
-                }
+                    BridgePlatformType.WEB -> {
+                        BridgeCall.PlatForm.Web
+                    }
 
-                else -> {
-                    BridgeCall.PlatForm.Other
+                    else -> {
+                        BridgeCall.PlatForm.Other
+                    }
                 }
-            }
 
             getBridgeContext()?.dispatcher?.onDispatchBridgeMethod(
                 BridgeCall(getBridgeContext()).apply {
@@ -311,17 +336,18 @@ class SparklingBridge : IReleasable {
                 },
                 object : IBridgeCallback {
                     override fun onBridgeResult(
-                        result: BridgeResult, call: BridgeCall?,
-                        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?
+                        result: BridgeResult,
+                        call: BridgeCall?,
+                        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?,
                     ) {
                         LogUtils.d(
                             TAG,
-                            "dealWithCloseEvent, bridgeName: ${pair.first}}, result: ${result.toString()}"
+                            "dealWithCloseEvent, bridgeName: ${pair.first}}, result: $result",
                         )
                     }
                 },
                 getBridgeContext()!!,
-                null
+                null,
             )
         }
     }
@@ -335,7 +361,10 @@ internal object BridgeManager {
 
     fun attachInitListener(listener: BridgeInitListener) = listeners.add(listener)
 
-    fun insert(webView: View, sparklingBridge: SparklingBridge) {
+    fun insert(
+        webView: View,
+        sparklingBridge: SparklingBridge,
+    ) {
         map[webView.hashCode()] = sparklingBridge
         map.values.log()
         listeners.forEach {
@@ -343,9 +372,7 @@ internal object BridgeManager {
         }
     }
 
-    fun getSparklingBridge(view: View): SparklingBridge? {
-        return map[view.hashCode()]
-    }
+    fun getSparklingBridge(view: View): SparklingBridge? = map[view.hashCode()]
 
     fun remove(bridge: SparklingBridge) {
         val find = map.toList().find { it.second == bridge }
@@ -362,13 +389,21 @@ internal object BridgeManager {
      * @param containerId
      * @return
      */
-    fun insert(containerId: String, sparklingBridge: SparklingBridge) {
-
+    fun insert(
+        containerId: String,
+        sparklingBridge: SparklingBridge,
+    ) {
     }
-
 }
 
 interface BridgeInitListener {
-    fun onInit(view: View, sparklingBridge: SparklingBridge)
-    fun onInit(containerID: String, sparklingBridge: SparklingBridge) {}
+    fun onInit(
+        view: View,
+        sparklingBridge: SparklingBridge,
+    )
+
+    fun onInit(
+        containerID: String,
+        sparklingBridge: SparklingBridge,
+    ) {}
 }

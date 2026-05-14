@@ -36,7 +36,6 @@ import java.io.FileOutputStream
  * Call [register] once from Application.onCreate to wire everything up.
  */
 class AppMediaDepend : IHostMediaDepend {
-
     companion object {
         private const val TAG = "AppMediaDepend"
         private const val REQUEST_CODE_ALBUM = 0x600
@@ -66,33 +65,49 @@ class AppMediaDepend : IHostMediaDepend {
      * camera/gallery picker, and we override the activity via a fragment
      * to receive onActivityResult.
      */
-    val lifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
-        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-            // Attach a headless fragment to each SparklingActivity to receive
-            // onActivityResult and onRequestPermissionsResult callbacks.
-            if (activity.javaClass.name == "com.tiktok.sparkling.SparklingActivity") {
-                val fm = (activity as? androidx.appcompat.app.AppCompatActivity)?.supportFragmentManager ?: return
-                if (fm.findFragmentByTag(MediaResultFragment.TAG) == null) {
-                    fm.beginTransaction()
-                        .add(MediaResultFragment(this@AppMediaDepend), MediaResultFragment.TAG)
-                        .commitAllowingStateLoss()
+    val lifecycleCallbacks =
+        object : Application.ActivityLifecycleCallbacks {
+            override fun onActivityCreated(
+                activity: Activity,
+                savedInstanceState: Bundle?,
+            ) {
+                // Attach a headless fragment to each SparklingActivity to receive
+                // onActivityResult and onRequestPermissionsResult callbacks.
+                if (activity.javaClass.name == "com.tiktok.sparkling.SparklingActivity") {
+                    val fm = (activity as? androidx.appcompat.app.AppCompatActivity)?.supportFragmentManager ?: return
+                    if (fm.findFragmentByTag(MediaResultFragment.TAG) == null) {
+                        fm
+                            .beginTransaction()
+                            .add(MediaResultFragment(this@AppMediaDepend), MediaResultFragment.TAG)
+                            .commitAllowingStateLoss()
+                    }
                 }
             }
+
+            override fun onActivityStarted(activity: Activity) {}
+
+            override fun onActivityResumed(activity: Activity) {}
+
+            override fun onActivityPaused(activity: Activity) {}
+
+            override fun onActivityStopped(activity: Activity) {}
+
+            override fun onActivitySaveInstanceState(
+                activity: Activity,
+                outState: Bundle,
+            ) {}
+
+            override fun onActivityDestroyed(activity: Activity) {}
         }
-        override fun onActivityStarted(activity: Activity) {}
-        override fun onActivityResumed(activity: Activity) {}
-        override fun onActivityPaused(activity: Activity) {}
-        override fun onActivityStopped(activity: Activity) {}
-        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
-        override fun onActivityDestroyed(activity: Activity) {}
-    }
 
     /**
      * Headless fragment that receives onActivityResult and onRequestPermissionsResult.
      * This is the standard Android pattern for receiving results without modifying
      * the host Activity.
      */
-    class MediaResultFragment(private val depend: AppMediaDepend) : androidx.fragment.app.Fragment() {
+    class MediaResultFragment(
+        private val depend: AppMediaDepend,
+    ) : androidx.fragment.app.Fragment() {
         companion object {
             const val TAG = "MediaResultFragment"
         }
@@ -100,18 +115,30 @@ class AppMediaDepend : IHostMediaDepend {
         // No-arg constructor required by the framework for re-creation
         constructor() : this(AppMediaDepend())
 
-        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        override fun onActivityResult(
+            requestCode: Int,
+            resultCode: Int,
+            data: Intent?,
+        ) {
             super.onActivityResult(requestCode, resultCode, data)
             depend.handleActivityResult(requestCode, resultCode, data)
         }
 
-        override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        override fun onRequestPermissionsResult(
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray,
+        ) {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults)
             depend.handlePermissionResult(requestCode, permissions, grantResults)
         }
     }
 
-    fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    fun handleActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?,
+    ) {
         if (requestCode != REQUEST_CODE_ALBUM && requestCode != REQUEST_CODE_CAMERA) return
         val callback = pendingCallback ?: return
         val params = pendingParams ?: return
@@ -136,7 +163,11 @@ class AppMediaDepend : IHostMediaDepend {
         }
     }
 
-    fun handlePermissionResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    fun handlePermissionResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
         if (requestCode != REQUEST_CODE_CAMERA_PERMISSION) return
         val activity = pendingContext as? Activity
         val callback = pendingCallback
@@ -154,7 +185,12 @@ class AppMediaDepend : IHostMediaDepend {
         }
     }
 
-    private fun handleAlbumResult(data: Intent?, params: ChooseMediaParams, callback: IChooseMediaResultCallback, context: Context) {
+    private fun handleAlbumResult(
+        data: Intent?,
+        params: ChooseMediaParams,
+        callback: IChooseMediaResultCallback,
+        context: Context,
+    ) {
         val uri = data?.data
         if (uri == null) {
             callback.onFailure(-1, "No media selected")
@@ -163,7 +199,11 @@ class AppMediaDepend : IHostMediaDepend {
         processUri(uri, params, callback, context)
     }
 
-    private fun handleCameraResult(params: ChooseMediaParams, callback: IChooseMediaResultCallback, context: Context) {
+    private fun handleCameraResult(
+        params: ChooseMediaParams,
+        callback: IChooseMediaResultCallback,
+        context: Context,
+    ) {
         val file = cameraOutputFile
         if (file == null || !file.exists()) {
             callback.onFailure(-1, "Camera capture failed")
@@ -172,7 +212,12 @@ class AppMediaDepend : IHostMediaDepend {
         processUri(Uri.fromFile(file), params, callback, context)
     }
 
-    private fun processUri(uri: Uri, params: ChooseMediaParams, callback: IChooseMediaResultCallback, context: Context) {
+    private fun processUri(
+        uri: Uri,
+        params: ChooseMediaParams,
+        callback: IChooseMediaResultCallback,
+        context: Context,
+    ) {
         val inputStream = context.contentResolver.openInputStream(uri)
         if (inputStream == null) {
             callback.onFailure(-1, "Cannot read file")
@@ -186,11 +231,12 @@ class AppMediaDepend : IHostMediaDepend {
         inputStream.close()
 
         val mediaType = if (params.mediaTypes.contains("video")) "video" else "image"
-        val fileInfo = ChooseMediaResults.FileInfo(
-            tempFilePath = tempFile.absolutePath,
-            size = tempFile.length(),
-            mediaType = mediaType
-        )
+        val fileInfo =
+            ChooseMediaResults.FileInfo(
+                tempFilePath = tempFile.absolutePath,
+                size = tempFile.length(),
+                mediaType = mediaType,
+            )
         fileInfo.mimeType = context.contentResolver.getType(uri)
 
         if (params.needBase64Data && mediaType == "image") {
@@ -213,7 +259,11 @@ class AppMediaDepend : IHostMediaDepend {
         callback.onSuccess(results, "ok")
     }
 
-    override fun handleJsInvoke(context: Context, params: ChooseMediaParams, callback: IChooseMediaResultCallback) {
+    override fun handleJsInvoke(
+        context: Context,
+        params: ChooseMediaParams,
+        callback: IChooseMediaResultCallback,
+    ) {
         val activity = context as? Activity
         if (activity == null) {
             callback.onFailure(-1, "Context is not an Activity, it is: ${context.javaClass.name}")
@@ -232,11 +282,12 @@ class AppMediaDepend : IHostMediaDepend {
                 val intent = Intent(Intent.ACTION_PICK)
                 val hasVideo = params.mediaTypes.contains("video")
                 val hasImage = params.mediaTypes.contains("image")
-                intent.type = when {
-                    hasVideo && hasImage -> "*/*"
-                    hasVideo -> "video/*"
-                    else -> "image/*"
-                }
+                intent.type =
+                    when {
+                        hasVideo && hasImage -> "*/*"
+                        hasVideo -> "video/*"
+                        else -> "image/*"
+                    }
                 if (hasVideo && hasImage) {
                     intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
                 }
@@ -246,6 +297,7 @@ class AppMediaDepend : IHostMediaDepend {
                     activity.startActivityForResult(intent, REQUEST_CODE_ALBUM)
                 }
             }
+
             "camera" -> {
                 // Check runtime camera permission before launching
                 if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -258,6 +310,7 @@ class AppMediaDepend : IHostMediaDepend {
                     launchCameraIntent(activity, params, callback)
                 }
             }
+
             else -> {
                 pendingCallback = null
                 pendingParams = null
@@ -272,7 +325,11 @@ class AppMediaDepend : IHostMediaDepend {
         return appCompatActivity.supportFragmentManager.findFragmentByTag(MediaResultFragment.TAG) as? MediaResultFragment
     }
 
-    private fun launchCameraIntent(activity: Activity, params: ChooseMediaParams, callback: IChooseMediaResultCallback) {
+    private fun launchCameraIntent(
+        activity: Activity,
+        params: ChooseMediaParams,
+        callback: IChooseMediaResultCallback,
+    ) {
         try {
             val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
             val cacheDir = File(activity.cacheDir, "sparkling_media")
@@ -280,11 +337,12 @@ class AppMediaDepend : IHostMediaDepend {
             val outputFile = File(cacheDir, "camera_${System.currentTimeMillis()}.jpg")
             cameraOutputFile = outputFile
 
-            val photoUri = FileProvider.getUriForFile(
-                activity,
-                "${activity.packageName}.fileprovider",
-                outputFile
-            )
+            val photoUri =
+                FileProvider.getUriForFile(
+                    activity,
+                    "${activity.packageName}.fileprovider",
+                    outputFile,
+                )
             intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
 
             if (params.cameraType.lowercase() == "front") {

@@ -10,18 +10,14 @@ object SparklingContextTransferStation {
         sparklingContextMap[context.containerId] = context
     }
 
-    fun getSparklingContext(containerId: String?): SparklingContext? {
-        return sparklingContextMap[containerId]
-    }
+    fun getSparklingContext(containerId: String?): SparklingContext? = sparklingContextMap[containerId]
 
     fun releaseSparklingContext(containerId: String?) {
         sparklingContextMap.remove(containerId)
     }
 
-
     @JvmStatic
     internal fun clearAllContexts() {
         sparklingContextMap.clear()
     }
-
 }

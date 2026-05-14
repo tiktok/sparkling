@@ -16,21 +16,27 @@ import com.tiktok.sparkling.method.storage.utils.NativeProviderFactory
 import java.util.Date
 
 class StorageGetItemMethod : AbsStorageGetItemMethodIDL() {
-
-    override fun handle(params: IDLMethodGetStorageItemParamModel, callback: CompletionBlock<IDLMethodGetStorageItemResultModel>, type: BridgePlatformType) {
+    override fun handle(
+        params: IDLMethodGetStorageItemParamModel,
+        callback: CompletionBlock<IDLMethodGetStorageItemResultModel>,
+        type: BridgePlatformType,
+    ) {
         val context = BridgeBaseRuntime.applicationContext
         context ?: return callback.onFailure(IDLBridgeMethod.FAIL, "Context not provided in host")
 
-        val key = params.key.ifEmpty {
-            return callback.onFailure(IDLBridgeMethod.INVALID_PARAM, "Key in the params is empty")
-        }
+        val key =
+            params.key.ifEmpty {
+                return callback.onFailure(IDLBridgeMethod.INVALID_PARAM, "Key in the params is empty")
+            }
         val biz = params.biz ?: ""
         try {
             var value =
                 NativeProviderFactory.providerNativeStorage(context).tryGetBizStorageItem(biz, key)
 
-            val validTime = NativeProviderFactory.providerNativeStorage(context)
-                .tryGetBizStorageItem(biz, key + STORAGE_ITEM_TIME_SUFFIX)
+            val validTime =
+                NativeProviderFactory
+                    .providerNativeStorage(context)
+                    .tryGetBizStorageItem(biz, key + STORAGE_ITEM_TIME_SUFFIX)
             if (validTime is String && !checkStorageAvailiable(validTime)) {
                 value = null
                 StorageRemoveItemMethod.Companion.removeStorage(context, biz, key)
@@ -39,14 +45,16 @@ class StorageGetItemMethod : AbsStorageGetItemMethodIDL() {
             val isPiperData = true
             callback.onSuccess(
                 IDLMethodGetStorageItemResultModel::class.java.createXModel().apply {
-                    this.data = value.let {
-                        if (isPiperData && it !is String) {
-                            PiperData.createDisposableFromObject(it)
-                        } else {
-                            it
+                    this.data =
+                        value.let {
+                            if (isPiperData && it !is String) {
+                                PiperData.createDisposableFromObject(it)
+                            } else {
+                                it
+                            }
                         }
-                    }
-                })
+                },
+            )
         } catch (e: Exception) {
             Log.e("XGetStorageItemMethod", "failed to properly getStorageItem with exception $e")
             callback.onFailure(IDLBridgeMethod.FAIL, "failed to properly getStorageItem with exception $e")
@@ -60,13 +68,12 @@ class StorageGetItemMethod : AbsStorageGetItemMethodIDL() {
         return try {
             val currentDate = Date()
             val validDate = Date(time.toLong())
-            //check
+            // check
             currentDate.before(validDate)
         } catch (e: Exception) {
             Log.e(TAG, "checkStorageAvailiable: ${e.message}")
             false
         }
-
     }
 
     companion object {

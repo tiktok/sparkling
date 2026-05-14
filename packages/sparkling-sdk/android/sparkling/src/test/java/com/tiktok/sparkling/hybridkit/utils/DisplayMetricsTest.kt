@@ -27,10 +27,9 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(
     sdk = [33],
-    packageName = "com.tiktok.sparkling"
+    packageName = "com.tiktok.sparkling",
 )
 class DisplayMetricsTest {
-
     private lateinit var context: Context
 
     @Before
@@ -47,9 +46,10 @@ class DisplayMetricsTest {
     fun testNumberDivContext() {
         val mockContext = mockk<Context>()
         val mockResources = mockk<android.content.res.Resources>()
-        val mockDisplayMetrics = DisplayMetrics().apply {
-            density = 2.0f
-        }
+        val mockDisplayMetrics =
+            DisplayMetrics().apply {
+                density = 2.0f
+            }
 
         every { mockContext.resources } returns mockResources
         every { mockResources.displayMetrics } returns mockDisplayMetrics
@@ -62,9 +62,10 @@ class DisplayMetricsTest {
     fun testNumberDivContextWithDifferentDensity() {
         val mockContext = mockk<Context>()
         val mockResources = mockk<android.content.res.Resources>()
-        val mockDisplayMetrics = DisplayMetrics().apply {
-            density = 3.0f
-        }
+        val mockDisplayMetrics =
+            DisplayMetrics().apply {
+                density = 3.0f
+            }
 
         every { mockContext.resources } returns mockResources
         every { mockResources.displayMetrics } returns mockDisplayMetrics
@@ -77,9 +78,10 @@ class DisplayMetricsTest {
     fun testNumberDivContextWithFloat() {
         val mockContext = mockk<Context>()
         val mockResources = mockk<android.content.res.Resources>()
-        val mockDisplayMetrics = DisplayMetrics().apply {
-            density = 2.5f
-        }
+        val mockDisplayMetrics =
+            DisplayMetrics().apply {
+                density = 2.5f
+            }
 
         every { mockContext.resources } returns mockResources
         every { mockResources.displayMetrics } returns mockDisplayMetrics
@@ -92,9 +94,9 @@ class DisplayMetricsTest {
     fun testStatusBarHeightExtension() {
         mockkObject(DevicesUtil)
         val mockContext = mockk<Context>()
-        
+
         every { DevicesUtil.getStatusBarHeight(mockContext) } returns 48
-        
+
         // Note: We can't directly test the extension property on a mock,
         // but we can verify DevicesUtil.getStatusBarHeight works
         val statusBarHeight = DevicesUtil.getStatusBarHeight(mockContext)
@@ -106,9 +108,10 @@ class DisplayMetricsTest {
         mockkObject(DevicesUtil)
         val mockContext = mockk<Context>()
         val mockResources = mockk<android.content.res.Resources>()
-        val mockDisplayMetrics = DisplayMetrics().apply {
-            density = 2.0f
-        }
+        val mockDisplayMetrics =
+            DisplayMetrics().apply {
+                density = 2.0f
+            }
 
         every { mockContext.resources } returns mockResources
         every { mockResources.displayMetrics } returns mockDisplayMetrics
@@ -117,7 +120,7 @@ class DisplayMetricsTest {
         // Test the conversion: 48px / 2.0 density = 24dp
         val statusBarHeightPx = DevicesUtil.getStatusBarHeight(mockContext)
         val statusBarHeightDp = statusBarHeightPx / mockContext
-        
+
         assertEquals(24.0, statusBarHeightDp, 0.01)
     }
 
@@ -127,10 +130,11 @@ class DisplayMetricsTest {
         val mockWindow = mockk<Window>()
         val mockDecorView = mockk<View>()
         val mockResources = mockk<android.content.res.Resources>()
-        val mockDisplayMetrics = DisplayMetrics().apply {
-            density = 2.0f
-            heightPixels = 1920
-        }
+        val mockDisplayMetrics =
+            DisplayMetrics().apply {
+                density = 2.0f
+                heightPixels = 1920
+            }
 
         every { mockActivity.resources } returns mockResources
         every { mockResources.displayMetrics } returns mockDisplayMetrics
@@ -147,7 +151,7 @@ class DisplayMetricsTest {
         // Calculate expected: bottom (1920) / density (2.0) - statusBarHeightDp (24) = 960 - 24 = 936
         val statusBarHeightDp = 48 / mockActivity
         val expectedSafeArea = 1920 / mockActivity - statusBarHeightDp
-        
+
         assertEquals(936.0, expectedSafeArea, 0.01)
     }
 
@@ -155,10 +159,11 @@ class DisplayMetricsTest {
     fun testSafeAreaHeightFallbackToScreenHeight() {
         val mockActivity = mockk<Activity>()
         val mockResources = mockk<android.content.res.Resources>()
-        val mockDisplayMetrics = DisplayMetrics().apply {
-            density = 2.0f
-            heightPixels = 1920
-        }
+        val mockDisplayMetrics =
+            DisplayMetrics().apply {
+                density = 2.0f
+                heightPixels = 1920
+            }
 
         every { mockActivity.resources } returns mockResources
         every { mockResources.displayMetrics } returns mockDisplayMetrics
@@ -172,7 +177,7 @@ class DisplayMetricsTest {
         val statusBarHeightDp = 48 / mockActivity
         val fallbackHeight = mockDisplayMetrics.heightPixels / mockActivity
         val expectedSafeArea = fallbackHeight - statusBarHeightDp
-        
+
         assertEquals(936.0, expectedSafeArea, 0.01)
     }
 
@@ -180,9 +185,10 @@ class DisplayMetricsTest {
     fun testDivisionOperatorWithZeroDensity() {
         val mockContext = mockk<Context>()
         val mockResources = mockk<android.content.res.Resources>()
-        val mockDisplayMetrics = DisplayMetrics().apply {
-            density = 0.0f // Edge case
-        }
+        val mockDisplayMetrics =
+            DisplayMetrics().apply {
+                density = 0.0f // Edge case
+            }
 
         every { mockContext.resources } returns mockResources
         every { mockResources.displayMetrics } returns mockDisplayMetrics
@@ -195,9 +201,10 @@ class DisplayMetricsTest {
     fun testDivisionOperatorWithNegativeNumber() {
         val mockContext = mockk<Context>()
         val mockResources = mockk<android.content.res.Resources>()
-        val mockDisplayMetrics = DisplayMetrics().apply {
-            density = 2.0f
-        }
+        val mockDisplayMetrics =
+            DisplayMetrics().apply {
+                density = 2.0f
+            }
 
         every { mockContext.resources } returns mockResources
         every { mockResources.displayMetrics } returns mockDisplayMetrics

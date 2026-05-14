@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core.model.idl
 
 import androidx.annotation.Keep
@@ -14,24 +13,20 @@ import org.json.JSONObject
  */
 @Keep
 interface IDLMethodBaseModel {
-
     /**
      * Serialize param model to JSONObject
      * @return JSONObject after performing serialization
      */
     @Keep
     fun toJSON(): JSONObject
+
     @Keep
     @Throws(IDLMethodException::class)
     fun convert(): Map<String, Any>?
 
     class Default : IDLMethodBaseModel {
-        override fun toJSON(): JSONObject {
-            return JSONObject()
-        }
+        override fun toJSON(): JSONObject = JSONObject()
 
-        override fun convert(): Map<String, Any>? {
-            return mapOf()
-        }
+        override fun convert(): Map<String, Any>? = mapOf()
     }
 }

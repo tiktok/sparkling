@@ -27,7 +27,6 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.ExecutorService
 
-
 class SaveDataURLMethod : AbsSaveDataURLMethodIDL() {
     private val FORMAT_JPG = "jpg"
     private val FORMAT_PNG = "png"
@@ -35,78 +34,79 @@ class SaveDataURLMethod : AbsSaveDataURLMethodIDL() {
     private val MIME_TYPE_IMAGE_JPEG = "image/jpeg"
     private val MIME_TYPE_IMAGE_PNG = "image/png"
 
-    private fun getPermissionDependInstance(bridgeContext: IBridgeContext): IHostPermissionDepend? {
-        return CommonDependsProvider.hostPermissionDepend
-    }
+    private fun getPermissionDependInstance(bridgeContext: IBridgeContext): IHostPermissionDepend? = CommonDependsProvider.hostPermissionDepend
 
-    private fun getExecutorService(): ExecutorService {
-        return ThreadPool.getExecutorService()
-    }
+    private fun getExecutorService(): ExecutorService = ThreadPool.getExecutorService()
 
     override fun handle(
         params: SaveDataURLInputModel,
         callback: CompletionBlock<SaveDataURLResultModel>,
-        type: BridgePlatformType
+        type: BridgePlatformType,
     ) {
         val bridgeContext = getSDKContext()
-        val context = bridgeContext?.context ?: return callback.onFailure(
-            IDLBridgeMethod.FAIL,
-            "Context not provided in host"
-        )
-        val activity = IDLMethodHelper.getActivity(context) ?: return callback.onFailure(
-            IDLBridgeMethod.FAIL, "context can not convert to activity"
-        )
+        val context =
+            bridgeContext?.context ?: return callback.onFailure(
+                IDLBridgeMethod.FAIL,
+                "Context not provided in host",
+            )
+        val activity =
+            IDLMethodHelper.getActivity(context) ?: return callback.onFailure(
+                IDLBridgeMethod.FAIL,
+                "context can not convert to activity",
+            )
         if (params.dataURL.isEmpty()) {
             return callback.onFailure(IDLBridgeMethod.INVALID_PARAM, "The dataURL key is required.")
         }
         if (params.extension.isEmpty()) {
             return callback.onFailure(
                 IDLBridgeMethod.INVALID_PARAM,
-                "The extension key is required."
+                "The extension key is required.",
             )
         }
         if (params.filename.isEmpty()) {
             return callback.onFailure(
                 IDLBridgeMethod.INVALID_PARAM,
-                "The filename key is required."
+                "The filename key is required.",
             )
         }
         if (!params.dataURL.startsWith("data:")) {
             return callback.onFailure(IDLBridgeMethod.INVALID_PARAM, "dataURL invalid")
         }
 
-        val realPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_IMAGES
-        } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        }
+        val realPermission =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Manifest.permission.READ_MEDIA_IMAGES
+            } else {
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            }
 
         if (getPermissionDependInstance(bridgeContext)?.hasPermission(
                 activity,
-                realPermission
+                realPermission,
             ) == true
         ) {
             handleSaveDataURL(context, params, callback)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-            && getPermissionDependInstance(bridgeContext)?.hasPermission(
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+            getPermissionDependInstance(bridgeContext)?.hasPermission(
                 activity,
-                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
             ) == true
         ) {
             handleSaveDataURL(context, params, callback)
         } else {
             getPermissionDependInstance(bridgeContext)?.requestPermissions(
-                activity, object : OnPermissionsGrantCallback {
+                activity,
+                object : OnPermissionsGrantCallback {
                     override fun onResult(onPermissionsGrantResults: Array<OnPermissionsGrantResult>) {
-                        if (onPermissionsGrantResults.isNotEmpty()
-                            && onPermissionsGrantResults[0].result == PackageManager.PERMISSION_GRANTED
+                        if (onPermissionsGrantResults.isNotEmpty() &&
+                            onPermissionsGrantResults[0].result == PackageManager.PERMISSION_GRANTED
                         ) {
                             handleSaveDataURL(context, params, callback)
-                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-                            && onPermissionsGrantResults.size == 2
-                            && getPermissionDependInstance(bridgeContext)?.hasPermission(
+                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE &&
+                            onPermissionsGrantResults.size == 2 &&
+                            getPermissionDependInstance(bridgeContext)?.hasPermission(
                                 activity,
-                                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
                             ) == true
                         ) {
                             handleSaveDataURL(context, params, callback)
@@ -114,17 +114,19 @@ class SaveDataURLMethod : AbsSaveDataURLMethodIDL() {
                             callback.onFailure(IDLBridgeMethod.FAIL, "request permission denied")
                         }
                     }
-                }, arrayOf(
+                },
+                arrayOf(
                     realPermission,
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED else null
-                ).filterNotNull().toTypedArray()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED else null,
+                ).filterNotNull().toTypedArray(),
             )
         }
     }
 
     fun handleSaveDataURL(
-        context: Context, params: SaveDataURLInputModel,
-        callback: CompletionBlock<SaveDataURLResultModel>
+        context: Context,
+        params: SaveDataURLInputModel,
+        callback: CompletionBlock<SaveDataURLResultModel>,
     ) {
         val dataURL = params.dataURL
         var base64 = ""
@@ -137,10 +139,11 @@ class SaveDataURLMethod : AbsSaveDataURLMethodIDL() {
             return callback.onFailure(IDLBridgeMethod.INVALID_PARAM)
         }
         val extension = params.extension
-        val fileName = "${params.filename}.${extension}"
+        val fileName = "${params.filename}.$extension"
         val saveFolder =
             BDMediaFileUtils.getCacheDir(context)?.absolutePath ?: return callback.onFailure(
-                IDLBridgeMethod.FAIL, "cacheDir is null"
+                IDLBridgeMethod.FAIL,
+                "cacheDir is null",
             )
         val file = File(saveFolder, fileName)
         val filePath = file.absolutePath
@@ -169,12 +172,13 @@ class SaveDataURLMethod : AbsSaveDataURLMethodIDL() {
                     fileOutputStream.flush()
                     if (params.saveToAlbum != null) {
                         if (params.saveToAlbum == "image") {
-                            val uri = BDMediaFileUtils.copyFileToGallery(
-                                context,
-                                filePath,
-                                true,
-                                mimeType
-                            )
+                            val uri =
+                                BDMediaFileUtils.copyFileToGallery(
+                                    context,
+                                    filePath,
+                                    true,
+                                    mimeType,
+                                )
                             if (uri != null) {
                                 ThreadPool.runInMain {
                                     callback.onSuccess(SaveDataURLResultModel::class.createXModel())
@@ -193,15 +197,18 @@ class SaveDataURLMethod : AbsSaveDataURLMethodIDL() {
                         }
                     } else {
                         ThreadPool.runInMain {
-                            callback.onSuccess(SaveDataURLResultModel::class.createXModel().apply {
-                                this.filePath = filePath
-                            })
+                            callback.onSuccess(
+                                SaveDataURLResultModel::class.createXModel().apply {
+                                    this.filePath = filePath
+                                },
+                            )
                         }
                     }
                 } catch (e: Exception) {
                     ThreadPool.runInMain {
                         callback.onFailure(
-                            IDLBridgeMethod.FAIL, e.message ?: "store file exception"
+                            IDLBridgeMethod.FAIL,
+                            e.message ?: "store file exception",
                         )
                     }
                 } finally {
@@ -220,12 +227,10 @@ class SaveDataURLMethod : AbsSaveDataURLMethodIDL() {
         return BitmapFactory.decodeByteArray(decode, 0, decode.size)
     }
 
-    private fun getMimeTypeByExtension(extension: String): String {
-        return when (extension) {
+    private fun getMimeTypeByExtension(extension: String): String =
+        when (extension) {
             FORMAT_JPG -> MIME_TYPE_IMAGE_JPEG
             FORMAT_PNG -> MIME_TYPE_IMAGE_PNG
             else -> FORMAT_NONSUPPORT_TYPE
         }
-    }
-
 }

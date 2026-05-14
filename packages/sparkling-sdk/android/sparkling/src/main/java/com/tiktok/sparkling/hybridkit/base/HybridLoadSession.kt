@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.hybridkit.base
 
 import com.tiktok.sparkling.hybridkit.utils.GsonUtils
@@ -74,19 +73,15 @@ class HybridLoadSession {
 
     var pluginInfos = mutableMapOf<String, Long>()
 
-    override fun toString(): String {
-        return SnapShot(loadSession = this).toString()
-    }
+    override fun toString(): String = SnapShot(loadSession = this).toString()
 
-    fun toJSONObject(): JSONObject {
-        return SnapShot(loadSession = this).toJSONObject()
-    }
+    fun toJSONObject(): JSONObject = SnapShot(loadSession = this).toJSONObject()
 
-    fun Long?.value() : Long {
-        return this ?: 0L
-    }
+    fun Long?.value(): Long = this ?: 0L
 
-    class SnapShot(loadSession: HybridLoadSession) {
+    class SnapShot(
+        loadSession: HybridLoadSession,
+    ) {
         init {
             loadSession.apply {
                 total = loadEngineEnd.value() - openTime.value()
@@ -103,7 +98,7 @@ class HybridLoadSession {
                 prepareGlobalPropsCost = prepareGlobalPropsEnd.value() - prepareGlobalPropsStart.value()
                 prepareComponentEnd2PrepareTemplateStart = prepareTemplateStart.value() - prepareComponentEnd.value()
                 sparkContainerCost = loadEngineStart.value() - openTime.value() - lynxViewInitCost - prepareComponentEnd2PrepareTemplateStart
-                prepareExtraInfoCost  = prepareExtraInfoEnd.value() - prepareExtraInfoStart.value()
+                prepareExtraInfoCost = prepareExtraInfoEnd.value() - prepareExtraInfoStart.value()
                 customInitCost = customInitEnd.value() - customInitStart.value()
                 pluginInfoStr = GsonUtils.toJson(pluginInfos)
             }
@@ -127,17 +122,15 @@ class HybridLoadSession {
         private var prepareComponentEnd2PrepareTemplateStart = 0L
         private var pluginInfoStr: String? = null
 
-        override fun toString(): String {
-            return "total = $total , init2StartRender = $init2StartRender, renderCost = $renderCost, prepareTemplateCost = $prepareTemplateCost, " +
-                    "prepareJSBCost = $prepareJSBCost, preparePluginExecuteCost = $preparePluginExecuteCost, prepareFontCost = $prepareFontCost, " +
-                    "sparkContainerCost = $sparkContainerCost, lynxCost = $lynxCost, lynxViewInitCost = $lynxViewInitCost, prepareInitDataCost = $prepareInitDataCost, " +
-                    "prepareComponentCost = $prepareComponentCost, prepareGlobalPropsCost = $prepareGlobalPropsCost, prepareComponentEnd2PrepareTemplateStart = $prepareComponentEnd2PrepareTemplateStart, " +
-                    "customInitCost = $customInitCost, prepareExtraInfoCost = $prepareExtraInfoCost, pluginInfos = $pluginInfoStr"
+        override fun toString(): String =
+            "total = $total , init2StartRender = $init2StartRender, renderCost = $renderCost, prepareTemplateCost = $prepareTemplateCost, " +
+                "prepareJSBCost = $prepareJSBCost, preparePluginExecuteCost = $preparePluginExecuteCost, prepareFontCost = $prepareFontCost, " +
+                "sparkContainerCost = $sparkContainerCost, lynxCost = $lynxCost, lynxViewInitCost = $lynxViewInitCost, prepareInitDataCost = $prepareInitDataCost, " +
+                "prepareComponentCost = $prepareComponentCost, prepareGlobalPropsCost = $prepareGlobalPropsCost, prepareComponentEnd2PrepareTemplateStart = $prepareComponentEnd2PrepareTemplateStart, " +
+                "customInitCost = $customInitCost, prepareExtraInfoCost = $prepareExtraInfoCost, pluginInfos = $pluginInfoStr"
 
-        }
-
-        fun toJSONObject(): JSONObject {
-            return JSONObject().apply {
+        fun toJSONObject(): JSONObject =
+            JSONObject().apply {
                 put("total", total)
                 put("init2StartRender", init2StartRender)
                 put("renderCost", renderCost)
@@ -156,9 +149,5 @@ class HybridLoadSession {
                 put("customInitCost", customInitCost)
                 put("pluginInfos", pluginInfoStr)
             }
-        }
-
     }
-
 }
-

@@ -21,14 +21,12 @@ import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseResultMo
  */
 
 abstract class AbsChooseMediaMethodIDL : AbsSparklingIDLMethod<AbsChooseMediaMethodIDL.ChooseMediaInputModel, AbsChooseMediaMethodIDL.ChooseMediaResultModel>() {
-
     @IDLMethodName(name = "media.chooseMedia", params = ["maxCount", "mediaTypes", "sourceType", "cameraType", "compressImage", "saveToPhotoAlbum", "isNeedCut", "cropRatioWidth", "cropRatioHeight", "needBase64Data", "compressOption", "compressWidth", "compressHeight", "permissionDenyAction", "isMultiSelect", "useNewCompressSolution", "shouldKeepOriginalFormat", "compressQuality"], results = ["tempFiles"])
     final override val name: String = "media.chooseMedia"
 
-
     @IDLMethodParamModel
     interface ChooseMediaInputModel : IDLMethodBaseParamModel {
-        companion object{
+        companion object {
             const val ChooseMediaMediaTypesImage = "image"
             const val ChooseMediaMediaTypesVideo = "video"
             const val ChooseMediaSourceTypeAlbum = "album"
@@ -106,15 +104,14 @@ abstract class AbsChooseMediaMethodIDL : AbsSparklingIDLMethod<AbsChooseMediaMet
     }
 
     @IDLMethodResultModel
-    interface ChooseMediaResultModel: IDLMethodBaseResultModel {
-
+    interface ChooseMediaResultModel : IDLMethodBaseResultModel {
         @get:IDLMethodParamField(required = true, isGetter = true, keyPath = "tempFiles", nestedClassType = BridgeBeanChooseMediaTempFiles::class)
         @set:IDLMethodParamField(required = true, isGetter = false, keyPath = "tempFiles", nestedClassType = BridgeBeanChooseMediaTempFiles::class)
         var tempFiles: List<BridgeBeanChooseMediaTempFiles>?
     }
 
     interface BridgeBeanChooseMediaTempFiles : IDLMethodBaseModel {
-        companion object{
+        companion object {
             const val ChooseMediaMediaTypeImage = "image"
             const val ChooseMediaMediaTypeVideo = "video"
         }

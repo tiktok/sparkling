@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core.base
 
 import android.webkit.WebView
@@ -31,7 +30,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class AbsSparklingIDLMethodTest {
-
     private lateinit var testMethod: TestSparklingIDLMethod
     private lateinit var mockBridgeContext: IBridgeContext
     private lateinit var mockContextFactory: ContextProviderFactory
@@ -118,10 +116,11 @@ class AbsSparklingIDLMethodTest {
     @Test
     fun testOnSuccessWithOriginalResult() {
         // Given
-        val testData = mutableMapOf<String, Any>(
-            "key1" to "value1",
-            IDLBridgeMethod.ORIGINAL_RESULT to mapOf("original" to "data")
-        )
+        val testData =
+            mutableMapOf<String, Any>(
+                "key1" to "value1",
+                IDLBridgeMethod.ORIGINAL_RESULT to mapOf("original" to "data"),
+            )
         val msg = "Success message"
         testMethod.useOriginalResultOverride = true
 
@@ -147,7 +146,7 @@ class AbsSparklingIDLMethodTest {
         testMethod.onSuccess(mockCallback, testData, msg)
 
         // Then
-        verify { 
+        verify {
             mockCallback.invoke(any())
         }
     }
@@ -155,9 +154,10 @@ class AbsSparklingIDLMethodTest {
     @Test
     fun testOnFailureWithOriginalResult() {
         // Given
-        val testData = mutableMapOf<String, Any>(
-            IDLBridgeMethod.ORIGINAL_RESULT to mapOf("error" to "details")
-        )
+        val testData =
+            mutableMapOf<String, Any>(
+                IDLBridgeMethod.ORIGINAL_RESULT to mapOf("error" to "details"),
+            )
         val code = 500
         val msg = "Error message"
         testMethod.useOriginalResultOverride = true
@@ -185,7 +185,7 @@ class AbsSparklingIDLMethodTest {
         testMethod.onFailure(mockCallback, code, msg, testData)
 
         // Then
-        verify { 
+        verify {
             mockCallback.invoke(any())
         }
     }
@@ -270,7 +270,11 @@ class AbsSparklingIDLMethodTest {
         override val name: String = "testMethod"
         override val useOriginalResult: Boolean get() = useOriginalResultOverride
 
-        override fun handle(params: TestParamModel, callback: CompletionBlock<TestResultModel>, type: BridgePlatformType) {
+        override fun handle(
+            params: TestParamModel,
+            callback: CompletionBlock<TestResultModel>,
+            type: BridgePlatformType,
+        ) {
             handleInvoked = true
             callback.onSuccess(TestResultModel(), "Success")
         }
@@ -279,29 +283,23 @@ class AbsSparklingIDLMethodTest {
         interface TestParamModel : IDLMethodBaseParamModel {
             @get:IDLMethodParamField(keyPath = "param1")
             val param1: String?
-            
-            override fun toJSON(): JSONObject {
-                return JSONObject().apply {
+
+            override fun toJSON(): JSONObject =
+                JSONObject().apply {
                     put("param1", param1)
                 }
-            }
 
-            override fun convert(): Map<String, Any>? {
-                return mapOf("param1" to (param1 ?: ""))
-            }
+            override fun convert(): Map<String, Any>? = mapOf("param1" to (param1 ?: ""))
         }
 
         @IDLMethodResultModel
         class TestResultModel : IDLMethodBaseResultModel {
-            override fun convert(): MutableMap<String, Any>? {
-                return mutableMapOf("result" to "success")
-            }
+            override fun convert(): MutableMap<String, Any>? = mutableMapOf("result" to "success")
 
-            override fun toJSON(): JSONObject {
-                return JSONObject().apply {
+            override fun toJSON(): JSONObject =
+                JSONObject().apply {
                     put("result", "success")
                 }
-            }
         }
     }
 }

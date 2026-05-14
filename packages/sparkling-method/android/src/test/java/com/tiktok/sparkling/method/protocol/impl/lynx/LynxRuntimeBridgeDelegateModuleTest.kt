@@ -11,7 +11,6 @@ import org.junit.Test
 import org.mockito.Mockito
 
 class LynxRuntimeBridgeDelegateModuleTest {
-
     private lateinit var lynxRuntimeBridgeDelegateModule: LynxRuntimeBridgeDelegateModule
     private val mockContext = Mockito.mock(Context::class.java)
     private val mockObj = Mockito.mock(Any::class.java)

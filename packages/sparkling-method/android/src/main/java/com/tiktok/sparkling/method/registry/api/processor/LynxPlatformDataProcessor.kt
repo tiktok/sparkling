@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.api.processor
 
 import com.tiktok.sparkling.method.registry.api.Utils
@@ -26,13 +25,15 @@ import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
 class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
-
-    var context : IBridgeContext? = null
+    var context: IBridgeContext? = null
 
     override fun matchPlatformType(platformType: BridgePlatformType) = platformType == BridgePlatformType.LYNX
 
     @Throws(IllegalInputParamException::class)
-    override fun transformPlatformDataToMap(params: ReadableMap, clazz: Class<out IDLBridgeMethod>): Map<String, Any?>? {
+    override fun transformPlatformDataToMap(
+        params: ReadableMap,
+        clazz: Class<out IDLBridgeMethod>,
+    ): Map<String, Any?>? {
         val pool = (IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(context?.containerID))?.BRIDGE_ANNOTATION_MAP?.get(clazz)
         return if (pool != null) {
             LynxDataProcessorForMap.getJavaOnlyMapParams(params.toHashMap(), pool)
@@ -43,7 +44,10 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
         }
     }
 
-    private fun getJavaOnlyMapParams(params: HashMap<String, Any>, clazz: Class<out IDLMethodBaseParamModel>): Map<String, Any?>? {
+    private fun getJavaOnlyMapParams(
+        params: HashMap<String, Any>,
+        clazz: Class<out IDLMethodBaseParamModel>,
+    ): Map<String, Any?>? {
         val classMap = preCheck(clazz, params) ?: return null
         return params.mapValues {
             val annotation = classMap[it.key]?.second
@@ -53,7 +57,10 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
     }
 
     @Throws(IllegalInputParamException::class)
-    private fun proxyValue(clazz: Class<out IDLMethodBaseModel>?, map: HashMap<String, Any>): Any? {
+    private fun proxyValue(
+        clazz: Class<out IDLMethodBaseModel>?,
+        map: HashMap<String, Any>,
+    ): Any? {
         if (clazz == null) return null
         preCheck(clazz, map) ?: return null
         return Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz)) { _, method, _ ->
@@ -70,20 +77,27 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
         }
     }
 
-    private fun convertValueWithAnnotation(value: Any?, annotation: IDLMethodParamField?): Any? {
-        val result = if (isNestClass(value, annotation)) {
-            proxyValue(annotation?.nestedClassType?.java, (value as ReadableMap).toHashMap()/* = java.util.HashMap<kotlin.String, kotlin.Any> */)
-        } else if (isNestListClass(value, annotation)){
-            (value as List<*>).map {
-                proxyValue(annotation?.nestedClassType?.java, (it as ReadableMap).toHashMap())
+    private fun convertValueWithAnnotation(
+        value: Any?,
+        annotation: IDLMethodParamField?,
+    ): Any? {
+        val result =
+            if (isNestClass(value, annotation)) {
+                proxyValue(annotation?.nestedClassType?.java, (value as ReadableMap).toHashMap()/* = java.util.HashMap<kotlin.String, kotlin.Any> */)
+            } else if (isNestListClass(value, annotation)) {
+                (value as List<*>).map {
+                    proxyValue(annotation?.nestedClassType?.java, (it as ReadableMap).toHashMap())
+                }
+            } else {
+                Utils.getValue(value)
             }
-        } else {
-            Utils.getValue(value)
-        }
         return result
     }
 
-    private fun checkValue(classMap: HashMap<String, Pair<Method, IDLMethodParamField>>, params: HashMap<String, Any>) {
+    private fun checkValue(
+        classMap: HashMap<String, Pair<Method, IDLMethodParamField>>,
+        params: HashMap<String, Any>,
+    ) {
         /**
          * check value
          */
@@ -97,27 +111,31 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
             when (method.returnType) {
                 String::class.java -> {
                     if (value != null && value !is String) {
-                        throw  IllegalInputParamException("${it.key} param has wrong declared type. except string,but ${value.javaClass}")
+                        throw IllegalInputParamException("${it.key} param has wrong declared type. except string,but ${value.javaClass}")
                     }
                 }
+
                 Number::class.java -> {
                     if (value != null && value !is Number) {
-                        throw  IllegalInputParamException("${it.key} param has wrong declared type. except number,but ${value.javaClass}")
+                        throw IllegalInputParamException("${it.key} param has wrong declared type. except number,but ${value.javaClass}")
                     }
                 }
+
                 java.lang.Boolean::class.java, Boolean::class.java -> {
                     if (value != null && value !is Boolean) {
-                        throw  IllegalInputParamException("${it.key} param has wrong declared type. except boolean,but ${value.javaClass}")
+                        throw IllegalInputParamException("${it.key} param has wrong declared type. except boolean,but ${value.javaClass}")
                     }
                 }
+
                 List::class.java -> {
                     if (value != null && value !is List<*>) {
-                        throw  IllegalInputParamException("${it.key} param has wrong declared type. except List ,but ${value.javaClass}")
+                        throw IllegalInputParamException("${it.key} param has wrong declared type. except List ,but ${value.javaClass}")
                     }
                 }
+
                 Map::class.java -> {
                     if (value != null && value !is Map<*, *>) {
-                        throw  IllegalInputParamException("${it.key} param has wrong declared type. except Map ,but ${value.javaClass}")
+                        throw IllegalInputParamException("${it.key} param has wrong declared type. except Map ,but ${value.javaClass}")
                     }
                 }
             }
@@ -130,6 +148,7 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
                             throw IllegalInputParamException("${it.key} has wrong type.should be one of ${option.asList()} but got $value")
                         }
                     }
+
                     Number::class.java -> {
                         val intEnum = method.getAnnotation(IDLMethodIntEnum::class.java)
                         val option = intEnum.option
@@ -137,6 +156,7 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
                             throw IllegalInputParamException("${it.key} has wrong value.should be one of ${option.asList()} but got $value")
                         }
                     }
+
                     Map::class.java -> {
                         val stringEnum = method.getAnnotation(IDLMethodStringEnum::class.java)
                         if (stringEnum != null) {
@@ -173,19 +193,28 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
         throw IllegalInputParamException("the key is not a number")
     }
 
+    private fun isNestClass(
+        value: Any?,
+        annotation: IDLMethodParamField?,
+    ) = value is Map<*, *> && annotation?.nestedClassType != IDLMethodBaseModel.Default::class
 
-    private fun isNestClass(value: Any?, annotation: IDLMethodParamField?) = value is Map<*, *> && annotation?.nestedClassType != IDLMethodBaseModel.Default::class
-    private fun isNestListClass(value: Any?, annotation: IDLMethodParamField?) = value is List<*> && annotation?.nestedClassType != IDLMethodBaseModel.Default::class
+    private fun isNestListClass(
+        value: Any?,
+        annotation: IDLMethodParamField?,
+    ) = value is List<*> && annotation?.nestedClassType != IDLMethodBaseModel.Default::class
 
-
-    private fun preCheck(clazz: Class<out IDLMethodBaseModel>?, map: HashMap<String, Any>): HashMap<String, Pair<Method, IDLMethodParamField>>? {
-        val classMap = clazz?.declaredMethods?.fold(hashMapOf<String, Pair<Method, IDLMethodParamField>>()) { _map, method ->
-            val annotation = method.getAnnotation(IDLMethodParamField::class.java)
-            if (annotation != null) {
-                _map[annotation.keyPath] = Pair<Method, IDLMethodParamField>(method, annotation)
-            }
-            _map
-        } ?: return null
+    private fun preCheck(
+        clazz: Class<out IDLMethodBaseModel>?,
+        map: HashMap<String, Any>,
+    ): HashMap<String, Pair<Method, IDLMethodParamField>>? {
+        val classMap =
+            clazz?.declaredMethods?.fold(hashMapOf<String, Pair<Method, IDLMethodParamField>>()) { _map, method ->
+                val annotation = method.getAnnotation(IDLMethodParamField::class.java)
+                if (annotation != null) {
+                    _map[annotation.keyPath] = Pair<Method, IDLMethodParamField>(method, annotation)
+                }
+                _map
+            } ?: return null
         /**
          * init default value
          */
@@ -197,18 +226,32 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
         return classMap
     }
 
-    private fun parseStringByReturnType(method: Method, annotation: IDLMethodParamField) = when (method.returnType) {
-        Number::class.java -> when (annotation.defaultValue.type) {
-            DefaultType.DOUBLE -> annotation.defaultValue.doubleValue
-            DefaultType.LONG -> annotation.defaultValue.longValue
-            DefaultType.INT -> annotation.defaultValue.intValue
-            else -> annotation.defaultValue.intValue
+    private fun parseStringByReturnType(
+        method: Method,
+        annotation: IDLMethodParamField,
+    ) = when (method.returnType) {
+        Number::class.java -> {
+            when (annotation.defaultValue.type) {
+                DefaultType.DOUBLE -> annotation.defaultValue.doubleValue
+                DefaultType.LONG -> annotation.defaultValue.longValue
+                DefaultType.INT -> annotation.defaultValue.intValue
+                else -> annotation.defaultValue.intValue
+            }
         }
-        Boolean::class.java, java.lang.Boolean::class.java -> annotation.defaultValue.boolValue
-        else -> annotation.defaultValue.stringValue
+
+        Boolean::class.java, java.lang.Boolean::class.java -> {
+            annotation.defaultValue.boolValue
+        }
+
+        else -> {
+            annotation.defaultValue.stringValue
+        }
     }
 
-    private fun getMapWithDefault(clazz: Class<out IDLMethodBaseModel>?, map: HashMap<String, Any>): HashMap<String, Any?>? {
+    private fun getMapWithDefault(
+        clazz: Class<out IDLMethodBaseModel>?,
+        map: HashMap<String, Any>,
+    ): HashMap<String, Any?>? {
         val methods = clazz?.declaredMethods?.filter { it.getAnnotation(IDLMethodParamField::class.java)?.isGetter == true }
         return methods?.fold(hashMapOf()) { acc, method ->
             val annotation = method.getAnnotation(IDLMethodParamField::class.java)
@@ -221,19 +264,21 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
                 map[annotation.keyPath] = defaultValue
             }
 
-            acc[annotation.keyPath] = if (annotation.nestedClassType != IDLMethodBaseModel.Default::class && value is ReadableMap) {
-                val nestedClassType = annotation.nestedClassType
-                getMapWithDefault(nestedClassType.java, value.toHashMap())
-            } else if (annotation.nestedClassType != IDLMethodBaseModel.Default::class && value is ReadableArray) {
-                value.toArrayList().map { getMapWithDefault(annotation.nestedClassType.java, (it as ReadableMap).toHashMap()) }
-            } else {
-                map[annotation.keyPath]
-            }
+            acc[annotation.keyPath] =
+                if (annotation.nestedClassType != IDLMethodBaseModel.Default::class && value is ReadableMap) {
+                    val nestedClassType = annotation.nestedClassType
+                    getMapWithDefault(nestedClassType.java, value.toHashMap())
+                } else if (annotation.nestedClassType != IDLMethodBaseModel.Default::class && value is ReadableArray) {
+                    value.toArrayList().map { getMapWithDefault(annotation.nestedClassType.java, (it as ReadableMap).toHashMap()) }
+                } else {
+                    map[annotation.keyPath]
+                }
             acc
         }
     }
 
-    override fun transformMapToPlatformData(params: Map<String, Any?>, clazz: Class<out IDLBridgeMethod>): ReadableMap {
-        return Utils.convertMapToReadableMap(params)
-    }
+    override fun transformMapToPlatformData(
+        params: Map<String, Any?>,
+        clazz: Class<out IDLBridgeMethod>,
+    ): ReadableMap = Utils.convertMapToReadableMap(params)
 }

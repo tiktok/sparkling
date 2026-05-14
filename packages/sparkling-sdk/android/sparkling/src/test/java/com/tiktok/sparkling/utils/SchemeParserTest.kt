@@ -13,12 +13,11 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class SchemeParserTest {
-
     @Test
     fun testParseSchemeWithLynxViewPage() {
         val scheme = "hybrid://lynxview_page?bundle=test_bundle&title=Test%20Title"
         val result = SchemeParser.parseScheme(scheme)
-        
+
         assertNotNull(result)
         assertEquals(HybridKitType.LYNX, result!!.engineType)
         assertEquals(HybridContainerType.PAGE, result.containerType)
@@ -64,7 +63,7 @@ class SchemeParserTest {
     fun testParseSchemeWithWebView() {
         val scheme = "hybrid://webview?bundle=web_bundle&title=Web%20Title"
         val result = SchemeParser.parseScheme(scheme)
-        
+
         assertNotNull(result)
         assertEquals(HybridKitType.WEB, result!!.engineType)
         assertEquals("web_bundle", result.bundle)
@@ -75,7 +74,7 @@ class SchemeParserTest {
     fun testParseSchemeWithUnknownHost() {
         val scheme = "hybrid://unknown?bundle=test_bundle"
         val result = SchemeParser.parseScheme(scheme)
-        
+
         assertNull(result)
     }
 
@@ -83,13 +82,14 @@ class SchemeParserTest {
     fun testParseSchemeWithInvalidProtocol() {
         val scheme = "https://lynxview?bundle=test_bundle"
         val result = SchemeParser.parseScheme(scheme)
-        
+
         assertNull(result)
     }
 
     @Test
     fun testParseSchemeWithAllParameters() {
-        val scheme = "hybrid://lynxview_page?" +
+        val scheme =
+            "hybrid://lynxview_page?" +
                 "bundle=test_bundle&" +
                 "title=Test%20Title&" +
                 "title_color=%23FF0000&" +
@@ -103,9 +103,9 @@ class SchemeParserTest {
                 "container_bg_color=%23F0F0F0&" +
                 "hide_error=1&" +
                 "force_theme_style=dark"
-        
+
         val result = SchemeParser.parseScheme(scheme)
-        
+
         assertNotNull(result)
         with(result!!) {
             assertEquals(HybridKitType.LYNX, engineType)
@@ -128,15 +128,16 @@ class SchemeParserTest {
 
     @Test
     fun testParseSchemeWithBooleanParametersFalse() {
-        val scheme = "hybrid://lynxview_page?" +
+        val scheme =
+            "hybrid://lynxview_page?" +
                 "hide_nav_bar=0&" +
                 "hide_status_bar=0&" +
                 "trans_status_bar=0&" +
                 "hide_loading=0&" +
                 "hide_error=0"
-        
+
         val result = SchemeParser.parseScheme(scheme)
-        
+
         assertNotNull(result)
         with(result!!) {
             assertEquals(HybridContainerType.PAGE, containerType)
@@ -152,7 +153,7 @@ class SchemeParserTest {
     fun testParseSchemeWithMissingParameters() {
         val scheme = "hybrid://lynxview_page"
         val result = SchemeParser.parseScheme(scheme)
-        
+
         assertNotNull(result)
         with(result!!) {
             assertEquals(HybridKitType.LYNX, engineType)
@@ -177,7 +178,7 @@ class SchemeParserTest {
     fun testParseSchemeWithEmptyString() {
         val scheme = ""
         val result = SchemeParser.parseScheme(scheme)
-        
+
         assertNull(result)
     }
 
@@ -185,7 +186,7 @@ class SchemeParserTest {
     fun testParseSchemeWithJustProtocol() {
         val scheme = "hybrid://"
         val result = SchemeParser.parseScheme(scheme)
-        
+
         assertNull(result)
     }
 
@@ -193,7 +194,7 @@ class SchemeParserTest {
     fun testParseSchemeWithSpecialCharacters() {
         val scheme = "hybrid://lynxview_page?title=Special%20%26%20Characters%20%23%40%24&bundle=test"
         val result = SchemeParser.parseScheme(scheme)
-        
+
         assertNotNull(result)
         val parsed = result!!
         assertEquals(HybridContainerType.PAGE, parsed.containerType)
@@ -205,7 +206,7 @@ class SchemeParserTest {
     fun testParseSchemeWithInvalidBooleanValues() {
         val scheme = "hybrid://lynxview_page?hide_nav_bar=invalid&hide_status_bar=true"
         val result = SchemeParser.parseScheme(scheme)
-        
+
         assertNotNull(result)
         with(result!!) {
             assertEquals(HybridContainerType.PAGE, containerType)
@@ -218,7 +219,7 @@ class SchemeParserTest {
     fun testParseSchemeWithDuplicateParameters() {
         val scheme = "hybrid://lynxview_page?bundle=first&bundle=second&title=first_title&title=second_title"
         val result = SchemeParser.parseScheme(scheme)
-        
+
         assertNotNull(result)
         val parsed = result!!
         assertEquals(HybridContainerType.PAGE, parsed.containerType)
@@ -228,10 +229,11 @@ class SchemeParserTest {
 
     @Test
     fun testCustomSchemeParserHandlesCustomSchemes() {
-        val expected = HybridSchemeParam().apply {
-            engineType = HybridKitType.LYNX
-            bundle = "custom_bundle"
-        }
+        val expected =
+            HybridSchemeParam().apply {
+                engineType = HybridKitType.LYNX
+                bundle = "custom_bundle"
+            }
 
         SchemeParser.setCustomSchemeParser {
             if (it.startsWith("custom://")) expected else null

@@ -11,5 +11,5 @@ import com.google.gson.annotations.SerializedName
  */
 internal data class StorageValue(
     @SerializedName("type") val type: String = "",
-    @SerializedName("value") val value: String = ""
+    @SerializedName("value") val value: String = "",
 )

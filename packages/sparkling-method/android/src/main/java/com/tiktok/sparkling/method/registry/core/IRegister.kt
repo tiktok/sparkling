@@ -2,20 +2,18 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core
 
 /**
  * Desc:
  */
 interface IRegister {
-
-
     fun findIDLMethod(name: String): IDLMethodProvider?
 
-
-    fun registerMethod(name: String, methodProvider: IDLMethodProvider)
-
+    fun registerMethod(
+        name: String,
+        methodProvider: IDLMethodProvider,
+    )
 
     fun getIDLMethodList(): Map<String, IDLMethodProvider>
 }

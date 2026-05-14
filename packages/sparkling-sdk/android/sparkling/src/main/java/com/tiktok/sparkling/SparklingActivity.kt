@@ -16,7 +16,6 @@ import com.tiktok.sparkling.Sparkling.Companion.SPARKLING_CONTEXT_CONTAINER_ID
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 
 class SparklingActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val containerId = intent.getStringExtra(SPARKLING_CONTEXT_CONTAINER_ID)
@@ -36,6 +35,7 @@ class SparklingActivity : AppCompatActivity() {
                 controller.systemBarsBehavior =
                     WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
+
             param.transStatusBar -> {
                 WindowCompat.setDecorFitsSystemWindows(window, false)
                 window.statusBarColor = Color.TRANSPARENT
@@ -58,14 +58,14 @@ class SparklingActivity : AppCompatActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = sparklingContext?.hybridSchemeParam?.title ?: getString(R.string.sparkling_page_title)
-        
+
         val titleColorStr = sparklingContext?.hybridSchemeParam?.titleColor
         if (!titleColorStr.isNullOrEmpty()) {
             try {
                 val titleColor = Color.parseColor(titleColorStr)
                 val toolbar = (supportActionBar?.customView ?: findViewById<Toolbar>(R.id.toolbar)) as Toolbar
                 toolbar.setTitleTextColor(titleColor)
-                
+
                 val customToolbar = sparklingContext?.sparklingUIProvider?.getToolBar(this)
                 customToolbar?.setTitleTextColor(titleColor)
             } catch (e: IllegalArgumentException) {
@@ -75,8 +75,9 @@ class SparklingActivity : AppCompatActivity() {
         val navBarColorStr = sparklingContext?.hybridSchemeParam?.navBarColor
         if (!navBarColorStr.isNullOrEmpty()) {
             val navBarColor = ColorUtil.parseColorSafely(navBarColorStr)
-            val activeToolbar = sparklingContext?.sparklingUIProvider?.getToolBar(this)
-                ?: findViewById<Toolbar>(R.id.toolbar)
+            val activeToolbar =
+                sparklingContext?.sparklingUIProvider?.getToolBar(this)
+                    ?: findViewById<Toolbar>(R.id.toolbar)
             activeToolbar?.setBackgroundColor(navBarColor)
         }
 
@@ -90,18 +91,19 @@ class SparklingActivity : AppCompatActivity() {
             if (it.hideNavBar || (it.transStatusBar && !it.showNavBarInTransStatusBar)) {
                 supportActionBar?.hide()
             }
-            requestedOrientation = when (it.screenOrientation) {
-                "portrait" -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                "landscape" -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                else -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            }
+            requestedOrientation =
+                when (it.screenOrientation) {
+                    "portrait" -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                    "landscape" -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                    else -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                }
         }
 
         val fragment = SparklingFragment.newInstance()
-        supportFragmentManager.beginTransaction()
+        supportFragmentManager
+            .beginTransaction()
             .replace(R.id.main_view_container, fragment)
             .commit()
-
     }
 
     override fun onResume() {

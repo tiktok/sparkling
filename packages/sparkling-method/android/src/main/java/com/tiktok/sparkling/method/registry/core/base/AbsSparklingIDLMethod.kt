@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core.base
 
 import android.webkit.WebView
@@ -30,9 +29,7 @@ import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
-abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> :
-    IDLBridgeMethod where INPUT : IDLMethodBaseParamModel, OUTPUT : IDLMethodBaseResultModel {
-
+abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> : IDLBridgeMethod where INPUT : IDLMethodBaseParamModel, OUTPUT : IDLMethodBaseResultModel {
     private var bridgeContext: IBridgeContext? = null
     var contextProviderFactory: ContextProviderFactory? = null
 
@@ -44,14 +41,10 @@ abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> :
         this.bridgeContext = bridgeContext
     }
 
-    fun getSDKContext(): IBridgeContext? {
-        return this.bridgeContext
-    }
+    fun getSDKContext(): IBridgeContext? = this.bridgeContext
 
     @Deprecated("Please use [getSDKContext] ", ReplaceWith(""))
-    open fun <T> provideContext(clz: Class<T>): T? {
-        return contextProviderFactory?.provideInstance(clz)
-    }
+    open fun <T> provideContext(clz: Class<T>): T? = contextProviderFactory?.provideInstance(clz)
 
     fun getXValue(data: Any?): Any? {
         if (data is IDLDynamic) {
@@ -60,7 +53,10 @@ abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> :
         return data
     }
 
-    fun getXValue(map: Map<String, Any>, key: String): Any? {
+    fun getXValue(
+        map: Map<String, Any>,
+        key: String,
+    ): Any? {
         val value = map[key]
         if (value is IDLDynamic) {
             return value.getValue()
@@ -68,13 +64,9 @@ abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> :
         return value
     }
 
-    fun toJSON(list: List<Any>): JSONArray {
-        return JsonUtils.listToJSON(list)
-    }
+    fun toJSON(list: List<Any>): JSONArray = JsonUtils.listToJSON(list)
 
-    fun toJSON(map: Map<String, Any>): JSONObject {
-        return JsonUtils.mapToJSON(map)
-    }
+    fun toJSON(map: Map<String, Any>): JSONObject = JsonUtils.mapToJSON(map)
 
     fun toJSON(data: IDLMethodBaseModel?): JSONObject {
         if (data == null) {
@@ -83,7 +75,11 @@ abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> :
         return data.toJSON()
     }
 
-    fun onSuccess(callback: IDLBridgeMethod.Callback, data: Map<String, Any>, msg: String = "") {
+    fun onSuccess(
+        callback: IDLBridgeMethod.Callback,
+        data: Map<String, Any>,
+        msg: String = "",
+    ) {
         if (useOriginalResult) {
             if (data[IDLBridgeMethod.ORIGINAL_RESULT] != null && data[IDLBridgeMethod.ORIGINAL_RESULT] is Map<*, *>) {
                 callback.invoke(data[IDLBridgeMethod.ORIGINAL_RESULT] as Map<String, Any?>)
@@ -92,22 +88,31 @@ abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> :
             }
         } else {
             if (shouldUseOriginalData(getSDKContext())) {
-                callback.invoke(mutableMapOf<String, Any>().apply {
-                    put(IDLBridgeMethod.PARAM_CODE, IDLBridgeMethod.SUCCESS)
-                    put(IDLBridgeMethod.PARAM_MSG, msg)
-                    putAll(data)
-                })
+                callback.invoke(
+                    mutableMapOf<String, Any>().apply {
+                        put(IDLBridgeMethod.PARAM_CODE, IDLBridgeMethod.SUCCESS)
+                        put(IDLBridgeMethod.PARAM_MSG, msg)
+                        putAll(data)
+                    },
+                )
             } else {
-                callback.invoke(mutableMapOf<String, Any>().apply {
-                    put(IDLBridgeMethod.PARAM_CODE, IDLBridgeMethod.SUCCESS)
-                    put(IDLBridgeMethod.PARAM_MSG, msg)
-                    put(IDLBridgeMethod.PARAM_DATA, data)
-                })
+                callback.invoke(
+                    mutableMapOf<String, Any>().apply {
+                        put(IDLBridgeMethod.PARAM_CODE, IDLBridgeMethod.SUCCESS)
+                        put(IDLBridgeMethod.PARAM_MSG, msg)
+                        put(IDLBridgeMethod.PARAM_DATA, data)
+                    },
+                )
             }
         }
     }
 
-    fun onFailure(callback: IDLBridgeMethod.Callback, code: Int, msg: String = "", data: Map<String, Any> = mutableMapOf()) {
+    fun onFailure(
+        callback: IDLBridgeMethod.Callback,
+        code: Int,
+        msg: String = "",
+        data: Map<String, Any> = mutableMapOf(),
+    ) {
         if (useOriginalResult) {
             if (data[IDLBridgeMethod.ORIGINAL_RESULT] != null && data[IDLBridgeMethod.ORIGINAL_RESULT] is Map<*, *>) {
                 callback.invoke(data[IDLBridgeMethod.ORIGINAL_RESULT] as Map<String, Any?>)
@@ -116,27 +121,35 @@ abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> :
             }
         } else {
             if (shouldUseOriginalData(getSDKContext())) {
-                callback.invoke(mutableMapOf<String, Any>().apply {
-                    put(IDLBridgeMethod.PARAM_CODE, code)
-                    put(IDLBridgeMethod.PARAM_MSG, msg)
-                    putAll(data)
-                })
+                callback.invoke(
+                    mutableMapOf<String, Any>().apply {
+                        put(IDLBridgeMethod.PARAM_CODE, code)
+                        put(IDLBridgeMethod.PARAM_MSG, msg)
+                        putAll(data)
+                    },
+                )
             } else {
-                callback.invoke(mutableMapOf<String, Any>().apply {
-                    put(IDLBridgeMethod.PARAM_CODE, code)
-                    put(IDLBridgeMethod.PARAM_MSG, msg)
-                    put(IDLBridgeMethod.PARAM_DATA, data)
-                })
+                callback.invoke(
+                    mutableMapOf<String, Any>().apply {
+                        put(IDLBridgeMethod.PARAM_CODE, code)
+                        put(IDLBridgeMethod.PARAM_MSG, msg)
+                        put(IDLBridgeMethod.PARAM_DATA, data)
+                    },
+                )
             }
         }
     }
 
-    abstract fun handle(params: INPUT, callback: CompletionBlock<OUTPUT>, type: BridgePlatformType)
+    abstract fun handle(
+        params: INPUT,
+        callback: CompletionBlock<OUTPUT>,
+        type: BridgePlatformType,
+    )
 
     override fun realHandle(
         params: Map<String, Any?>,
         callback: IDLBridgeMethod.Callback,
-        type: BridgePlatformType
+        type: BridgePlatformType,
     ) {
         val paramModel = createParamModelProxy(params)
         if (paramModel == null) {
@@ -164,50 +177,78 @@ abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> :
                 if (method.name.equals("toJSON")) {
                     return@InvocationHandler runCatching {
                         return@runCatching JSONObject().apply {
-                            dataSource.mapValues {
-                                return@mapValues when (it.value) {
-                                    is Long -> it.value
-                                    is Int -> it.value
-                                    is Double -> it.value
-                                    is String -> it.value
-                                    is Boolean -> it.value
-                                    is List<*> -> JsonUtils.toJSONArray(it.value as List<*>)
-                                    is Map<*, *> -> JsonUtils.toJSONObject(it.value as Map<*, *>)
-                                    is IDLDynamic -> (it.value as IDLDynamic).toPrimitiveOrJSON()
-                                    else -> {
-                                        // nested class type
-                                        if (it.value is IDLMethodBaseModel) {
-                                            (it.value as IDLMethodBaseModel).toJSON()
-                                        } else {
-                                            null
+                            dataSource
+                                .mapValues {
+                                    return@mapValues when (it.value) {
+                                        is Long -> {
+                                            it.value
+                                        }
+
+                                        is Int -> {
+                                            it.value
+                                        }
+
+                                        is Double -> {
+                                            it.value
+                                        }
+
+                                        is String -> {
+                                            it.value
+                                        }
+
+                                        is Boolean -> {
+                                            it.value
+                                        }
+
+                                        is List<*> -> {
+                                            JsonUtils.toJSONArray(it.value as List<*>)
+                                        }
+
+                                        is Map<*, *> -> {
+                                            JsonUtils.toJSONObject(it.value as Map<*, *>)
+                                        }
+
+                                        is IDLDynamic -> {
+                                            (it.value as IDLDynamic).toPrimitiveOrJSON()
+                                        }
+
+                                        else -> {
+                                            // nested class type
+                                            if (it.value is IDLMethodBaseModel) {
+                                                (it.value as IDLMethodBaseModel).toJSON()
+                                            } else {
+                                                null
+                                            }
                                         }
                                     }
+                                }.forEach { entry ->
+                                    entry.value?.let {
+                                        put(entry.key, entry.value)
+                                    }
                                 }
-                            }.forEach { entry ->
-                                entry.value?.let {
-                                    put(entry.key, entry.value)
-                                }
-                            }
                         }
                     }.getOrDefault(JSONObject())
                 }
 
-                if (method.name.equals("toString"))  {
+                if (method.name.equals("toString")) {
                     return@InvocationHandler "Just need to check if the relevant fields can be obtained, " +
-                            "no need to pay attention to the overall situation of the current model. " +
-                            "just like this: params.xxx;" + "dataSource = $dataSource"
+                        "no need to pay attention to the overall situation of the current model. " +
+                        "just like this: params.xxx;" + "dataSource = $dataSource"
                 }
 
                 val propertyName = getPropertyName(method)
                 return@InvocationHandler dataSource[propertyName]
-            }) as INPUT
+            },
+        ) as INPUT
     }
 
     private fun getPropertyName(method: Method): String {
         val pool =
-            (getSDKContext()?.containerID?.let {
-                IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(it)
-            })?.BRIDGE_ANNOTATION_MAP?.get(this::class.java)
+            (
+                getSDKContext()?.containerID?.let {
+                    IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(it)
+                }
+            )?.BRIDGE_ANNOTATION_MAP?.get(this::class.java)
         if (pool != null) {
             val keyPath = pool.methodParamModel.methodModel[method]?.keyPath
             if (keyPath != null) {
@@ -221,24 +262,29 @@ abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> :
     }
 
     private fun getParamsClazz(): Class<*>? {
-        val paramClass = (getSDKContext()?.containerID?.let {
-            IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(it)
-        })?.BRIDGE_ANNOTATION_MAP?.get(this::class.java)?.paramClass
+        val paramClass =
+            (
+                getSDKContext()?.containerID?.let {
+                    IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(it)
+                }
+            )?.BRIDGE_ANNOTATION_MAP?.get(this::class.java)?.paramClass
         if (paramClass != null) {
             return paramClass
         }
         println("idl Map->Model. no cache")
-        var paramModelList = this.javaClass.declaredClasses.filter {
-            it.getAnnotation(
-                IDLMethodParamModel::class.java
-            ) != null
-        }
-        if (paramModelList.isEmpty()) {
-            paramModelList = this.javaClass.superclass.declaredClasses.filter {
+        var paramModelList =
+            this.javaClass.declaredClasses.filter {
                 it.getAnnotation(
-                    IDLMethodParamModel::class.java
+                    IDLMethodParamModel::class.java,
                 ) != null
             }
+        if (paramModelList.isEmpty()) {
+            paramModelList =
+                this.javaClass.superclass.declaredClasses.filter {
+                    it.getAnnotation(
+                        IDLMethodParamModel::class.java,
+                    ) != null
+                }
             if (paramModelList.isEmpty()) {
                 throw IllegalStateException("Illegal class format, no param model is defined in class")
             }
@@ -247,14 +293,24 @@ abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> :
         return paramModelList.firstOrNull()
     }
 
-    fun <OUTPUT> createCompletionBlockProxy(classLoader: ClassLoader, callback: IDLBridgeMethod.Callback): CompletionBlock<OUTPUT> where OUTPUT : IDLMethodBaseResultModel {
-        return object : CompletionBlock<OUTPUT> {
-            override fun onSuccess(result: OUTPUT, msg: String) {
+    fun <OUTPUT> createCompletionBlockProxy(
+        classLoader: ClassLoader,
+        callback: IDLBridgeMethod.Callback,
+    ): CompletionBlock<OUTPUT> where OUTPUT : IDLMethodBaseResultModel =
+        object : CompletionBlock<OUTPUT> {
+            override fun onSuccess(
+                result: OUTPUT,
+                msg: String,
+            ) {
                 val resultMap = result.convert() ?: mutableMapOf()
                 this@AbsSparklingIDLMethod.onSuccess(callback = callback, data = resultMap, msg = msg)
             }
 
-            override fun onFailure(code: Int, msg: String, data: OUTPUT?) {
+            override fun onFailure(
+                code: Int,
+                msg: String,
+                data: OUTPUT?,
+            ) {
                 val resultMap = data?.convert() ?: mutableMapOf()
                 this@AbsSparklingIDLMethod.onFailure(callback, code, msg, resultMap)
             }
@@ -264,13 +320,11 @@ abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> :
                 callback.invoke(resultMap)
             }
         }
-    }
 
-    protected fun getHybridUrl(type: BridgePlatformType): String? {
-        return if (type == BridgePlatformType.LYNX) {
+    protected fun getHybridUrl(type: BridgePlatformType): String? =
+        if (type == BridgePlatformType.LYNX) {
             (getSDKContext()?.view as? LynxView)?.templateUrl
         } else {
             (getSDKContext()?.view as? WebView)?.url
         }
-    }
 }

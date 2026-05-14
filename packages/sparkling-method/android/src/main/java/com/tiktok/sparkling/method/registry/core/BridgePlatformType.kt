@@ -2,12 +2,14 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core
 
 /**
  * Desc:
  */
 enum class BridgePlatformType {
-    WEB, LYNX, NONE, ALL
+    WEB,
+    LYNX,
+    NONE,
+    ALL,
 }

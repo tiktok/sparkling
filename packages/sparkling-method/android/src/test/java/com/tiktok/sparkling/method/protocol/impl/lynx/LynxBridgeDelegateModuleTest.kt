@@ -28,9 +28,9 @@
 //     fun setUp() {
 //         // Mock the constructor call so we don't have to deal with complex initialization
 //         Mockito.`when`(mockLynxContext.getContext()).thenReturn(Mockito.mock(android.content.Context::class.java))
-//         
+//
 //         lynxBridgeDelegateModule = LynxBridgeDelegateModule(mockLynxContext)
-//         
+//
 //         // Use reflection to set the private field realLynxBridgeDelegate
 //         try {
 //             val field = LynxBridgeDelegateModule::class.java.getDeclaredField("realLynxBridgeDelegate")
@@ -50,7 +50,7 @@
 //     //     val fromEngine = "lynx"
 //     //
 //     //     lynxBridgeDelegateModule.call(bridgeName, params, callback)
-//     //     
+//     //
 //     //     // Verify that realLynxBridgeDelegate.call was invoked with the correct parameters
 //     //     verify(mockRealLynxBridgeDelegate).call(bridgeName, params, callback, fromEngine)
 //     // }

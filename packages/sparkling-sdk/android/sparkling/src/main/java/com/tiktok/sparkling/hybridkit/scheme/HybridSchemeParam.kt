@@ -26,9 +26,10 @@ open class HybridSchemeParam(
     var showNavBarInTransStatusBar: Boolean = false,
     var hideError: Boolean = false,
 //    var fallbackUrl: String? = null,
-    var forceThemeStyle: String? = null
-) : BaseSchemeParam(engineType), Serializable, Parcelable {
-
+    var forceThemeStyle: String? = null,
+) : BaseSchemeParam(engineType),
+    Serializable,
+    Parcelable {
     constructor(parcel: Parcel) : this(
         HybridKitType.values()[parcel.readInt()],
         HybridContainerType.values()[parcel.readInt()],
@@ -44,10 +45,13 @@ open class HybridSchemeParam(
         parcel.readString(),
         parcel.readString(),
         parcel.readByte() != 0.toByte(),
-        parcel.readByte() != 0.toByte()
+        parcel.readByte() != 0.toByte(),
     )
 
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
+    override fun writeToParcel(
+        parcel: Parcel,
+        flags: Int,
+    ) {
         parcel.writeInt(engineType.ordinal)
         parcel.writeInt(containerType.ordinal)
         parcel.writeString(bundle)
@@ -67,24 +71,18 @@ open class HybridSchemeParam(
         parcel.writeString(forceThemeStyle)
     }
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun describeContents(): Int = 0
 
     companion object {
         const val DefaultPresetWidth = -1
         const val DefaultPresetHeight = -1
+
         @JvmField
-        val CREATOR : Parcelable.Creator<HybridSchemeParam> = object : Parcelable.Creator<HybridSchemeParam> {
-            override fun createFromParcel(parcel: Parcel): HybridSchemeParam {
-                return HybridSchemeParam(parcel)
-            }
+        val CREATOR: Parcelable.Creator<HybridSchemeParam> =
+            object : Parcelable.Creator<HybridSchemeParam> {
+                override fun createFromParcel(parcel: Parcel): HybridSchemeParam = HybridSchemeParam(parcel)
 
-            override fun newArray(size: Int): Array<HybridSchemeParam?> {
-                return arrayOfNulls(size)
+                override fun newArray(size: Int): Array<HybridSchemeParam?> = arrayOfNulls(size)
             }
-        }
     }
-
-
 }

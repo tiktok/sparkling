@@ -12,7 +12,6 @@ import com.tiktok.sparkling.hybridkit.utils.safeGetQueryParameter
 import java.util.concurrent.ConcurrentHashMap
 
 object SparklingUriParser {
-
     private val parsedUriMap: MutableMap<String, MutableMap<String, String>> =
         ConcurrentHashMap()
 
@@ -27,7 +26,7 @@ object SparklingUriParser {
     fun parseQueryMap(
         uri: Uri,
         extra: Map<String, String>? = null,
-        bundle: Bundle? = null
+        bundle: Bundle? = null,
     ): MutableMap<String, String> {
         // priority: extra < innerUri < Uri
         val queryMap = mutableMapOf<String, String>()
@@ -50,11 +49,12 @@ object SparklingUriParser {
             if (url == null) {
                 url = extra?.get("url")
             }
-            url?.let {
-                Uri.parse(it)
-            }?.let { _uri ->
-                queryMap.putAll(parseUri(_uri))
-            }
+            url
+                ?.let {
+                    Uri.parse(it)
+                }?.let { _uri ->
+                    queryMap.putAll(parseUri(_uri))
+                }
         }
 
         queryMap.putAll(parseUri(uri))
@@ -65,7 +65,7 @@ object SparklingUriParser {
     @JvmOverloads
     internal fun parseUri(
         uri: Uri,
-        extra: Map<String, String>? = null
+        extra: Map<String, String>? = null,
     ): MutableMap<String, String> {
         val queryMap = mutableMapOf<String, String>()
         if (extra != null) {
@@ -86,7 +86,7 @@ object SparklingUriParser {
     @JvmStatic
     fun saveUriAndQueries(
         containerId: String,
-        queryMap: MutableMap<String, String>
+        queryMap: MutableMap<String, String>,
     ) {
         parsedUriMap[containerId] = queryMap
     }
@@ -95,7 +95,10 @@ object SparklingUriParser {
      * Appends query keys from [mergedParams] that are not already present on [originUri].
      */
     @JvmStatic
-    fun appendExtraQueryToUri(originUri: Uri, mergedParams: Map<String, String>): Uri {
+    fun appendExtraQueryToUri(
+        originUri: Uri,
+        mergedParams: Map<String, String>,
+    ): Uri {
         val existingNames = originUri.queryParameterNames
         val builder = originUri.buildUpon().clearQuery()
         for (name in originUri.queryParameterNames) {
@@ -111,29 +114,32 @@ object SparklingUriParser {
         return builder.build()
     }
 
-
     inline fun <reified T : BaseSchemeParam> T.applyEngine(uri: Uri) {
         this.apply {
             val host = uri.host?.lowercase()
-            engineType = when {
-                host?.contains(SchemeConstants.Host.WEB_VIEW) == true -> {
-                    HybridKitType.WEB
+            engineType =
+                when {
+                    host?.contains(SchemeConstants.Host.WEB_VIEW) == true -> {
+                        HybridKitType.WEB
+                    }
+
+                    host?.contains(SchemeConstants.Host.LYNX_VIEW) == true -> {
+                        HybridKitType.LYNX
+                    }
+
+                    else -> {
+                        HybridKitType.UNKNOWN
+                    }
                 }
-                host?.contains(SchemeConstants.Host.LYNX_VIEW) == true -> {
-                    HybridKitType.LYNX
-                }
-                else -> {
-                    HybridKitType.UNKNOWN
-                }
-            }
 
             if (this is HybridSchemeParam) {
-                containerType = when {
-                    host?.contains(SchemeConstants.Host.LYNX_VIEW_CARD) == true -> HybridContainerType.CARD
-                    host?.contains(SchemeConstants.Host.LYNX_VIEW_PAGE) == true -> HybridContainerType.PAGE
-                    host?.contains(SchemeConstants.Host.LYNX_VIEW) == true -> HybridContainerType.PAGE
-                    else -> HybridContainerType.UNKNOWN
-                }
+                containerType =
+                    when {
+                        host?.contains(SchemeConstants.Host.LYNX_VIEW_CARD) == true -> HybridContainerType.CARD
+                        host?.contains(SchemeConstants.Host.LYNX_VIEW_PAGE) == true -> HybridContainerType.PAGE
+                        host?.contains(SchemeConstants.Host.LYNX_VIEW) == true -> HybridContainerType.PAGE
+                        else -> HybridContainerType.UNKNOWN
+                    }
             }
         }
     }

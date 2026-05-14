@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core
 
 import io.mockk.*
@@ -17,22 +16,25 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
 class LocalBridgeTest {
-
     private lateinit var localBridge: LocalBridge
     private lateinit var mockRegistry: IDLMethodRegistry
-    
+
     // Use a concrete test class instead of mocking Class<out IDLBridgeMethod>
     private class TestIDLBridgeMethod : IDLBridgeMethod {
         override val name: String = "TestMethod"
-        
-        override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {
+
+        override fun realHandle(
+            params: Map<String, Any?>,
+            callback: IDLBridgeMethod.Callback,
+            type: BridgePlatformType,
+        ) {
             // Test implementation
         }
-        
+
         override fun setProviderFactory(contextProviderFactory: com.tiktok.sparkling.method.registry.core.model.context.ContextProviderFactory?) {
             // Test implementation
         }
-        
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) {
             // Test implementation
         }
@@ -115,7 +117,7 @@ class LocalBridgeTest {
         val namespace = "TEST_NAMESPACE"
         val methodName = "testMethod"
         val mockRegistry = createMockRegistryForNamespace(namespace)
-        
+
         every { mockRegistry.findMethodClass(BridgePlatformType.WEB, methodName) } returns TestIDLBridgeMethod::class.java
         localBridge.registerRegistry(mockRegistry)
 
@@ -146,7 +148,7 @@ class LocalBridgeTest {
         val namespace = "TEST_NAMESPACE"
         val methodName = "nonExistentMethod"
         val mockRegistry = createMockRegistryForNamespace(namespace)
-        
+
         every { mockRegistry.findMethodClass(BridgePlatformType.WEB, methodName) } returns null
         localBridge.registerRegistry(mockRegistry)
 
@@ -161,12 +163,13 @@ class LocalBridgeTest {
     fun testGetIDLMethodListWithExistingRegistry() {
         // Given
         val namespace = "TEST_NAMESPACE"
-        val mockMethodList = mutableMapOf<String, Class<out IDLBridgeMethod>>(
-            "method1" to TestIDLBridgeMethod::class.java,
-            "method2" to TestIDLBridgeMethod::class.java
-        )
+        val mockMethodList =
+            mutableMapOf<String, Class<out IDLBridgeMethod>>(
+                "method1" to TestIDLBridgeMethod::class.java,
+                "method2" to TestIDLBridgeMethod::class.java,
+            )
         val mockRegistry = createMockRegistryForNamespace(namespace)
-        
+
         every { mockRegistry.getMethodList(BridgePlatformType.ALL) } returns mockMethodList
         localBridge.registerRegistry(mockRegistry)
 
@@ -195,7 +198,7 @@ class LocalBridgeTest {
         // Given
         val namespace = "EMPTY_NAMESPACE"
         val mockRegistry = createMockRegistryForNamespace(namespace)
-        
+
         every { mockRegistry.getMethodList(BridgePlatformType.WEB) } returns null
         localBridge.registerRegistry(mockRegistry)
 
@@ -213,7 +216,7 @@ class LocalBridgeTest {
         val namespace2 = "NAMESPACE_2"
         val mockRegistry1 = createMockRegistryForNamespace(namespace1)
         val mockRegistry2 = createMockRegistryForNamespace(namespace2)
-        
+
         val methodName = "testMethod"
         every { mockRegistry1.findMethodClass(BridgePlatformType.WEB, methodName) } returns TestIDLBridgeMethod::class.java
         every { mockRegistry2.findMethodClass(BridgePlatformType.WEB, methodName) } returns null
@@ -236,26 +239,30 @@ class LocalBridgeTest {
         val namespace = "TEST_NAMESPACE"
         val mockRegistry1 = createMockRegistryForNamespace(namespace)
         val mockRegistry2 = createMockRegistryForNamespace(namespace)
-        
+
         val methodName = "testMethod"
-        
+
         // Create a second test class for the override scenario
         class TestIDLBridgeMethod2 : IDLBridgeMethod {
             override val name: String = "TestMethod2"
-            
-            override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {
+
+            override fun realHandle(
+                params: Map<String, Any?>,
+                callback: IDLBridgeMethod.Callback,
+                type: BridgePlatformType,
+            ) {
                 // Test implementation
             }
-            
+
             override fun setProviderFactory(contextProviderFactory: com.tiktok.sparkling.method.registry.core.model.context.ContextProviderFactory?) {
                 // Test implementation
             }
-            
+
             override fun setBridgeContext(bridgeContext: IBridgeContext) {
                 // Test implementation
             }
         }
-        
+
         every { mockRegistry1.findMethodClass(BridgePlatformType.WEB, methodName) } returns TestIDLBridgeMethod::class.java
         every { mockRegistry2.findMethodClass(BridgePlatformType.WEB, methodName) } returns TestIDLBridgeMethod2::class.java
 
@@ -275,7 +282,7 @@ class LocalBridgeTest {
         val namespace = "TEST_NAMESPACE"
         val mockRegistry = createMockRegistryForNamespace(namespace)
         val methodName = "testMethod"
-        
+
         every { mockRegistry.findMethodClass(any(), any()) } returns TestIDLBridgeMethod::class.java
         localBridge.registerRegistry(mockRegistry)
 

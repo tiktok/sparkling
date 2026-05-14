@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core.utils
 
 import com.google.gson.Gson
@@ -14,49 +13,66 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 object JsonUtils {
-
     val GSON = Gson()
 
     /**
      * serializes the specified object into its equivalent Json representation.
      */
-    fun toJson(obj: Any): String {
-        return GSON.toJson(obj)
-    }
+    fun toJson(obj: Any): String = GSON.toJson(obj)
 
     /**
      * deserializes the specified Json into an object of the specified class.
      */
-    fun <T> fromJson(json: String, typeClass: Class<T>): T {
-        return GSON.fromJson(json, typeClass)
-    }
-
+    fun <T> fromJson(
+        json: String,
+        typeClass: Class<T>,
+    ): T = GSON.fromJson(json, typeClass)
 
     fun mapToJSON(map: Map<String, Any>): JSONObject {
         val jsonObject = JSONObject()
         map.forEach {
             val key = it.key
             when (val value = it.value) {
-                is Long -> jsonObject.put(key, value.toDouble())
-                is Float -> jsonObject.put(key, value.toDouble())
-                is Int -> jsonObject.put(key, value)
-                is Double -> jsonObject.put(key, value)
-                is String -> jsonObject.put(key, value)
-                is Boolean -> jsonObject.put(key, value)
+                is Long -> {
+                    jsonObject.put(key, value.toDouble())
+                }
+
+                is Float -> {
+                    jsonObject.put(key, value.toDouble())
+                }
+
+                is Int -> {
+                    jsonObject.put(key, value)
+                }
+
+                is Double -> {
+                    jsonObject.put(key, value)
+                }
+
+                is String -> {
+                    jsonObject.put(key, value)
+                }
+
+                is Boolean -> {
+                    jsonObject.put(key, value)
+                }
+
                 is Map<*, *> -> {
                     try {
                         jsonObject.put(key, mapToJSON(value as Map<String, Any>))
                     } catch (e: Exception) {
-                        //ignore
+                        // ignore
                     }
                 }
+
                 is List<*> -> {
                     try {
                         jsonObject.put(key, listToJSON(value as List<Any>))
                     } catch (e: Exception) {
-                        //ignore
+                        // ignore
                     }
                 }
+
                 is IDLDynamic -> {
                     jsonObject.put(key, value.getValue())
                 }
@@ -65,30 +81,50 @@ object JsonUtils {
         return jsonObject
     }
 
-     fun listToJSON(list: List<Any>): JSONArray {
+    fun listToJSON(list: List<Any>): JSONArray {
         val jsonArray = JSONArray()
         list.forEach {
             when (it) {
-                is Float -> jsonArray.put(it.toDouble())
-                is Long -> jsonArray.put(it.toDouble())
-                is Int -> jsonArray.put(it)
-                is Double -> jsonArray.put(it)
-                is String -> jsonArray.put(it)
-                is Boolean -> jsonArray.put(it)
+                is Float -> {
+                    jsonArray.put(it.toDouble())
+                }
+
+                is Long -> {
+                    jsonArray.put(it.toDouble())
+                }
+
+                is Int -> {
+                    jsonArray.put(it)
+                }
+
+                is Double -> {
+                    jsonArray.put(it)
+                }
+
+                is String -> {
+                    jsonArray.put(it)
+                }
+
+                is Boolean -> {
+                    jsonArray.put(it)
+                }
+
                 is Map<*, *> -> {
                     try {
                         jsonArray.put(mapToJSON(it as Map<String, Any>))
                     } catch (e: Exception) {
-                        //ignore
+                        // ignore
                     }
                 }
+
                 is List<*> -> {
                     try {
                         jsonArray.put(listToJSON(it as List<Any>))
                     } catch (e: Exception) {
-                        //ignore
+                        // ignore
                     }
                 }
+
                 is IDLDynamic -> {
                     jsonArray.put(it.getValue())
                 }
@@ -97,8 +133,8 @@ object JsonUtils {
         return jsonArray
     }
 
-    fun jsonToMap(json: JSONObject): Map<String, Any?> {
-        return mutableMapOf<String, Any?>().apply {
+    fun jsonToMap(json: JSONObject): Map<String, Any?> =
+        mutableMapOf<String, Any?>().apply {
             val iterator = json.keys()
             while (iterator.hasNext()) {
                 val key = iterator.next()
@@ -114,10 +150,9 @@ object JsonUtils {
                 }
             }
         }
-    }
 
-    fun jsonToList(json: JSONArray): List<Any?> {
-        return mutableListOf<Any?>().apply {
+    fun jsonToList(json: JSONArray): List<Any?> =
+        mutableListOf<Any?>().apply {
             val len = json.length()
             for (index in 0 until len) {
                 when (json.opt(index)) {
@@ -132,69 +167,119 @@ object JsonUtils {
                 }
             }
         }
-    }
 
     @JvmStatic
     fun toJSONArray(source: List<*>): JSONArray {
         val result = JSONArray()
-        source.filterNotNull().map {
-            when (it) {
-                is Int -> it
-                is Long -> it
-                is String -> it
-                is Boolean -> it
-                is Double -> it
-                is List<*> -> toJSONArray(it)
-                is Map<*,*> -> toJSONObject(it)
-                is IDLDynamic -> it.toPrimitiveOrJSON()
-                else -> {
-                    // nested class type
-                    if (it is IDLMethodBaseModel) {
-                        it.toJSON()
-                    } else {
-                        null
+        source
+            .filterNotNull()
+            .map {
+                when (it) {
+                    is Int -> {
+                        it
+                    }
+
+                    is Long -> {
+                        it
+                    }
+
+                    is String -> {
+                        it
+                    }
+
+                    is Boolean -> {
+                        it
+                    }
+
+                    is Double -> {
+                        it
+                    }
+
+                    is List<*> -> {
+                        toJSONArray(it)
+                    }
+
+                    is Map<*, *> -> {
+                        toJSONObject(it)
+                    }
+
+                    is IDLDynamic -> {
+                        it.toPrimitiveOrJSON()
+                    }
+
+                    else -> {
+                        // nested class type
+                        if (it is IDLMethodBaseModel) {
+                            it.toJSON()
+                        } else {
+                            null
+                        }
                     }
                 }
+            }.forEach {
+                it?.let {
+                    result.put(it)
+                }
             }
-        }.forEach {
-            it?.let {
-                result.put(it)
-            }
-        }
         return result
     }
 
     @JvmStatic
     fun toJSONObject(source: Map<*, *>): JSONObject {
         val result = JSONObject()
-        source.map { entry ->
-            val entryValue = entry.value
-            entry.key to when (entryValue) {
-                is Int -> entryValue
-                is Long -> entryValue
-                is String -> entryValue
-                is Boolean -> entryValue
-                is Double -> entryValue
-                is List<*> -> toJSONArray(entryValue)
-                is Map<*,*> -> toJSONObject(entryValue)
-                is IDLDynamic -> entryValue.toPrimitiveOrJSON()
-                else -> {
-                    // nested class type
-                    if (entryValue is IDLMethodBaseModel) {
-                        entryValue.toJSON()
-                    } else {
-                        null
+        source
+            .map { entry ->
+                val entryValue = entry.value
+                entry.key to
+                    when (entryValue) {
+                        is Int -> {
+                            entryValue
+                        }
+
+                        is Long -> {
+                            entryValue
+                        }
+
+                        is String -> {
+                            entryValue
+                        }
+
+                        is Boolean -> {
+                            entryValue
+                        }
+
+                        is Double -> {
+                            entryValue
+                        }
+
+                        is List<*> -> {
+                            toJSONArray(entryValue)
+                        }
+
+                        is Map<*, *> -> {
+                            toJSONObject(entryValue)
+                        }
+
+                        is IDLDynamic -> {
+                            entryValue.toPrimitiveOrJSON()
+                        }
+
+                        else -> {
+                            // nested class type
+                            if (entryValue is IDLMethodBaseModel) {
+                                entryValue.toJSON()
+                            } else {
+                                null
+                            }
+                        }
+                    }
+            }.forEach { pair ->
+                pair.first?.let {
+                    if (it is String) {
+                        result.put(it, pair.second)
                     }
                 }
             }
-        }.forEach { pair ->
-            pair.first?.let {
-                if (it is String) {
-                    result.put(it, pair.second)
-                }
-            }
-        }
         return result
     }
-
 }

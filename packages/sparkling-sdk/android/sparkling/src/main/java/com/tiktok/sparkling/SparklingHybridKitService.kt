@@ -12,12 +12,9 @@ import com.tiktok.sparkling.hybridkit.utils.HybridKitInitManager
 import java.util.concurrent.atomic.AtomicBoolean
 
 object SparklingHybridKitService : IHybridKitBaseService {
-
     private val initialized = AtomicBoolean(false)
 
-    override fun getHybridInitStatus(): HybridKitInitStatus {
-        return HybridKitInitManager.status
-    }
+    override fun getHybridInitStatus(): HybridKitInitStatus = HybridKitInitManager.status
 
     override fun addHybridKitInitCallback(callback: HybridKitInitCallback) {
         HybridKitInitManager.addCallback(callback)
@@ -27,7 +24,12 @@ object SparklingHybridKitService : IHybridKitBaseService {
         HybridKitInitManager.removeCallback(callback)
     }
 
-    override fun open(context: Context, url: String, targetHandlerName: String?, bundle: Bundle?) {
+    override fun open(
+        context: Context,
+        url: String,
+        targetHandlerName: String?,
+        bundle: Bundle?,
+    ) {
         TODO("Not yet implemented")
     }
 
@@ -37,6 +39,4 @@ object SparklingHybridKitService : IHybridKitBaseService {
 //            initialized.set(true)
 //        }
     }
-
-
 }

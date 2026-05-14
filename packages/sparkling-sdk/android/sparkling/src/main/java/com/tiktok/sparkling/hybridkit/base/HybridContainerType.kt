@@ -6,5 +6,5 @@ package com.tiktok.sparkling.hybridkit.base
 enum class HybridContainerType {
     UNKNOWN,
     PAGE,
-    CARD
+    CARD,
 }

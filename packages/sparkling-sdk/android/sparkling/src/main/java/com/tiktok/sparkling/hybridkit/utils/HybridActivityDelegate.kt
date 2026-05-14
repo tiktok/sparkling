@@ -9,11 +9,9 @@ import java.lang.ref.WeakReference
 object HybridActivityDelegate {
     private var topActivityRef: WeakReference<Activity>? = null
 
-    fun getTopActivity(): Activity? {
-        return topActivityRef?.get()
-    }
+    fun getTopActivity(): Activity? = topActivityRef?.get()
 
-    fun setTopActivity(activity: Activity){
+    fun setTopActivity(activity: Activity) {
         topActivityRef = WeakReference(activity)
     }
 }

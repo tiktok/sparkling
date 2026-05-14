@@ -2,9 +2,8 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core.exception
 
-open class IDLMethodException(message:String):Exception(message) {
-
-}
+open class IDLMethodException(
+    message: String,
+) : Exception(message)

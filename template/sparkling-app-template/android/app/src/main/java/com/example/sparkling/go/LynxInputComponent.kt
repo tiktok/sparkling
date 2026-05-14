@@ -21,89 +21,107 @@ import com.lynx.tasm.behavior.LynxUIMethodConstants
 import com.lynx.tasm.behavior.ui.LynxUI
 import com.lynx.tasm.event.LynxCustomEvent
 
+class LynxInputComponent(
+    context: LynxContext?,
+) : LynxUI<AppCompatEditText>(context) {
+    override fun createView(context: Context): AppCompatEditText =
+        AppCompatEditText(context).apply {
+            setLines(1)
+            setSingleLine()
+            gravity = Gravity.CENTER_VERTICAL
+            background = null
+            imeOptions = EditorInfo.IME_ACTION_NONE
+            setHorizontallyScrolling(true)
+            setPadding(0, 0, 0, 0)
+            addTextChangedListener(
+                object : TextWatcher {
+                    override fun beforeTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        count: Int,
+                        after: Int,
+                    ) {}
 
-class LynxInputComponent(context: LynxContext?) : LynxUI<AppCompatEditText>(context) {
+                    override fun onTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        before: Int,
+                        count: Int,
+                    ) {}
 
-  override fun createView(context: Context): AppCompatEditText {
-    return AppCompatEditText(context).apply {
-      setLines(1)
-      setSingleLine()
-      gravity = Gravity.CENTER_VERTICAL
-      background = null
-      imeOptions = EditorInfo.IME_ACTION_NONE
-      setHorizontallyScrolling(true)
-      setPadding(0, 0, 0, 0)
-      addTextChangedListener(object : TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        override fun afterTextChanged(s: Editable?) {
-          emitEvent("input", mapOf("value" to (s?.toString() ?: "")))
+                    override fun afterTextChanged(s: Editable?) {
+                        emitEvent("input", mapOf("value" to (s?.toString() ?: "")))
+                    }
+                },
+            )
+            onFocusChangeListener =
+                View.OnFocusChangeListener { _, hasFocus ->
+                    if (!hasFocus) {
+                        emitEvent("blur", null)
+                    }
+                }
         }
-      })
-      onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-        if (!hasFocus) {
-          emitEvent("blur", null)
+
+    override fun onLayoutUpdated() {
+        super.onLayoutUpdated()
+        val paddingTop = mPaddingTop + mBorderTopWidth
+        val paddingBottom = mPaddingBottom + mBorderBottomWidth
+        val paddingLeft = mPaddingLeft + mBorderLeftWidth
+        val paddingRight = mPaddingRight + mBorderRightWidth
+        mView.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
+    }
+
+    @LynxProp(name = "value")
+    fun setValue(value: String) {
+        if (value != mView.text.toString()) {
+            mView.setText(value)
         }
-      }
     }
-  }
 
-  override fun onLayoutUpdated() {
-    super.onLayoutUpdated()
-    val paddingTop = mPaddingTop + mBorderTopWidth
-    val paddingBottom = mPaddingBottom + mBorderBottomWidth
-    val paddingLeft = mPaddingLeft + mBorderLeftWidth
-    val paddingRight = mPaddingRight + mBorderRightWidth
-    mView.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
-  }
-
-  @LynxProp(name = "value")
-  fun setValue(value: String) {
-    if (value != mView.text.toString()) {
-      mView.setText(value)
+    @LynxUIMethod
+    fun focus(
+        params: ReadableMap,
+        callback: Callback,
+    ) {
+        if (mView.requestFocus()) {
+            if (showSoftInput()) {
+                callback.invoke(LynxUIMethodConstants.SUCCESS)
+            } else {
+                callback.invoke(LynxUIMethodConstants.UNKNOWN, "fail to show keyboard")
+            }
+        } else {
+            callback.invoke(LynxUIMethodConstants.UNKNOWN, "fail to focus")
+        }
     }
-  }
 
-  @LynxUIMethod
-  fun focus(params: ReadableMap, callback: Callback) {
-    if (mView.requestFocus()) {
-      if (showSoftInput()) {
-        callback.invoke(LynxUIMethodConstants.SUCCESS)
-      } else {
-        callback.invoke(LynxUIMethodConstants.UNKNOWN, "fail to show keyboard")
-      }
-    } else {
-      callback.invoke(LynxUIMethodConstants.UNKNOWN, "fail to focus")
+    private fun showSoftInput(): Boolean {
+        val imm = lynxContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        return imm.showSoftInput(mView, InputMethodManager.SHOW_IMPLICIT, null)
     }
-  }
 
-  private fun showSoftInput(): Boolean {
-    val imm = lynxContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    return imm.showSoftInput(mView, InputMethodManager.SHOW_IMPLICIT, null)
-  }
-
-  @LynxProp(name = "placeholder")
-  fun setPlaceHolder(value: String) {
-    mView.hint = value
-  }
-
-  @LynxProp(name = "text-color")
-  fun setTextColor(value: String) {
-    var value = value
-    if (value.startsWith("#")) {
-      value = value.substring(1)
+    @LynxProp(name = "placeholder")
+    fun setPlaceHolder(value: String) {
+        mView.hint = value
     }
-    val textColor = "#" + value
-    val hintColor = "#40" + value
-    mView.setHintTextColor(Color.parseColor(hintColor))
-    mView.setTextColor(Color.parseColor(textColor))
-  }
 
+    @LynxProp(name = "text-color")
+    fun setTextColor(value: String) {
+        var value = value
+        if (value.startsWith("#")) {
+            value = value.substring(1)
+        }
+        val textColor = "#" + value
+        val hintColor = "#40" + value
+        mView.setHintTextColor(Color.parseColor(hintColor))
+        mView.setTextColor(Color.parseColor(textColor))
+    }
 
-
-  private fun emitEvent(name: String, value: Map<String, Any>?) {
-    val detail = LynxCustomEvent(sign, name)
-    value?.forEach { (key, v) -> detail.addDetail(key, v) }
-    lynxContext.eventEmitter.sendCustomEvent(detail)
-  }
+    private fun emitEvent(
+        name: String,
+        value: Map<String, Any>?,
+    ) {
+        val detail = LynxCustomEvent(sign, name)
+        value?.forEach { (key, v) -> detail.addDetail(key, v) }
+        lynxContext.eventEmitter.sendCustomEvent(detail)
+    }
 }

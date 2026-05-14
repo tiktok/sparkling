@@ -7,7 +7,9 @@ import com.tiktok.sparkling.method.runtime.depend.network.AbsStringConnection
 import com.tiktok.sparkling.method.runtime.depend.common.IHostNetworkDepend
 import java.io.File
 
-class HttpRequest(private var url: String) {
+class HttpRequest(
+    private var url: String,
+) {
     var cacheTime = 0
         private set
     var headers: LinkedHashMap<String, String>? = null
@@ -32,9 +34,8 @@ class HttpRequest(private var url: String) {
         private set
     var postFilePart: LinkedHashMap<String, File>? = null
         private set
-    fun getUrl(): String {
-        return url
-    }
+
+    fun getUrl(): String = url
 
     fun cacheTime(cacheTime: Int): HttpRequest {
         this.cacheTime = cacheTime
@@ -96,39 +97,25 @@ class HttpRequest(private var url: String) {
         return this
     }
 
-    fun doGetForString(hostNetworkDepend: IHostNetworkDepend): AbsStringConnection {
-        return NetworkRequestImpl.requestForString(RequestMethod.GET, this, hostNetworkDepend)
-    }
+    fun doGetForString(hostNetworkDepend: IHostNetworkDepend): AbsStringConnection = NetworkRequestImpl.requestForString(RequestMethod.GET, this, hostNetworkDepend)
 
-    fun doGetForStream(hostNetworkDepend: IHostNetworkDepend): AbsStreamConnection {
-        return NetworkRequestImpl.requestForStream(RequestMethod.GET, this, hostNetworkDepend)
-    }
+    fun doGetForStream(hostNetworkDepend: IHostNetworkDepend): AbsStreamConnection = NetworkRequestImpl.requestForStream(RequestMethod.GET, this, hostNetworkDepend)
 
-    fun doPostForString(hostNetworkDepend: IHostNetworkDepend): AbsStringConnection {
-        return NetworkRequestImpl.requestForString(RequestMethod.POST, this, hostNetworkDepend)
-    }
+    fun doPostForString(hostNetworkDepend: IHostNetworkDepend): AbsStringConnection = NetworkRequestImpl.requestForString(RequestMethod.POST, this, hostNetworkDepend)
 
-    fun doPostForStream(hostNetworkDepend: IHostNetworkDepend): AbsStreamConnection {
-        return NetworkRequestImpl.requestForStream(RequestMethod.POST, this, hostNetworkDepend)
-    }
+    fun doPostForStream(hostNetworkDepend: IHostNetworkDepend): AbsStreamConnection = NetworkRequestImpl.requestForStream(RequestMethod.POST, this, hostNetworkDepend)
 
-    fun doPutForString(hostNetworkDepend: IHostNetworkDepend): AbsStringConnection {
-        return NetworkRequestImpl.requestForString(RequestMethod.PUT, this, hostNetworkDepend)
-    }
+    fun doPutForString(hostNetworkDepend: IHostNetworkDepend): AbsStringConnection = NetworkRequestImpl.requestForString(RequestMethod.PUT, this, hostNetworkDepend)
 
-    fun doDeleteForString(hostNetworkDepend: IHostNetworkDepend): AbsStringConnection {
-        return NetworkRequestImpl.requestForString(RequestMethod.DELETE, this, hostNetworkDepend)
-    }
+    fun doDeleteForString(hostNetworkDepend: IHostNetworkDepend): AbsStringConnection = NetworkRequestImpl.requestForString(RequestMethod.DELETE, this, hostNetworkDepend)
 
-    fun doDownloadFile(hostNetworkDepend: IHostNetworkDepend): AbsStreamConnection {
-        return NetworkRequestImpl.requestForStream(RequestMethod.DOWNLOAD, this, hostNetworkDepend)
-    }
+    fun doDownloadFile(hostNetworkDepend: IHostNetworkDepend): AbsStreamConnection = NetworkRequestImpl.requestForStream(RequestMethod.DOWNLOAD, this, hostNetworkDepend)
 }
 
-enum class RequestMethod{
+enum class RequestMethod {
     GET,
     POST,
     PUT,
     DELETE,
-    DOWNLOAD
+    DOWNLOAD,
 }

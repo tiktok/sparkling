@@ -9,7 +9,6 @@ import org.junit.Test
 import org.mockito.Mockito
 
 class BridgeFactoryManagerTest {
-
     @Test
     fun testCheckAndInitBridge() {
         val manager = BridgeFactoryManager()

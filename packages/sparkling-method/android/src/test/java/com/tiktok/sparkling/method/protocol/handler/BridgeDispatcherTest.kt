@@ -26,9 +26,7 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
-
 class BridgeDispatcherTest {
-
     private lateinit var bridgeDispatcher: BridgeDispatcher
     private val mockBridgeContext = Mockito.mock(BridgeContext::class.java)
     private val mockBridgeCall = Mockito.mock(BridgeCall::class.java)

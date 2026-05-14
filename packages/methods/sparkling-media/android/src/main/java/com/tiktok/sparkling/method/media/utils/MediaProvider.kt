@@ -8,4 +8,3 @@ import com.tiktok.sparkling.method.media.depend.IHostMediaDepend
 object MediaProvider {
     var hostMediaDepend: IHostMediaDepend? = null
 }
-

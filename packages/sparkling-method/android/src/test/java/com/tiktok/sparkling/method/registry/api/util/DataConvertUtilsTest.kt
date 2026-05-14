@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.api.util
 
 import com.tiktok.sparkling.method.registry.api.Utils
@@ -18,7 +17,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class DataConvertUtilsTest {
-
     @Before
     fun setUp() {
         // Setup if needed
@@ -32,13 +30,14 @@ class DataConvertUtilsTest {
     @Test
     fun testMapToJSONWithSimpleTypes() {
         // Given
-        val testMap = mapOf(
-            "string" to "value",
-            "int" to 42,
-            "double" to 3.14,
-            "boolean" to true,
-            "null" to null
-        )
+        val testMap =
+            mapOf(
+                "string" to "value",
+                "int" to 42,
+                "double" to 3.14,
+                "boolean" to true,
+                "null" to null,
+            )
 
         // When
         val result = Utils.mapToJSON(testMap)
@@ -56,10 +55,11 @@ class DataConvertUtilsTest {
     fun testMapToJSONWithNestedMap() {
         // Given
         val nestedMap = mapOf("nested_key" to "nested_value")
-        val testMap = mapOf(
-            "simple" to "value",
-            "nested" to nestedMap
-        )
+        val testMap =
+            mapOf(
+                "simple" to "value",
+                "nested" to nestedMap,
+            )
 
         // When
         val result = Utils.mapToJSON(testMap)
@@ -67,7 +67,7 @@ class DataConvertUtilsTest {
         // Then
         assertNotNull("Result should not be null", result)
         assertEquals("Simple value should match", "value", result.getString("simple"))
-        
+
         val nestedJson = result.getJSONObject("nested")
         assertNotNull("Nested object should not be null", nestedJson)
         assertEquals("Nested value should match", "nested_value", nestedJson.getString("nested_key"))
@@ -77,10 +77,11 @@ class DataConvertUtilsTest {
     fun testMapToJSONWithList() {
         // Given
         val testList = listOf("item1", "item2", 123)
-        val testMap = mapOf(
-            "list" to testList,
-            "simple" to "value"
-        )
+        val testMap =
+            mapOf(
+                "list" to testList,
+                "simple" to "value",
+            )
 
         // When
         val result = Utils.mapToJSON(testMap)
@@ -88,7 +89,7 @@ class DataConvertUtilsTest {
         // Then
         assertNotNull("Result should not be null", result)
         assertEquals("Simple value should match", "value", result.getString("simple"))
-        
+
         val jsonArray = result.getJSONArray("list")
         assertNotNull("Array should not be null", jsonArray)
         assertEquals("Array should have 3 items", 3, jsonArray.length())
@@ -113,17 +114,20 @@ class DataConvertUtilsTest {
     @Test
     fun testMapToJSONWithComplexNesting() {
         // Given
-        val deepNestedMap = mapOf(
-            "level3" to "deep_value"
-        )
-        val nestedMap = mapOf(
-            "level2" to deepNestedMap,
-            "array" to listOf(1, 2, 3)
-        )
-        val testMap = mapOf(
-            "level1" to nestedMap,
-            "simple" to "top_level"
-        )
+        val deepNestedMap =
+            mapOf(
+                "level3" to "deep_value",
+            )
+        val nestedMap =
+            mapOf(
+                "level2" to deepNestedMap,
+                "array" to listOf(1, 2, 3),
+            )
+        val testMap =
+            mapOf(
+                "level1" to nestedMap,
+                "simple" to "top_level",
+            )
 
         // When
         val result = Utils.mapToJSON(testMap)
@@ -131,14 +135,14 @@ class DataConvertUtilsTest {
         // Then
         assertNotNull("Result should not be null", result)
         assertEquals("Top level value should match", "top_level", result.getString("simple"))
-        
+
         val level1 = result.getJSONObject("level1")
         assertNotNull("Level 1 should not be null", level1)
-        
+
         val level2 = level1.getJSONObject("level2")
         assertNotNull("Level 2 should not be null", level2)
         assertEquals("Deep value should match", "deep_value", level2.getString("level3"))
-        
+
         val array = level1.getJSONArray("array")
         assertNotNull("Array should not be null", array)
         assertEquals("Array should have 3 items", 3, array.length())
@@ -147,12 +151,13 @@ class DataConvertUtilsTest {
     @Test
     fun testMapToJSONWithSpecialCharacters() {
         // Given
-        val testMap = mapOf(
-            "unicode" to "Hello 🌍",
-            "special_chars" to "!@#$%^&*()",
-            "json_chars" to "\"quotes\" and {braces}",
-            "empty_string" to ""
-        )
+        val testMap =
+            mapOf(
+                "unicode" to "Hello 🌍",
+                "special_chars" to "!@#$%^&*()",
+                "json_chars" to "\"quotes\" and {braces}",
+                "empty_string" to "",
+            )
 
         // When
         val result = Utils.mapToJSON(testMap)
@@ -168,12 +173,13 @@ class DataConvertUtilsTest {
     @Test
     fun testMapToJSONWithLargeNumbers() {
         // Given
-        val testMap = mapOf(
-            "large_int" to Long.MAX_VALUE,
-            "small_int" to Long.MIN_VALUE,
-            "large_double" to Double.MAX_VALUE,
-            "small_double" to Double.MIN_VALUE
-        )
+        val testMap =
+            mapOf(
+                "large_int" to Long.MAX_VALUE,
+                "small_int" to Long.MIN_VALUE,
+                "large_double" to Double.MAX_VALUE,
+                "small_double" to Double.MIN_VALUE,
+            )
 
         // When
         val result = Utils.mapToJSON(testMap)
@@ -189,11 +195,12 @@ class DataConvertUtilsTest {
     @Test
     fun testMapToJSONPreservesOrder() {
         // Given
-        val testMap = linkedMapOf(
-            "first" to 1,
-            "second" to 2,
-            "third" to 3
-        )
+        val testMap =
+            linkedMapOf(
+                "first" to 1,
+                "second" to 2,
+                "third" to 3,
+            )
 
         // When
         val result = Utils.mapToJSON(testMap)
@@ -207,14 +214,15 @@ class DataConvertUtilsTest {
     @Test
     fun testMapToJSONWithMixedTypes() {
         // Given
-        val testMap = mapOf(
-            "string" to "text",
-            "number" to 42,
-            "boolean" to false,
-            "array" to listOf("a", "b", "c"),
-            "object" to mapOf("inner" to "value"),
-            "null_value" to null
-        )
+        val testMap =
+            mapOf(
+                "string" to "text",
+                "number" to 42,
+                "boolean" to false,
+                "array" to listOf("a", "b", "c"),
+                "object" to mapOf("inner" to "value"),
+                "null_value" to null,
+            )
 
         // When
         val result = Utils.mapToJSON(testMap)
@@ -224,13 +232,13 @@ class DataConvertUtilsTest {
         assertEquals("String should match", "text", result.getString("string"))
         assertEquals("Number should match", 42, result.getInt("number"))
         assertFalse("Boolean should match", result.getBoolean("boolean"))
-        
+
         val array = result.getJSONArray("array")
         assertEquals("Array should have 3 items", 3, array.length())
-        
+
         val obj = result.getJSONObject("object")
         assertEquals("Object should have inner value", "value", obj.getString("inner"))
-        
+
         assertTrue("Null value should be null", result.isNull("null_value"))
     }
 }

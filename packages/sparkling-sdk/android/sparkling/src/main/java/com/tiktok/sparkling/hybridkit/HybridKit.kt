@@ -30,29 +30,27 @@ object HybridKit {
      * must be called before initLynxKit
      * @param hybridConfig cannot be null
      */
-    fun setHybridConfig(hybridConfig: SparklingHybridConfig, application: Application) {
+    fun setHybridConfig(
+        hybridConfig: SparklingHybridConfig,
+        application: Application,
+    ) {
         HybridCommon.setHybridConfig(hybridConfig, application)
     }
-
 
     @JvmOverloads
     fun initLynxKit() {
         HybridLynxKit.init(application)
     }
 
-    fun getTopActivity(): Activity? {
-        return HybridActivityStackManager.getTopActivity()
-    }
+    fun getTopActivity(): Activity? = HybridActivityStackManager.getTopActivity()
 
-    fun isBackground(): Boolean {
-        return HybridActivityStackManager.isBackground()
-    }
+    fun isBackground(): Boolean = HybridActivityStackManager.isBackground()
 
     fun createKitView(
         scheme: HybridSchemeParam,
         param: HybridContext,
         context: Context,
-        lifeCycle: IHybridKitLifeCycle? = null
+        lifeCycle: IHybridKitLifeCycle? = null,
     ): IKitView? {
         if (scheme.engineType == HybridKitType.LYNX) {
             return HybridLynxKit.createKitView(scheme, param, context, lifeCycle)
@@ -61,4 +59,3 @@ object HybridKit {
         return null
     }
 }
-

@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.api
 
 import android.content.Context
@@ -33,7 +32,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class SparklingBridgeTest {
-
     private lateinit var sparklingBridge: SparklingBridge
     private lateinit var mockView: View
     private lateinit var mockContext: Context
@@ -63,7 +61,7 @@ class SparklingBridgeTest {
         mockkObject(BridgeManager)
         mockkObject(IDLMethodRegistryCacheManager)
         mockkObject(InnerBridge)
-        
+
         every { BridgeManager.insert(any<View>(), any()) } returns Unit
         every { BridgeManager.insert(any<String>(), any()) } returns Unit
         every { BridgeManager.remove(any()) } returns Unit
@@ -71,7 +69,7 @@ class SparklingBridgeTest {
         every { InnerBridge.initSDKMonitor(any(), any()) } returns Unit
 
         sparklingBridge = spyk(SparklingBridge())
-        
+
         // Mock the getBridgeContext method using spyk
         every { sparklingBridge.getBridgeContext() } returns mockBridgeContext
         every { mockBridgeContext.defaultCallHandler } returns mockk(relaxed = true)
@@ -158,7 +156,7 @@ class SparklingBridgeTest {
         // Given
         val namespace = "BUSINESS_NAMESPACE"
         val realBridgeContext = BridgeContext()
-        
+
         // Use real BridgeContext for this test
         every { sparklingBridge.getBridgeContext() } returns realBridgeContext
 
@@ -175,9 +173,9 @@ class SparklingBridgeTest {
         val namespace = "BUSINESS_NAMESPACE"
         val testMethodClass = TestIDLBridgeMethod::class.java
         val realBridgeContext = BridgeContext()
-        
+
         every { sparklingBridge.getBridgeContext() } returns realBridgeContext
-        
+
         // Set up business namespace
         sparklingBridge.bindWithBusinessNamespace(namespace)
 
@@ -191,15 +189,19 @@ class SparklingBridgeTest {
     // Test implementation for IDLBridgeMethod
     class TestIDLBridgeMethod : IDLBridgeMethod {
         override val name: String = "testMethod"
-        
-        override fun realHandle(params: Map<String, Any?>, callback: IDLBridgeMethod.Callback, type: BridgePlatformType) {
+
+        override fun realHandle(
+            params: Map<String, Any?>,
+            callback: IDLBridgeMethod.Callback,
+            type: BridgePlatformType,
+        ) {
             // Test implementation
         }
-        
+
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) {
             // Test implementation
         }
-        
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) {
             // Test implementation
         }
@@ -245,7 +247,7 @@ class SparklingBridgeTest {
         // Given
         val testMethodClass = TestIDLBridgeMethod::class.java
         val realBridgeContext = BridgeContext()
-        
+
         every { sparklingBridge.getBridgeContext() } returns realBridgeContext
 
         // When
@@ -333,7 +335,7 @@ class SparklingBridgeTest {
     //     // Given
     //     val containerId = "test_container"
     //     val mockSDKContext = mockk<IBridgeContext>(relaxed = true)
-    //     
+    //
     //     every { sparklingBridge.getBridgeSDKContext() } returns mockSDKContext
     //     every { mockSDKContext.containerID } returns containerId
     //     every { BridgeManager.remove(sparklingBridge) } returns Unit

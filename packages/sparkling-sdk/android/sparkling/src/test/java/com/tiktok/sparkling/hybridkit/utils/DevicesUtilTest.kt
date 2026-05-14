@@ -30,10 +30,9 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(
     sdk = [33],
-    packageName = "com.tiktok.sparkling"
+    packageName = "com.tiktok.sparkling",
 )
 class DevicesUtilTest {
-
     private lateinit var context: Context
 
     @Before
@@ -68,10 +67,10 @@ class DevicesUtilTest {
     fun testGetNavigationBarHeightWithMissingResource() {
         val mockContext = mockk<Context>()
         val mockResources = mockk<Resources>()
-        
+
         every { mockContext.resources } returns mockResources
         every { mockResources.getIdentifier("navigation_bar_height", "dimen", "android") } returns 0
-        
+
         val result = DevicesUtil.getNavigationBarHeight(mockContext)
         assertEquals(0, result)
     }
@@ -81,11 +80,11 @@ class DevicesUtilTest {
         val mockContext = mockk<Context>()
         val mockResources = mockk<Resources>()
         val expectedHeight = 48
-        
+
         every { mockContext.resources } returns mockResources
         every { mockResources.getIdentifier("navigation_bar_height", "dimen", "android") } returns 123
         every { mockResources.getDimensionPixelSize(123) } returns expectedHeight
-        
+
         val result = DevicesUtil.getNavigationBarHeight(mockContext)
         assertEquals(expectedHeight, result)
     }
@@ -94,13 +93,14 @@ class DevicesUtilTest {
     fun testIsPadReturnsFalseForPhone() {
         val mockContext = mockk<Context>()
         val mockResources = mockk<Resources>()
-        val configuration = Configuration().apply {
-            screenLayout = Configuration.SCREENLAYOUT_SIZE_NORMAL
-        }
-        
+        val configuration =
+            Configuration().apply {
+                screenLayout = Configuration.SCREENLAYOUT_SIZE_NORMAL
+            }
+
         every { mockContext.resources } returns mockResources
         every { mockResources.configuration } returns configuration
-        
+
         val result = DevicesUtil.isPad(mockContext)
         assertFalse(result)
     }
@@ -109,13 +109,14 @@ class DevicesUtilTest {
     fun testIsPadReturnsTrueForTablet() {
         val mockContext = mockk<Context>()
         val mockResources = mockk<Resources>()
-        val configuration = Configuration().apply {
-            screenLayout = Configuration.SCREENLAYOUT_SIZE_LARGE
-        }
-        
+        val configuration =
+            Configuration().apply {
+                screenLayout = Configuration.SCREENLAYOUT_SIZE_LARGE
+            }
+
         every { mockContext.resources } returns mockResources
         every { mockResources.configuration } returns configuration
-        
+
         val result = DevicesUtil.isPad(mockContext)
         assertTrue(result)
     }
@@ -124,13 +125,14 @@ class DevicesUtilTest {
     fun testIsPadReturnsTrueForXLarge() {
         val mockContext = mockk<Context>()
         val mockResources = mockk<Resources>()
-        val configuration = Configuration().apply {
-            screenLayout = Configuration.SCREENLAYOUT_SIZE_XLARGE
-        }
-        
+        val configuration =
+            Configuration().apply {
+                screenLayout = Configuration.SCREENLAYOUT_SIZE_XLARGE
+            }
+
         every { mockContext.resources } returns mockResources
         every { mockResources.configuration } returns configuration
-        
+
         val result = DevicesUtil.isPad(mockContext)
         assertTrue(result)
     }
@@ -139,13 +141,14 @@ class DevicesUtilTest {
     fun testPx2dp() {
         val mockContext = mockk<Context>()
         val mockResources = mockk<Resources>()
-        val mockDisplayMetrics = DisplayMetrics().apply {
-            density = 2.0f
-        }
-        
+        val mockDisplayMetrics =
+            DisplayMetrics().apply {
+                density = 2.0f
+            }
+
         every { mockContext.resources } returns mockResources
         every { mockResources.displayMetrics } returns mockDisplayMetrics
-        
+
         val result = DevicesUtil.px2dp(100.0, mockContext)
         assertEquals(50, result)
     }

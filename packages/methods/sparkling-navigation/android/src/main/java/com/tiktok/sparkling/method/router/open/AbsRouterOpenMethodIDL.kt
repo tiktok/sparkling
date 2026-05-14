@@ -21,14 +21,11 @@ import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseResultMo
  * DO NOT MODIFY!!!
  */
 abstract class AbsRouterOpenMethodIDL : AbsSparklingIDLMethod<AbsRouterOpenMethodIDL.IDLMethodOpenParamModel, AbsRouterOpenMethodIDL.IDLMethodOpenResultModel>() {
-
     @IDLMethodName(name = "router.open", params = ["scheme", "replace", "replaceType", "useSysBrowser", "animated", "interceptor", "extra"])
     final override val name: String = "router.open"
 
-
     @IDLMethodParamModel
     interface IDLMethodOpenParamModel : IDLMethodBaseParamModel {
-
         @get:IDLMethodParamField(required = true, isGetter = true, keyPath = "scheme")
         val scheme: String
 
@@ -52,9 +49,7 @@ abstract class AbsRouterOpenMethodIDL : AbsSparklingIDLMethod<AbsRouterOpenMetho
     }
 
     @IDLMethodResultModel
-    interface IDLMethodOpenResultModel: IDLMethodBaseResultModel {
-    }
+    interface IDLMethodOpenResultModel : IDLMethodBaseResultModel
 
-    interface IDLMethodOpenExtra : IDLMethodBaseModel {
-    }
+    interface IDLMethodOpenExtra : IDLMethodBaseModel
 }

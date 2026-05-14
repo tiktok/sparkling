@@ -22,10 +22,9 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(
     sdk = [33],
-    packageName = "com.tiktok.sparkling"
+    packageName = "com.tiktok.sparkling",
 )
 class GlobalPropsUtilsTest {
-
     private lateinit var context: Context
     private var originalContext: Application? = null
     private var originalBaseInfoConfig: BaseInfoConfig? = null
@@ -146,7 +145,7 @@ class GlobalPropsUtilsTest {
     fun testSetStableProps() {
         val props = mapOf("customKey" to "customValue")
         GlobalPropsUtils.instance.setStableProps(props)
-        
+
         val stableProps = GlobalPropsUtils.instance.getStableGlobalProps()
         assertEquals("customValue", stableProps["customKey"])
     }
@@ -155,10 +154,10 @@ class GlobalPropsUtilsTest {
     fun testSetUnstableProps() {
         val containerId = "test_container"
         val props = mapOf("unstableKey" to "unstableValue")
-        
+
         GlobalPropsUtils.instance.setUnstableProps(containerId, props)
         val globalProps = GlobalPropsUtils.instance.getGlobalProps(containerId)
-        
+
         assertEquals("unstableValue", globalProps["unstableKey"])
     }
 
@@ -166,10 +165,10 @@ class GlobalPropsUtilsTest {
     fun testFlushGlobalProps() {
         val containerId = "test_container_flush"
         val props = mapOf("key" to "value")
-        
+
         GlobalPropsUtils.instance.setUnstableProps(containerId, props)
         GlobalPropsUtils.instance.flushGlobalProps(containerId)
-        
+
         val globalProps = GlobalPropsUtils.instance.getGlobalProps(containerId)
         // After flush, container-specific props should be cleared
         assertTrue(!globalProps.containsKey("key") || globalProps["key"] == null)

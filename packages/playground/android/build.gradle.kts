@@ -8,10 +8,10 @@ plugins {
 buildscript {
     repositories {
         mavenLocal()
-}
+    }
 }
 
 // Apply centralized Maven Publish config for all subprojects (safe-guarded for library modules)
 subprojects {
-    apply(from = "${rootDir}/publish.gradle")
+    apply(from = "$rootDir/publish.gradle")
 }

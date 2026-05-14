@@ -6,7 +6,10 @@ package com.tiktok.sparkling.hybridkit.utils
 import java.util.concurrent.ConcurrentHashMap
 
 class SafeConcurrentHashMap<K, V> : ConcurrentHashMap<K, V>() {
-    override fun put(key: K & Any, value: V & Any): V? {
+    override fun put(
+        key: K & Any,
+        value: V & Any,
+    ): V? {
         runCatching {
             if (key == null || value == null) {
                 return null
@@ -16,7 +19,10 @@ class SafeConcurrentHashMap<K, V> : ConcurrentHashMap<K, V>() {
         return null
     }
 
-    override fun putIfAbsent(key: K & Any, value: V & Any): V? {
+    override fun putIfAbsent(
+        key: K & Any,
+        value: V & Any,
+    ): V? {
         runCatching {
             if (key == null || value == null) {
                 return null
@@ -29,11 +35,11 @@ class SafeConcurrentHashMap<K, V> : ConcurrentHashMap<K, V>() {
     override fun putAll(from: Map<out K, V>) {
         runCatching {
             val keys = from.filter { it.value == null }.keys.joinToString(",")
-            super.putAll(from.filter {
-                it.key != null && it.value != null
-            })
+            super.putAll(
+                from.filter {
+                    it.key != null && it.value != null
+                },
+            )
         }
     }
-
-
 }

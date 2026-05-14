@@ -6,6 +6,8 @@ package com.tiktok.sparkling.hybridkit.service.api
 
 interface IService {
     fun onRegister(bid: String)
+
     fun onUnRegister()
+
     fun getBid(): String
 }

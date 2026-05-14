@@ -16,19 +16,16 @@ import com.tiktok.sparkling.method.router.utils.RouterProvider
  * Handles closing pages/containers.
  */
 class RouterCloseMethod : AbsRouterCloseMethodIDL() {
-
     companion object {
         private const val TAG = "RouterCloseMethod"
     }
 
-    private fun getRouterDependInstance(): IHostRouterDepend? {
-        return RouterProvider.hostRouterDepend
-    }
+    private fun getRouterDependInstance(): IHostRouterDepend? = RouterProvider.hostRouterDepend
 
     override fun handle(
         params: IDLMethodCloseParamModel,
         callback: CompletionBlock<IDLMethodCloseResultModel>,
-        type: BridgePlatformType
+        type: BridgePlatformType,
     ) {
         // Check if router dependency is available
         val routerDepend = getRouterDependInstance()
@@ -41,21 +38,23 @@ class RouterCloseMethod : AbsRouterCloseMethodIDL() {
         val containerID = params.containerID
         val animated = params.animated ?: true // Default to animated close
 
-        val success = try {
-            routerDepend.closeView(getSDKContext(), type, containerID, animated)
-        } catch (e: Exception) {
-            Log.e(TAG, "Exception while closing container: ${e.message}")
-            false
-        }
+        val success =
+            try {
+                routerDepend.closeView(getSDKContext(), type, containerID, animated)
+            } catch (e: Exception) {
+                Log.e(TAG, "Exception while closing container: ${e.message}")
+                false
+            }
 
         if (success) {
             callback.onSuccess(IDLMethodCloseResultModel::class.java.createXModel())
         } else {
-            val errorMsg = if (containerID.isNullOrBlank()) {
-                "Failed to close current container"
-            } else {
-                "Failed to close container: $containerID"
-            }
+            val errorMsg =
+                if (containerID.isNullOrBlank()) {
+                    "Failed to close current container"
+                } else {
+                    "Failed to close container: $containerID"
+                }
             callback.onFailure(IDLBridgeMethod.FAIL, errorMsg, null)
         }
     }

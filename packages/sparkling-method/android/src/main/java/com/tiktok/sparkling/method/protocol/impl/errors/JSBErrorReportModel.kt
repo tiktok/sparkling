@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.protocol.impl.errors
 
 import android.view.View
@@ -18,10 +17,13 @@ class JSBErrorReportModel {
         const val DEFAULT_JSB_ERROR_BID = "jsb_sdk_error_bid"
         const val DEFAULT_JSB_ERROR_EVENT = "jsb_sdk_error_event"
 
-        //global messages
+        // global messages
         private val globalExtension: HashMap<String, Any> = HashMap<String, Any>()
 
-        fun putGlobalExtension(key: String, value: Any?) {
+        fun putGlobalExtension(
+            key: String,
+            value: Any?,
+        ) {
             value?.let {
                 globalExtension[key] = it
             }
@@ -32,7 +34,7 @@ class JSBErrorReportModel {
         }
     }
 
-    //instance messages
+    // instance messages
     private var jsbMethodName: String? = null
     private var jsbUrl: String? = null
     private var jsbErrorCode: Int? = null
@@ -41,7 +43,7 @@ class JSBErrorReportModel {
     private var containerID: String? = null
     private var jsbEngine: String? = null
 
-    //only put new value
+    // only put new value
     private val jsbExtension: HashMap<String, Any> = HashMap<String, Any>()
 
     internal fun setJsbMethodName(jsbMethodName: String?) {
@@ -72,7 +74,10 @@ class JSBErrorReportModel {
         this.containerID = containerID
     }
 
-    fun putJsbExtension(key: String, value: Any?) {
+    fun putJsbExtension(
+        key: String,
+        value: Any?,
+    ) {
         value?.let { jsbExtension.put(key, it) }
     }
 
@@ -80,13 +85,12 @@ class JSBErrorReportModel {
         jsbExtension.putAll(map)
     }
 
-
     internal fun reportJSBErrorModel(contextErrorModel: JSBErrorReportModel?) {
         if (!checkJSBErrorCodeIsRight()) {
             return
         }
         if (SparklingBridge.jsbErrorReportBlockList.contains(jsbMethodName)) {
-            //report be block.
+            // report be block.
             return
         }
         realReportSDKErrorModel(contextErrorModel, DEFAULT_JSB_ERROR_EVENT, 0)
@@ -95,7 +99,7 @@ class JSBErrorReportModel {
     private fun realReportSDKErrorModel(
         contextErrorModel: JSBErrorReportModel?,
         eventName: String,
-        simple: Int
+        simple: Int,
     ) {
         MonitorUtils.customReport(
             eventName,
@@ -113,32 +117,28 @@ class JSBErrorReportModel {
                         put(key, value.toString())
                     }
                 }
-                //add context message
+                // add context message
                 contextErrorModel?.jsbExtension?.let {
                     for ((key, value) in it) {
                         put(key, value.toString())
                     }
                 }
-            })
+            },
+        )
     }
 
-    private val allJSBSDKErrorCode = arrayOf(
-        IDLBridgeMethod.UNREGISTERED, // UnregisteredMethod, the called method isn't registered, due to legacy error, sdk use BridgeConstants's BRIDGE_NOT_FOUND
-        IDLBridgeMethod.INVALID_PARAM, // InvalidParameter, the parameter passed by FE is invalid
-        IDLBridgeMethod.INVALID_RESULT, // InvalidResult, the result passed by the method implementor is invalid
-
-        IDLBridgeMethod.UNKNOWN_ERROR,
-        IDLBridgeMethod.PERMISSION_NO_EXIST, // internal code, due to legacy error, sdk use BridgeConstants's PERMISSION_NO_EXIST
-        IDLBridgeMethod.ANNOTATION_ERROR, // when annotation can't get
-        IDLBridgeMethod.ILLEGAL_OPERATION_ERROR, // when call a illegal method of proxy
-
-
-        IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED, // bridge call be intercepted
-        IDLBridgeMethod.BRIDGE_HAS_BEEN_RELEASED,
-
+    private val allJSBSDKErrorCode =
+        arrayOf(
+            IDLBridgeMethod.UNREGISTERED, // UnregisteredMethod, the called method isn't registered, due to legacy error, sdk use BridgeConstants's BRIDGE_NOT_FOUND
+            IDLBridgeMethod.INVALID_PARAM, // InvalidParameter, the parameter passed by FE is invalid
+            IDLBridgeMethod.INVALID_RESULT, // InvalidResult, the result passed by the method implementor is invalid
+            IDLBridgeMethod.UNKNOWN_ERROR,
+            IDLBridgeMethod.PERMISSION_NO_EXIST, // internal code, due to legacy error, sdk use BridgeConstants's PERMISSION_NO_EXIST
+            IDLBridgeMethod.ANNOTATION_ERROR, // when annotation can't get
+            IDLBridgeMethod.ILLEGAL_OPERATION_ERROR, // when call a illegal method of proxy
+            IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED, // bridge call be intercepted
+            IDLBridgeMethod.BRIDGE_HAS_BEEN_RELEASED,
         )
 
-    private fun checkJSBErrorCodeIsRight(): Boolean {
-        return allJSBSDKErrorCode.contains(jsbErrorCode)
-    }
+    private fun checkJSBErrorCodeIsRight(): Boolean = allJSBSDKErrorCode.contains(jsbErrorCode)
 }

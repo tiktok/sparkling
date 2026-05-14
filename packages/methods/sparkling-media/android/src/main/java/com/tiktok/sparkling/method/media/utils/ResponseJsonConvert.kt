@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName
 class AvatarUri {
     @SerializedName("uri")
     var uri: String? = null
+
     @SerializedName("url_list")
     var urlList: List<String>? = null
 }

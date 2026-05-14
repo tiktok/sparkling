@@ -7,14 +7,14 @@ import android.net.Uri
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
 
 interface IKitInitParam {
-    var type : HybridKitType
-    var loadUri : Uri?
+    var type: HybridKitType
+    var loadUri: Uri?
 
-    fun setGlobalProps(_globalProps: Map<String, Any>?){}
+    fun setGlobalProps(_globalProps: Map<String, Any>?) {}
 
-    fun removeGlobalProps(_globalPropsKeys: List<String>?){}
+    fun removeGlobalProps(_globalPropsKeys: List<String>?) {}
 
-    fun obtainGlobalProps():Map<String, Any>? = null
+    fun obtainGlobalProps(): Map<String, Any>? = null
 
     fun getHybridSchemeParam(): HybridSchemeParam? = null
 

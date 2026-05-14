@@ -10,11 +10,11 @@ import com.tiktok.sparkling.hybridkit.HybridContext
 
 interface SparklingUIProvider {
     fun getLoadingView(context: Context): View
+
     fun getErrorView(context: Context): View
+
     fun getToolBar(context: Context): Toolbar?
 }
-
-
 
 class SparklingContext : HybridContext() {
     var sparklingUIProvider: SparklingUIProvider? = null

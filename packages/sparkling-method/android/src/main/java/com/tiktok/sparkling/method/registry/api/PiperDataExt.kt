@@ -9,8 +9,8 @@ import org.json.JSONObject
 /**
  */
 
-internal fun PiperData.toJSONObject(): JSONObject {
-    return try {
+internal fun PiperData.toJSONObject(): JSONObject =
+    try {
         when (this.dataType) {
             PiperData.DataType.String.ordinal -> {
                 val rawData = this.rawData
@@ -37,10 +37,9 @@ internal fun PiperData.toJSONObject(): JSONObject {
     } catch (e: Exception) {
         JSONObject()
     }
-}
 
-internal fun PiperData.stringify(): String {
-    return when (this.dataType) {
+internal fun PiperData.stringify(): String =
+    when (this.dataType) {
         PiperData.DataType.String.ordinal -> {
             this.rawData as? String
         }
@@ -54,9 +53,10 @@ internal fun PiperData.stringify(): String {
             }
         }
 
-        else -> null
+        else -> {
+            null
+        }
     } ?: ""
-}
 
 internal fun Map<*, *>.containsPiperData(): Boolean {
     this.forEach { (_, v) ->

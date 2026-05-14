@@ -13,10 +13,9 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(
     sdk = [33],
-    packageName = "com.tiktok.sparkling"
+    packageName = "com.tiktok.sparkling",
 )
 class RuntimeInfoTest {
-
     private lateinit var runtimeInfo: RuntimeInfo
 
     @Before
@@ -155,7 +154,7 @@ class RuntimeInfoTest {
     fun testRuntimeInfoIsConcurrentHashMap() {
         runtimeInfo["key1"] = "value1"
         runtimeInfo["key2"] = 123
-        
+
         assertEquals("value1", runtimeInfo["key1"])
         assertEquals(123, runtimeInfo["key2"])
         assertEquals(2, runtimeInfo.size)
@@ -166,7 +165,7 @@ class RuntimeInfoTest {
         runtimeInfo[RuntimeInfo.CONTAINER_ID] = "test-container-id"
         runtimeInfo[RuntimeInfo.SCREEN_WIDTH] = 1080
         runtimeInfo[RuntimeInfo.SCREEN_HEIGHT] = 1920
-        
+
         assertEquals("test-container-id", runtimeInfo[RuntimeInfo.CONTAINER_ID])
         assertEquals(1080, runtimeInfo[RuntimeInfo.SCREEN_WIDTH])
         assertEquals(1920, runtimeInfo[RuntimeInfo.SCREEN_HEIGHT])
@@ -177,7 +176,7 @@ class RuntimeInfoTest {
         runtimeInfo[RuntimeInfo.OS] = "Android"
         runtimeInfo[RuntimeInfo.OS_VERSION] = "13"
         runtimeInfo[RuntimeInfo.LANGUAGE] = "en"
-        
+
         assertEquals(3, runtimeInfo.size)
         assertTrue(runtimeInfo.containsKey(RuntimeInfo.OS))
         assertTrue(runtimeInfo.containsKey(RuntimeInfo.OS_VERSION))
@@ -188,12 +187,12 @@ class RuntimeInfoTest {
     fun testClearAndEmpty() {
         runtimeInfo[RuntimeInfo.CONTAINER_ID] = "test"
         runtimeInfo[RuntimeInfo.SCREEN_WIDTH] = 1080
-        
+
         assertFalse(runtimeInfo.isEmpty())
         assertEquals(2, runtimeInfo.size)
-        
+
         runtimeInfo.clear()
-        
+
         assertTrue(runtimeInfo.isEmpty())
         assertEquals(0, runtimeInfo.size)
     }
@@ -202,7 +201,7 @@ class RuntimeInfoTest {
     fun testReplaceValues() {
         runtimeInfo[RuntimeInfo.DEVICE_MODEL] = "Pixel 6"
         assertEquals("Pixel 6", runtimeInfo[RuntimeInfo.DEVICE_MODEL])
-        
+
         runtimeInfo[RuntimeInfo.DEVICE_MODEL] = "Galaxy S22"
         assertEquals("Galaxy S22", runtimeInfo[RuntimeInfo.DEVICE_MODEL])
     }
@@ -210,7 +209,7 @@ class RuntimeInfoTest {
     @Test
     fun testNullValues() {
         runtimeInfo.remove(RuntimeInfo.ENVIRONMENT)
-        
+
         assertFalse(runtimeInfo.containsKey(RuntimeInfo.ENVIRONMENT))
         assertNull(runtimeInfo[RuntimeInfo.ENVIRONMENT])
     }

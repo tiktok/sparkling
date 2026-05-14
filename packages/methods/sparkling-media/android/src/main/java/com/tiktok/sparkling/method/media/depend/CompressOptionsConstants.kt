@@ -10,4 +10,3 @@ object CompressOptionsConstants {
     const val ONLY_IMAGE = 3
     const val NONE = 4
 }
-

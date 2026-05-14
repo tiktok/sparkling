@@ -18,7 +18,6 @@ import java.lang.reflect.Field
 
 @RunWith(RobolectricTestRunner::class)
 class HybridActivityStackManagerTest {
-
     private lateinit var mockApplication: Application
     private lateinit var mockActivity: Activity
     private lateinit var activityLifecycleCallbacks: Application.ActivityLifecycleCallbacks
@@ -26,21 +25,21 @@ class HybridActivityStackManagerTest {
     @Before
     fun setUp() {
         clearAllMocks()
-        
+
         mockApplication = mockk(relaxed = true)
         mockActivity = mockk(relaxed = true)
-        
+
         mockkObject(HybridActivityDelegate)
         every { HybridActivityDelegate.getTopActivity() } returns null
         every { HybridActivityDelegate.setTopActivity(any()) } just Runs
-        
+
         every { mockApplication.registerActivityLifecycleCallbacks(any()) } answers {
             activityLifecycleCallbacks = firstArg()
         }
-        
+
         // Reset resumeCount to 0 using reflection to ensure clean state
         resetResumeCount()
-        
+
         // Initialize HybridActivityStackManager to ensure activityLifecycleCallbacks is captured
         HybridActivityStackManager.init(mockApplication)
     }
@@ -58,7 +57,7 @@ class HybridActivityStackManagerTest {
     @Test
     fun testInit() {
         HybridActivityStackManager.init(mockApplication)
-        
+
         verify { mockApplication.registerActivityLifecycleCallbacks(any()) }
     }
 
@@ -66,9 +65,9 @@ class HybridActivityStackManagerTest {
     fun testGetTopActivity() {
         val expectedActivity = mockk<Activity>()
         every { HybridActivityDelegate.getTopActivity() } returns expectedActivity
-        
+
         val result = HybridActivityStackManager.getTopActivity()
-        
+
         assertEquals(expectedActivity, result)
         verify { HybridActivityDelegate.getTopActivity() }
     }
@@ -76,9 +75,9 @@ class HybridActivityStackManagerTest {
     @Test
     fun testGetTopActivityWhenNull() {
         every { HybridActivityDelegate.getTopActivity() } returns null
-        
+
         val result = HybridActivityStackManager.getTopActivity()
-        
+
         assertNull(result)
     }
 
@@ -90,7 +89,7 @@ class HybridActivityStackManagerTest {
     @Test
     fun testIsBackgroundAfterActivityResumed() {
         activityLifecycleCallbacks.onActivityResumed(mockActivity)
-        
+
         assertFalse(HybridActivityStackManager.isBackground())
         verify { HybridActivityDelegate.setTopActivity(mockActivity) }
     }
@@ -99,7 +98,7 @@ class HybridActivityStackManagerTest {
     fun testIsBackgroundAfterActivityPaused() {
         activityLifecycleCallbacks.onActivityResumed(mockActivity)
         assertFalse(HybridActivityStackManager.isBackground())
-        
+
         activityLifecycleCallbacks.onActivityPaused(mockActivity)
         assertTrue(HybridActivityStackManager.isBackground())
     }
@@ -107,16 +106,16 @@ class HybridActivityStackManagerTest {
     @Test
     fun testMultipleActivitiesResumeAndPause() {
         val mockActivity2 = mockk<Activity>(relaxed = true)
-        
+
         activityLifecycleCallbacks.onActivityResumed(mockActivity)
         assertFalse(HybridActivityStackManager.isBackground())
-        
+
         activityLifecycleCallbacks.onActivityResumed(mockActivity2)
         assertFalse(HybridActivityStackManager.isBackground())
-        
+
         activityLifecycleCallbacks.onActivityPaused(mockActivity)
         assertFalse(HybridActivityStackManager.isBackground())
-        
+
         activityLifecycleCallbacks.onActivityPaused(mockActivity2)
         assertTrue(HybridActivityStackManager.isBackground())
     }
@@ -124,39 +123,39 @@ class HybridActivityStackManagerTest {
     @Test
     fun testActivityLifecycleCallbacksOnActivityCreated() {
         val mockBundle = mockk<Bundle>(relaxed = true)
-        
+
         activityLifecycleCallbacks.onActivityCreated(mockActivity, mockBundle)
-        
+
         assertTrue(HybridActivityStackManager.isBackground())
     }
 
     @Test
     fun testActivityLifecycleCallbacksOnActivityStarted() {
         activityLifecycleCallbacks.onActivityStarted(mockActivity)
-        
+
         assertTrue(HybridActivityStackManager.isBackground())
     }
 
     @Test
     fun testActivityLifecycleCallbacksOnActivityStopped() {
         activityLifecycleCallbacks.onActivityStopped(mockActivity)
-        
+
         assertTrue(HybridActivityStackManager.isBackground())
     }
 
     @Test
     fun testActivityLifecycleCallbacksOnActivitySaveInstanceState() {
         val mockBundle = mockk<Bundle>(relaxed = true)
-        
+
         activityLifecycleCallbacks.onActivitySaveInstanceState(mockActivity, mockBundle)
-        
+
         assertTrue(HybridActivityStackManager.isBackground())
     }
 
     @Test
     fun testActivityLifecycleCallbacksOnActivityDestroyed() {
         activityLifecycleCallbacks.onActivityDestroyed(mockActivity)
-        
+
         assertTrue(HybridActivityStackManager.isBackground())
     }
 
@@ -164,27 +163,27 @@ class HybridActivityStackManagerTest {
     fun testComplexActivityLifecycleScenario() {
         val mockActivity2 = mockk<Activity>(relaxed = true)
         val mockActivity3 = mockk<Activity>(relaxed = true)
-        
+
         assertTrue(HybridActivityStackManager.isBackground())
-        
+
         activityLifecycleCallbacks.onActivityResumed(mockActivity)
         assertFalse(HybridActivityStackManager.isBackground())
         verify { HybridActivityDelegate.setTopActivity(mockActivity) }
-        
+
         activityLifecycleCallbacks.onActivityResumed(mockActivity2)
         assertFalse(HybridActivityStackManager.isBackground())
         verify { HybridActivityDelegate.setTopActivity(mockActivity2) }
-        
+
         activityLifecycleCallbacks.onActivityResumed(mockActivity3)
         assertFalse(HybridActivityStackManager.isBackground())
         verify { HybridActivityDelegate.setTopActivity(mockActivity3) }
-        
+
         activityLifecycleCallbacks.onActivityPaused(mockActivity2)
         assertFalse(HybridActivityStackManager.isBackground())
-        
+
         activityLifecycleCallbacks.onActivityPaused(mockActivity)
         assertFalse(HybridActivityStackManager.isBackground())
-        
+
         activityLifecycleCallbacks.onActivityPaused(mockActivity3)
         assertTrue(HybridActivityStackManager.isBackground())
     }

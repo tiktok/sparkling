@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  */
-open class RuntimeInfo() : ConcurrentHashMap<String, Any>() {
+open class RuntimeInfo : ConcurrentHashMap<String, Any>() {
     companion object {
         const val CONTAINER_ID = "containerID"
         const val QUERY_ITEMS = "queryItems"
@@ -20,6 +20,7 @@ open class RuntimeInfo() : ConcurrentHashMap<String, Any>() {
         const val APP_LOCALE = "appLocale"
         const val LYNX_SDK_VERSION = "lynxSdkVersion"
         const val SPARKLING_VERSION = "sparklingVersion"
+
         /** Hardcoded SDK version — update during release workflow. */
         const val SPARKLING_VERSION_VALUE = "1.0.0"
         const val STATUS_BAR_HEIGHT = "statusBarHeight"
@@ -37,5 +38,4 @@ open class RuntimeInfo() : ConcurrentHashMap<String, Any>() {
         const val NAVIGATION_BAR_HEIGHT = "navigationBarHeight"
         const val PIXEL_RATIO = "pixelRatio"
     }
-
 }

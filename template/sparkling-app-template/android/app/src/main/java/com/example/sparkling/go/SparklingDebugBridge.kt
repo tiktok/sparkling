@@ -19,17 +19,20 @@ object SparklingDebugBridge {
         }
     }
 
-    fun getDevUrl(context: Context, fallback: String): String {
-        return runCatching {
+    fun getDevUrl(
+        context: Context,
+        fallback: String,
+    ): String =
+        runCatching {
             val debugToolClass = Class.forName(DEBUG_TOOL_CLASS)
-            val getDevUrlMethod = debugToolClass.getMethod(
-                "getDevUrl",
-                Context::class.java,
-                String::class.java,
-            )
+            val getDevUrlMethod =
+                debugToolClass.getMethod(
+                    "getDevUrl",
+                    Context::class.java,
+                    String::class.java,
+                )
             getDevUrlMethod.invoke(null, context, fallback) as? String ?: fallback
         }.getOrDefault(fallback)
-    }
 
     fun showDevUrlDialog(
         activity: Activity,
@@ -38,17 +41,19 @@ object SparklingDebugBridge {
     ) {
         runCatching {
             val debugToolClass = Class.forName(DEBUG_TOOL_CLASS)
-            val showDevUrlDialogMethod = debugToolClass.getMethod(
-                "showDevUrlDialog",
-                Activity::class.java,
-                String::class.java,
-                Function1::class.java,
-            )
-            val callback = object : Function1<String, Unit> {
-                override fun invoke(updatedUrl: String) {
-                    onSaved(updatedUrl)
+            val showDevUrlDialogMethod =
+                debugToolClass.getMethod(
+                    "showDevUrlDialog",
+                    Activity::class.java,
+                    String::class.java,
+                    Function1::class.java,
+                )
+            val callback =
+                object : Function1<String, Unit> {
+                    override fun invoke(updatedUrl: String) {
+                        onSaved(updatedUrl)
+                    }
                 }
-            }
             showDevUrlDialogMethod.invoke(null, activity, initialUrl, callback)
         }
     }

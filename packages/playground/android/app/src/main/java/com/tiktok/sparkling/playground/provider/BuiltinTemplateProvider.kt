@@ -8,11 +8,15 @@ import com.lynx.tasm.provider.AbsTemplateProvider
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
-class BuiltinTemplateProvider(context: Context) : AbsTemplateProvider() {
-
+class BuiltinTemplateProvider(
+    context: Context,
+) : AbsTemplateProvider() {
     private var mContext: Context = context.applicationContext
 
-    override fun loadTemplate(uri: String, callback: Callback) {
+    override fun loadTemplate(
+        uri: String,
+        callback: Callback,
+    ) {
         Thread {
             try {
                 mContext.assets.open(uri).use { inputStream ->

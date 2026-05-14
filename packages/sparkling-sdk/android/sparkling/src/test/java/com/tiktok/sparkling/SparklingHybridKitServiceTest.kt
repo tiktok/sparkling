@@ -19,17 +19,16 @@ import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class SparklingHybridKitServiceTest {
-
     private lateinit var context: Context
     private lateinit var mockCallback: HybridKitInitCallback
 
     @Before
     fun setUp() {
         clearAllMocks()
-        
+
         context = RuntimeEnvironment.getApplication()
         mockCallback = mockk(relaxed = true)
-        
+
         mockkObject(HybridKitInitManager)
         every { HybridKitInitManager.status } returns HybridKitInitStatus.INIT
         every { HybridKitInitManager.addCallback(any()) } just Runs
@@ -39,9 +38,9 @@ class SparklingHybridKitServiceTest {
     @Test
     fun testGetHybridInitStatus() {
         every { HybridKitInitManager.status } returns HybridKitInitStatus.FINISHED
-        
+
         val status = SparklingHybridKitService.getHybridInitStatus()
-        
+
         assertEquals(HybridKitInitStatus.FINISHED, status)
         verify { HybridKitInitManager.status }
     }
@@ -49,32 +48,32 @@ class SparklingHybridKitServiceTest {
     @Test
     fun testGetHybridInitStatusWhenNotInit() {
         every { HybridKitInitManager.status } returns HybridKitInitStatus.INIT
-        
+
         val status = SparklingHybridKitService.getHybridInitStatus()
-        
+
         assertEquals(HybridKitInitStatus.INIT, status)
     }
 
     @Test
     fun testGetHybridInitStatusWhenInitFailed() {
         every { HybridKitInitManager.status } returns HybridKitInitStatus.LOADING
-        
+
         val status = SparklingHybridKitService.getHybridInitStatus()
-        
+
         assertEquals(HybridKitInitStatus.LOADING, status)
     }
 
     @Test
     fun testAddHybridKitInitCallback() {
         SparklingHybridKitService.addHybridKitInitCallback(mockCallback)
-        
+
         verify { HybridKitInitManager.addCallback(mockCallback) }
     }
 
     @Test
     fun testRemoveHybridInitCallback() {
         SparklingHybridKitService.removeHybridInitCallback(mockCallback)
-        
+
         verify { HybridKitInitManager.removeCallback(mockCallback) }
     }
 
@@ -82,16 +81,16 @@ class SparklingHybridKitServiceTest {
     fun testAddAndRemoveMultipleCallbacks() {
         val callback1 = mockk<HybridKitInitCallback>(relaxed = true)
         val callback2 = mockk<HybridKitInitCallback>(relaxed = true)
-        
+
         SparklingHybridKitService.addHybridKitInitCallback(callback1)
         SparklingHybridKitService.addHybridKitInitCallback(callback2)
-        
+
         verify { HybridKitInitManager.addCallback(callback1) }
         verify { HybridKitInitManager.addCallback(callback2) }
-        
+
         SparklingHybridKitService.removeHybridInitCallback(callback1)
         SparklingHybridKitService.removeHybridInitCallback(callback2)
-        
+
         verify { HybridKitInitManager.removeCallback(callback1) }
         verify { HybridKitInitManager.removeCallback(callback2) }
     }
@@ -101,7 +100,7 @@ class SparklingHybridKitServiceTest {
         val url = "test_url"
         val targetHandlerName = "test_handler"
         val bundle = Bundle()
-        
+
         assertThrows(NotImplementedError::class.java) {
             SparklingHybridKitService.open(context, url, targetHandlerName, bundle)
         }
@@ -111,7 +110,7 @@ class SparklingHybridKitServiceTest {
     fun testOpenMethodWithNullTargetHandler() {
         val url = "test_url"
         val bundle = Bundle()
-        
+
         assertThrows(NotImplementedError::class.java) {
             SparklingHybridKitService.open(context, url, null, bundle)
         }
@@ -121,7 +120,7 @@ class SparklingHybridKitServiceTest {
     fun testOpenMethodWithNullBundle() {
         val url = "test_url"
         val targetHandlerName = "test_handler"
-        
+
         assertThrows(NotImplementedError::class.java) {
             SparklingHybridKitService.open(context, url, targetHandlerName, null)
         }
@@ -130,14 +129,14 @@ class SparklingHybridKitServiceTest {
     @Test
     fun testInitHybridCoreSDKWithForceInitTrue() {
         SparklingHybridKitService.initHybridCoreSDK(forceInit = true)
-        
+
         assertTrue(true)
     }
 
     @Test
     fun testInitHybridCoreSDKWithForceInitFalse() {
         SparklingHybridKitService.initHybridCoreSDK(forceInit = false)
-        
+
         assertTrue(true)
     }
 
@@ -145,7 +144,7 @@ class SparklingHybridKitServiceTest {
     fun testServiceIsObject() {
         val service1 = SparklingHybridKitService
         val service2 = SparklingHybridKitService
-        
+
         assertSame(service1, service2)
     }
 
@@ -158,30 +157,31 @@ class SparklingHybridKitServiceTest {
     fun testCallbackManagement() {
         val callback1 = mockk<HybridKitInitCallback>(relaxed = true)
         val callback2 = mockk<HybridKitInitCallback>(relaxed = true)
-        
+
         SparklingHybridKitService.addHybridKitInitCallback(callback1)
         SparklingHybridKitService.addHybridKitInitCallback(callback2)
         SparklingHybridKitService.addHybridKitInitCallback(callback1)
-        
+
         verify(exactly = 2) { HybridKitInitManager.addCallback(callback1) }
         verify(exactly = 1) { HybridKitInitManager.addCallback(callback2) }
-        
+
         SparklingHybridKitService.removeHybridInitCallback(callback1)
         SparklingHybridKitService.removeHybridInitCallback(callback2)
         SparklingHybridKitService.removeHybridInitCallback(callback1)
-        
+
         verify(exactly = 2) { HybridKitInitManager.removeCallback(callback1) }
         verify(exactly = 1) { HybridKitInitManager.removeCallback(callback2) }
     }
 
     @Test
     fun testInitStatusMapping() {
-        val statuses = listOf(
-            HybridKitInitStatus.INIT,
-            HybridKitInitStatus.FINISHED,
-            HybridKitInitStatus.LOADING
-        )
-        
+        val statuses =
+            listOf(
+                HybridKitInitStatus.INIT,
+                HybridKitInitStatus.FINISHED,
+                HybridKitInitStatus.LOADING,
+            )
+
         for (status in statuses) {
             every { HybridKitInitManager.status } returns status
             assertEquals(status, SparklingHybridKitService.getHybridInitStatus())

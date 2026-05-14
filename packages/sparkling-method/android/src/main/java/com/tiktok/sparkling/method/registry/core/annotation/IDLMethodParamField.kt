@@ -2,7 +2,6 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-
 package com.tiktok.sparkling.method.registry.core.annotation
 
 import androidx.annotation.Keep
@@ -23,11 +22,17 @@ annotation class IDLMethodParamField(
     val primitiveClassType: KClass<out Any> = Any::class,
     val isEnum: Boolean = false,
     val isGetter: Boolean = true,
-    val defaultValue: MethodParamDefaultValue = MethodParamDefaultValue()
+    val defaultValue: MethodParamDefaultValue = MethodParamDefaultValue(),
 )
+
 @Keep
 enum class DefaultType {
-    STRING, DOUBLE, INT, LONG, BOOL, NONE
+    STRING,
+    DOUBLE,
+    INT,
+    LONG,
+    BOOL,
+    NONE,
 }
 
 @Target(AnnotationTarget.ANNOTATION_CLASS)
@@ -37,6 +42,6 @@ annotation class MethodParamDefaultValue(
     val doubleValue: Double = 0.0,
     val stringValue: String = "",
     val intValue: Int = 0,
-    val boolValue:Boolean = false,
-    val longValue: Long = 0L
+    val boolValue: Boolean = false,
+    val longValue: Long = 0L,
 )

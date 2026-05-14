@@ -19,7 +19,10 @@ import java.io.FileOutputStream
 import java.io.IOException
 
 object BdFileUtils {
-    fun convertUriToPath(context: Context, uri: Uri?): String? {
+    fun convertUriToPath(
+        context: Context,
+        uri: Uri?,
+    ): String? {
         if (uri == null) {
             return null
         }
@@ -53,13 +56,15 @@ object BdFileUtils {
                 }
                 var contentUri: Uri? = uri
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    contentUri = ContentUris.withAppendedId(
-                        Uri.parse(FConstants.URI_DOWNLOADS), id!!.toLong(),
-                    )
+                    contentUri =
+                        ContentUris.withAppendedId(
+                            Uri.parse(FConstants.URI_DOWNLOADS),
+                            id!!.toLong(),
+                        )
                 }
                 val path = getDataColumn(context, contentUri!!, null, null)
 
-                //cant get file path by contentProvider, then we use stream to copy the file to cache
+                // cant get file path by contentProvider, then we use stream to copy the file to cache
                 if (path == null) {
                     val input: FileInputStream?
                     val output: FileOutputStream?
@@ -136,33 +141,43 @@ object BdFileUtils {
             if (!TextUtils.isEmpty(id) && id!!.startsWith("/storage/emulated/")) {
                 return id
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && !TextUtils.isEmpty(id) && id!!.contains(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && !TextUtils.isEmpty(id) &&
+                id!!.contains(
                     ":",
                 )
             ) {
                 id = id.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
             }
-            val filePath = getDataColumn(
-                context, MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                MediaStore.Images.Media._ID + FConstants.ID_SELECTION, arrayOf<String?>(id),
-            )
+            val filePath =
+                getDataColumn(
+                    context,
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    MediaStore.Images.Media._ID + FConstants.ID_SELECTION,
+                    arrayOf<String?>(id),
+                )
             return filePath
         }
         return null
     }
 
     private fun getDataColumn(
-        context: Context, uri: Uri, selection: String?,
-        selectionArgs: Array<String?>?
+        context: Context,
+        uri: Uri,
+        selection: String?,
+        selectionArgs: Array<String?>?,
     ): String? {
         var cursor: Cursor? = null
         val projection = arrayOf<String?>(FConstants.DATA_COLUMN)
 
         try {
-            cursor = context.getContentResolver().query(
-                uri, projection, selection, selectionArgs,
-                null,
-            )
+            cursor =
+                context.getContentResolver().query(
+                    uri,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    null,
+                )
             if (cursor != null && cursor.moveToFirst()) {
                 val index = cursor.getColumnIndexOrThrow(FConstants.DATA_COLUMN)
                 return cursor.getString(index)
