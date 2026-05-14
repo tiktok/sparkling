@@ -75,6 +75,7 @@ If a check does not apply to your change, mention why in the PR description.
 - Follow the platform guidelines documented in `docs/code-style/style-configs.md`.
 - JavaScript/TypeScript uses the shared flat ESLint config in `eslint.config.js`. Keep import order tidy and ensure files carry the required license header where enforced.
 - Use Prettier settings from `template/sparkling-app-template/.prettierrc` for frontend code, and platform configs (`.editorconfig`, `.clang-format`, `.swiftlint.yml`) within the template directories.
+- Before submitting native code, run `scripts/lint.sh` to verify iOS Swift / ObjC / C++ and Android Kotlin formatting. CI runs the same script and will fail on any violation. If you touched native sources, run `scripts/lint.sh --fix` first to apply formatting in place, then re-run `scripts/lint.sh` to confirm a clean pass. Targets can be narrowed with `scripts/lint.sh [swift|clang|kotlin]`. Requires `swift-format`, `clang-format`, and `ktlint` on PATH (install via `brew install swift-format clang-format ktlint` on macOS).
 
 ## Reviews & Merges
 - At least one maintainer review is required before merge. Reviewers may request changes or additional tests to reduce regression risk.
