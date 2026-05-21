@@ -590,6 +590,7 @@ jobs:
       - name: Verify template iOS pod install
         working-directory: template/sparkling-app-template/ios
         run: |
+          rm -f Podfile.lock
           echo "🔨 Verifying template iOS pod install..."
           echo "   All Sparkling pods resolved from CocoaPods trunk"
 
@@ -607,6 +608,23 @@ jobs:
             sleep $DELAY
             DELAY=$((DELAY + 60))
           done
+
+      - name: Verify template iOS build
+        working-directory: template/sparkling-app-template/ios
+        run: |
+          echo "🔨 Building template iOS app (simulator, no code signing)..."
+          xcodebuild \
+            -workspace SparklingGo.xcworkspace \
+            -scheme SparklingGoInHouse \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY='' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_ENTITLEMENTS=''
+          echo "✅ Template iOS build succeeded"
 
   # ──────────────────────────────────────────────────────────────
   # Step 4: Publish sparkling-app-template to npm

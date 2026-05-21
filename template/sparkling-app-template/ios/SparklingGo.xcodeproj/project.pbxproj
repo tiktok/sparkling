@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		07B2FB684B8D385782138000 /* Pods_SparklingGoUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9AD74935FFBD17E3B3D4E69A /* Pods_SparklingGoUITests.framework */; };
+		15064CE7D75AAA4B1365B819 /* Pods_SparklingGoInHouse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7872262C3B07417CD3D64FD /* Pods_SparklingGoInHouse.framework */; };
 		903208242ED9629900167236 /* LynxResources in Resources */ = {isa = PBXBuildFile; fileRef = 903208232ED9629900167236 /* LynxResources */; };
 		9CF6B09A1F033C4D476754DE /* LynxResources in Resources */ = {isa = PBXBuildFile; fileRef = 903208232ED9629900167236 /* LynxResources */; };
 		CEAB8C5202B26CF8F0BE5581 /* Pods_SparklingGo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B00F0DF4C89E15C31BC93A3 /* Pods_SparklingGo.framework */; };
@@ -55,8 +56,11 @@
 		B5E42D779278857A5AAB06BF /* Pods-SparklingGoUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGoUITests.debug.xcconfig"; path = "Target Support Files/Pods-SparklingGoUITests/Pods-SparklingGoUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		BEB0A8939FDC0E69DE1ACBE1 /* Pods-SparklingGoUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGoUITests.release.xcconfig"; path = "Target Support Files/Pods-SparklingGoUITests/Pods-SparklingGoUITests.release.xcconfig"; sourceTree = "<group>"; };
 		C070511DD16ADB8A7E080D02 /* SparklingGoInHouse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SparklingGoInHouse.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C492CACB668E9CA099F62A4E /* Pods-SparklingGoInHouse.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGoInHouse.debug.xcconfig"; path = "Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse.debug.xcconfig"; sourceTree = "<group>"; };
 		C50586CC4ECBC63F4329F466 /* Pods-SparklingMethodTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingMethodTests.release.xcconfig"; path = "Target Support Files/Pods-SparklingMethodTests/Pods-SparklingMethodTests.release.xcconfig"; sourceTree = "<group>"; };
+		CF08A3181F6F8598B5B549B6 /* Pods-SparklingGoInHouse.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGoInHouse.release.xcconfig"; path = "Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse.release.xcconfig"; sourceTree = "<group>"; };
 		E28DB50001F3EFBF06162E18 /* Pods-SparklingGo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGo.debug.xcconfig"; path = "Target Support Files/Pods-SparklingGo/Pods-SparklingGo.debug.xcconfig"; sourceTree = "<group>"; };
+		F7872262C3B07417CD3D64FD /* Pods_SparklingGoInHouse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SparklingGoInHouse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC9A690424F49FA47736FA61 /* Pods-SparklingGoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGoTests.release.xcconfig"; path = "Target Support Files/Pods-SparklingGoTests/Pods-SparklingGoTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -128,6 +132,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				15064CE7D75AAA4B1365B819 /* Pods_SparklingGoInHouse.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,6 +146,7 @@
 				34294AA1E3153C7FF24DA29D /* Pods_SparklingGoTests.framework */,
 				9AD74935FFBD17E3B3D4E69A /* Pods_SparklingGoUITests.framework */,
 				80857B85C0422883390B2606 /* Pods_SparklingMethodTests.framework */,
+				F7872262C3B07417CD3D64FD /* Pods_SparklingGoInHouse.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -182,6 +188,8 @@
 				BEB0A8939FDC0E69DE1ACBE1 /* Pods-SparklingGoUITests.release.xcconfig */,
 				8C76000D4A2F6C5E1542B66F /* Pods-SparklingMethodTests.debug.xcconfig */,
 				C50586CC4ECBC63F4329F466 /* Pods-SparklingMethodTests.release.xcconfig */,
+				C492CACB668E9CA099F62A4E /* Pods-SparklingGoInHouse.debug.xcconfig */,
+				CF08A3181F6F8598B5B549B6 /* Pods-SparklingGoInHouse.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -289,9 +297,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3BD2CED64D45F66E4B041308 /* Build configuration list for PBXNativeTarget "SparklingGoInHouse" */;
 			buildPhases = (
+				0DDC3B8F8DD3FF44E7198169 /* [CP] Check Pods Manifest.lock */,
 				BFC146A4025F02FD285C00CD /* Sources */,
 				AE22B03FC3758922AAC2EDE7 /* Frameworks */,
 				EF4438325BA9DBA2ADD21037 /* Resources */,
+				209D85357FD02CF4F75C29F6 /* [CP] Embed Pods Frameworks */,
+				D9ABF883AA82F5BBF562FF58 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -398,6 +409,28 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		0DDC3B8F8DD3FF44E7198169 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SparklingGoInHouse-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		10EDD5AE55F2E68755A1F4D3 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -435,6 +468,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		209D85357FD02CF4F75C29F6 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		2CE636BDEA6EB413D84DBE48 /* [CP] Embed Pods Frameworks */ = {
@@ -603,6 +653,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SparklingMethodTests/Pods-SparklingMethodTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D9ABF883AA82F5BBF562FF58 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		E74EF213CF315A781DF57CB4 /* [CP] Copy Pods Resources */ = {
@@ -1031,6 +1098,7 @@
 		};
 		CB11BD834D252FE605390701 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C492CACB668E9CA099F62A4E /* Pods-SparklingGoInHouse.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -1073,6 +1141,7 @@
 		};
 		E3C23746D32E724CECA7BC3E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CF08A3181F6F8598B5B549B6 /* Pods-SparklingGoInHouse.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

@@ -56,8 +56,8 @@ def sparkling_kit
 
   pod 'DebugRouter', '5.0.15', :subspecs => ['MessageTransceiverEnable']
 
-  pod 'SnapKit'
-  pod 'Mantle', '~> 2.2.0'
+  pod 'SnapKit', '5.7.1'
+  pod 'Mantle', '2.2.0'
   
   pod 'SDWebImage','5.15.5'
   pod 'SDWebImageWebPCoder', '0.11.0'

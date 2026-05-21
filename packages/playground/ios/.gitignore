@@ -45,8 +45,7 @@ Packages/
 
 # CocoaPods
 Pods/
-# Keep Podfile.lock tracked
-#!Podfile.lock
+Podfile.lock
 
 # Carthage
 Carthage/Build/
