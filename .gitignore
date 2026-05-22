@@ -30,7 +30,9 @@ template/sparkling-app-template/android/.gradle/
 template/sparkling-app-template/ios/build/
 template/sparkling-app-template/ios/DerivedData/
 template/sparkling-app-template/ios/Pods/
-template/sparkling-app-template/ios/Podfile.lock
+# ios/Podfile.lock is intentionally tracked: the release pipeline regenerates
+# and commits it. It stays ignored only inside generated apps, via the
+# template's own ios/gitignore.
 template/sparkling-app-template/coverage/
 template/sparkling-app-template/vendor/bundle/
 template/sparkling-app-template/.bundle/

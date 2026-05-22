@@ -292,10 +292,13 @@ jobs:
           signing_key: ${{ secrets.SIGNING_KEY }}
 
   # ──────────────────────────────────────────────────────────────
-  # Step 3a: Verify template JS build first
+  # Step 3a: Verify app template on Android
+  #   Scaffolds a fresh project from the local template with the
+  #   freshly built create-sparkling-app CLI and runs `pnpm run:android`,
+  #   so the published Maven artifacts are exercised end-to-end.
   # ──────────────────────────────────────────────────────────────
-  verify-template-js:
-    name: Verify App Template JS
+  verify-template-android:
+    name: Verify App Template Android
     runs-on: ubuntu-latest
     needs: [prepare, publish-typescript, publish-android]
     environment:
@@ -304,160 +307,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Verify app template (Android)
+        uses: ./.github/actions/verify-template-android
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          registry-url: ${{ env.NPM_REGISTRY_URL }}
-
-      - name: Ensure latest npm (>= 11.5.1 required for Trusted Publishing)
-        run: |
-          echo "📦 Upgrading npm for Trusted Publishing support..."
-          npm install -g npm@latest
-          echo "✅ npm version: $(npm --version)"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Install dependencies
-        run: |
-          echo "📦 Installing workspace dependencies..."
-          pnpm install --frozen-lockfile
-          echo "✅ Dependencies installed successfully"
-
-      - name: Build packages
-        run: |
-          echo "🔨 Building all packages (skipping website)..."
-          pnpm --filter '!sparkling-website' -r build
-          echo "✅ All packages built successfully"
-
-      - name: Update all versions
-        run: |
-          echo "📝 Updating all versions to ${{ needs.prepare.outputs.version }}..."
-          chmod +x scripts/update-all-version.sh
-          ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
-          echo "✅ Versions updated successfully"
-
-      - name: Wait for npm packages availability
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          echo "⏳ Waiting for npm packages to be available..."
-          ALL_FOUND=true
-          for pkg in sparkling-navigation sparkling-debug-tool sparkling-app-cli sparkling-types sparkling-method; do
-            FOUND=false
-            for i in {1..30}; do
-              if pnpm view "$pkg@$VERSION" version 2>/dev/null | grep -q "$VERSION"; then
-                echo "✅ $pkg@$VERSION is available on npm (after $i checks)"
-                FOUND=true
-                break
-              fi
-              echo "Waiting for $pkg... ($i/30, next check in 10s)"
-              sleep 10
-            done
-            if [ "$FOUND" != "true" ]; then
-              echo "::error::$pkg@$VERSION not available on npm after 5 minutes"
-              ALL_FOUND=false
-            fi
-          done
-          if [ "$ALL_FOUND" != "true" ]; then
-            exit 1
-          fi
-
-      - name: Verify template JS build
-        working-directory: template/sparkling-app-template
-        run: |
-          echo "🔨 Verifying template JS build..."
-          pnpm install --no-frozen-lockfile
-          pnpm build
-          echo "✅ Template JS build succeeded"
-
-  # ──────────────────────────────────────────────────────────────
-  # Step 3b: Verify template Android build (parallel with iOS)
-  # ──────────────────────────────────────────────────────────────
-  verify-template-android:
-    name: Verify App Template Android
-    runs-on: ubuntu-latest
-    needs: [prepare, verify-template-js]
-    environment:
-      name: package releasement
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          registry-url: ${{ env.NPM_REGISTRY_URL }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install dependencies
-        run: |
-          pnpm install --frozen-lockfile
-
-      - name: Update all versions
-        run: |
-          chmod +x scripts/update-all-version.sh
-          ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
-
-      - name: Wait for Android Maven packages availability
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          echo "⏳ Waiting for Android artifacts on Maven Central (max 30 minutes, every 20s)..."
-
-          declare -a ARTIFACTS=(
-            "com/tiktok/sparkling/sparkling"
-            "com/tiktok/sparkling/sparkling-method"
-          )
-
-          ALL_FOUND=true
-          for artifact in "${ARTIFACTS[@]}"; do
-            FOUND=false
-            POM_URL="https://repo1.maven.org/maven2/${artifact}/${VERSION}/$(basename "${artifact}")-${VERSION}.pom"
-
-            for i in {1..90}; do
-              if curl -fsSL "$POM_URL" >/dev/null 2>&1; then
-                echo "✅ ${artifact//\//.}:${VERSION} is available (after $i checks)"
-                FOUND=true
-                break
-              fi
-
-              echo "Waiting for ${artifact//\//.}:${VERSION}... ($i/90, next check in 20s)"
-              sleep 20
-            done
-
-            if [ "$FOUND" != "true" ]; then
-              echo "::error::${artifact//\//.}:${VERSION} not available on Maven Central after 30 minutes"
-              ALL_FOUND=false
-            fi
-          done
-
-          if [ "$ALL_FOUND" != "true" ]; then
-            exit 1
-          fi
-
-      - name: Verify template Android build
-        working-directory: template/sparkling-app-template/android
-        run: |
-          echo "🔨 Verifying template Android build..."
-          chmod +x ./gradlew 2>/dev/null || true
-          ./gradlew assembleDebug --no-daemon
-          echo "✅ Template Android build succeeded"
+          version: ${{ needs.prepare.outputs.version }}
+          node_version: ${{ env.NODE_VERSION }}
+          pnpm_version: ${{ env.PNPM_VERSION }}
 
   # ──────────────────────────────────────────────────────────────
   # Step 2c: Publish iOS pods
@@ -497,134 +352,29 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   # ──────────────────────────────────────────────────────────────
-  # Step 3c: Verify template iOS pod install (mac runner)
-  #   Sparkling is resolved from CocoaPods trunk and methods from
-  #   node_modules via :path.
+  # Step 3b: Verify app template on iOS (mac runner)
+  #   Scaffolds a fresh project from the local template with the
+  #   freshly built create-sparkling-app CLI and runs `pnpm run:ios`,
+  #   so the pods published to CocoaPods trunk are exercised end-to-end.
+  #   The Podfile.lock resolved here is uploaded as an artifact so the
+  #   publish-template job can ship and commit it.
   # ──────────────────────────────────────────────────────────────
   verify-template-ios:
     name: Verify App Template iOS
     runs-on: macos-latest
-    needs: [prepare, verify-template-js, publish-ios]
+    needs: [prepare, publish-typescript, publish-ios]
     environment:
       name: package releasement
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Verify app template (iOS)
+        uses: ./.github/actions/verify-template-ios
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          registry-url: ${{ env.NPM_REGISTRY_URL }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-
-      - name: Install CocoaPods
-        run: |
-          echo "📦 Installing CocoaPods..."
-          bundle install
-          echo "✅ CocoaPods version: $(bundle exec pod --version)"
-
-      - name: Install dependencies
-        run: |
-          pnpm install --frozen-lockfile
-
-      - name: Update all versions
-        run: |
-          chmod +x scripts/update-all-version.sh
-          ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
-
-      - name: Install template npm dependencies
-        working-directory: template/sparkling-app-template
-        run: |
-          echo "📦 Installing template dependencies (JS tooling)..."
-          pnpm install --no-frozen-lockfile
-          echo "✅ Template npm dependencies installed"
-
-      - name: Wait for iOS pods on CocoaPods trunk
-        run: |
-          VERSION="${{ needs.prepare.outputs.version }}"
-          echo "⏳ Waiting for iOS pods on CocoaPods trunk (max 10 minutes, every 30s)..."
-
-          PODS=()
-          while IFS= read -r pod; do
-            PODS+=("$pod")
-          done < <(jq -r '.[].pod_name' scripts/ios_pods.json)
-
-          ALL_FOUND=true
-          for pod in "${PODS[@]}"; do
-            FOUND=false
-
-            for i in {1..20}; do
-              if bundle exec pod trunk info "$pod" 2>/dev/null | grep -q "$VERSION"; then
-                echo "✅ $pod $VERSION is indexed on trunk (after $i checks)"
-                FOUND=true
-                break
-              fi
-
-              echo "Waiting for $pod $VERSION... ($i/20, next check in 30s)"
-              sleep 30
-            done
-
-            if [ "$FOUND" != "true" ]; then
-              echo "::error::$pod $VERSION not found on CocoaPods trunk after 10 minutes"
-              ALL_FOUND=false
-            fi
-          done
-
-          if [ "$ALL_FOUND" != "true" ]; then
-            exit 1
-          fi
-
-          echo "✅ All pods indexed on trunk. Waiting 90s for CDN propagation..."
-          sleep 90
-
-      - name: Verify template iOS pod install
-        working-directory: template/sparkling-app-template/ios
-        run: |
-          rm -f Podfile.lock
-          echo "🔨 Verifying template iOS pod install..."
-          echo "   All Sparkling pods resolved from CocoaPods trunk"
-
-          DELAY=60
-          for i in {1..6}; do
-            if bundle exec pod install --repo-update --verbose; then
-              echo "✅ Template iOS pod install succeeded"
-              exit 0
-            fi
-            if [ $i -eq 6 ]; then
-              echo "::error::pod install failed after 6 attempts"
-              exit 1
-            fi
-            echo "pod install failed (attempt $i/6), waiting ${DELAY}s for CDN to propagate..."
-            sleep $DELAY
-            DELAY=$((DELAY + 60))
-          done
-
-      - name: Verify template iOS build
-        working-directory: template/sparkling-app-template/ios
-        run: |
-          echo "🔨 Building template iOS app (simulator, no code signing)..."
-          xcodebuild \
-            -workspace SparklingGo.xcworkspace \
-            -scheme SparklingGoInHouse \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath build \
-            CODE_SIGN_IDENTITY='' \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_ENTITLEMENTS=''
-          echo "✅ Template iOS build succeeded"
+          version: ${{ needs.prepare.outputs.version }}
+          node_version: ${{ env.NODE_VERSION }}
+          pnpm_version: ${{ env.PNPM_VERSION }}
 
   # ──────────────────────────────────────────────────────────────
   # Step 4: Publish sparkling-app-template to npm
@@ -633,7 +383,7 @@ jobs:
   publish-template:
     name: Publish App Template
     runs-on: ubuntu-latest
-    needs: [prepare, verify-template-js, verify-template-android, verify-template-ios]
+    needs: [prepare, verify-template-android, verify-template-ios]
     environment:
       name: package releasement
     steps:
@@ -648,7 +398,7 @@ jobs:
           echo "  Version: ${{ needs.prepare.outputs.version }}"
           echo "  Is RC:   ${{ needs.prepare.outputs.is_rc }}"
           echo "  Runner:  ${{ runner.os }} (${{ runner.arch }})"
-          echo "  Depends: verify-template-js, verify-template-android, verify-template-ios"
+          echo "  Depends: verify-template-android, verify-template-ios"
           echo "========================================="
 
       - name: Setup Node.js
@@ -680,6 +430,29 @@ jobs:
           chmod +x scripts/update-all-version.sh
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
           echo "✅ Versions updated successfully"
+
+      - name: Download verified iOS Podfile.lock
+        uses: actions/download-artifact@v4
+        with:
+          name: template-ios-podfile-lock___${{ github.run_id }}_${{ needs.prepare.outputs.version }}
+          path: ${{ runner.temp }}/verified-ios-lock
+
+      - name: Apply verified Podfile.lock
+        run: |
+          # verify-template-ios tagged the artifact and the file inside it with
+          # a ___<run_id>_<version> suffix. run_id is identical across every
+          # job of this run, so the same name is recomputed here — no value is
+          # passed between jobs. The suffix also makes the download impossible
+          # to confuse with the checked-out Podfile.lock; strip it so the
+          # published/committed file is a plain Podfile.lock.
+          SRC="${{ runner.temp }}/verified-ios-lock/Podfile.lock___${{ github.run_id }}_${{ needs.prepare.outputs.version }}"
+          DEST="template/sparkling-app-template/ios/Podfile.lock"
+          if [ ! -f "$SRC" ]; then
+            echo "::error::Verified Podfile.lock not found at $SRC"
+            exit 1
+          fi
+          mv -f "$SRC" "$DEST"
+          echo "✅ Applied Podfile.lock verified by verify-template-ios"
 
       - name: Verify template versions before publish
         run: |
@@ -814,8 +587,9 @@ jobs:
           - **Android** (`template/sparkling-app-template/android/app/build.gradle.kts`):
             - `com.tiktok.sparkling:sparkling`
             - `com.tiktok.sparkling:sparkling-method`
-          - **iOS** (`template/sparkling-app-template/ios/Podfile`):
-            - All Sparkling pods (`Sparkling`, `SparklingMethod`, `Sparkling-DebugTool`, `Sparkling-Router`) pinned to release version from CocoaPods trunk
+          - **iOS** (`template/sparkling-app-template/ios/`):
+            - `Podfile` — all Sparkling pods (`Sparkling`, `SparklingMethod`, `Sparkling-DebugTool`, `Sparkling-Router`) pinned to release version from CocoaPods trunk
+            - `Podfile.lock` — regenerated and verified by the iOS template verification job
           - **Root & SDK versions** aligned
 
           > This PR was created automatically by GitHub Actions.
@@ -861,7 +635,7 @@ jobs:
   notify-failure:
     name: Notify on Failure
     runs-on: ubuntu-latest
-    needs: [prepare, preflight-linux-auth, preflight-darwin-auth, publish-typescript, publish-android, publish-ios, verify-template-js, verify-template-android, verify-template-ios, publish-template]
+    needs: [prepare, preflight-linux-auth, preflight-darwin-auth, publish-typescript, publish-android, publish-ios, verify-template-android, verify-template-ios, publish-template]
     if: failure()
     steps:
       - name: Report failure details
@@ -874,11 +648,11 @@ jobs:
           echo ""
           echo "  Job Results:"
           echo "    prepare:                 ${{ needs.prepare.result }}"
-          echo "    preflight-registry:      ${{ needs.preflight-registry-auth.result }}"
+          echo "    preflight-linux-auth:    ${{ needs.preflight-linux-auth.result }}"
+          echo "    preflight-darwin-auth:   ${{ needs.preflight-darwin-auth.result }}"
           echo "    publish-typescript:      ${{ needs.publish-typescript.result }}"
           echo "    publish-android:         ${{ needs.publish-android.result }}"
           echo "    publish-ios:             ${{ needs.publish-ios.result }}"
-          echo "    verify-template-js:      ${{ needs.verify-template-js.result }}"
           echo "    verify-template-android: ${{ needs.verify-template-android.result }}"
           echo "    verify-template-ios:     ${{ needs.verify-template-ios.result }}"
           echo "    publish-template:        ${{ needs.publish-template.result }}"

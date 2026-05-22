@@ -1,0 +1,85 @@
+name: Verify App Template iOS
+description: >
+  Scaffold a fresh project from the local template using the freshly built
+  create-sparkling-app CLI, run `pnpm run:ios` against the published pods,
+  and upload the resolved Podfile.lock so the publish job can ship/commit it.
+
+inputs:
+  version:
+    description: Release version (e.g. 2.1.0 or 2.1.0-rc.12)
+    required: true
+  node_version:
+    description: Node.js version
+    required: false
+    default: '22.21.1'
+  pnpm_version:
+    description: pnpm version
+    required: false
+    default: '10.26.0'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node_version }}
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ inputs.pnpm_version }}
+
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install CocoaPods
+      shell: bash
+      run: |
+        echo "📦 Installing CocoaPods (root Gemfile)..."
+        bundle install
+        echo "✅ CocoaPods version: $(bundle exec pod --version)"
+
+    - name: Verify app template (iOS)
+      shell: bash
+      run: |
+        python3 scripts/verify_template.py \
+          --platform ios \
+          --version "${{ inputs.version }}" \
+          --workspace-dir "${{ runner.temp }}/sparkling-template-verify" \
+          --podfile-lock-out "template/sparkling-app-template/ios/Podfile.lock"
+
+    - name: Stage verified Podfile.lock for upload
+      id: lock-meta
+      shell: bash
+      run: |
+        # Tag the artifact (and the file inside it) with a run-unique suffix:
+        #   ___<run_id>_<version>
+        # run_id is unique per workflow run and identical across every job of
+        # that run, so the publish job recomputes the same name with nothing
+        # passed between jobs. It then strips the suffix back to a plain
+        # Podfile.lock.
+        suffix="___${{ github.run_id }}_${{ inputs.version }}"
+        filename="Podfile.lock${suffix}"
+        artifact="template-ios-podfile-lock${suffix}"
+        cp template/sparkling-app-template/ios/Podfile.lock "${{ runner.temp }}/${filename}"
+        echo "filename=${filename}" >> "$GITHUB_OUTPUT"
+        echo "artifact-name=${artifact}" >> "$GITHUB_OUTPUT"
+        echo "Staged verified Podfile.lock as ${filename} (artifact: ${artifact})"
+
+    - name: Upload verified Podfile.lock
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.lock-meta.outputs.artifact-name }}
+        path: ${{ runner.temp }}/${{ steps.lock-meta.outputs.filename }}
+        if-no-files-found: error
+        retention-days: 7
+        overwrite: true

@@ -31,6 +31,16 @@ on:
         required: true
         default: false
         type: boolean
+      verify_template_android:
+        description: Verify the app template on Android (scaffold via CLI, then pnpm run:android)
+        required: true
+        default: false
+        type: boolean
+      verify_template_ios:
+        description: Verify the app template on iOS (scaffold via CLI, then pnpm run:ios; uploads the resolved Podfile.lock as an artifact)
+        required: true
+        default: false
+        type: boolean
       publish_template:
         description: Resume sparkling-app-template publish
         required: true
@@ -239,10 +249,50 @@ jobs:
           cocoapods_trunk_token: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+  # Verify jobs are independent toggles: they assume the npm/Maven/CocoaPods
+  # artifacts are already published, scaffold a fresh project from the local
+  # template via the create-sparkling-app CLI, and run pnpm run:android /
+  # pnpm run:ios against the published artifacts. They need only `prepare`.
+  verify-template-android:
+    name: Verify App Template Android
+    runs-on: ubuntu-latest
+    needs: prepare
+    if: ${{ github.event.inputs.verify_template_android == 'true' }}
+    environment:
+      name: package releasement
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify app template (Android)
+        uses: ./.github/actions/verify-template-android
+        with:
+          version: ${{ needs.prepare.outputs.version }}
+          node_version: ${{ env.NODE_VERSION }}
+          pnpm_version: ${{ env.PNPM_VERSION }}
+
+  verify-template-ios:
+    name: Verify App Template iOS
+    runs-on: macos-latest
+    needs: prepare
+    if: ${{ github.event.inputs.verify_template_ios == 'true' }}
+    environment:
+      name: package releasement
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify app template (iOS)
+        uses: ./.github/actions/verify-template-ios
+        with:
+          version: ${{ needs.prepare.outputs.version }}
+          node_version: ${{ env.NODE_VERSION }}
+          pnpm_version: ${{ env.PNPM_VERSION }}
+
   publish-template:
     name: Resume App Template Publish
     runs-on: macos-latest
-    needs: [prepare, preflight-linux-auth, preflight-darwin-auth]
+    needs: [prepare, verify-template-android, verify-template-ios]
     if: ${{ github.event.inputs.publish_template == 'true' }}
     steps:
       - name: Checkout
@@ -269,6 +319,23 @@ jobs:
         run: |
           chmod +x scripts/update-all-version.sh
           ./scripts/update-all-version.sh ${{ needs.prepare.outputs.version }}
+
+      - name: Download verified iOS Podfile.lock
+        uses: actions/download-artifact@v4
+        with:
+          name: template-ios-podfile-lock___${{ github.run_id }}_${{ needs.prepare.outputs.version }}
+          path: ${{ runner.temp }}/verified-ios-lock
+
+      - name: Apply verified Podfile.lock
+        run: |
+          SRC="${{ runner.temp }}/verified-ios-lock/Podfile.lock___${{ github.run_id }}_${{ needs.prepare.outputs.version }}"
+          DEST="template/sparkling-app-template/ios/Podfile.lock"
+          if [ ! -f "$SRC" ]; then
+            echo "::error::Verified Podfile.lock not found at $SRC"
+            exit 1
+          fi
+          mv -f "$SRC" "$DEST"
+          echo "✅ Applied Podfile.lock verified by verify-template-ios"
 
       - name: Check template package status
         id: template_check

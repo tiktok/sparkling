@@ -1,0 +1,54 @@
+name: Verify App Template Android
+description: >
+  Scaffold a fresh project from the local template using the freshly built
+  create-sparkling-app CLI and run `pnpm run:android` against the published
+  Maven Central artifacts.
+
+inputs:
+  version:
+    description: Release version (e.g. 2.1.0 or 2.1.0-rc.12)
+    required: true
+  node_version:
+    description: Node.js version
+    required: false
+    default: '22.21.1'
+  pnpm_version:
+    description: pnpm version
+    required: false
+    default: '10.26.0'
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node_version }}
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{ inputs.pnpm_version }}
+
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Verify app template (Android)
+      shell: bash
+      run: |
+        python3 scripts/verify_template.py \
+          --platform android \
+          --version "${{ inputs.version }}" \
+          --workspace-dir "${{ runner.temp }}/sparkling-template-verify"
