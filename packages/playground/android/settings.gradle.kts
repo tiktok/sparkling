@@ -28,12 +28,13 @@ include(":sparkling-method")
 project(":sparkling-method").projectDir = file("../../../packages/sparkling-method/android")
 
 // BEGIN SPARKLING AUTOLINK
-val sparklingAutolinkProjects = listOf<Pair<String, java.io.File>>(
-  "sparkling-debug-tool" to file("../../sparkling-debug-tool/android"),
-  "sparkling-media" to file("../../methods/sparkling-media/android"),
-  "sparkling-navigation" to file("../../methods/sparkling-navigation/android"),
-  "sparkling-storage" to file("../../methods/sparkling-storage/android")
-)
+val sparklingAutolinkProjects =
+    listOf<Pair<String, java.io.File>>(
+        "sparkling-debug-tool" to file("../../sparkling-debug-tool/android"),
+        "sparkling-media" to file("../../methods/sparkling-media/android"),
+        "sparkling-navigation" to file("../../methods/sparkling-navigation/android"),
+        "sparkling-storage" to file("../../methods/sparkling-storage/android"),
+    )
 sparklingAutolinkProjects.forEach { (name, dir) ->
     include(":$name")
     project(":$name").projectDir = dir
