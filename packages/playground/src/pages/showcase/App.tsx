@@ -173,7 +173,7 @@ function ShowcaseContent() {
             className={`showcase-search-input ${isDark ? 'showcase-search-input--dark' : 'showcase-search-input--light'}`}
             bindinput={handleSearch}
             placeholder="Search demos..."
-            text-color={isDark ? '#ffffff' : '#000000'}
+            style={{ color: isDark ? '#ffffff' : '#000000' }}
           />
         </view>
         {searchQuery.length > 0 ? (

@@ -20,9 +20,6 @@ class RouterServiceImpl: RouterService {
     func openScheme(withParams params: Sparkling_Router.OpenMethodParamModel, completion: @escaping SparklingMethod.PipeMethod.CompletionBlock) {
         let urlString = params.scheme
         let context = SPKContext()
-        // Register <input> custom element so sub-pages can use text inputs
-        let inputElement = SparklingLynxElement(lynxElementName: "input", lynxElementClassName: LynxInput.self)
-        context.customUIElements = [inputElement]
         if let rawExtra = params.extra as? [String: Any] {
             var extra: [String: AnyHashable] = [:]
             for (key, value) in rawExtra {

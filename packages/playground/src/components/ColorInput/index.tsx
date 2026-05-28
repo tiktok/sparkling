@@ -40,7 +40,7 @@ export function ColorInput(props: ColorInputProps) {
           value={props.value}
           bindinput={handleInput}
           placeholder={props.placeholder || '#000000'}
-          text-color={isDark ? '#ffffff' : '#000000'}
+          style={{ color: isDark ? '#ffffff' : '#000000' }}
         />
         <view className="color-input-swatch" style={{ backgroundColor: props.value || '#888888' }} />
       </view>

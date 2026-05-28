@@ -5,6 +5,12 @@ plugins {
     jacoco
 }
 
+tasks.matching { it.name.startsWith("kaptGenerateStubs") }.configureEach {
+    if (this is org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions.jvmTarget = "11"
+    }
+}
+
 android {
     namespace = "com.tiktok.sparkling.playground"
     compileSdk = 34
@@ -79,6 +85,8 @@ dependencies {
     implementation(libs.fresco.animated.webp)
     implementation(libs.fresco.webp.support)
     implementation(libs.fresco.animated.base)
+    implementation(libs.lynx.xelement)
+    implementation(libs.lynx.xelement.input)
 
     kapt(libs.lynx.processor)
 
@@ -86,7 +94,7 @@ dependencies {
     listOf(
         project(":sparkling-media"),
         project(":sparkling-navigation"),
-        project(":sparkling-storage"),
+        project(":sparkling-storage")
     ).forEach { dep -> add("implementation", dep) }
     debugImplementation(project(":sparkling-debug-tool"))
     // END SPARKLING AUTOLINK

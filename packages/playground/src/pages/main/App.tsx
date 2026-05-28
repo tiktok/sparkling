@@ -238,7 +238,7 @@ function HomePage(props: { showPage: boolean; topInset: number }) {
               value={displayInput}
               bindinput={handleInput}
               placeholder="gp-screen.lynx.bundle"
-              text-color={isDark ? '#ffffff' : '#000000'}
+              style={{ color: isDark ? '#ffffff' : '#000000' }}
             />
             <view className="go-button" bindtap={handleGo}>
               <text className="go-button-text">Go</text>
@@ -495,7 +495,7 @@ function SettingsPage(props: { showPage: boolean; topInset: number }) {
                     defaultValue={devUrlInput}
                     bindinput={handleDevUrlInput}
                     placeholder="http://192.168.1.100:5969/"
-                    text-color={isDark ? '#ffffff' : '#000000'}
+                    style={{ color: isDark ? '#ffffff' : '#000000' }}
                   />
                   <view
                     className={`dev-url-save ${canSave ? 'dev-url-save--active' : 'dev-url-save--disabled'}`}

@@ -213,8 +213,8 @@ function SchemeBuilderContent() {
             borderRadius: '8px',
             padding: '0 12px',
             backgroundColor: isDark ? '#2a2a2a' : '#f0f2f5',
+            color: isDark ? '#25f4ee' : '#009995',
           }}
-          text-color={isDark ? '#25f4ee' : '#009995'}
         />
         <view className={dk('open-button')} bindtap={handleOpen}>
           <text className="open-button-text">Open</text>

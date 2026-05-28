@@ -7,16 +7,6 @@ import Sparkling
 import SwiftUI
 import UIKit
 
-class SparklingLynxElement: SPKLynxElement {
-    var lynxElementName: String
-    var lynxElementClassName: AnyClass
-
-    init(lynxElementName: String, lynxElementClassName: AnyClass) {
-        self.lynxElementName = lynxElementName
-        self.lynxElementClassName = lynxElementClassName
-    }
-}
-
 struct SPKSwiftVC: UIViewControllerRepresentable {
     var frame: CGRect
 

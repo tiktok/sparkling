@@ -39,6 +39,8 @@ lynx-service-log = { group = "org.lynxsdk.lynx", name = "lynx-service-log", vers
 lynx-service-http = { group = "org.lynxsdk.lynx", name = "lynx-service-http", version.ref = "lynxSdk" }
 lynx-service-devtool = { group = "org.lynxsdk.lynx", name = "lynx-service-devtool", version.ref = "lynxSdk" }
 lynx-processor = { group = "org.lynxsdk.lynx", name = "lynx-processor", version.ref = "lynxSdk" }
+lynx-xelement = { group = "org.lynxsdk.lynx", name = "xelement", version.ref = "lynxSdk" }
+lynx-xelement-input = { group = "org.lynxsdk.lynx", name = "xelement-input", version.ref = "lynxSdk" }
 okhttp = {group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp"}
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
