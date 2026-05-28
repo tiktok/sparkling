@@ -93,7 +93,7 @@ describe('sparkling-method cli', () => {
       await fs.ensureDir(srcDir);
       await fs.writeFile(
         path.join(srcDir, 'method.d.ts'),
-        `interface ShowToastRequest {\n  message: string;\n  /** @default 2000 */\n  duration?: number;\n}\n\ninterface ShowToastResponse { success: boolean; }\n\ndeclare function showToast(params: ShowToastRequest, callback: (res: ShowToastResponse) => void): void;`
+        `interface ShowToastRequest {\n  message: string;\n  /** @default 2000 */\n  duration?: number;\n}\n\ninterface ShowToastResponse {\n  success: boolean;\n  count: number;\n}\n\ndeclare function showToast(params: ShowToastRequest, callback: (res: ShowToastResponse) => void): void;`
       );
 
       await runCodegen({ src: 'src' });
@@ -122,8 +122,12 @@ describe('sparkling-method cli', () => {
       await expect(fs.pathExists(swiftPath)).resolves.toBe(true);
 
       const kotlinContent = await fs.readFile(kotlinPath, 'utf8');
+      expect(kotlinContent.split('\n')[0]).toBe('package com.example.toast.demo.showtoast');
       expect(kotlinContent).toContain('AbsShowToastMethodIDL');
       expect(kotlinContent).toContain('duration');
+      expect(kotlinContent).toContain('interface IDLMethodShowToastResultModel : IDLMethodBaseResultModel');
+      expect(kotlinContent).toContain("// you can't set a Number type to this param");
+      expect(kotlinContent).not.toContain('&#x2F;');
 
       const swiftContent = await fs.readFile(swiftPath, 'utf8');
       expect(swiftContent).toContain('class SPKShowToastMethodResultModel');
