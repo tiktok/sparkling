@@ -343,14 +343,15 @@ function injectAndroidSettings(settingsPath: string, modules: MethodModuleConfig
 
   const lines = modules.map(module => {
     const rel = relativeTo(projectDir, module.android?.projectDir ?? module.root);
-    return `  "${module.name}" to file("${toPosixPath(rel)}")`;
-  }).join(',\n');
+    return `        "${module.name}" to file("${toPosixPath(rel)}"),`;
+  }).join('\n');
 
   const ktsBlock = [
     ANDROID_AUTOLINK_START,
-    'val sparklingAutolinkProjects = listOf<Pair<String, java.io.File>>(',
+    'val sparklingAutolinkProjects =',
+    '    listOf<Pair<String, java.io.File>>(',
     lines,
-    ')',
+    '    )',
     'sparklingAutolinkProjects.forEach { (name, dir) ->',
     '    include(":$name")',
     '    project(":$name").projectDir = dir',
@@ -607,7 +608,7 @@ function injectAndroidDependencies(appGradlePath: string, modules: MethodModuleC
 
   const ktsLines: string[] = [];
   if (regularModules.length) {
-    const depLinesKts = regularModules.map(m => `${innerIndent}    project(":${m.name}")`).join(',\n');
+    const depLinesKts = regularModules.map(m => `${innerIndent}    project(":${m.name}"),`).join('\n');
     ktsLines.push(
       `${innerIndent}listOf(`,
       depLinesKts,
@@ -778,18 +779,35 @@ function writeAndroidRegistry(modules: MethodModuleConfig[], appPackage: string,
   const entries = modules.map(m => {
     const pkg = m.android?.packageName ?? '';
     const cls = m.android?.className ?? '';
-    return `        SparklingAutolinkModule(name = "${m.name}", androidPackage = "${pkg}", className = "${cls}")`;
-  }).join(',\n');
+    return [
+      '            SparklingAutolinkModule(',
+      `                name = "${m.name}",`,
+      `                androidPackage = "${pkg}",`,
+      `                className = "${cls}",`,
+      '            ),',
+    ].join('\n');
+  }).join('\n');
+
+  const moduleList = modules.length
+    ? [
+      '    val modules =',
+      '        listOf(',
+      entries,
+      '        )',
+    ]
+    : ['    val modules = emptyList<SparklingAutolinkModule>()'];
 
   const content = [
     `package ${appPackage}`,
     '',
-    'data class SparklingAutolinkModule(val name: String, val androidPackage: String?, val className: String?)',
+    'data class SparklingAutolinkModule(',
+    '    val name: String,',
+    '    val androidPackage: String?,',
+    '    val className: String?,',
+    ')',
     '',
     'object SparklingAutolink {',
-    '    val modules = listOf(',
-    entries,
-    '    )',
+    ...moduleList,
     '}',
     '',
   ].join('\n');
