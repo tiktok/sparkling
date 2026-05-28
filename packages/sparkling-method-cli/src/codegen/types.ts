@@ -83,6 +83,7 @@ export interface KotlinFieldView {
   enumType?: string;
   enum?: KotlinEnumEntry[];
   explanation?: string;
+  isLast: boolean;
 }
 
 export interface KotlinEnumEntry {
