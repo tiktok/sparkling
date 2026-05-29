@@ -88,7 +88,7 @@ struct SPKSchemeParamTests {
             [
                 "title": "Test Title",
                 "hide_nav_bar": true,
-                "nav_bar_color": "#FF0000",
+                "nav_bar_color": "#FF0000"
             ] as [String: Any]
 
         param.update(withDictionary: dict)
@@ -121,7 +121,7 @@ struct SPKSchemeParamTests {
         let param = SPKSchemeParam()
         let dict = [
             "navBarColor": "#FF0000",
-            "backgroundColor": "#00FF00",
+            "backgroundColor": "#00FF00"
         ]
 
         param.update(withDictionary: dict)
@@ -135,7 +135,7 @@ struct SPKSchemeParamTests {
         let dict =
             [
                 "hide_nav_bar": "true",
-                "full_screen": false,
+                "full_screen": false
             ] as [String: Any]
 
         param.update(withDictionary: dict)
@@ -149,7 +149,7 @@ struct SPKSchemeParamTests {
         let dict =
             [
                 "title": NSNull(),
-                "hideNavBar": nil,
+                "hideNavBar": nil
             ] as [String: Any?]
 
         param.update(withDictionary: dict as [String: Any])

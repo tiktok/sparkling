@@ -138,6 +138,7 @@ class RouterOpenMethod : AbsRouterOpenMethodIDL() {
     }
 }
 
+@Suppress("ktlint:standard:enum-entry-name-case")
 enum class ReplaceType {
     alwaysCloseAfterOpen,
     alwaysCloseBeforeOpen,

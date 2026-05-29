@@ -366,7 +366,7 @@ struct MethodContextTest {
             "key with spaces",
             "key@with#symbols$",
             "🔑emoji🗝️key",
-            "localized_key",
+            "localized_key"
         ]
 
         for key in specialKeys {

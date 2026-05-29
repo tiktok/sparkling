@@ -248,7 +248,7 @@ struct SPKHybridContextTests {
             "string": "text",
             "number": 42,
             "array": [1, 2, 3],
-            "nested": ["inner": "value"],
+            "nested": ["inner": "value"]
         ]
 
         context.globalProps = complexData

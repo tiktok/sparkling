@@ -2,7 +2,7 @@
   "fileScopedDeclarationPrivacy" : {
     "accessLevel" : "private"
   },
-  "indentConditionalCompilationBlocks" : true,
+  "indentConditionalCompilationBlocks" : false,
   "indentSwitchCaseLabels" : false,
   "indentation" : {
     "spaces" : 4
@@ -14,7 +14,7 @@
   "lineBreakBetweenDeclarationAttributes" : false,
   "lineLength" : 180,
   "maximumBlankLines" : 1,
-  "multiElementCollectionTrailingCommas" : true,
+  "multiElementCollectionTrailingCommas" : false,
   "noAssignmentInExpressions" : {
     "allowedFunctions" : [
       "XCTAssertNoThrow"
@@ -25,7 +25,7 @@
   "respectsExistingLineBreaks" : true,
   "rules" : {
     "AllPublicDeclarationsHaveDocumentation" : false,
-    "AlwaysUseLiteralForEmptyCollectionInit" : false,
+    "AlwaysUseLiteralForEmptyCollectionInit" : true,
     "AlwaysUseLowerCamelCase" : true,
     "AmbiguousTrailingClosureOverload" : true,
     "AvoidRetroactiveConformances" : true,

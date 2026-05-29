@@ -20,7 +20,7 @@ class TestParamsModel: SPKMethodModel {
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "name": "name",
-            "age": "age",
+            "age": "age"
         ]
     }
 }
@@ -225,7 +225,7 @@ struct MethodPipeTest {
         let pipe = MethodPipe()
         let methods: [PipeMethod] = [
             TestSuccessMethod(),
-            TestFailureMethod(),
+            TestFailureMethod()
         ]
 
         pipe.register(localMethods: methods)
@@ -622,7 +622,7 @@ struct MethodPipeTest {
 
         if let method = pipe.method(forName: TestSuccessMethod().methodName) {
             // Call with nil params should fail
-            let params = [String: Any]()
+            let params: [String: Any] = [:]
             do {
                 let paramModel = try TestParamsModel.from(dict: params) as? TestParamsModel
                 if let paramModel = paramModel {
@@ -651,7 +651,7 @@ struct MethodPipeTest {
         pipe.register(localMethods: [
             TestSuccessMethod(),
             TestFailureMethod(),
-            TestAsyncMethod(),
+            TestAsyncMethod()
         ])
 
         #expect(pipe.respondTo(methodName: TestSuccessMethod().methodName))

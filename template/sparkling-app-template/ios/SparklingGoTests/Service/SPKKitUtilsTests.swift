@@ -150,7 +150,7 @@ struct SPKKitUtilsTests {
             "bool": true,
             "array": [1, 2, 3],
             "dict": ["nested": "value"],
-            "nil": NSNull(),
+            "nil": NSNull()
         ]
 
         // When
@@ -177,14 +177,14 @@ struct SPKKitUtilsTests {
             [
                 "keep": "original",
                 "override": "old",
-                "number": 1,
+                "number": 1
             ] as [String: Any]
         let context = createTestContextWithGlobalProps(existingProps)
         let newProps =
             [
                 "override": "new",
                 "number": 2,
-                "add": "added",
+                "add": "added"
             ] as [String: Any]
 
         // When
@@ -237,7 +237,7 @@ struct SPKKitUtilsTests {
             "key.with.dots": "value4",
             "key@with@symbols": "value5",
             "localizedKey": "localizedValue",
-            "🚀emoji🚀": "emoji_value",
+            "🚀emoji🚀": "emoji_value"
         ]
 
         // When

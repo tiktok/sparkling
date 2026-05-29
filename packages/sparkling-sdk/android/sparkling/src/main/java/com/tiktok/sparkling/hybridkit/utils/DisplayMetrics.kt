@@ -7,10 +7,8 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Rect
 
-/**
- * Extension functions for display metrics calculations with high precision.
- * These provide more accurate measurements compared to integer-based calculations.
- */
+// Extension functions for display metrics calculations with high precision.
+// These provide more accurate measurements compared to integer-based calculations.
 
 /**
  * Converts a pixel value to dp using the context's display density.

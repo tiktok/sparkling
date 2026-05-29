@@ -13,11 +13,11 @@ struct LynxRecvMessageTest {
         let rawData: [String: Any] = [
             LynxKeys.data: [
                 "param1": "value1",
-                "param2": 123,
+                "param2": 123
             ],
             LynxKeys.namespace: "testNamespace",
             LynxKeys.containerID: "container123",
-            LynxKeys.protocolVersion: "2.0.0",
+            LynxKeys.protocolVersion: "2.0.0"
         ]
 
         let message = LynxRecvMessage(methodName: methodName, rawData: rawData)
@@ -78,9 +78,9 @@ struct LynxRecvMessageTest {
         let rawData: [String: Any] = [
             LynxKeys.data: [
                 "param1": "value1",
-                LynxKeys.useUIThread: false,
+                LynxKeys.useUIThread: false
             ],
-            LynxKeys.useUIThread: true,
+            LynxKeys.useUIThread: true
         ]
 
         let message = LynxRecvMessage(methodName: methodName, rawData: rawData)
@@ -129,7 +129,7 @@ struct LynxRecvMessageTest {
             LynxKeys.data: [
                 LynxKeys.useUIThread: true
             ],
-            LynxKeys.useUIThread: false,
+            LynxKeys.useUIThread: false
         ]
 
         let message = LynxRecvMessage(methodName: methodName, rawData: rawData)
@@ -141,7 +141,7 @@ struct LynxRecvMessageTest {
         let methodName = "testMethod"
         let rawData: [String: Any] = [
             "customKey": "customValue",
-            LynxKeys.data: ["param1": "value1"],
+            LynxKeys.data: ["param1": "value1"]
         ]
 
         let message = LynxRecvMessage(methodName: methodName, rawData: rawData)
@@ -256,7 +256,7 @@ struct LynxRecvMessageTest {
                 ]
             ],
             "array": [1, 2, 3],
-            "mixed": ["string", 42, true],
+            "mixed": ["string", 42, true]
         ]
         let rawData: [String: Any] = [
             LynxKeys.data: complexData
