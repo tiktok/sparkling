@@ -7,6 +7,7 @@ import android.app.Application
 import android.content.Intent
 import com.tiktok.sparkling.Sparkling.Companion.SPARKLING_CONTEXT_CONTAINER_ID
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
+import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 import com.tiktok.sparkling.utils.SchemeParser
 import io.mockk.clearAllMocks
 import io.mockk.unmockkAll
@@ -34,6 +35,7 @@ class SparklingTest {
     @Before
     fun setUp() {
         application = RuntimeEnvironment.getApplication()
+        ColorUtil.appContext = application
         sparklingContext =
             SparklingContext().apply {
                 containerId = "test_container_id"

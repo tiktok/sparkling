@@ -27,6 +27,7 @@ open class HybridSchemeParam(
     var hideError: Boolean = false,
 //    var fallbackUrl: String? = null,
     var forceThemeStyle: String? = null,
+    var disableAutoRemoveLoading: Boolean = false,
 ) : BaseSchemeParam(engineType),
     Serializable,
     Parcelable {
@@ -46,6 +47,8 @@ open class HybridSchemeParam(
         parcel.readString(),
         parcel.readByte() != 0.toByte(),
         parcel.readByte() != 0.toByte(),
+        parcel.readString(),
+        if (parcel.dataAvail() > 0) parcel.readByte() != 0.toByte() else false,
     )
 
     override fun writeToParcel(
@@ -69,6 +72,7 @@ open class HybridSchemeParam(
         parcel.writeByte(if (hideError) 1 else 0)
 //        parcel.writeString(fallbackUrl)
         parcel.writeString(forceThemeStyle)
+        parcel.writeByte(if (disableAutoRemoveLoading) 1 else 0)
     }
 
     override fun describeContents(): Int = 0

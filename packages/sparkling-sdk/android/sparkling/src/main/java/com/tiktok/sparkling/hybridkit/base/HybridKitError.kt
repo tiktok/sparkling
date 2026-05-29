@@ -14,4 +14,5 @@ class HybridKitError {
 
 object HybridErrorConstantCode {
     const val LynxLoadError = 210
+    const val ResourceLoadError = 211
 }

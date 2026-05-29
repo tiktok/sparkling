@@ -33,6 +33,7 @@ object SchemeConstants {
         const val HIDE_STATUS_BAR = "hide_status_bar"
         const val TRANS_STATUS_BAR = "trans_status_bar"
         const val HIDE_LOADING = "hide_loading"
+        const val DISABLE_AUTO_REMOVE_LOADING = "disable_auto_remove_loading"
         const val LOADING_BG_COLOR = "loading_bg_color"
         const val CONTAINER_BG_COLOR = "container_bg_color"
         const val SHOW_NAV_BAR_IN_TRANS_STATUS_BAR = "show_nav_bar_in_trans_status_bar"

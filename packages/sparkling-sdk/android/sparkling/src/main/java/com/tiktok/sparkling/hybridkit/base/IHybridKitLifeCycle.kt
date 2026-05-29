@@ -79,9 +79,47 @@ abstract class IHybridKitLifeCycle(
     open fun onRuntimeReady(kitType: HybridKitType) {}
 
     /**
+     * callback when Lynx first screen layout completed
+     */
+    open fun onFirstScreen(view: IKitView) {}
+
+    /**
+     * callback when Lynx page update completed
+     */
+    open fun onPageUpdate(view: IKitView) {}
+
+    /**
+     * callback when KitView data/update event completed
+     */
+    open fun onUpdate(view: IKitView) {}
+
+    /**
+     * callback when KitView receives a non-load-finish error
+     */
+    open fun onReceivedError(
+        view: IKitView,
+        hybridKitError: HybridKitError,
+    ) {
+    }
+
+    /**
+     * callback when KitView receives performance data
+     */
+    open fun onReceivedPerformance(
+        view: IKitView,
+        perf: Map<String, Any>?,
+    ) {
+    }
+
+    /**
      * callback when load finish
      */
     open fun onLoadFinish(view: IKitView) {}
+
+    /**
+     * callback before KitView reloads the current url
+     */
+    open fun onReload(view: IKitView) {}
 
     /**
      * callback when kit destroy
@@ -106,6 +144,23 @@ abstract class IHybridKitLifeCycle(
         templateArray: ByteArray?,
         baseUrl: String?,
     ) {}
+
+    open fun onResourceLoadStart(
+        view: IKitView,
+        url: String,
+    ) {
+    }
+
+    open fun onResourceLoadFinish(
+        view: IKitView,
+        url: String,
+        templateArray: ByteArray?,
+        hybridKitError: HybridKitError?,
+    ) {
+        if (hybridKitError == null) {
+            onResourceLoadFinish(templateArray, url)
+        }
+    }
 
     /**
      * this callback would be invoked when first dispatchDraw after load/reload/updateData/updateGlobalProps/updateMetaData

@@ -112,6 +112,8 @@ object SchemeParser {
         params.hideStatusBar = uri.safeGetQueryParameter(SchemeConstants.Param.HIDE_STATUS_BAR) == SchemeConstants.Value.ENABLED
         params.transStatusBar = uri.safeGetQueryParameter(SchemeConstants.Param.TRANS_STATUS_BAR) == SchemeConstants.Value.ENABLED
         params.hideLoading = uri.safeGetQueryParameter(SchemeConstants.Param.HIDE_LOADING) == SchemeConstants.Value.ENABLED
+        params.disableAutoRemoveLoading =
+            uri.safeGetQueryParameter(SchemeConstants.Param.DISABLE_AUTO_REMOVE_LOADING) == SchemeConstants.Value.ENABLED
         params.loadingBgColor = resolveThemedColor(uri, SchemeConstants.Param.LOADING_BG_COLOR, params.forceThemeStyle)
         params.containerBgColor = resolveThemedColor(uri, SchemeConstants.Param.CONTAINER_BG_COLOR, params.forceThemeStyle)
         params.showNavBarInTransStatusBar = uri.safeGetQueryParameter(SchemeConstants.Param.SHOW_NAV_BAR_IN_TRANS_STATUS_BAR) == SchemeConstants.Value.ENABLED

@@ -82,14 +82,20 @@ class SimpleLynxKitView :
     }
 
     override fun reload() {
+        if (hasDestroyed) {
+            return
+        }
         hybridContext.tryResetTemplateResData(System.currentTimeMillis())
-        lynxKitLifeCycle?.onLoadStart(this, rawUrl ?: "")
+        lynxKitLifeCycle?.onReload(this)
         lynxKitInitParams?.obtainGlobalProps()?.let {
             updateData(it)
         }
-        rawUrl?.let {
-            load(it)
+        val target = rawUrl
+        if (target.isNullOrBlank()) {
+            lynxKitLifeCycle?.onLoadFailed(this, "", "bundle path is null")
+            return
         }
+        load(target)
     }
 
     override fun updateData(data: Map<String, Any>) {

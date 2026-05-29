@@ -4,9 +4,13 @@
 package com.tiktok.sparkling
 
 import android.content.Context
+import android.util.Size
 import android.view.View
 import androidx.appcompat.widget.Toolbar
 import com.tiktok.sparkling.hybridkit.HybridContext
+import com.tiktok.sparkling.hybridkit.base.HybridKitError
+import com.tiktok.sparkling.hybridkit.base.HybridKitType
+import com.tiktok.sparkling.hybridkit.base.IKitView
 
 interface SparklingUIProvider {
     fun getLoadingView(context: Context): View
@@ -16,6 +20,78 @@ interface SparklingUIProvider {
     fun getToolBar(context: Context): Toolbar?
 }
 
+interface SparklingLifecycleDelegate {
+    fun onLoadStart(
+        view: IKitView,
+        url: String,
+    ) {
+    }
+
+    fun onLoadFinish(view: IKitView) {
+    }
+
+    fun onLoadFailed(
+        view: IKitView,
+        url: String,
+        error: HybridKitError,
+    ) {
+    }
+
+    fun onRuntimeReady(kitType: HybridKitType) {
+    }
+
+    fun onFirstScreen(view: IKitView) {
+    }
+
+    fun onPageUpdate(view: IKitView) {
+    }
+
+    fun onUpdate(view: IKitView) {
+    }
+
+    fun onReceivedError(
+        view: IKitView,
+        error: HybridKitError,
+    ) {
+    }
+
+    fun onReceivedPerformance(
+        view: IKitView,
+        perf: Map<String, Any>?,
+    ) {
+    }
+
+    fun onResourceLoadFinish(
+        templateArray: ByteArray?,
+        baseUrl: String?,
+    ) {
+    }
+
+    fun onResourceLoadStart(
+        view: IKitView,
+        url: String,
+    ) {
+    }
+
+    fun onResourceLoadFinish(
+        view: IKitView,
+        url: String,
+        templateArray: ByteArray?,
+        error: HybridKitError?,
+    ) {
+    }
+
+    fun onIntrinsicContentSizeChanged(
+        view: IKitView,
+        size: Size,
+    ) {
+    }
+
+    fun onReload(view: IKitView) {
+    }
+}
+
 class SparklingContext : HybridContext() {
     var sparklingUIProvider: SparklingUIProvider? = null
+    var lifecycleDelegate: SparklingLifecycleDelegate? = null
 }

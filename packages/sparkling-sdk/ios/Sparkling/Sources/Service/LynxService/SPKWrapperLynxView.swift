@@ -483,6 +483,7 @@ extension SPKWrapperLynxView: LynxViewLifecycle {
                 let params = self?.params as? SPKLynxKitParams,
                 error.code >= LynxErrorCodeLoadTemplate && error.code < LynxErrorCodeJavaScript
             {
+                self?.loadState = .SPKLoadStateFailed
                 self?.lifeCycleDelegate?.view?(self, didLoadFailedWithURL: URL.spk.url(string: params.sourceUrl ?? ""), error: error)
             }
         }

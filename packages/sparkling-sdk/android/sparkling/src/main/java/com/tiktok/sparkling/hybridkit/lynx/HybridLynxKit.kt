@@ -101,6 +101,7 @@ object HybridLynxKit {
         lifeCycle?.onPreKitCreate()
 
         GlobalPropsUtils.instance.init(hybridContext, context)
+        val lynxConfig = HybridCommon.hybridConfig?.lynxConfig as SparklingLynxConfig?
 
         var kitInitParams: LynxKitInitParams =
             (hybridContext.hybridParams as? LynxKitInitParams)
@@ -110,10 +111,19 @@ object HybridLynxKit {
         }
 
         val viewBuilder = LynxViewBuilder()
+        var lynxViewRef: SimpleLynxKitView? = null
+        (lynxConfig?.templateProvider ?: LynxEnv.inst().templateProvider)?.let { templateProvider ->
+            viewBuilder.setTemplateProvider(
+                SimpleLynxTemplateProvider(templateProvider, lifeCycle) {
+                    lynxViewRef
+                },
+            )
+        }
         val bridge = SparklingBridge()
         bridge.registerLynxModule(viewBuilder, hybridContext.containerId)
         val lynxView =
             SimpleLynxKitView(context, hybridContext, viewBuilder, kitInitParams, lifeCycle)
+        lynxViewRef = lynxView
         bridge.init(
             lynxView,
             hybridContext.containerId,

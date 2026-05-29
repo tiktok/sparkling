@@ -52,6 +52,46 @@ struct SPKViewTests {
         #expect(view.sparkContentMode == .SPKContainerViewContentModeFitSize)
     }
 
+    @Test func intrinsicContentSizeFollowsContentMode() {
+        let view = SPKContainerView(frame: CGRect(x: 0, y: 0, width: 100, height: 72))
+        view.contentSize = CGSize(width: 180, height: 240)
+
+        view.sparkContentMode = .SPKContainerViewContentModeFixedSize
+        #expect(view.intrinsicContentSize == CGSize(width: 100, height: 72))
+
+        view.sparkContentMode = .SPKContainerViewContentModeFixedWidth
+        #expect(view.intrinsicContentSize == CGSize(width: 100, height: 240))
+
+        view.sparkContentMode = .SPKContainerViewContentModeFixedHeight
+        #expect(view.intrinsicContentSize == CGSize(width: 180, height: 72))
+
+        view.sparkContentMode = .SPKContainerViewContentModeFitSize
+        #expect(view.intrinsicContentSize == CGSize(width: 180, height: 240))
+    }
+
+    @Test func didChangeIntrinsicContentSizeUpdatesFrameForCardModes() {
+        let view = SPKContainerView(frame: CGRect(x: 0, y: 0, width: 100, height: 72))
+
+        view.sparkContentMode = .SPKContainerViewContentModeFixedSize
+        view.view(MockWrapperView(), didChangeIntrinsicContentSize: CGSize(width: 180, height: 240))
+        #expect(view.frame.size == CGSize(width: 100, height: 72))
+
+        view.sparkContentMode = .SPKContainerViewContentModeFixedWidth
+        view.view(MockWrapperView(), didChangeIntrinsicContentSize: CGSize(width: 180, height: 240))
+        #expect(view.frame.size == CGSize(width: 100, height: 240))
+        #expect(view.contentSize == CGSize(width: 180, height: 240))
+
+        view.frame = CGRect(x: 0, y: 0, width: 100, height: 72)
+        view.sparkContentMode = .SPKContainerViewContentModeFixedHeight
+        view.view(MockWrapperView(), didChangeIntrinsicContentSize: CGSize(width: 180, height: 240))
+        #expect(view.frame.size == CGSize(width: 180, height: 72))
+
+        view.frame = CGRect(x: 0, y: 0, width: 100, height: 72)
+        view.sparkContentMode = .SPKContainerViewContentModeFitSize
+        view.view(MockWrapperView(), didChangeIntrinsicContentSize: CGSize(width: 180, height: 240))
+        #expect(view.frame.size == CGSize(width: 180, height: 240))
+    }
+
     @Test func backgroundProperty() {
         let view = SPKContainerView()
 
@@ -165,6 +205,20 @@ struct SPKViewTests {
         #expect(view.subviews.isEmpty)
     }
 
+    @Test func removeLoadingViewKeepsLoadingWhenAutoRemoveDisabled() {
+        let view = SPKContainerView()
+        let config = SPKSchemeParam()
+        let loadingView = TestLoadingView()
+        config.disableAutoRemoveLoading = true
+        view.config = config
+
+        view.add(loadingView: loadingView)
+        view.removeLoadingView()
+
+        #expect(loadingView.superview === view)
+        #expect(loadingView.didStopLoadingAnimation == false)
+    }
+
     @Test func handleViewLifecycleMethods() {
         let view = SPKContainerView()
         let initialHybridAppear = view.hybridAppear
@@ -228,7 +282,7 @@ struct SPKViewTests {
         // Test that reload method doesn't crash
         view.reload(context)
 
-        #expect(true)  // Pass if no crash occurs
+        #expect(view.loadState == .SPKLoadStateLoading)
     }
 
     @Test func loadMethod() {
@@ -319,7 +373,7 @@ struct SPKViewTests {
         view.viewDidStartLoading(nil)
         view.viewDidConstructJSRuntime(nil)
 
-        #expect(true)  // Pass if no crash occurs
+        #expect(view.loadState == .SPKLoadStateLoading)
     }
 
     @Test func viewUpdateTitleAndSubtitle() {
@@ -339,7 +393,7 @@ struct SPKViewTests {
         // Test that load failed method doesn't crash
         view.view(nil, didLoadFailedWithURL: testURL, error: error)
 
-        #expect(true)  // Pass if no crash occurs
+        #expect(view.loadState == .SPKLoadStateFailed)
     }
 
     @Test func viewDidFinishLoad() {
@@ -349,6 +403,45 @@ struct SPKViewTests {
         // Test that load completion method doesn't crash
         view.view(nil, didFinishLoadWithURL: testURL)
 
-        #expect(true)  // Pass if no crash occurs
+        #expect(view.loadState == .SPKLoadStateSucceed)
+    }
+}
+
+private final class MockWrapperView: UIView, SPKWrapperViewProtocol {
+    var containerID: String = "mock_wrapper"
+    var context: SPKHybridContext?
+    var loadState: SPKLoadState = .SPKLoadStateNotLoad
+    var rawView: UIView? { self }
+    var params: SPKHybridParams?
+    weak var lifeCycleDelegate: SPKWrapperViewLifecycleProtocol?
+    var anyMethodPipe: Any?
+    var estimatedProgress: Float = 0
+
+    func load() {}
+
+    func reload(_ context: SPKHybridContext?) {
+        self.context = context
+    }
+
+    func send(event event: String, params: [String: Any]?, callback: ((Any?) -> Void)?) {}
+
+    func config(withParams params: SPKHybridParams?) {
+        self.params = params
+    }
+
+    func onshow(params: [AnyHashable: Any]) {}
+
+    func onHide(params: [AnyHashable: Any]) {}
+
+    func update(withGlobalProps globalProps: Any?) {}
+
+    func config(withGlobalProps globalProps: Any?) {}
+}
+
+private final class TestLoadingView: UIView, SPKLoadingViewProtocol {
+    var didStopLoadingAnimation = false
+
+    func stopLoadingAnimation() {
+        didStopLoadingAnimation = true
     }
 }
