@@ -64,8 +64,6 @@ enum DebugDevURLSupport {
 
     static func makeContext(delegate: SPKContainerLifecycleProtocol? = nil) -> SPKContext {
         let context = SPKContext()
-        let element = SparklingLynxElement(lynxElementName: "input", lynxElementClassName: LynxInput.self)
-        context.customUIElements = [element]
         context.containerLifecycleDelegate = delegate
         return context
     }
