@@ -111,6 +111,10 @@ plugins: [
 
 在模拟器上，`localhost` 直接可用。在**真机**上，应用需要你机器的局域网 IP 地址。
 
+`sparkling run:android` 会为真机把 dev server 绑定到这个具体的局域网 IP。它默认不
+绑定 `0.0.0.0`，因为那会把 dev server 暴露到所有网络接口。如果自动检测选错了
+网络，可以传入 `--host <host>`，或在 `app.config.ts` 中设置 `dev.server.host`。
+
 ### 问题
 
 Dev server 运行在你的机器上，如 `http://192.168.1.100:5969/`。但

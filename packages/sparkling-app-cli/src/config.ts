@@ -116,6 +116,23 @@ export function resolveDevServerPort(config: AppConfig): number {
   return DEV_SERVER_PORT;
 }
 
+export function getConfiguredDevServerHost(config: AppConfig): string | undefined {
+  const host = (config as { dev?: { server?: { host?: unknown } } }).dev?.server?.host;
+  if (typeof host !== 'string') {
+    return undefined;
+  }
+  const trimmed = host.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+export function resolveDevServerHost(config: AppConfig, explicitHost?: string): string | undefined {
+  const explicit = explicitHost?.trim();
+  if (explicit) {
+    return explicit;
+  }
+  return getConfiguredDevServerHost(config);
+}
+
 export function updateDevServerPortInAppConfig(configPath: string, port: number): boolean {
   if (!isValidPort(port) || !fs.existsSync(configPath)) {
     return false;

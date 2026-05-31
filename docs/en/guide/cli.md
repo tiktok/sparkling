@@ -42,6 +42,7 @@ npx sparkling dev
 | --- | --- |
 | `--config <path>` | Path to `app.config.ts` (default: `app.config.ts`) |
 | `--port <number>` | Dev server port (default: `app.config.ts -> dev.server.port`, fallback `5969`) |
+| `--host <host>` | Dev server host (default: `app.config.ts -> dev.server.host`, then Rspeedy default) |
 
 The default port **5969** spells **LYNX** on a phone keypad (L=5, Y=9, N=6, X=9).
 
@@ -99,6 +100,7 @@ npx sparkling run:android
 | --- | --- |
 | `--copy` | Copy assets to native shells |
 | `--skip-copy` | Skip copying assets (default) |
+| `--host <host>` | Dev server host for Android devices, useful for multi-network machines |
 
 This command will:
 
@@ -111,6 +113,12 @@ This command will:
 5. Run `gradlew assembleDebug`
 6. Install the APK on a connected device/emulator
 7. Launch the main activity
+
+For physical devices, the CLI binds the dev server to the selected LAN IPv4 rather
+than `0.0.0.0`. This keeps wireless debugging working while avoiding exposure on
+unrelated interfaces such as VPN, Docker, or wired networks. You can override the
+host with `--host <host>` or `dev.server.host` in `app.config.ts`; Sparkling prints
+a warning if you explicitly use `0.0.0.0`.
 
 ### `sparkling run:ios`
 

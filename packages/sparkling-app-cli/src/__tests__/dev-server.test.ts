@@ -69,4 +69,43 @@ describe('ensureDevServerRunning', () => {
 
     process.argv = argvBackup;
   });
+
+  it('checks the requested host before reusing an existing server', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: true }) as unknown as typeof fetch;
+
+    await ensureDevServerRunning('/tmp/project', 5969, '192.168.1.25');
+
+    expect(global.fetch).toHaveBeenCalledWith('http://192.168.1.25:5969/', expect.any(Object));
+    expect(spawnMock).not.toHaveBeenCalled();
+  });
+
+  it('starts a server on the requested host when only localhost responds', async () => {
+    global.fetch = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('connect ECONNREFUSED'))
+      .mockResolvedValueOnce({ ok: true }) as unknown as typeof fetch;
+
+    const argvBackup = process.argv.slice();
+    process.argv[1] = '/tmp/mock-cli-entry.js';
+
+    await ensureDevServerRunning('/tmp/project', 5969, '192.168.1.25');
+
+    const expectedCommand = process.platform === 'darwin' ? 'script' : process.execPath;
+    const expectedArgs = process.platform === 'darwin'
+      ? ['-q', '/dev/null', process.execPath, '/tmp/mock-cli-entry.js', 'dev', '--port', '5969', '--host', '192.168.1.25']
+      : ['/tmp/mock-cli-entry.js', 'dev', '--port', '5969', '--host', '192.168.1.25'];
+
+    expect(spawnMock).toHaveBeenCalledTimes(1);
+    expect(spawnMock).toHaveBeenCalledWith(
+      expectedCommand,
+      expectedArgs,
+      expect.objectContaining({
+        cwd: '/tmp/project',
+        detached: true,
+        stdio: 'ignore',
+      }),
+    );
+
+    process.argv = argvBackup;
+  });
 });

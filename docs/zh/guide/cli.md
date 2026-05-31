@@ -42,6 +42,7 @@ npx sparkling dev
 | --- | --- |
 | `--config <path>` | `app.config.ts` 路径（默认：`app.config.ts`） |
 | `--port <number>` | 开发服务器端口（默认：`app.config.ts -> dev.server.port`，兜底 `5969`） |
+| `--host <host>` | 开发服务器 host（默认：`app.config.ts -> dev.server.host`，否则使用 Rspeedy 默认值） |
 
 默认端口 **5969** 对应手机九宫格键盘上的 **LYNX**（L=5, Y=9, N=6, X=9）。
 
@@ -99,6 +100,7 @@ npx sparkling run:android
 | --- | --- |
 | `--copy` | 将资源复制到原生 Shell |
 | `--skip-copy` | 跳过资源复制（默认行为） |
+| `--host <host>` | Android 设备使用的 dev server host，适用于多网卡机器 |
 
 该命令会依次执行：
 
@@ -111,6 +113,11 @@ npx sparkling run:android
 5. 运行 `gradlew assembleDebug`
 6. 将 APK 安装到已连接的设备/模拟器
 7. 启动主 Activity
+
+真机调试时，CLI 会把 dev server 绑定到选中的局域网 IPv4，而不是 `0.0.0.0`。
+这样仍然支持无线调试，但不会同时暴露到 VPN、Docker、有线网络等无关接口。你可以
+通过 `--host <host>` 或 `app.config.ts` 中的 `dev.server.host` 覆盖 host；如果显式
+使用 `0.0.0.0`，Sparkling 会打印安全提示。
 
 ### `sparkling run:ios`
 
