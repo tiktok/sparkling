@@ -38,8 +38,8 @@ struct SPKSchemeTests {
         #expect(param?.engineType == .SPKHybridEngineTypeLynx)
     }
 
-    @Test func resolverWithLynxViewCardURLScheme() {
-        let url = URL(string: "hybrid://lynxview_card?url=http%3A%2F%2F127.0.0.1%3A5969%2Fcard.lynx.bundle")
+    @Test func resolverWithLynxViewCardRemoteURLScheme() {
+        let url = URL(string: "hybrid://lynxview_card?url=https%3A%2F%2Fexample.com%2Fcard.lynx.bundle")
         let context = SPKContext()
 
         let param = SPKScheme.resolver(withScheme: url, context: context, paramClass: SPKSchemeParam.self)
