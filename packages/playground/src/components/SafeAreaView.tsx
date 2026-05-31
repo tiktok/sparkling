@@ -29,7 +29,7 @@ function snapshotGlobalProps(): Record<string, unknown> | undefined {
   if (typeof lynx === 'undefined') {
     return undefined
   }
-  return lynx.__globalProps as Record<string, unknown> | undefined
+  return lynx.__globalProps as unknown as Record<string, unknown> | undefined
 }
 
 function paddingFromInsets(

@@ -31,7 +31,7 @@ class SPKRouterTest: XCTestCase {
             CloseMethodParamModel.jsonKeyPathsByPropertyKey() as? [String: String],
             [
                 "containerID": "containerID",
-                "animated": "animated",
+                "animated": "animated"
             ])
     }
 
@@ -61,7 +61,7 @@ class SPKRouterTest: XCTestCase {
                 "useSysBrowser": "useSysBrowser",
                 "animated": "animated",
                 "interceptor": "interceptor",
-                "extra": "extra",
+                "extra": "extra"
             ])
     }
 

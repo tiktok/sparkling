@@ -4,8 +4,7 @@
 import fs from 'fs'
 import path from 'path'
 import { defineConfig } from '@lynx-js/rspeedy'
-import { pluginQRCode } from '@lynx-js/qrcode-rsbuild-plugin'
-import { pluginReactLynx } from '@lynx-js/react-rsbuild-plugin'
+import lynxSharedConfig from './lynx.shared.config.js'
 
 function copyDir(src: string, dest: string) {
   if (!fs.existsSync(src)) {
@@ -29,40 +28,12 @@ function copyDir(src: string, dest: string) {
 }
 
 export default defineConfig({
+  ...lynxSharedConfig,
   server: {
     port: 5969,
   },
-  source: {
-    entry: {
-      main: './src/pages/main/index.tsx',
-      showcase: './src/pages/showcase/index.tsx',
-      'scheme-builder': './src/pages/scheme-builder/index.tsx',
-      'scheme-presets': './src/pages/scheme-presets/index.tsx',
-      'nav-basic': './src/pages/nav-basic/index.tsx',
-      'nav-chain': './src/pages/nav-chain/index.tsx',
-      'gp-device': './src/pages/gp-device/index.tsx',
-      'gp-screen': './src/pages/gp-screen/index.tsx',
-      'gp-container': './src/pages/gp-container/index.tsx',
-      'storage-demo': './src/pages/storage-demo/index.tsx',
-      'media-choose': './src/pages/media-choose/index.tsx',
-      'media-upload': './src/pages/media-upload/index.tsx',
-      'media-download': './src/pages/media-download/index.tsx',
-    },
-  },
-  output: {
-    assetPrefix: 'asset:///',
-    filename: {
-      bundle: '[name].lynx.bundle',
-    },
-  },
   plugins: [
-    pluginQRCode({
-      schema(url) {
-        // We use `?fullscreen=true` to open the page in LynxExplorer in full screen mode
-        return `${url}?fullscreen=true`
-      },
-    }),
-    pluginReactLynx(),
+    ...(lynxSharedConfig.plugins ?? []),
     {
       name: 'copy-assets-plugin',
       setup(api) {

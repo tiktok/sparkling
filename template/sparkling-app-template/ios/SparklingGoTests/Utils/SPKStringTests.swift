@@ -156,7 +156,7 @@ struct SPKStringTests {
             "https://example.com/path",
             "https://example.com/path/",
             "https://example.com/path??",
-            "https://example.com/path?#fragment",
+            "https://example.com/path?#fragment"
         ]
 
         for testCase in testCases {

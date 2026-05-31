@@ -201,6 +201,42 @@ describe('autolink', () => {
       expect(registry).toContain('NavigationModule');
     });
 
+    it('writes ktlint-compliant Android autolink output', async () => {
+      await autolink({ cwd, platform: 'android' });
+
+      const settings = fs.readFileSync(path.join(cwd, 'android', 'settings.gradle.kts'), 'utf8');
+      expect(settings).toContain([
+        'val sparklingAutolinkProjects =',
+        '    listOf<Pair<String, java.io.File>>(',
+        '        "sparkling-navigation" to file("../node_modules/sparkling-navigation/android"),',
+        '    )',
+      ].join('\n'));
+
+      const gradle = fs.readFileSync(path.join(cwd, 'android', 'app', 'build.gradle.kts'), 'utf8');
+      expect(gradle).toContain([
+        '    listOf(',
+        '        project(":sparkling-navigation"),',
+        '    ).forEach { dep -> add("implementation", dep) }',
+      ].join('\n'));
+
+      const registryPath = path.join(cwd, 'android', 'app', 'src', 'main', 'java', 'com', 'test', 'app', 'SparklingAutolink.kt');
+      const registry = fs.readFileSync(registryPath, 'utf8');
+      expect(registry).toContain([
+        'data class SparklingAutolinkModule(',
+        '    val name: String,',
+        '    val androidPackage: String?,',
+        '    val className: String?,',
+        ')',
+      ].join('\n'));
+      expect(registry).toContain([
+        '            SparklingAutolinkModule(',
+        '                name = "sparkling-navigation",',
+        '                androidPackage = "com.sparkling.navigation",',
+        '                className = "NavigationModule",',
+        '            ),',
+      ].join('\n'));
+    });
+
     it('returns the discovered module', async () => {
       const modules = await autolink({ cwd, platform: 'all' });
       expect(modules).toHaveLength(1);
@@ -261,6 +297,7 @@ describe('autolink', () => {
       expect(settings).toContain('"sparkling-navigation"');
       expect(settings).toContain('"sparkling-storage"');
       expect(settings).toContain('"sparkling-media"');
+      expect(settings).not.toContain(',,');
     });
 
     it('injects all modules into build.gradle.kts dependencies', async () => {
@@ -270,6 +307,7 @@ describe('autolink', () => {
       expect(gradle).toContain(':sparkling-navigation');
       expect(gradle).toContain(':sparkling-storage');
       expect(gradle).toContain(':sparkling-media');
+      expect(gradle).not.toContain(',,');
     });
 
     it('writes the Android registry with all entries', async () => {
@@ -374,11 +412,7 @@ describe('autolink', () => {
       const registryPath = path.join(cwd, 'android', 'app', 'src', 'main', 'java', 'com', 'test', 'app', 'SparklingAutolink.kt');
       expect(fs.existsSync(registryPath)).toBe(true);
       const registry = fs.readFileSync(registryPath, 'utf8');
-      expect(registry).toContain('val modules = listOf(');
-      // No module entries between listOf( and )
-      const match = registry.match(/listOf\(\s*([\s\S]*?)\s*\)/);
-      expect(match).toBeTruthy();
-      expect(match![1].trim()).toBe('');
+      expect(registry).toContain('val modules = emptyList<SparklingAutolinkModule>()');
     });
 
     it('returns empty array', async () => {

@@ -161,7 +161,7 @@ public class TestLynxParamsModel: SPKMethodModel {
     public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "name": "name",
-            "age": "age",
+            "age": "age"
         ]
     }
 }
@@ -248,7 +248,7 @@ struct SPKLynxNativeModuleTest {
         let params =
             [
                 LynxKeys.data: ["name": "TestUser"],
-                LynxKeys.containerID: containerID,
+                LynxKeys.containerID: containerID
             ] as [String: Any]
 
         nativeModule.call(name: TestLynxMethod.methodName(), params: params, callback: mockCallback.callback)
@@ -274,7 +274,7 @@ struct SPKLynxNativeModuleTest {
         let params =
             [
                 LynxKeys.data: ["name": "TestUser"],
-                LynxKeys.containerID: containerID,
+                LynxKeys.containerID: containerID
             ] as [String: Any]
 
         nativeModule.call(name: "test.method", params: params, callback: mockCallback.callback)
@@ -306,7 +306,7 @@ struct SPKLynxNativeModuleTest {
         let params =
             [
                 LynxKeys.data: ["name": "MessageUser"],
-                LynxKeys.containerID: containerID,  // containerID provided in message
+                LynxKeys.containerID: containerID  // containerID provided in message
             ] as [String: Any]
 
         nativeModule.call(name: TestLynxMethod.methodName(), params: params, callback: mockCallback.callback)
@@ -327,7 +327,7 @@ struct SPKLynxNativeModuleTest {
         let params =
             [
                 LynxKeys.data: ["name": "TestUser"],
-                LynxKeys.containerID: "",  // Empty containerID
+                LynxKeys.containerID: ""  // Empty containerID
             ] as [String: Any]
 
         nativeModule.call(name: "test.method", params: params, callback: mockCallback.callback)
@@ -354,9 +354,9 @@ struct SPKLynxNativeModuleTest {
             [
                 LynxKeys.data: [
                     "name": "ThreadUser",
-                    LynxKeys.threadType: LynxKeys.mainThread,
+                    LynxKeys.threadType: LynxKeys.mainThread
                 ],
-                LynxKeys.containerID: containerID,
+                LynxKeys.containerID: containerID
             ] as [String: Any]
 
         nativeModule.call(name: TestLynxMethod.methodName(), params: params, callback: mockCallback.callback)
@@ -382,9 +382,9 @@ struct SPKLynxNativeModuleTest {
             [
                 LynxKeys.data: [
                     "name": "CurrentThreadUser",
-                    LynxKeys.threadType: LynxKeys.currentThread,
+                    LynxKeys.threadType: LynxKeys.currentThread
                 ],
-                LynxKeys.containerID: containerID,
+                LynxKeys.containerID: containerID
             ] as [String: Any]
 
         nativeModule.call(name: TestLynxMethod.methodName(), params: params, callback: mockCallback.callback)
@@ -411,9 +411,9 @@ struct SPKLynxNativeModuleTest {
             [
                 LynxKeys.data: [
                     "name": "DestroyingUser",
-                    LynxKeys.threadType: LynxKeys.currentThread,
+                    LynxKeys.threadType: LynxKeys.currentThread
                 ],
-                LynxKeys.containerID: containerID,
+                LynxKeys.containerID: containerID
             ] as [String: Any]
 
         nativeModule.call(name: TestLynxMethod.methodName(), params: params, callback: mockCallback.callback)
@@ -437,7 +437,7 @@ struct SPKLynxNativeModuleTest {
         let params =
             [
                 LynxKeys.data: ["name": "ErrorUser"],
-                LynxKeys.containerID: containerID,
+                LynxKeys.containerID: containerID
             ] as [String: Any]
 
         nativeModule.call(name: "non.existent.method", params: params, callback: mockCallback.callback)
@@ -466,7 +466,7 @@ struct SPKLynxNativeModuleTest {
         let params =
             [
                 LynxKeys.data: ["age": 25],  // Missing required name parameter
-                LynxKeys.containerID: containerID,
+                LynxKeys.containerID: containerID
             ] as [String: Any]
 
         nativeModule.call(name: TestLynxMethod.methodName(), params: params, callback: mockCallback.callback)
@@ -495,7 +495,7 @@ struct SPKLynxNativeModuleTest {
         let params =
             [
                 LynxKeys.data: ["name": "FailureUser"],
-                LynxKeys.containerID: containerID,
+                LynxKeys.containerID: containerID
             ] as [String: Any]
 
         nativeModule.call(name: TestLynxFailureMethod.methodName(), params: params, callback: mockCallback.callback)
@@ -533,7 +533,7 @@ struct SPKLynxNativeModuleTest {
             let params =
                 [
                     LynxKeys.data: ["name": "ConcurrentUser\(i)"],
-                    LynxKeys.containerID: containerID,
+                    LynxKeys.containerID: containerID
                 ] as [String: Any]
 
             nativeModule.call(name: TestLynxAsyncMethod.methodName(), params: params, callback: mockCallback.callback)

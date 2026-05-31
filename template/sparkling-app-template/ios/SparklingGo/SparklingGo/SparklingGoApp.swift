@@ -11,7 +11,7 @@ import SparklingMethod
 import SwiftUI
 
 #if canImport(Sparkling_DebugTool)
-    import Sparkling_DebugTool
+import Sparkling_DebugTool
 #endif
 
 class AppDelegate: NSObject, UIApplicationDelegate {
@@ -22,7 +22,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         let webPCoder = SDImageWebPCoder.shared
         SDImageCodersManager.shared.addCoder(webPCoder)
         #if canImport(Sparkling_DebugTool)
-            SparklingDebugTool.setup()
+        SparklingDebugTool.setup()
         #endif
         SPKServiceRegister.registerAll()
         SPKExecuteAllPrepareBootTask()

@@ -78,7 +78,7 @@ export function FormField(props: FormFieldProps) {
           className={`form-field-input ${isDark ? 'form-field-input--dark' : 'form-field-input--light'}`}
           defaultValue={props.value}
           placeholder={props.placeholder || ''}
-          text-color={isDark ? '#ffffff' : '#000000'}
+          style={{ color: isDark ? '#ffffff' : '#000000' }}
           bindinput={(e: { detail: { value: string } }) => {
             'background only'
             ;(props as FormFieldInputProps).onInput(e.detail.value)

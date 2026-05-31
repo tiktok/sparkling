@@ -42,7 +42,7 @@ struct SPKHybridSchemeParamTests {
         let dict: [String: Any] = [
             "url": "https://example.com?param1=value1&param2=value2",
             "bundle": "test.bundle",
-            "extra_param": "extra_value",
+            "extra_param": "extra_value"
         ]
         let param = SPKHybridSchemeParam(withDictionary: dict)
 
@@ -249,7 +249,7 @@ struct SPKHybridSchemeParamTests {
     @Test func testHandleSpecialCharacters() async throws {
         let dict: [String: Any] = [
             "url": "https://example.com?param=hello%20world&special=!@#$%^&*()",
-            "unicode": "test unicode parameter",
+            "unicode": "test unicode parameter"
         ]
         let param = SPKHybridSchemeParam(withDictionary: dict)
 

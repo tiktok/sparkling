@@ -44,8 +44,12 @@ def sparkling_kit
     'Framework',
     'ReleaseResource'
   ]
+  pod 'LynxBase', '3.7.0', :subspecs => ['Framework']
+  pod 'LynxServiceAPI', '3.7.0'
+  pod 'LynxDevtool', '3.7.0', :subspecs => ['Framework']
   
   pod 'PrimJS', '3.7.0', :subspecs => ['quickjs', 'napi']
+  pod 'XElement', '3.7.0'
 
   pod 'LynxService', '3.7.0', :subspecs => [
     'Image',

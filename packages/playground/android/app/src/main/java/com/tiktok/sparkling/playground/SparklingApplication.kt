@@ -9,9 +9,7 @@ import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.imagepipeline.core.ImagePipelineConfig
 import com.facebook.imagepipeline.memory.PoolConfig
 import com.facebook.imagepipeline.memory.PoolFactory
-import com.lynx.tasm.behavior.Behavior
-import com.lynx.tasm.behavior.LynxContext
-import com.lynx.tasm.behavior.ui.LynxUI
+import com.lynx.xelement.XElementBehaviors
 import com.tiktok.sparkling.hybridkit.HybridKit
 import com.tiktok.sparkling.hybridkit.config.BaseInfoConfig
 import com.tiktok.sparkling.hybridkit.config.SparklingHybridConfig
@@ -31,7 +29,6 @@ import com.tiktok.sparkling.method.media.uploadfile.UploadFileMethod
 import com.tiktok.sparkling.method.media.uploadimage.UploadImageMethod
 import com.tiktok.sparkling.method.media.utils.MediaProvider
 import com.tiktok.sparkling.playground.depend.AppMediaDepend
-import com.tiktok.sparkling.playground.input.LynxInputComponent
 import com.tiktok.sparkling.playground.provider.BuiltinTemplateProvider
 import com.tiktok.sparkling.debugtool.SparklingDebugTool
 import com.tiktok.sparkling.playground.depend.AppNetworkDepend
@@ -65,13 +62,7 @@ class SparklingApplication : Application() {
         val baseInfoConfig = BaseInfoConfig(isDebug = BuildConfig.DEBUG)
         val lynxConfig =
             SparklingLynxConfig.build(this) {
-                addBehaviors(
-                    listOf(
-                        object : Behavior("input", false) {
-                            override fun createUI(context: LynxContext?): LynxUI<*>? = LynxInputComponent(context)
-                        },
-                    ),
-                )
+                addBehaviors(XElementBehaviors().create())
                 setTemplateProvider(BuiltinTemplateProvider(this@SparklingApplication))
             }
         val hybridConfig =

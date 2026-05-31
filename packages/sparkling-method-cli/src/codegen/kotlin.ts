@@ -97,7 +97,10 @@ function convertObjectToKotlinView(
   }
 
   context.visiting.add(className);
-  const items = definition.fields.map((field) => convertFieldToKotlinView(field, context, [...path, field.name]));
+  const items = definition.fields.map((field, index) => ({
+    ...convertFieldToKotlinView(field, context, [...path, field.name]),
+    isLast: index === definition.fields.length - 1
+  }));
   const needCompanion = items.some((item) => item.enum && item.enum.length > 0);
   context.visiting.delete(className);
 
@@ -131,8 +134,9 @@ function convertFieldToKotlinView(field: FieldSummary, context: KotlinBuildConte
     enumType: enumDetails?.enumType,
     enum: enumDetails?.entries,
     explanation: context.scope === 'response' && typeInfo.typeName === 'Number'
-      ? '// you can\'t set a Number type to this param, only support Int/Double/Long/Float'
-      : undefined
+      ? ' // you can\'t set a Number type to this param, only support Int/Double/Long/Float'
+      : undefined,
+    isLast: false
   };
 }
 
