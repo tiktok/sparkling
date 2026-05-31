@@ -259,10 +259,11 @@ class SparklingViewTest {
     fun lifecycleCallbacksForwardToSparklingDelegate() {
         val kitView = RecordingKitView(context)
         val delegate = RecordingSparklingLifecycleDelegate()
-        val error = HybridKitError().apply {
-            errorCode = 210
-            errorReason = "LynxReceiveError"
-        }
+        val error =
+            HybridKitError().apply {
+                errorCode = 210
+                errorReason = "LynxReceiveError"
+            }
         val perf = mapOf<String, Any>("setup_timing" to mapOf("draw_end" to 123L))
         val lifeCycleSlot = slot<IHybridKitLifeCycle>()
         every {

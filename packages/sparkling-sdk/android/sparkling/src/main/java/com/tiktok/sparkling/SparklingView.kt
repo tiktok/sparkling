@@ -52,13 +52,21 @@ class SparklingView(
             val frameWidth = currentFrameWidth()
             val frameHeight = currentFrameHeight()
             return when (sparkContentMode) {
-                SparklingViewContentMode.FIT_SIZE -> contentSize.withFallback(frameWidth, frameHeight)
-                SparklingViewContentMode.FIXED_WIDTH ->
+                SparklingViewContentMode.FIT_SIZE -> {
+                    contentSize.withFallback(frameWidth, frameHeight)
+                }
+
+                SparklingViewContentMode.FIXED_WIDTH -> {
                     Size(frameWidth.takeIf { it > 0 } ?: contentSize.width, contentSize.height)
-                SparklingViewContentMode.FIXED_HEIGHT ->
+                }
+
+                SparklingViewContentMode.FIXED_HEIGHT -> {
                     Size(contentSize.width, frameHeight.takeIf { it > 0 } ?: contentSize.height)
-                SparklingViewContentMode.FIXED_SIZE ->
+                }
+
+                SparklingViewContentMode.FIXED_SIZE -> {
                     Size(frameWidth, frameHeight)
+                }
             }
         }
 
@@ -503,13 +511,18 @@ class SparklingView(
                 if (size.width > 0) targetWidth = size.width
                 if (size.height > 0) targetHeight = size.height
             }
+
             SparklingViewContentMode.FIXED_WIDTH -> {
                 if (size.height > 0) targetHeight = size.height
             }
+
             SparklingViewContentMode.FIXED_HEIGHT -> {
                 if (size.width > 0) targetWidth = size.width
             }
-            SparklingViewContentMode.FIXED_SIZE -> return
+
+            SparklingViewContentMode.FIXED_SIZE -> {
+                return
+            }
         }
         if (targetWidth != currentLayoutParams.width || targetHeight != currentLayoutParams.height) {
             currentLayoutParams.width = targetWidth
