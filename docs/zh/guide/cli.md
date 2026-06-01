@@ -100,7 +100,7 @@ npx sparkling run:android
 | --- | --- |
 | `--copy` | 将资源复制到原生 Shell |
 | `--skip-copy` | 跳过资源复制（默认行为） |
-| `--host <host>` | Android 设备使用的 dev server host，适用于多网卡机器 |
+| `--host <host>` | Android 设备使用的 dev server host，适用于自动检测的局域网 IPv4 不是目标网络时 |
 
 该命令会依次执行：
 
@@ -113,10 +113,6 @@ npx sparkling run:android
 5. 运行 `gradlew assembleDebug`
 6. 将 APK 安装到已连接的设备/模拟器
 7. 启动主 Activity
-
-真机调试时，CLI 会使用选中的局域网 IPv4 作为应用调试 URL 和 dev server host。
-如果自动检测选错了网络，可以通过 `--host <host>` 或 `app.config.ts` 中的
-`dev.server.host` 覆盖 host。
 
 ### `sparkling run:ios`
 

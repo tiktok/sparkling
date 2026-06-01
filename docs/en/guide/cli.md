@@ -100,7 +100,7 @@ npx sparkling run:android
 | --- | --- |
 | `--copy` | Copy assets to native shells |
 | `--skip-copy` | Skip copying assets (default) |
-| `--host <host>` | Dev server host for Android devices, useful for multi-network machines |
+| `--host <host>` | Dev server host for Android devices, useful when auto-detected LAN IPv4 is not the desired network |
 
 This command will:
 
@@ -113,10 +113,6 @@ This command will:
 5. Run `gradlew assembleDebug`
 6. Install the APK on a connected device/emulator
 7. Launch the main activity
-
-For physical devices, the CLI uses the selected LAN IPv4 for the app's debug URL
-and dev server host. If automatic detection picks the wrong network, override the
-host with `--host <host>` or `dev.server.host` in `app.config.ts`.
 
 ### `sparkling run:ios`
 
