@@ -17,7 +17,6 @@ import org.junit.Test
  * [BaseInfoConfig], [LogConfig] and [DebugConfig].
  */
 class HybridConfigTest {
-
     @Test
     fun sparklingHybridConfigBuilderAppliesDefaults() {
         val baseInfo = BaseInfoConfig(isDebug = true)
@@ -40,13 +39,14 @@ class HybridConfigTest {
         val logCfg = LogConfig(mockk(relaxed = true))
         val debugCfg = DebugConfig(showErrorWhenJSBFailed = true)
 
-        val cfg = SparklingHybridConfig.build(baseInfo) {
-            setLynxConfig(lynxCfg)
-            setWebConfig(webCfg)
-            setBridgeConfig(bridgeCfg)
-            setLogConfig(logCfg)
-            setDebugConfig(debugCfg)
-        }
+        val cfg =
+            SparklingHybridConfig.build(baseInfo) {
+                setLynxConfig(lynxCfg)
+                setWebConfig(webCfg)
+                setBridgeConfig(bridgeCfg)
+                setLogConfig(logCfg)
+                setDebugConfig(debugCfg)
+            }
 
         assertSame(baseInfo, cfg.baseInfoConfig)
         assertSame(lynxCfg, cfg.lynxConfig)
@@ -71,10 +71,20 @@ class HybridConfigTest {
 
     @Test
     fun debugAndLogConfigPropertiesAreReadable() {
-        val logger = object : com.tiktok.sparkling.hybridkit.utils.HybridLogger {
-            override fun onLog(msg: String, logLevel: com.tiktok.sparkling.hybridkit.utils.LogLevel, tag: String) = Unit
-            override fun onReject(e: Throwable, extraMsg: String, tag: String) = Unit
-        }
+        val logger =
+            object : com.tiktok.sparkling.hybridkit.utils.HybridLogger {
+                override fun onLog(
+                    msg: String,
+                    logLevel: com.tiktok.sparkling.hybridkit.utils.LogLevel,
+                    tag: String,
+                ) = Unit
+
+                override fun onReject(
+                    e: Throwable,
+                    extraMsg: String,
+                    tag: String,
+                ) = Unit
+            }
         val log = LogConfig(logger)
         assertSame(logger, log.logger)
 
@@ -100,13 +110,14 @@ class HybridConfigTest {
 
         val moduleWrapper = mockk<SparklingLynxModuleWrapper>(relaxed = true)
         var initCalled = false
-        val cfg = SparklingLynxConfig.build(app) {
-            setCheckPropsSetter(false)
-            setLibraryLoader(null)
-            setTemplateProvider(null)
-            addLynxModules(mapOf("foo" to moduleWrapper))
-            setAdditionInit { initCalled = true }
-        }
+        val cfg =
+            SparklingLynxConfig.build(app) {
+                setCheckPropsSetter(false)
+                setLibraryLoader(null)
+                setTemplateProvider(null)
+                addLynxModules(mapOf("foo" to moduleWrapper))
+                setAdditionInit { initCalled = true }
+            }
 
         assertFalse(cfg.isCheckPropsSetter)
         assertEquals(1, cfg.globalModules.size)

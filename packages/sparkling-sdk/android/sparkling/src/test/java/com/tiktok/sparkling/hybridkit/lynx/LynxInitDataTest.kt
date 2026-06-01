@@ -14,22 +14,24 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class LynxInitDataTest {
-
     @Test
     fun tryTransformUnsupportedDataHandlesBundleJsonAndArray() {
-        val bundle = Bundle().apply {
-            putString("name", "sparkling")
-            putInt("count", 2)
-        }
-        val jsonObject = JSONObject().apply {
-            put("a", 1)
-            put("b", JSONObject().put("c", true))
-        }
-        val jsonArray = JSONArray().apply {
-            put("x")
-            put(JSONObject().put("y", 2))
-            put(JSONObject.NULL)
-        }
+        val bundle =
+            Bundle().apply {
+                putString("name", "sparkling")
+                putInt("count", 2)
+            }
+        val jsonObject =
+            JSONObject().apply {
+                put("a", 1)
+                put("b", JSONObject().put("c", true))
+            }
+        val jsonArray =
+            JSONArray().apply {
+                put("x")
+                put(JSONObject().put("y", 2))
+                put(JSONObject.NULL)
+            }
 
         val fromBundle = LynxInitData.tryTransformUnsupportedData(bundle) as Map<*, *>
         val fromJson = LynxInitData.tryTransformUnsupportedData(jsonObject) as Map<*, *>
@@ -45,10 +47,11 @@ class LynxInitDataTest {
 
     @Test
     fun tryTransformUnsupportedDataIgnoresNonStringMapKeysAndSupportsNested() {
-        val input = mapOf(
-            "ok" to listOf(1, mapOf("nested" to "v")),
-            7 to "ignored",
-        )
+        val input =
+            mapOf(
+                "ok" to listOf(1, mapOf("nested" to "v")),
+                7 to "ignored",
+            )
 
         val out = LynxInitData.tryTransformUnsupportedData(input) as Map<*, *>
 

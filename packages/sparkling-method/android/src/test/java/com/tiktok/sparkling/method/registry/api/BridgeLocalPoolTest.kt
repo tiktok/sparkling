@@ -20,7 +20,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class BridgeLocalPoolTest {
-
     /**
      * Concrete IDL bridge method with a default constructor so the local pool
      * can lazily instantiate it via reflection.
@@ -28,6 +27,7 @@ class BridgeLocalPoolTest {
     open class FakeBridgeMethod : IDLBridgeMethod {
         override val name: String = "fake.method"
         var released: Int = 0
+
         override fun realHandle(
             params: Map<String, Any?>,
             callback: IDLBridgeMethod.Callback,
@@ -35,7 +35,9 @@ class BridgeLocalPoolTest {
         ) = Unit
 
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) = Unit
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) = Unit
+
         override fun release() {
             released += 1
         }

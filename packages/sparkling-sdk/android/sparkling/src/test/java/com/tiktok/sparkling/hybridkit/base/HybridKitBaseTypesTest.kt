@@ -14,15 +14,15 @@ import org.junit.Test
  * and the default no-op implementations of [IHybridKitLifeCycle].
  */
 class HybridKitBaseTypesTest {
-
     @Test
     fun hybridKitErrorPrintsErrorMessage() {
-        val err = HybridKitError().apply {
-            errorCode = 210
-            errorReason = "lynx load failure"
-            originCode = 500
-            originReason = "underlying"
-        }
+        val err =
+            HybridKitError().apply {
+                errorCode = 210
+                errorReason = "lynx load failure"
+                originCode = 500
+                originReason = "underlying"
+            }
         assertEquals(210, err.errorCode)
         assertEquals("lynx load failure", err.errorReason)
         assertEquals(500, err.originCode)

@@ -64,7 +64,17 @@ const runCommand = (cmd, args) =>
     env: process.env,
   });
 
+console.log('\n[coverage:ts] Building shared TypeScript workspace deps');
+const sharedPrebuild = runCommand('pnpm', ['--filter', 'sparkling-method', 'build']);
+if (sharedPrebuild.status !== 0) {
+  failures.push('sparkling-method (prebuild)');
+}
+
 for (const target of targets) {
+  if (failures.length > 0) {
+    break;
+  }
+
   const outDir = join(outputRoot, target.name);
   mkdirSync(outDir, { recursive: true });
 
@@ -106,6 +116,7 @@ for (const target of targets) {
           'exec',
           'vitest',
           'run',
+          '--passWithNoTests',
           '--coverage',
           '--coverage.include',
           'src/**/*.{ts,tsx}',

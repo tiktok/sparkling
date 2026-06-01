@@ -20,7 +20,8 @@ pick_ios_destination() {
 
     if [[ -n "$runtime" && "$line" =~ ^[[:space:]]+iPhone[[:space:]] ]]; then
       sim_name="$(echo "$line" \
-        | sed -E 's/^[[:space:]]+([^(]+)\(.*$/\1/' \
+        | sed -E 's/^[[:space:]]+//' \
+        | sed -E 's/[[:space:]]+\([0-9A-Fa-f-]{36}\)[[:space:]]+\((Booted|Shutdown)\).*$//' \
         | sed -E 's/[[:space:]]+$//')"
       destination="platform=iOS Simulator,OS=$runtime,name=$sim_name"
     fi

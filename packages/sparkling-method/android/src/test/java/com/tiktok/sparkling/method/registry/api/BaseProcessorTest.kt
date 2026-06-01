@@ -22,7 +22,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class BaseProcessorTest {
-
     /**
      * Stub bridge whose `realHandle` invokes the provided callback synchronously
      * with whatever data the test wishes to surface.
@@ -45,6 +44,7 @@ class BaseProcessorTest {
         }
 
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) = Unit
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) = Unit
     }
 
@@ -86,12 +86,16 @@ class BaseProcessorTest {
         override val processor: FakeProcessor,
     ) : BaseProcessor<Map<String, Any?>>(bridge, data) {
         override fun getPlatformType(): BridgePlatformType = BridgePlatformType.WEB
-        override fun onError(code: Int, message: String): Map<String, Any?> =
-            mapOf(IDLBridgeMethod.PARAM_CODE to code, IDLBridgeMethod.PARAM_MSG to message)
+
+        override fun onError(
+            code: Int,
+            message: String,
+        ): Map<String, Any?> = mapOf(IDLBridgeMethod.PARAM_CODE to code, IDLBridgeMethod.PARAM_MSG to message)
     }
 
     private class CapturingCallback : IBridgeMethodCallback {
         var lastResult: Any? = null
+
         override fun onBridgeResult(parcel: Any) {
             lastResult = parcel
         }
@@ -99,12 +103,14 @@ class BaseProcessorTest {
 
     @Test
     fun handleDispatchesSuccessThroughProcessor() {
-        val bridge = StubBridge().apply {
-            nextResult = mapOf(
-                IDLBridgeMethod.PARAM_CODE to IDLBridgeMethod.SUCCESS,
-                IDLBridgeMethod.PARAM_DATA to mapOf("k" to "v"),
-            )
-        }
+        val bridge =
+            StubBridge().apply {
+                nextResult =
+                    mapOf(
+                        IDLBridgeMethod.PARAM_CODE to IDLBridgeMethod.SUCCESS,
+                        IDLBridgeMethod.PARAM_DATA to mapOf("k" to "v"),
+                    )
+            }
         val processor = FakeProcessor()
         val target = TestProcessor(bridge, mapOf("input" to 1), processor)
         val callback = CapturingCallback()
@@ -121,9 +127,10 @@ class BaseProcessorTest {
 
     @Test
     fun handleDispatchesFailureCodeThroughProcessor() {
-        val bridge = StubBridge().apply {
-            nextResult = mapOf(IDLBridgeMethod.PARAM_CODE to IDLBridgeMethod.FAIL)
-        }
+        val bridge =
+            StubBridge().apply {
+                nextResult = mapOf(IDLBridgeMethod.PARAM_CODE to IDLBridgeMethod.FAIL)
+            }
         val processor = FakeProcessor()
         val target = TestProcessor(bridge, mapOf("input" to 1), processor)
         val callback = CapturingCallback()

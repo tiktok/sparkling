@@ -17,21 +17,24 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class IBridgeServiceTest {
-
     private class StubBridgeService : IBridgeService {
         override fun createBridgeService(): IKitBridgeService? = null
+
         override fun onRegister(bid: String) = Unit
+
         override fun onUnRegister() = Unit
+
         override fun getBid(): String = "bid"
     }
 
     private class StubBridgeRegistry : IBridgeRegistry {
         var registered = 0
         var unregistered = 0
+
         override fun onRegisterBridge(
             kitView: IKitView,
             context: Context,
-            sessionInfo: android.content.pm.PackageInstaller.SessionInfo?
+            sessionInfo: android.content.pm.PackageInstaller.SessionInfo?,
         ) {
             registered += 1
         }
@@ -40,15 +43,20 @@ class IBridgeServiceTest {
     private class StubStatusObserver : IBridgeStatusObserver {
         var created = 0
         var preInit = 0
+
         override fun onKitViewCreated(
             context: Context,
             kitView: IKitView,
-            sessionInfo: android.content.pm.PackageInstaller.SessionInfo?
+            sessionInfo: android.content.pm.PackageInstaller.SessionInfo?,
         ) {
             created += 1
         }
 
-        override fun onLynxViewPreInit(context: Context, builder: Any?, containerId: String?) {
+        override fun onLynxViewPreInit(
+            context: Context,
+            builder: Any?,
+            containerId: String?,
+        ) {
             preInit += 1
         }
     }

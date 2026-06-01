@@ -9,8 +9,9 @@ import org.junit.Assert.assertSame
 import org.junit.Test
 
 class IDependencyIteratorTest {
-
-    private class Node(val tag: String) : AbsDependencyIterator<Node>()
+    private class Node(
+        val tag: String,
+    ) : AbsDependencyIterator<Node>()
 
     @Test
     fun nextSetterAndGetterUseSharedState() {

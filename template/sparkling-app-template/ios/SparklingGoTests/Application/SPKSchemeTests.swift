@@ -232,14 +232,13 @@ struct SPKContextTests {
 
     @Test @MainActor func initializationWithBuilders() {
         let loadingBuilder: SPKLoadingViewBuilder = { UIView() as! (UIView & SPKLoadingViewProtocol) }
-        let failedBuilder: SPKFailedViewBuilder = { _, _ in UIView() as! (UIView & SPKLoadErrorViewProtocol) }
+        let failedBuilder: SPKFailedViewBuilder = { _ in UIView() as! (UIView & SPKLoadErrorViewProtocol) }
         let naviBar = SPKNavigationBar()
 
-        let context = SPKContext(
-            loadingViewBuilder: loadingBuilder,
-            failedViewBuilder: failedBuilder,
-            naviBar: naviBar
-        )
+        let context = SPKContext()
+        context.loadingViewBuilder = loadingBuilder
+        context.failedViewBuilder = failedBuilder
+        context.naviBar = naviBar
 
         #expect(context.loadingViewBuilder != nil)
         #expect(context.failedViewBuilder != nil)

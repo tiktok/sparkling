@@ -10,7 +10,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CancelCallbackConfigTest {
-
     @Test
     fun defaultsAreDisabled() {
         val config = CancelCallbackConfig()

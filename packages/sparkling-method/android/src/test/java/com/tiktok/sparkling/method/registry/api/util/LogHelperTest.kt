@@ -13,24 +13,27 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class LogHelperTest {
-
     /**
      * Reflectively access the internal extension functions defined inside
      * `LogHelper.kt` so we can drive them from a unit test without having to
      * widen their visibility in production code.
      */
     private fun callLog(receiver: Any?) {
-        val method = Class.forName("com.tiktok.sparkling.method.registry.api.util.LogHelperKt")
-            .declaredMethods
-            .single { it.name == "log" }
+        val method =
+            Class
+                .forName("com.tiktok.sparkling.method.registry.api.util.LogHelperKt")
+                .declaredMethods
+                .single { it.name == "log" }
         method.isAccessible = true
         method.invoke(null, receiver)
     }
 
     private fun callPrintStackString(t: Throwable): String {
-        val method = Class.forName("com.tiktok.sparkling.method.registry.api.util.LogHelperKt")
-            .declaredMethods
-            .single { it.name == "printStackString" }
+        val method =
+            Class
+                .forName("com.tiktok.sparkling.method.registry.api.util.LogHelperKt")
+                .declaredMethods
+                .single { it.name == "printStackString" }
         method.isAccessible = true
         return method.invoke(null, t) as String
     }

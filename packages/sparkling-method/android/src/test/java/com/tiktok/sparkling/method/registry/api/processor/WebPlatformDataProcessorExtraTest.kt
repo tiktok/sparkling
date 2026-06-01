@@ -34,99 +34,120 @@ import java.lang.reflect.InvocationTargetException
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class WebPlatformDataProcessorExtraTest {
-
     private val processor = WebPlatformDataProcessor()
 
-    private fun callPreCheck(clazz: Class<*>, params: JSONObject): Any? {
-        val m = WebPlatformDataProcessor::class.java.getDeclaredMethod(
-            "preCheck",
-            Class::class.java,
-            JSONObject::class.java,
-        )
+    private fun callPreCheck(
+        clazz: Class<*>,
+        params: JSONObject,
+    ): Any? {
+        val m =
+            WebPlatformDataProcessor::class.java.getDeclaredMethod(
+                "preCheck",
+                Class::class.java,
+                JSONObject::class.java,
+            )
         m.isAccessible = true
         return m.invoke(processor, clazz, params)
     }
 
-    private fun callGetJsonObjectParams(clazz: Class<out IDLMethodBaseParamModel>, params: JSONObject): Map<*, *>? {
-        val m = WebPlatformDataProcessor::class.java.getDeclaredMethod(
-            "getJsonObjectParams",
-            JSONObject::class.java,
-            Class::class.java,
-        )
+    private fun callGetJsonObjectParams(
+        clazz: Class<out IDLMethodBaseParamModel>,
+        params: JSONObject,
+    ): Map<*, *>? {
+        val m =
+            WebPlatformDataProcessor::class.java.getDeclaredMethod(
+                "getJsonObjectParams",
+                JSONObject::class.java,
+                Class::class.java,
+            )
         m.isAccessible = true
         return m.invoke(processor, params, clazz) as Map<*, *>?
     }
 
-    private fun callGetMapWithDefault(clazz: Class<*>?, json: JSONObject): JSONObject {
-        val m = WebPlatformDataProcessor::class.java.getDeclaredMethod(
-            "getMapWithDefault",
-            Class::class.java,
-            JSONObject::class.java,
-        )
+    private fun callGetMapWithDefault(
+        clazz: Class<*>?,
+        json: JSONObject,
+    ): JSONObject {
+        val m =
+            WebPlatformDataProcessor::class.java.getDeclaredMethod(
+                "getMapWithDefault",
+                Class::class.java,
+                JSONObject::class.java,
+            )
         m.isAccessible = true
         return m.invoke(processor, clazz, json) as JSONObject
     }
 
-    private fun callGetJsonWithDefault(clazz: Class<*>?, json: JSONObject): JSONObject? {
-        val m = WebPlatformDataProcessor::class.java.getDeclaredMethod(
-            "getJsonWithDefault",
-            Class::class.java,
-            JSONObject::class.java,
-        )
+    private fun callGetJsonWithDefault(
+        clazz: Class<*>?,
+        json: JSONObject,
+    ): JSONObject? {
+        val m =
+            WebPlatformDataProcessor::class.java.getDeclaredMethod(
+                "getJsonWithDefault",
+                Class::class.java,
+                JSONObject::class.java,
+            )
         m.isAccessible = true
         return m.invoke(processor, clazz, json) as JSONObject?
     }
 
     @Test
     fun checkValueRejectsMissingRequiredParam() {
-        val ex = runCatching {
-            callPreCheck(RequiredOnlyModel::class.java, JSONObject())
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callPreCheck(RequiredOnlyModel::class.java, JSONObject())
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
     @Test
     fun checkValueRejectsWrongStringType() {
         val params = JSONObject().put("name", 5)
-        val ex = runCatching {
-            callPreCheck(StringTypedModel::class.java, params)
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callPreCheck(StringTypedModel::class.java, params)
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
     @Test
     fun checkValueRejectsWrongNumberType() {
         val params = JSONObject().put("count", "not a number")
-        val ex = runCatching {
-            callPreCheck(NumberTypedModel::class.java, params)
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callPreCheck(NumberTypedModel::class.java, params)
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
     @Test
     fun checkValueRejectsWrongBooleanType() {
         val params = JSONObject().put("flag", "nope")
-        val ex = runCatching {
-            callPreCheck(BoolTypedModel::class.java, params)
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callPreCheck(BoolTypedModel::class.java, params)
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
     @Test
     fun checkValueRejectsWrongListType() {
         val params = JSONObject().put("items", "not a list")
-        val ex = runCatching {
-            callPreCheck(ListTypedModel::class.java, params)
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callPreCheck(ListTypedModel::class.java, params)
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
     @Test
     fun checkValueRejectsWrongMapType() {
         val params = JSONObject().put("config", "not a map")
-        val ex = runCatching {
-            callPreCheck(MapTypedModel::class.java, params)
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callPreCheck(MapTypedModel::class.java, params)
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
@@ -149,9 +170,10 @@ class WebPlatformDataProcessorExtraTest {
     @Test
     fun checkValueRejectsInvalidIntEnum() {
         val params = JSONObject().put("level", 99)
-        val ex = runCatching {
-            callGetJsonObjectParams(IntEnumModel::class.java, params)
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callGetJsonObjectParams(IntEnumModel::class.java, params)
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
@@ -165,9 +187,10 @@ class WebPlatformDataProcessorExtraTest {
     @Test
     fun checkValueRejectsInvalidStringEnumWithMapValues() {
         val params = JSONObject().put("opts", JSONObject().put("k", "C"))
-        val ex = runCatching {
-            callGetJsonObjectParams(StringEnumMapModel::class.java, params)
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callGetJsonObjectParams(StringEnumMapModel::class.java, params)
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
@@ -203,68 +226,85 @@ class WebPlatformDataProcessorExtraTest {
         // No registered annotation pool and no proxy model: should be null.
         class UnknownBridge : IDLBridgeMethod {
             override val name: String = "unknown"
+
             override fun realHandle(
                 params: Map<String, Any?>,
                 callback: IDLBridgeMethod.Callback,
                 type: BridgePlatformType,
             ) = Unit
+
             override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) = Unit
+
             override fun setBridgeContext(bridgeContext: IBridgeContext) = Unit
         }
         val res = processor.transformPlatformDataToMap(JSONObject(), UnknownBridge::class.java)
         assertNull(res)
     }
 
-    /* ---------------------------------------------------------------------- */
-    /* Helper model interfaces – they only need annotations to drive branches  */
-    /* ---------------------------------------------------------------------- */
+    // ----------------------------------------------------------------------
+    // Helper model interfaces – they only need annotations to drive branches
+    // ----------------------------------------------------------------------
 
     interface RequiredOnlyModel : IDLMethodBaseParamModel {
         @get:IDLMethodParamField(required = true, keyPath = "name")
         val name: String?
+
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 
     interface StringTypedModel : IDLMethodBaseParamModel {
         @get:IDLMethodParamField(keyPath = "name")
         val name: String?
+
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 
     interface NumberTypedModel : IDLMethodBaseParamModel {
         @get:IDLMethodParamField(keyPath = "count")
         val count: Number?
+
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 
     interface BoolTypedModel : IDLMethodBaseParamModel {
         @get:IDLMethodParamField(keyPath = "flag")
         val flag: Boolean?
+
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 
     interface ListTypedModel : IDLMethodBaseParamModel {
         @get:IDLMethodParamField(keyPath = "items")
         val items: List<Any?>?
+
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 
     interface MapTypedModel : IDLMethodBaseParamModel {
         @get:IDLMethodParamField(keyPath = "config")
         val config: Map<String, Any?>?
+
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 
     interface OptionalModel : IDLMethodBaseParamModel {
         @get:IDLMethodParamField(keyPath = "name")
         val name: String?
+
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 
@@ -272,7 +312,9 @@ class WebPlatformDataProcessorExtraTest {
         @get:IDLMethodParamField(keyPath = "level", isEnum = true)
         @get:IDLMethodIntEnum(1, 2, 3)
         val level: Number?
+
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 
@@ -280,7 +322,9 @@ class WebPlatformDataProcessorExtraTest {
         @get:IDLMethodParamField(keyPath = "opts", isEnum = true)
         @get:IDLMethodStringEnum("A", "B")
         val opts: Map<String, Any?>?
+
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 
@@ -304,6 +348,7 @@ class WebPlatformDataProcessorExtraTest {
         val flag: Boolean?
 
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 
@@ -323,6 +368,7 @@ class WebPlatformDataProcessorExtraTest {
         val name: String?
 
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 }

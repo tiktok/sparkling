@@ -25,15 +25,23 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class ReadableMapImplTest {
-
-    private fun sample(): JSONObject = JSONObject().apply {
-        put("s", "hello")
-        put("i", 42)
-        put("d", 3.14)
-        put("b", true)
-        put("a", JSONArray().apply { put("x"); put(7); put(2.5); put(true) })
-        put("m", JSONObject().apply { put("k", "v") })
-    }
+    private fun sample(): JSONObject =
+        JSONObject().apply {
+            put("s", "hello")
+            put("i", 42)
+            put("d", 3.14)
+            put("b", true)
+            put(
+                "a",
+                JSONArray().apply {
+                    put("x")
+                    put(7)
+                    put(2.5)
+                    put(true)
+                },
+            )
+            put("m", JSONObject().apply { put("k", "v") })
+        }
 
     @Test
     fun mapAccessorsReturnExpectedValues() {
@@ -111,11 +119,18 @@ class ReadableMapImplTest {
         assertEquals(2.5, arr.getDouble(2), 0.0)
         assertTrue(arr.getBoolean(3))
 
-        val nestedMap = ReadableMapImpl(
-            JSONObject().apply {
-                put("nested", JSONArray().apply { put(JSONObject().put("k", "v")); put(JSONArray().put(1)) })
-            }
-        )
+        val nestedMap =
+            ReadableMapImpl(
+                JSONObject().apply {
+                    put(
+                        "nested",
+                        JSONArray().apply {
+                            put(JSONObject().put("k", "v"))
+                            put(JSONArray().put(1))
+                        },
+                    )
+                },
+            )
         val nested = nestedMap.getArray("nested")!!
         assertNotNull(nested.getMap(0))
         assertNotNull(nested.getArray(1))
@@ -130,22 +145,23 @@ class ReadableMapImplTest {
 
     @Test
     fun arrayGetTypeMatchesContent() {
-        val arr = ReadableMapImpl(
-            JSONObject().apply {
-                put(
-                    "a",
-                    JSONArray().apply {
-                        put("s")
-                        put(true)
-                        put(JSONObject())
-                        put(JSONArray())
-                        put(1)
-                        put(1.5)
-                        put(JSONObject.NULL)
-                    }
-                )
-            }
-        ).getArray("a")!!
+        val arr =
+            ReadableMapImpl(
+                JSONObject().apply {
+                    put(
+                        "a",
+                        JSONArray().apply {
+                            put("s")
+                            put(true)
+                            put(JSONObject())
+                            put(JSONArray())
+                            put(1)
+                            put(1.5)
+                            put(JSONObject.NULL)
+                        },
+                    )
+                },
+            ).getArray("a")!!
 
         assertEquals(XReadableType.String, arr.getType(0))
         assertEquals(XReadableType.Boolean, arr.getType(1))
@@ -228,15 +244,16 @@ class ReadableMapImplTest {
 
     @Test
     fun bridgeCollectionsOptHelpersCoverAllTypes() {
-        val source = JSONObject().apply {
-            put("s", "v")
-            put("b", true)
-            put("i", 5)
-            // d as a non-int double; JSONObject collapses 1.0 to int.
-            put("d", 1.25)
-            put("m", JSONObject().put("kk", "vv"))
-            put("arr", JSONArray().put("x"))
-        }
+        val source =
+            JSONObject().apply {
+                put("s", "v")
+                put("b", true)
+                put("i", 5)
+                // d as a non-int double; JSONObject collapses 1.0 to int.
+                put("d", 1.25)
+                put("m", JSONObject().put("kk", "vv"))
+                put("arr", JSONArray().put("x"))
+            }
         val map = ReadableMapImpl(source)
 
         assertEquals("v", map.optString("s"))
@@ -269,23 +286,24 @@ class ReadableMapImplTest {
 
     @Test
     fun toObjectMapAndToObjectListWalkAllBranches() {
-        val source = JSONObject().apply {
-            put("s", "v")
-            put("b", true)
-            put("i", 5)
-            put("d", 1.25)
-            put("nestedMap", JSONObject().put("k", "vv"))
-            put(
-                "nestedArr",
-                JSONArray()
-                    .put("a")
-                    .put(true)
-                    .put(1)
-                    .put(2.5)
-                    .put(JSONObject().put("k", "vv"))
-                    .put(JSONArray().put("x"))
-            )
-        }
+        val source =
+            JSONObject().apply {
+                put("s", "v")
+                put("b", true)
+                put("i", 5)
+                put("d", 1.25)
+                put("nestedMap", JSONObject().put("k", "vv"))
+                put(
+                    "nestedArr",
+                    JSONArray()
+                        .put("a")
+                        .put(true)
+                        .put(1)
+                        .put(2.5)
+                        .put(JSONObject().put("k", "vv"))
+                        .put(JSONArray().put("x")),
+                )
+            }
         val map = ReadableMapImpl(source)
         val plain = map.toObjectMap()
         assertEquals("v", plain["s"])

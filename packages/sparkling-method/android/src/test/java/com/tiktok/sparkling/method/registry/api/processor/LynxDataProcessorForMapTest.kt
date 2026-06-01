@@ -15,16 +15,16 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class LynxDataProcessorForMapTest {
-
     @Test
     fun getJavaOnlyMapParamsAppliesDefaultAndConvertsValues() {
         val data = createAnnotationData()
-        val params = hashMapOf<String, Any>(
-            "name" to "sparkling",
-            "mode" to "A",
-            "payload" to hashMapOf("k" to 1),
-            "items" to listOf(1, 2, 3),
-        )
+        val params =
+            hashMapOf<String, Any>(
+                "name" to "sparkling",
+                "mode" to "A",
+                "payload" to hashMapOf("k" to 1),
+                "items" to listOf(1, 2, 3),
+            )
 
         val result = LynxDataProcessorForMap.getJavaOnlyMapParams(params, data)
 
@@ -37,14 +37,16 @@ class LynxDataProcessorForMapTest {
     @Test
     fun getJavaOnlyMapParamsThrowsOnInvalidEnum() {
         val data = createAnnotationData()
-        val invalid = hashMapOf<String, Any>(
-            "name" to "sparkling",
-            "mode" to "C",
-        )
+        val invalid =
+            hashMapOf<String, Any>(
+                "name" to "sparkling",
+                "mode" to "C",
+            )
 
-        val throwable = runCatching {
-            LynxDataProcessorForMap.getJavaOnlyMapParams(invalid, data)
-        }.exceptionOrNull()
+        val throwable =
+            runCatching {
+                LynxDataProcessorForMap.getJavaOnlyMapParams(invalid, data)
+            }.exceptionOrNull()
 
         assertTrue(throwable is IllegalInputParamException)
     }
@@ -54,32 +56,37 @@ class LynxDataProcessorForMapTest {
         val data = createAnnotationData()
         val missing = hashMapOf<String, Any>("mode" to "A")
 
-        val throwable = runCatching {
-            LynxDataProcessorForMap.getJavaOnlyMapParams(missing, data)
-        }.exceptionOrNull()
+        val throwable =
+            runCatching {
+                LynxDataProcessorForMap.getJavaOnlyMapParams(missing, data)
+            }.exceptionOrNull()
 
         assertTrue(throwable is IllegalInputParamException)
     }
 
     private fun createAnnotationData(): IDLAnnotationData {
-        val model = IDLAnnotationModel(
-            stringModel = hashMapOf(
-                "name" to IDLParamField(required = true, keyPath = "name", returnType = String::class.java),
-                "count" to IDLParamField(
-                    keyPath = "count",
-                    returnType = Number::class.java,
-                    defaultValue = IDLDefaultValue(type = DefaultType.INT, intValue = 5),
-                ),
-                "mode" to IDLParamField(
-                    keyPath = "mode",
-                    isEnum = true,
-                    returnType = String::class.java,
-                    stringEnum = listOf("A", "B"),
-                ),
-                "payload" to IDLParamField(keyPath = "payload", returnType = Map::class.java),
-                "items" to IDLParamField(keyPath = "items", returnType = List::class.java),
-            ),
-        )
+        val model =
+            IDLAnnotationModel(
+                stringModel =
+                    hashMapOf(
+                        "name" to IDLParamField(required = true, keyPath = "name", returnType = String::class.java),
+                        "count" to
+                            IDLParamField(
+                                keyPath = "count",
+                                returnType = Number::class.java,
+                                defaultValue = IDLDefaultValue(type = DefaultType.INT, intValue = 5),
+                            ),
+                        "mode" to
+                            IDLParamField(
+                                keyPath = "mode",
+                                isEnum = true,
+                                returnType = String::class.java,
+                                stringEnum = listOf("A", "B"),
+                            ),
+                        "payload" to IDLParamField(keyPath = "payload", returnType = Map::class.java),
+                        "items" to IDLParamField(keyPath = "items", returnType = List::class.java),
+                    ),
+            )
 
         return IDLAnnotationData(
             paramClass = Any::class.java,

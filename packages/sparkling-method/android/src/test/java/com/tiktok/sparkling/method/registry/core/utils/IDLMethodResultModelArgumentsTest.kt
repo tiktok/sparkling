@@ -11,7 +11,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class IDLMethodResultModelArgumentsTest {
-
     @Test
     fun createModelSupportsSetterGetterConvertAndAssignDirInNoCachePath() {
         val model = IDLMethodResultModelArguments.createModel(NoCacheResultModel::class.java)

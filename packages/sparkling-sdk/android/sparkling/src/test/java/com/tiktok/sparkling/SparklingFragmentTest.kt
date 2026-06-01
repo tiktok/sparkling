@@ -20,7 +20,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33], packageName = "com.tiktok.sparkling")
 class SparklingFragmentTest {
-
     private lateinit var application: Application
 
     @Before
@@ -53,7 +52,6 @@ class SparklingFragmentTest {
         val activity = controller.get()
         assertNotNull(activity)
     }
-
 
     @Test
     fun loadUrlForwardsToSparklingViewWithoutCrashing() {

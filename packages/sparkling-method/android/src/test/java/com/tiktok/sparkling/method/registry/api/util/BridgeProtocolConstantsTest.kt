@@ -7,7 +7,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class BridgeProtocolConstantsTest {
-
     @Test
     fun bridgeLynxProtocolMatchesExpectedBitFlag() {
         // Constructing the class so the no-arg constructor counts towards

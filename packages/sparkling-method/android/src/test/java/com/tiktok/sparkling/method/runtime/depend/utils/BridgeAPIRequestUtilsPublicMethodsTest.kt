@@ -25,22 +25,28 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class BridgeAPIRequestUtilsPublicMethodsTest {
-
     private class StringConnectionStub(
         private val body: String? = "{\"ok\":true}",
         private val code: Int = 200,
     ) : AbsStringConnection() {
         override fun getStringResponseBody(): String? = body
+
         override fun getResponseCode(): Int = code
+
         override fun getResponseHeader(): LinkedHashMap<String, String> = linkedMapOf("h" to "v")
+
         override fun getClientCode(): Int = 0
+
         override fun getErrorMsg(): String = ""
+
         override fun getException(): Throwable? = null
     }
 
     private class StreamConnectionStub : AbsStreamConnection() {
         override fun getInputStreamResponseBody() = ByteArrayInputStream(byteArrayOf(1, 2, 3))
+
         override fun getResponseCode(): Int = 200
+
         override fun getClientCode(): Int = 0
     }
 
@@ -51,13 +57,19 @@ class BridgeAPIRequestUtilsPublicMethodsTest {
         var lastMethod: RequestMethod? = null
         var lastRequest: HttpRequest? = null
 
-        override fun requestForString(method: RequestMethod, request: HttpRequest): AbsStringConnection {
+        override fun requestForString(
+            method: RequestMethod,
+            request: HttpRequest,
+        ): AbsStringConnection {
             lastMethod = method
             lastRequest = request
             return stringConnection
         }
 
-        override fun requestForStream(method: RequestMethod, request: HttpRequest): AbsStreamConnection {
+        override fun requestForStream(
+            method: RequestMethod,
+            request: HttpRequest,
+        ): AbsStreamConnection {
             lastMethod = method
             lastRequest = request
             return streamConnection
@@ -79,13 +91,18 @@ class BridgeAPIRequestUtilsPublicMethodsTest {
             lastBody = body
         }
 
-        override fun onFailed(errorCode: Int?, clientCode: Int?, throwable: Throwable) {
+        override fun onFailed(
+            errorCode: Int?,
+            clientCode: Int?,
+            throwable: Throwable,
+        ) {
             failed = true
         }
     }
 
     private class CapturingStreamCallback : IStreamResponseCallback {
         var connection: AbsStreamConnection? = null
+
         override fun handleConnection(connection: AbsStreamConnection?) {
             this.connection = connection
         }
@@ -115,9 +132,10 @@ class BridgeAPIRequestUtilsPublicMethodsTest {
     fun postFileUploadDispatchesPostAndForwardsResponse() {
         val depend = HostDepend()
         val cb = CapturingResponseCallback()
-        val fileMap = LinkedHashMap<String, File>().apply {
-            put("file", File.createTempFile("upload", ".bin"))
-        }
+        val fileMap =
+            LinkedHashMap<String, File>().apply {
+                put("file", File.createTempFile("upload", ".bin"))
+            }
 
         BridgeAPIRequestUtils.post(
             "https://example.com/upload",
@@ -297,15 +315,18 @@ class BridgeAPIRequestUtilsPublicMethodsTest {
     @Test
     fun postWithExceptionInChainSwallowsAndDoesNotCallCallback() {
         val cb = CapturingResponseCallback()
-        val exploding = object : IHostNetworkDepend {
-            override fun requestForString(method: RequestMethod, request: HttpRequest): AbsStringConnection {
-                throw RuntimeException("network down")
-            }
+        val exploding =
+            object : IHostNetworkDepend {
+                override fun requestForString(
+                    method: RequestMethod,
+                    request: HttpRequest,
+                ): AbsStringConnection = throw RuntimeException("network down")
 
-            override fun requestForStream(method: RequestMethod, request: HttpRequest): AbsStreamConnection {
-                throw RuntimeException("network down")
+                override fun requestForStream(
+                    method: RequestMethod,
+                    request: HttpRequest,
+                ): AbsStreamConnection = throw RuntimeException("network down")
             }
-        }
 
         BridgeAPIRequestUtils.post(
             "https://example.com",

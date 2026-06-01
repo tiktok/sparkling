@@ -27,7 +27,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33], packageName = "com.tiktok.sparkling")
 class DevicesUtilMoreTest {
-
     @Test
     fun brandAndModelAreNonNullStrings() {
         assertNotNull(DevicesUtil.brand)
@@ -77,10 +76,11 @@ class DevicesUtilMoreTest {
     fun isPadFalseForSmallScreenLayout() {
         val ctx = mockk<Context>()
         val resources = mockk<Resources>()
-        val configuration = Configuration().apply {
-            // SCREENLAYOUT_SIZE_NORMAL is < SCREENLAYOUT_SIZE_LARGE
-            screenLayout = Configuration.SCREENLAYOUT_SIZE_NORMAL
-        }
+        val configuration =
+            Configuration().apply {
+                // SCREENLAYOUT_SIZE_NORMAL is < SCREENLAYOUT_SIZE_LARGE
+                screenLayout = Configuration.SCREENLAYOUT_SIZE_NORMAL
+            }
         every { ctx.resources } returns resources
         every { resources.configuration } returns configuration
         assertFalse(DevicesUtil.isPad(ctx))

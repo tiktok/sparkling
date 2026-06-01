@@ -25,7 +25,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33], packageName = "com.tiktok.sparkling")
 class DevicesUtilExtraTest {
-
     @Test
     fun cachedScreenHeightAndWidthReturnPositiveValues() {
         val ctx = RuntimeEnvironment.getApplication()
@@ -81,10 +80,11 @@ class DevicesUtilExtraTest {
         val window = mockk<Window>()
         val decor = mockk<View>()
         val resources = mockk<android.content.res.Resources>()
-        val metrics = DisplayMetrics().apply {
-            density = 2.0f
-            heightPixels = 1500
-        }
+        val metrics =
+            DisplayMetrics().apply {
+                density = 2.0f
+                heightPixels = 1500
+            }
         every { activity.window } returns window
         every { window.decorView } returns decor
         every { decor.getWindowVisibleDisplayFrame(any()) } throws RuntimeException("fail")

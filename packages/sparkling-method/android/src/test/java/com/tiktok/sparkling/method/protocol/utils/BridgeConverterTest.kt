@@ -24,7 +24,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class BridgeConverterTest {
-
     @Test
     fun revertJavaOnlyMap2JSONObjectWithNullReturnsEmpty() {
         val obj = BridgeConverter.revertJavaOnlyMap2JSONObject(null)
@@ -120,13 +119,14 @@ class BridgeConverterTest {
 
     @Test
     fun convertJSONObject2JavaOnlyMapScalarTypes() {
-        val obj = JSONObject().apply {
-            put("s", "hello")
-            put("b", true)
-            put("i", 42)
-            put("d", 1.5)
-            put("nullKey", JSONObject.NULL)
-        }
+        val obj =
+            JSONObject().apply {
+                put("s", "hello")
+                put("b", true)
+                put("i", 42)
+                put("d", 1.5)
+                put("nullKey", JSONObject.NULL)
+            }
         val map = BridgeConverter.convertJSONObject2JavaOnlyMap(obj)
         assertEquals("hello", map.getString("s"))
         assertTrue(map.getBoolean("b"))
@@ -137,11 +137,18 @@ class BridgeConverterTest {
 
     @Test
     fun convertJSONObject2JavaOnlyMapNestedArrayAndMap() {
-        val obj = JSONObject().apply {
-            put("nested", JSONObject().put("k", "v"))
-            put("arr", JSONArray().put("a").put(1).put(JSONObject().put("kk", "vv"))
-                .put(JSONArray().put(true)))
-        }
+        val obj =
+            JSONObject().apply {
+                put("nested", JSONObject().put("k", "v"))
+                put(
+                    "arr",
+                    JSONArray()
+                        .put("a")
+                        .put(1)
+                        .put(JSONObject().put("kk", "vv"))
+                        .put(JSONArray().put(true)),
+                )
+            }
         val map = BridgeConverter.convertJSONObject2JavaOnlyMap(obj)
         val nested = map.getMap("nested") as JavaOnlyMap
         assertEquals("v", nested.getString("k"))
@@ -156,11 +163,12 @@ class BridgeConverterTest {
 
     @Test
     fun roundTripJSONObjectThroughJavaOnlyMap() {
-        val source = JSONObject().apply {
-            put("name", "alice")
-            put("age", 30)
-            put("nested", JSONObject().put("x", "y"))
-        }
+        val source =
+            JSONObject().apply {
+                put("name", "alice")
+                put("age", 30)
+                put("nested", JSONObject().put("x", "y"))
+            }
         val map = BridgeConverter.convertJSONObject2JavaOnlyMap(source)
         val back = BridgeConverter.revertJavaOnlyMap2JSONObject(map)
         assertEquals("alice", back.getString("name"))

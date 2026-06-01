@@ -49,12 +49,13 @@ class DataConvertUtilsTest {
 
     @Test
     fun testConvertMapToReadableMapSupportsNestedAndNull() {
-        val source = mapOf<String, Any?>(
-            "nested" to mapOf("inner" to 1),
-            "list" to listOf("a", 2),
-            "nullValue" to null,
-            "bool" to true,
-        )
+        val source =
+            mapOf<String, Any?>(
+                "nested" to mapOf("inner" to 1),
+                "list" to listOf("a", 2),
+                "nullValue" to null,
+                "bool" to true,
+            )
 
         val writableMap = Utils.convertMapToReadableMap(source)
 
@@ -325,11 +326,12 @@ class DataConvertUtilsTest {
 
     @Test
     fun testConvertArrayToWritableArrayRespectsLongFlag() {
-        val source = listOf(
-            1L,
-            mapOf("inner" to "v"),
-            listOf(2, 3),
-        )
+        val source =
+            listOf(
+                1L,
+                mapOf("inner" to "v"),
+                listOf(2, 3),
+            )
 
         DataConvertUtils.disableLongToDouble = false
         val asDouble = Utils.convertArrayToWritableArray(source)
@@ -344,14 +346,16 @@ class DataConvertUtilsTest {
 
     @Test
     fun testGetValueForReadableMapAndArray() {
-        val map = JavaOnlyMap().apply {
-            putString("name", "sparkling")
-            putInt("count", 2)
-        }
-        val arr = JavaOnlyArray().apply {
-            pushMap(map)
-            pushDouble(1.5)
-        }
+        val map =
+            JavaOnlyMap().apply {
+                putString("name", "sparkling")
+                putInt("count", 2)
+            }
+        val arr =
+            JavaOnlyArray().apply {
+                pushMap(map)
+                pushDouble(1.5)
+            }
 
         val value = Utils.getValue(arr)
         assertTrue(value is List<*>)
@@ -367,10 +371,11 @@ class DataConvertUtilsTest {
 
     @Test
     fun testConvertMapToReadableMapSupportsArrayAndJsonNull() {
-        val source = mapOf<String, Any?>(
-            "arrayValue" to arrayOf(1, "x", true),
-            "jsonNull" to JSONObject.NULL,
-        )
+        val source =
+            mapOf<String, Any?>(
+                "arrayValue" to arrayOf(1, "x", true),
+                "jsonNull" to JSONObject.NULL,
+            )
 
         val writableMap = Utils.convertMapToReadableMap(source)
 

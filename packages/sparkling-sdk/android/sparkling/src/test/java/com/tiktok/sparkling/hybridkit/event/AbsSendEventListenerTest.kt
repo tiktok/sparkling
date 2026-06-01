@@ -16,10 +16,16 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class AbsSendEventListenerTest {
-
-    private class RecordingListener(val tag: String) : AbsSendEventListener() {
+    private class RecordingListener(
+        val tag: String,
+    ) : AbsSendEventListener() {
         val invocations = mutableListOf<Triple<IKitView, String, Any?>>()
-        override fun invoke(kitView: IKitView, eventName: String, params: Any?) {
+
+        override fun invoke(
+            kitView: IKitView,
+            eventName: String,
+            params: Any?,
+        ) {
             invocations += Triple(kitView, eventName, params)
         }
     }

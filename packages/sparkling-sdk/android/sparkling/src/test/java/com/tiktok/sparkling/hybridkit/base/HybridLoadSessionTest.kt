@@ -18,7 +18,6 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class HybridLoadSessionTest {
-
     @Test
     fun toStringWithDefaultsSerializesZeroDurations() {
         val session = HybridLoadSession()
@@ -37,25 +36,26 @@ class HybridLoadSessionTest {
         val session = HybridLoadSession()
         val json = session.toJSONObject()
 
-        val expectedKeys = listOf(
-            "total",
-            "init2StartRender",
-            "renderCost",
-            "prepareTemplateCost",
-            "prepareJSBCost",
-            "preparePluginExecuteCost",
-            "prepareFontCost",
-            "sparkContainerCost",
-            "lynxCost",
-            "lynxViewInitCost",
-            "prepareInitDataCost",
-            "prepareComponentCost",
-            "prepareGlobalPropsCost",
-            "prepareComponentEnd2PrepareTemplateStart",
-            "prepareExtraInfoCost",
-            "customInitCost",
-            "pluginInfos",
-        )
+        val expectedKeys =
+            listOf(
+                "total",
+                "init2StartRender",
+                "renderCost",
+                "prepareTemplateCost",
+                "prepareJSBCost",
+                "preparePluginExecuteCost",
+                "prepareFontCost",
+                "sparkContainerCost",
+                "lynxCost",
+                "lynxViewInitCost",
+                "prepareInitDataCost",
+                "prepareComponentCost",
+                "prepareGlobalPropsCost",
+                "prepareComponentEnd2PrepareTemplateStart",
+                "prepareExtraInfoCost",
+                "customInitCost",
+                "pluginInfos",
+            )
         for (key in expectedKeys) {
             assertTrue("missing key=$key", json.has(key))
         }
@@ -65,38 +65,39 @@ class HybridLoadSessionTest {
 
     @Test
     fun snapShotComputesDerivedDurationsFromPopulatedSession() {
-        val session = HybridLoadSession().apply {
-            sessionId = "session-1"
-            clickTime = 1
-            openTime = 100
-            lynxViewInitStart = 200
-            lynxViewInitEnd = 250
-            customInitStart = 110
-            customInitEnd = 150
-            prepareInitDataStart = 260
-            prepareInitDataEnd = 280
-            prepareFontStart = 300
-            prepareFontEnd = 320
-            prepareGlobalPropsStart = 330
-            prepareGlobalPropsEnd = 340
-            pluginExecuteStart = 350
-            pluginExecuteEnd = 360
-            prepareComponentStart = 370
-            prepareComponentEnd = 400
-            prepareTemplateStart = 410
-            prepareTemplateEnd = 430
-            prepareExtraInfoStart = 440
-            prepareExtraInfoEnd = 470
-            prepareJSBStart = 480
-            prepareJSBEnd = 490
-            loadEngineAndTemplateDataStart = 500
-            startLoadTime = 505
-            loadEngineStart = 520
-            loadEngineEnd = 600
-            extraRecord["x"] = 1L
-            pluginInfos["a"] = 5L
-            pluginInfos["b"] = 10L
-        }
+        val session =
+            HybridLoadSession().apply {
+                sessionId = "session-1"
+                clickTime = 1
+                openTime = 100
+                lynxViewInitStart = 200
+                lynxViewInitEnd = 250
+                customInitStart = 110
+                customInitEnd = 150
+                prepareInitDataStart = 260
+                prepareInitDataEnd = 280
+                prepareFontStart = 300
+                prepareFontEnd = 320
+                prepareGlobalPropsStart = 330
+                prepareGlobalPropsEnd = 340
+                pluginExecuteStart = 350
+                pluginExecuteEnd = 360
+                prepareComponentStart = 370
+                prepareComponentEnd = 400
+                prepareTemplateStart = 410
+                prepareTemplateEnd = 430
+                prepareExtraInfoStart = 440
+                prepareExtraInfoEnd = 470
+                prepareJSBStart = 480
+                prepareJSBEnd = 490
+                loadEngineAndTemplateDataStart = 500
+                startLoadTime = 505
+                loadEngineStart = 520
+                loadEngineEnd = 600
+                extraRecord["x"] = 1L
+                pluginInfos["a"] = 5L
+                pluginInfos["b"] = 10L
+            }
 
         val json = session.toJSONObject()
 
@@ -138,16 +139,17 @@ class HybridLoadSessionTest {
 
     @Test
     fun toStringIncludesDerivedDurations() {
-        val session = HybridLoadSession().apply {
-            openTime = 0
-            loadEngineStart = 1
-            loadEngineEnd = 7
-            lynxViewInitStart = 0
-            lynxViewInitEnd = 0
-            prepareTemplateStart = 0
-            prepareTemplateEnd = 0
-            prepareComponentEnd = 0
-        }
+        val session =
+            HybridLoadSession().apply {
+                openTime = 0
+                loadEngineStart = 1
+                loadEngineEnd = 7
+                lynxViewInitStart = 0
+                lynxViewInitEnd = 0
+                prepareTemplateStart = 0
+                prepareTemplateEnd = 0
+                prepareComponentEnd = 0
+            }
         val text = session.toString()
         assertTrue(text.contains("total = 7"))
         assertTrue(text.contains("renderCost = 6"))

@@ -17,21 +17,21 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class WebProcessorForMapTest {
-
     @Test
     fun getJavaOnlyMapParamsAppliesDefaultAndParsesJsonTypes() {
         val data = createAnnotationData()
-        val params = JSONObject(
-            """
-            {
-              "name": "sparkling",
-              "mode": "A",
-              "payload": {"k": 1},
-              "items": [1,2,3],
-              "nullable": null
-            }
-            """.trimIndent(),
-        )
+        val params =
+            JSONObject(
+                """
+                {
+                  "name": "sparkling",
+                  "mode": "A",
+                  "payload": {"k": 1},
+                  "items": [1,2,3],
+                  "nullable": null
+                }
+                """.trimIndent(),
+            )
 
         val result = WebProcessorForMap.getJavaOnlyMapParams(params, data)
 
@@ -47,33 +47,38 @@ class WebProcessorForMapTest {
         val data = createAnnotationData()
         val invalid = JSONObject("{\"name\":\"sparkling\",\"mode\":\"C\"}")
 
-        val throwable = runCatching {
-            WebProcessorForMap.getJavaOnlyMapParams(invalid, data)
-        }.exceptionOrNull()
+        val throwable =
+            runCatching {
+                WebProcessorForMap.getJavaOnlyMapParams(invalid, data)
+            }.exceptionOrNull()
 
         assertTrue(throwable is IllegalInputParamException)
     }
 
     private fun createAnnotationData(): IDLAnnotationData {
-        val model = IDLAnnotationModel(
-            stringModel = hashMapOf(
-                "name" to IDLParamField(required = true, keyPath = "name", returnType = String::class.java),
-                "count" to IDLParamField(
-                    keyPath = "count",
-                    returnType = Number::class.java,
-                    defaultValue = IDLDefaultValue(type = DefaultType.INT, intValue = 5),
-                ),
-                "mode" to IDLParamField(
-                    keyPath = "mode",
-                    isEnum = true,
-                    returnType = String::class.java,
-                    stringEnum = listOf("A", "B"),
-                ),
-                "payload" to IDLParamField(keyPath = "payload", returnType = Map::class.java),
-                "items" to IDLParamField(keyPath = "items", returnType = List::class.java),
-                "nullable" to IDLParamField(keyPath = "nullable", returnType = String::class.java),
-            ),
-        )
+        val model =
+            IDLAnnotationModel(
+                stringModel =
+                    hashMapOf(
+                        "name" to IDLParamField(required = true, keyPath = "name", returnType = String::class.java),
+                        "count" to
+                            IDLParamField(
+                                keyPath = "count",
+                                returnType = Number::class.java,
+                                defaultValue = IDLDefaultValue(type = DefaultType.INT, intValue = 5),
+                            ),
+                        "mode" to
+                            IDLParamField(
+                                keyPath = "mode",
+                                isEnum = true,
+                                returnType = String::class.java,
+                                stringEnum = listOf("A", "B"),
+                            ),
+                        "payload" to IDLParamField(keyPath = "payload", returnType = Map::class.java),
+                        "items" to IDLParamField(keyPath = "items", returnType = List::class.java),
+                        "nullable" to IDLParamField(keyPath = "nullable", returnType = String::class.java),
+                    ),
+            )
 
         return IDLAnnotationData(
             paramClass = Any::class.java,

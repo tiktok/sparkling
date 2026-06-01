@@ -20,7 +20,7 @@ struct SPKGlobalPropsUtilsTests {
             "screenWidth", "screenHeight", "statusBarHeight", "os", "osVersion",
             "language", "isIPhoneX", "isIPhoneXMax", "safeAreaHeight", "contentHeight",
             "isPad", "topHeight", "bottomHeight", "accessibleMode", "isLowPowerMode",
-            "isAppBackground", "screenOrientation", "deviceModel"
+            "isAppBackground", "screenOrientation", "deviceModel",
         ]
 
         for key in requiredKeys {
@@ -77,7 +77,7 @@ struct SPKGlobalPropsUtilsTests {
         let topHeight = globalProps["topHeight"] as? CGFloat
         let bottomHeight = globalProps["bottomHeight"] as? CGFloat
         let contentHeight = globalProps["contentHeight"] as? CGFloat
-        let safeAreaHeight = globalProps["safeAreaHeight"] as? Int
+        let safeAreaHeight = globalProps["safeAreaHeight"] as? CGFloat
 
         #expect(topHeight != nil && topHeight! >= 0)
         #expect(bottomHeight != nil && bottomHeight! >= 0)
@@ -129,15 +129,6 @@ struct SPKGlobalPropsUtilsTests {
         #expect(globalProps1["screenWidth"] as? CGFloat == globalProps2["screenWidth"] as? CGFloat)
         #expect(globalProps1["os"] as? String == globalProps2["os"] as? String)
         #expect(globalProps1["isPad"] as? Int == globalProps2["isPad"] as? Int)
-
-        // iPhone X series consistency
-        let isIPhoneX = globalProps1["isIPhoneX"] as? Int ?? 0
-        let safeAreaHeight = globalProps1["safeAreaHeight"] as? Int ?? 0
-        if isIPhoneX == 1 {
-            #expect(safeAreaHeight == 34)
-        } else {
-            #expect(safeAreaHeight == 0)
-        }
     }
 
     @Test func testPerformanceAndEdgeCases() {

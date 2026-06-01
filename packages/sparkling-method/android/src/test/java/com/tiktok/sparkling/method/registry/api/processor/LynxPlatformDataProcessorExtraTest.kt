@@ -34,84 +34,101 @@ import java.lang.reflect.InvocationTargetException
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class LynxPlatformDataProcessorExtraTest {
-
     private val processor = LynxPlatformDataProcessor()
 
-    private fun callPreCheck(clazz: Class<*>, params: HashMap<String, Any>): Any? {
-        val m = LynxPlatformDataProcessor::class.java.getDeclaredMethod(
-            "preCheck",
-            Class::class.java,
-            HashMap::class.java,
-        )
+    private fun callPreCheck(
+        clazz: Class<*>,
+        params: HashMap<String, Any>,
+    ): Any? {
+        val m =
+            LynxPlatformDataProcessor::class.java.getDeclaredMethod(
+                "preCheck",
+                Class::class.java,
+                HashMap::class.java,
+            )
         m.isAccessible = true
         return m.invoke(processor, clazz, params)
     }
 
-    private fun callGetMapWithDefault(clazz: Class<*>?, map: HashMap<String, Any>): Any? {
-        val m = LynxPlatformDataProcessor::class.java.getDeclaredMethod(
-            "getMapWithDefault",
-            Class::class.java,
-            HashMap::class.java,
-        )
+    private fun callGetMapWithDefault(
+        clazz: Class<*>?,
+        map: HashMap<String, Any>,
+    ): Any? {
+        val m =
+            LynxPlatformDataProcessor::class.java.getDeclaredMethod(
+                "getMapWithDefault",
+                Class::class.java,
+                HashMap::class.java,
+            )
         m.isAccessible = true
         return m.invoke(processor, clazz, map)
     }
 
-    private fun callGetJavaOnlyMapParams(clazz: Class<out IDLMethodBaseParamModel>, params: HashMap<String, Any>): Map<*, *>? {
-        val m = LynxPlatformDataProcessor::class.java.getDeclaredMethod(
-            "getJavaOnlyMapParams",
-            HashMap::class.java,
-            Class::class.java,
-        )
+    private fun callGetJavaOnlyMapParams(
+        clazz: Class<out IDLMethodBaseParamModel>,
+        params: HashMap<String, Any>,
+    ): Map<*, *>? {
+        val m =
+            LynxPlatformDataProcessor::class.java.getDeclaredMethod(
+                "getJavaOnlyMapParams",
+                HashMap::class.java,
+                Class::class.java,
+            )
         m.isAccessible = true
         return m.invoke(processor, params, clazz) as Map<*, *>?
     }
 
     @Test
     fun checkValueRejectsMissingRequiredParam() {
-        val ex = runCatching {
-            callPreCheck(RequiredOnlyModel::class.java, hashMapOf())
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callPreCheck(RequiredOnlyModel::class.java, hashMapOf())
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
     @Test
     fun checkValueRejectsWrongStringType() {
-        val ex = runCatching {
-            callPreCheck(StringTypedModel::class.java, hashMapOf<String, Any>("name" to 5))
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callPreCheck(StringTypedModel::class.java, hashMapOf<String, Any>("name" to 5))
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
     @Test
     fun checkValueRejectsWrongNumberType() {
-        val ex = runCatching {
-            callPreCheck(NumberTypedModel::class.java, hashMapOf<String, Any>("count" to "x"))
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callPreCheck(NumberTypedModel::class.java, hashMapOf<String, Any>("count" to "x"))
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
     @Test
     fun checkValueRejectsWrongBooleanType() {
-        val ex = runCatching {
-            callPreCheck(BoolTypedModel::class.java, hashMapOf<String, Any>("flag" to "no"))
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callPreCheck(BoolTypedModel::class.java, hashMapOf<String, Any>("flag" to "no"))
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
     @Test
     fun checkValueRejectsWrongListType() {
-        val ex = runCatching {
-            callPreCheck(ListTypedModel::class.java, hashMapOf<String, Any>("items" to "no"))
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callPreCheck(ListTypedModel::class.java, hashMapOf<String, Any>("items" to "no"))
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
     @Test
     fun checkValueRejectsWrongMapType() {
-        val ex = runCatching {
-            callPreCheck(MapTypedModel::class.java, hashMapOf<String, Any>("config" to "no"))
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callPreCheck(MapTypedModel::class.java, hashMapOf<String, Any>("config" to "no"))
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
@@ -126,9 +143,10 @@ class LynxPlatformDataProcessorExtraTest {
     @Test
     fun checkValueRejectsInvalidIntEnum() {
         val params = hashMapOf<String, Any>("level" to 99)
-        val ex = runCatching {
-            callGetJavaOnlyMapParams(IntEnumModel::class.java, params)
-        }.exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching {
+                callGetJavaOnlyMapParams(IntEnumModel::class.java, params)
+            }.exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
@@ -144,6 +162,7 @@ class LynxPlatformDataProcessorExtraTest {
     @Test
     fun getMapWithDefaultPopulatesNestedDefaultsForGetters() {
         val map = hashMapOf<String, Any>()
+
         @Suppress("UNCHECKED_CAST")
         val out = callGetMapWithDefault(GetterModel::class.java, map) as Map<String, Any?>
         assertEquals(7, (out["count"] as Number).toInt())
@@ -154,12 +173,15 @@ class LynxPlatformDataProcessorExtraTest {
     fun transformPlatformDataToMapReturnsNullForUnknownBridge() {
         class UnknownBridge : IDLBridgeMethod {
             override val name: String = "unknown"
+
             override fun realHandle(
                 params: Map<String, Any?>,
                 callback: IDLBridgeMethod.Callback,
                 type: BridgePlatformType,
             ) = Unit
+
             override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) = Unit
+
             override fun setBridgeContext(bridgeContext: IBridgeContext) = Unit
         }
         val res = processor.transformPlatformDataToMap(JavaOnlyMap(), UnknownBridge::class.java)
@@ -168,31 +190,35 @@ class LynxPlatformDataProcessorExtraTest {
 
     @Test
     fun transformMapToPlatformDataConvertsNestedShapes() {
-        val res = processor.transformMapToPlatformData(
-            mapOf(
-                "name" to "sparkling",
-                "list" to listOf(1, "two", true),
-                "nested" to mapOf("a" to 1),
-            ),
-            object : IDLBridgeMethod {
-                override val name: String = "x"
-                override fun realHandle(
-                    params: Map<String, Any?>,
-                    callback: IDLBridgeMethod.Callback,
-                    type: BridgePlatformType,
-                ) = Unit
-                override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) = Unit
-                override fun setBridgeContext(bridgeContext: IBridgeContext) = Unit
-            }.javaClass,
-        )
+        val res =
+            processor.transformMapToPlatformData(
+                mapOf(
+                    "name" to "sparkling",
+                    "list" to listOf(1, "two", true),
+                    "nested" to mapOf("a" to 1),
+                ),
+                object : IDLBridgeMethod {
+                    override val name: String = "x"
+
+                    override fun realHandle(
+                        params: Map<String, Any?>,
+                        callback: IDLBridgeMethod.Callback,
+                        type: BridgePlatformType,
+                    ) = Unit
+
+                    override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) = Unit
+
+                    override fun setBridgeContext(bridgeContext: IBridgeContext) = Unit
+                }.javaClass,
+            )
         assertEquals("sparkling", res.getString("name"))
         val arr = res.getArray("list") as JavaOnlyArray
         assertEquals(3, arr.size)
     }
 
-    /* ---------------------------------------------------------------------- */
-    /* Helper interfaces                                                      */
-    /* ---------------------------------------------------------------------- */
+    // ----------------------------------------------------------------------
+    // Helper interfaces
+    // ----------------------------------------------------------------------
 
     interface RequiredOnlyModel : IDLMethodBaseParamModel {
         @get:IDLMethodParamField(required = true, keyPath = "name")

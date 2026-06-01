@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit
  */
 @RunWith(RobolectricTestRunner::class)
 class LogUtilsTest {
-
     @After
     fun reset() {
         LogUtils.logger = null
@@ -30,16 +29,25 @@ class LogUtilsTest {
         val captured = mutableListOf<Triple<String, LogLevel, String>>()
         val latch = CountDownLatch(LogLevel.values().size)
 
-        LogUtils.logger = object : HybridLogger {
-            override fun onLog(msg: String, logLevel: LogLevel, tag: String) {
-                synchronized(captured) { captured.add(Triple(msg, logLevel, tag)) }
-                latch.countDown()
-            }
+        LogUtils.logger =
+            object : HybridLogger {
+                override fun onLog(
+                    msg: String,
+                    logLevel: LogLevel,
+                    tag: String,
+                ) {
+                    synchronized(captured) { captured.add(Triple(msg, logLevel, tag)) }
+                    latch.countDown()
+                }
 
-            override fun onReject(e: Throwable, extraMsg: String, tag: String) {
-                // not exercised here
+                override fun onReject(
+                    e: Throwable,
+                    extraMsg: String,
+                    tag: String,
+                ) {
+                    // not exercised here
+                }
             }
-        }
 
         for (level in LogLevel.values()) {
             LogUtils.printLog("msg-$level", level, "tagX")
@@ -61,7 +69,9 @@ class LogUtilsTest {
             LogUtils.printLog("default-msg-$level", level, "tag")
         }
         // Drain async sequence executor so any pending Log.* calls complete.
-        AsyncUtils.getExecutor(TaskType.Sequence).submit { /* no-op */ }
+        AsyncUtils
+            .getExecutor(TaskType.Sequence)
+            .submit { /* no-op */ }
             .get(3, TimeUnit.SECONDS)
     }
 
@@ -72,15 +82,25 @@ class LogUtilsTest {
         val capturedTag = arrayOfNulls<String>(1)
         val capturedExtra = arrayOfNulls<String>(1)
 
-        LogUtils.logger = object : HybridLogger {
-            override fun onLog(msg: String, logLevel: LogLevel, tag: String) = Unit
-            override fun onReject(e: Throwable, extraMsg: String, tag: String) {
-                captured[0] = e
-                capturedTag[0] = tag
-                capturedExtra[0] = extraMsg
-                latch.countDown()
+        LogUtils.logger =
+            object : HybridLogger {
+                override fun onLog(
+                    msg: String,
+                    logLevel: LogLevel,
+                    tag: String,
+                ) = Unit
+
+                override fun onReject(
+                    e: Throwable,
+                    extraMsg: String,
+                    tag: String,
+                ) {
+                    captured[0] = e
+                    capturedTag[0] = tag
+                    capturedExtra[0] = extraMsg
+                    latch.countDown()
+                }
             }
-        }
 
         val err = IllegalStateException("boom")
         LogUtils.printReject(err, extraMsg = "ctx", tag = "tagY")
@@ -95,7 +115,9 @@ class LogUtilsTest {
     fun printRejectWithNullLoggerDoesNotThrow() {
         LogUtils.logger = null
         LogUtils.printReject(IllegalArgumentException("nope"))
-        AsyncUtils.getExecutor(TaskType.Sequence).submit { /* drain */ }
+        AsyncUtils
+            .getExecutor(TaskType.Sequence)
+            .submit { /* drain */ }
             .get(3, TimeUnit.SECONDS)
     }
 

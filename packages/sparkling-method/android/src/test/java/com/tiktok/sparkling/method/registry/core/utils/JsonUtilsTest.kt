@@ -23,7 +23,6 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class JsonUtilsTest {
-
     @Test
     fun toJsonAndFromJsonRoundTripPlainData() {
         val data = mapOf("a" to 1, "b" to "two")
@@ -38,17 +37,18 @@ class JsonUtilsTest {
 
     @Test
     fun mapToJsonHandlesAllPrimitiveAndStructuralTypes() {
-        val source = mapOf<String, Any>(
-            "intVal" to 1,
-            "longVal" to 2L,
-            "floatVal" to 3.5f,
-            "doubleVal" to 4.25,
-            "stringVal" to "hello",
-            "boolVal" to true,
-            "mapVal" to mapOf("nested" to "value"),
-            "listVal" to listOf(1, "two"),
-            "dynVal" to fixedDynamic("dyn"),
-        )
+        val source =
+            mapOf<String, Any>(
+                "intVal" to 1,
+                "longVal" to 2L,
+                "floatVal" to 3.5f,
+                "doubleVal" to 4.25,
+                "stringVal" to "hello",
+                "boolVal" to true,
+                "mapVal" to mapOf("nested" to "value"),
+                "listVal" to listOf(1, "two"),
+                "dynVal" to fixedDynamic("dyn"),
+            )
 
         val json = JsonUtils.mapToJSON(source)
 
@@ -82,17 +82,18 @@ class JsonUtilsTest {
 
     @Test
     fun listToJsonHandlesAllPrimitiveAndStructuralTypes() {
-        val source = listOf<Any>(
-            1,
-            2L,
-            3.5f,
-            4.25,
-            "five",
-            false,
-            mapOf("k" to "v"),
-            listOf<Any>("a", 1),
-            fixedDynamic(true),
-        )
+        val source =
+            listOf<Any>(
+                1,
+                2L,
+                3.5f,
+                4.25,
+                "five",
+                false,
+                mapOf("k" to "v"),
+                listOf<Any>("a", 1),
+                fixedDynamic(true),
+            )
 
         val arr = JsonUtils.listToJSON(source)
 
@@ -111,18 +112,19 @@ class JsonUtilsTest {
 
     @Test
     fun jsonToMapAndJsonToListReturnHydratedKotlinValues() {
-        val payload = JSONObject(
-            """
-            {
-              "i": 1,
-              "d": 2.5,
-              "s": "x",
-              "b": true,
-              "obj": { "nested": 7 },
-              "arr": [1, "two", { "k": "v" }, [9, 10]]
-            }
-            """.trimIndent(),
-        )
+        val payload =
+            JSONObject(
+                """
+                {
+                  "i": 1,
+                  "d": 2.5,
+                  "s": "x",
+                  "b": true,
+                  "obj": { "nested": 7 },
+                  "arr": [1, "two", { "k": "v" }, [9, 10]]
+                }
+                """.trimIndent(),
+            )
 
         val map = JsonUtils.jsonToMap(payload)
         assertEquals(1, map["i"])
@@ -154,25 +156,28 @@ class JsonUtilsTest {
 
     @Test
     fun toJSONArrayHandlesPrimitivesNullsCollectionsBaseModelAndIdlDynamic() {
-        val baseModel = object : IDLMethodBaseModel {
-            override fun toJSON(): JSONObject = JSONObject().apply { put("type", "base") }
-            override fun convert(): Map<String, Any>? = mapOf()
-        }
+        val baseModel =
+            object : IDLMethodBaseModel {
+                override fun toJSON(): JSONObject = JSONObject().apply { put("type", "base") }
+
+                override fun convert(): Map<String, Any>? = mapOf()
+            }
         val opaque = object {} // unknown -> filtered out
 
-        val source = listOf<Any?>(
-            1,
-            2L,
-            "s",
-            true,
-            3.14,
-            listOf<Any>(7, "x"),
-            mapOf("a" to 1),
-            fixedDynamic("d"),
-            baseModel,
-            null,    // dropped via filterNotNull
-            opaque,  // unknown -> mapped to null and dropped
-        )
+        val source =
+            listOf<Any?>(
+                1,
+                2L,
+                "s",
+                true,
+                3.14,
+                listOf<Any>(7, "x"),
+                mapOf("a" to 1),
+                fixedDynamic("d"),
+                baseModel,
+                null, // dropped via filterNotNull
+                opaque, // unknown -> mapped to null and dropped
+            )
 
         val arr = JsonUtils.toJSONArray(source)
 
@@ -191,24 +196,27 @@ class JsonUtilsTest {
 
     @Test
     fun toJSONObjectHandlesAllValueBranchesAndDropsNonStringKeys() {
-        val baseModel = object : IDLMethodBaseModel {
-            override fun toJSON(): JSONObject = JSONObject().apply { put("kind", "base") }
-            override fun convert(): Map<String, Any>? = null
-        }
+        val baseModel =
+            object : IDLMethodBaseModel {
+                override fun toJSON(): JSONObject = JSONObject().apply { put("kind", "base") }
 
-        val source = mapOf<Any?, Any?>(
-            "i" to 1,
-            "l" to 2L,
-            "s" to "v",
-            "b" to true,
-            "d" to 1.5,
-            "list" to listOf<Any>(1, 2),
-            "map" to mapOf("k" to "v"),
-            "dyn" to fixedDynamic(42L),
-            "model" to baseModel,
-            "unknown" to object {},
-            42 to "ignored", // non-string key dropped
-        )
+                override fun convert(): Map<String, Any>? = null
+            }
+
+        val source =
+            mapOf<Any?, Any?>(
+                "i" to 1,
+                "l" to 2L,
+                "s" to "v",
+                "b" to true,
+                "d" to 1.5,
+                "list" to listOf<Any>(1, 2),
+                "map" to mapOf("k" to "v"),
+                "dyn" to fixedDynamic(42L),
+                "model" to baseModel,
+                "unknown" to object {},
+                42 to "ignored", // non-string key dropped
+            )
 
         val json = JsonUtils.toJSONObject(source)
 
@@ -227,13 +235,18 @@ class JsonUtilsTest {
         assertFalse(json.has("unknown"))
     }
 
-    private fun fixedDynamic(value: Any?): IDLDynamic {
-        return object : IDLDynamic {
+    private fun fixedDynamic(value: Any?): IDLDynamic =
+        object : IDLDynamic {
             override fun isNull(): Boolean = value == null
+
             override fun asBoolean(): Boolean = value as Boolean
+
             override fun asDouble(): Double = (value as Number).toDouble()
+
             override fun asInt(): Int = (value as Number).toInt()
+
             override fun asLong(): Long = (value as Number).toLong()
+
             override fun asString(): String = value as String
 
             @Suppress("UNCHECKED_CAST")
@@ -241,21 +254,23 @@ class JsonUtilsTest {
 
             @Suppress("UNCHECKED_CAST")
             override fun asMap(): Map<String, Any> = value as Map<String, Any>
+
             override fun asByteArray(): ByteArray = value as ByteArray
-            override fun getType(): DynamicType = when (value) {
-                null -> DynamicType.Null
-                is Boolean -> DynamicType.Boolean
-                is Int -> DynamicType.Int
-                is Long -> DynamicType.Long
-                is Double, is Float -> DynamicType.Number
-                is String -> DynamicType.String
-                is Map<*, *> -> DynamicType.Map
-                is List<*> -> DynamicType.Array
-                is ByteArray -> DynamicType.ByteArray
-                else -> DynamicType.Null
-            }
+
+            override fun getType(): DynamicType =
+                when (value) {
+                    null -> DynamicType.Null
+                    is Boolean -> DynamicType.Boolean
+                    is Int -> DynamicType.Int
+                    is Long -> DynamicType.Long
+                    is Double, is Float -> DynamicType.Number
+                    is String -> DynamicType.String
+                    is Map<*, *> -> DynamicType.Map
+                    is List<*> -> DynamicType.Array
+                    is ByteArray -> DynamicType.ByteArray
+                    else -> DynamicType.Null
+                }
 
             override fun recycle() {}
         }
-    }
 }

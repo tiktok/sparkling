@@ -20,7 +20,6 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class IDLDynamicExtTest {
-
     @Test
     fun getValueRoutesPerType() {
         assertEquals("hi", FakeDynamic("hi", DynamicType.String).getValue())
@@ -85,10 +84,15 @@ class IDLDynamicExtTest {
         private val type: DynamicType,
     ) : IDLDynamic {
         override fun isNull(): Boolean = value == null
+
         override fun asBoolean(): Boolean = value as Boolean
+
         override fun asDouble(): Double = (value as Number).toDouble()
+
         override fun asInt(): Int = (value as Number).toInt()
+
         override fun asLong(): Long = (value as Number).toLong()
+
         override fun asString(): String = value as String
 
         @Suppress("UNCHECKED_CAST")
@@ -96,8 +100,11 @@ class IDLDynamicExtTest {
 
         @Suppress("UNCHECKED_CAST")
         override fun asMap(): Map<String, Any> = value as Map<String, Any>
+
         override fun asByteArray(): ByteArray = value as ByteArray
+
         override fun getType(): DynamicType = type
+
         override fun recycle() {}
     }
 }

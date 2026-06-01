@@ -24,7 +24,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33], packageName = "com.tiktok.sparkling")
 class SparklingActivityTest {
-
     private lateinit var application: Application
 
     @Before
@@ -49,10 +48,11 @@ class SparklingActivityTest {
 
     @Test
     fun onCreateWithSparklingContextSetsTitle() {
-        val ctx = SparklingContext().apply {
-            containerId = "container-title"
-            hybridSchemeParam = HybridSchemeParam(title = "Hello Sparkling")
-        }
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-title"
+                hybridSchemeParam = HybridSchemeParam(title = "Hello Sparkling")
+            }
         SparklingContextTransferStation.saveSparklingContext(ctx)
 
         val intent = android.content.Intent(application, SparklingActivity::class.java)
@@ -63,10 +63,11 @@ class SparklingActivityTest {
 
     @Test
     fun onCreateWithTransparentStatusBar() {
-        val ctx = SparklingContext().apply {
-            containerId = "container-trans"
-            hybridSchemeParam = HybridSchemeParam(transStatusBar = true)
-        }
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-trans"
+                hybridSchemeParam = HybridSchemeParam(transStatusBar = true)
+            }
         SparklingContextTransferStation.saveSparklingContext(ctx)
 
         val intent = android.content.Intent(application, SparklingActivity::class.java)
@@ -77,10 +78,11 @@ class SparklingActivityTest {
 
     @Test
     fun onCreateWithHiddenStatusBar() {
-        val ctx = SparklingContext().apply {
-            containerId = "container-hidden"
-            hybridSchemeParam = HybridSchemeParam(hideStatusBar = true)
-        }
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-hidden"
+                hybridSchemeParam = HybridSchemeParam(hideStatusBar = true)
+            }
         SparklingContextTransferStation.saveSparklingContext(ctx)
 
         val intent = android.content.Intent(application, SparklingActivity::class.java)
@@ -91,10 +93,11 @@ class SparklingActivityTest {
 
     @Test
     fun onCreateWithHideNavBarHidesActionBar() {
-        val ctx = SparklingContext().apply {
-            containerId = "container-hide-nav"
-            hybridSchemeParam = HybridSchemeParam(hideNavBar = true)
-        }
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-hide-nav"
+                hybridSchemeParam = HybridSchemeParam(hideNavBar = true)
+            }
         SparklingContextTransferStation.saveSparklingContext(ctx)
 
         val intent = android.content.Intent(application, SparklingActivity::class.java)
@@ -105,10 +108,11 @@ class SparklingActivityTest {
 
     @Test
     fun onCreateAppliesPortraitOrientation() {
-        val ctx = SparklingContext().apply {
-            containerId = "container-portrait"
-            hybridSchemeParam = HybridSchemeParam(screenOrientation = "portrait")
-        }
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-portrait"
+                hybridSchemeParam = HybridSchemeParam(screenOrientation = "portrait")
+            }
         SparklingContextTransferStation.saveSparklingContext(ctx)
 
         val intent = android.content.Intent(application, SparklingActivity::class.java)
@@ -119,10 +123,11 @@ class SparklingActivityTest {
 
     @Test
     fun onCreateAppliesLandscapeOrientation() {
-        val ctx = SparklingContext().apply {
-            containerId = "container-landscape"
-            hybridSchemeParam = HybridSchemeParam(screenOrientation = "landscape")
-        }
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-landscape"
+                hybridSchemeParam = HybridSchemeParam(screenOrientation = "landscape")
+            }
         SparklingContextTransferStation.saveSparklingContext(ctx)
 
         val intent = android.content.Intent(application, SparklingActivity::class.java)
@@ -133,14 +138,16 @@ class SparklingActivityTest {
 
     @Test
     fun onCreateAppliesValidTitleColor() {
-        val ctx = SparklingContext().apply {
-            containerId = "container-title-color"
-            hybridSchemeParam = HybridSchemeParam(
-                title = "Colored",
-                titleColor = "#FF0000",
-                navBarColor = "#00FF00",
-            )
-        }
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-title-color"
+                hybridSchemeParam =
+                    HybridSchemeParam(
+                        title = "Colored",
+                        titleColor = "#FF0000",
+                        navBarColor = "#00FF00",
+                    )
+            }
         SparklingContextTransferStation.saveSparklingContext(ctx)
 
         val intent = android.content.Intent(application, SparklingActivity::class.java)
@@ -151,13 +158,15 @@ class SparklingActivityTest {
 
     @Test
     fun onCreateHandlesInvalidTitleColorGracefully() {
-        val ctx = SparklingContext().apply {
-            containerId = "container-bad-color"
-            hybridSchemeParam = HybridSchemeParam(
-                title = "Bad",
-                titleColor = "not-a-color",
-            )
-        }
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-bad-color"
+                hybridSchemeParam =
+                    HybridSchemeParam(
+                        title = "Bad",
+                        titleColor = "not-a-color",
+                    )
+            }
         SparklingContextTransferStation.saveSparklingContext(ctx)
 
         val intent = android.content.Intent(application, SparklingActivity::class.java)
@@ -168,28 +177,31 @@ class SparklingActivityTest {
 
     @Test
     fun initToolBarUpdatesTitle() {
-        val ctx = SparklingContext().apply {
-            containerId = "container-init"
-            hybridSchemeParam = HybridSchemeParam(title = "Initial")
-        }
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-init"
+                hybridSchemeParam = HybridSchemeParam(title = "Initial")
+            }
         SparklingContextTransferStation.saveSparklingContext(ctx)
 
         val intent = android.content.Intent(application, SparklingActivity::class.java)
         intent.putExtra(Sparkling.SPARKLING_CONTEXT_CONTAINER_ID, ctx.containerId)
         val activity = Robolectric.buildActivity(SparklingActivity::class.java, intent).create().get()
 
-        val newCtx = SparklingContext().apply {
-            hybridSchemeParam = HybridSchemeParam(title = "Updated")
-        }
+        val newCtx =
+            SparklingContext().apply {
+                hybridSchemeParam = HybridSchemeParam(title = "Updated")
+            }
         activity.initToolBar(newCtx)
     }
 
     @Test
     fun initSparklingFragmentSwapsFragment() {
-        val ctx = SparklingContext().apply {
-            containerId = "container-frag"
-            hybridSchemeParam = HybridSchemeParam(screenOrientation = "auto")
-        }
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-frag"
+                hybridSchemeParam = HybridSchemeParam(screenOrientation = "auto")
+            }
         SparklingContextTransferStation.saveSparklingContext(ctx)
 
         val intent = android.content.Intent(application, SparklingActivity::class.java)
@@ -197,8 +209,10 @@ class SparklingActivityTest {
         val activity = Robolectric.buildActivity(SparklingActivity::class.java, intent).create().get()
 
         // Re-invoke fragment installation with another context.
-        activity.initSparklingFragment(SparklingContext().apply {
-            hybridSchemeParam = HybridSchemeParam(transStatusBar = true, showNavBarInTransStatusBar = false)
-        })
+        activity.initSparklingFragment(
+            SparklingContext().apply {
+                hybridSchemeParam = HybridSchemeParam(transStatusBar = true, showNavBarInTransStatusBar = false)
+            },
+        )
     }
 }

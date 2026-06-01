@@ -35,7 +35,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class AbsSparklingIDLMethodExtraTest {
-
     private lateinit var method: TestMethod
     private lateinit var collected: MutableList<Map<String, Any?>>
 
@@ -45,11 +44,12 @@ class AbsSparklingIDLMethodExtraTest {
         collected = mutableListOf()
     }
 
-    private fun callbackOf(): IDLBridgeMethod.Callback = object : IDLBridgeMethod.Callback {
-        override fun invoke(data: Map<String, Any?>) {
-            collected += data
+    private fun callbackOf(): IDLBridgeMethod.Callback =
+        object : IDLBridgeMethod.Callback {
+            override fun invoke(data: Map<String, Any?>) {
+                collected += data
+            }
         }
-    }
 
     private fun fakeDynamic(
         type: com.tiktok.sparkling.method.registry.core.model.idl.DynamicType,
@@ -59,24 +59,35 @@ class AbsSparklingIDLMethodExtraTest {
         string: String = "",
     ) = object : IDLDynamic {
         override fun isNull() = type == com.tiktok.sparkling.method.registry.core.model.idl.DynamicType.Null
+
         override fun asBoolean() = boolean
+
         override fun asDouble() = 0.0
+
         override fun asInt() = int
+
         override fun asLong() = long
+
         override fun asString() = string
+
         override fun asArray() = emptyList<Any>()
+
         override fun asMap() = emptyMap<String, Any>()
+
         override fun asByteArray() = ByteArray(0)
+
         override fun getType() = type
+
         override fun recycle() = Unit
     }
 
     @Test
     fun getXValueExtractsIDLDynamicValue() {
-        val dyn = fakeDynamic(
-            com.tiktok.sparkling.method.registry.core.model.idl.DynamicType.Int,
-            int = 42,
-        )
+        val dyn =
+            fakeDynamic(
+                com.tiktok.sparkling.method.registry.core.model.idl.DynamicType.Int,
+                int = 42,
+            )
         assertEquals(42, method.getXValue(dyn))
         assertEquals("plain", method.getXValue("plain"))
         assertNull(method.getXValue(null))
@@ -84,10 +95,11 @@ class AbsSparklingIDLMethodExtraTest {
 
     @Test
     fun getXValueLookupOnMapHandlesIDLDynamicAndPlain() {
-        val dyn = fakeDynamic(
-            com.tiktok.sparkling.method.registry.core.model.idl.DynamicType.Boolean,
-            boolean = true,
-        )
+        val dyn =
+            fakeDynamic(
+                com.tiktok.sparkling.method.registry.core.model.idl.DynamicType.Boolean,
+                boolean = true,
+            )
         val data = mapOf<String, Any>("dyn" to dyn, "raw" to 7)
         assertEquals(true, method.getXValue(data, "dyn"))
         assertEquals(7, method.getXValue(data, "raw"))
@@ -109,10 +121,11 @@ class AbsSparklingIDLMethodExtraTest {
 
     @Test
     fun completionBlockProxyForwardsSuccessFailureAndRawSuccess() {
-        val proxy = method.createCompletionBlockProxy<TestMethod.TestResultModel>(
-            this::class.java.classLoader!!,
-            callbackOf(),
-        )
+        val proxy =
+            method.createCompletionBlockProxy<TestMethod.TestResultModel>(
+                this::class.java.classLoader!!,
+                callbackOf(),
+            )
         proxy.onSuccess(TestMethod.TestResultModel("ok"), "done")
         proxy.onFailure(7, "boom", TestMethod.TestResultModel("nope"))
         proxy.onRawSuccess(TestMethod.TestResultModel("raw"))
@@ -125,10 +138,11 @@ class AbsSparklingIDLMethodExtraTest {
 
     @Test
     fun completionBlockProxyHandlesNullDataInFailureAndRawSuccess() {
-        val proxy = method.createCompletionBlockProxy<TestMethod.TestResultModel>(
-            this::class.java.classLoader!!,
-            callbackOf(),
-        )
+        val proxy =
+            method.createCompletionBlockProxy<TestMethod.TestResultModel>(
+                this::class.java.classLoader!!,
+                callbackOf(),
+            )
         proxy.onFailure(99, "explode", null)
         proxy.onRawSuccess(null)
         assertEquals(2, collected.size)
@@ -140,16 +154,17 @@ class AbsSparklingIDLMethodExtraTest {
     @Test
     fun realHandleSerializesAllPrimitiveTypesViaProxyToJSON() {
         method.captureToJsonResult = true
-        val params = mapOf<String, Any?>(
-            "p1" to "string",
-            "p2" to 1,
-            "p3" to 2L,
-            "p4" to 3.14,
-            "p5" to true,
-            "p6" to listOf("x", 1),
-            "p7" to mapOf("k" to "v"),
-            "p8" to null, // null is filtered out
-        )
+        val params =
+            mapOf<String, Any?>(
+                "p1" to "string",
+                "p2" to 1,
+                "p3" to 2L,
+                "p4" to 3.14,
+                "p5" to true,
+                "p6" to listOf("x", 1),
+                "p7" to mapOf("k" to "v"),
+                "p8" to null, // null is filtered out
+            )
         method.realHandle(params, callbackOf(), BridgePlatformType.WEB)
         assertNotNull(method.lastToJsonResult)
         val json = method.lastToJsonResult!!
@@ -176,11 +191,12 @@ class AbsSparklingIDLMethodExtraTest {
         // A class without an inner @IDLMethodParamModel will throw IllegalStateException
         val bad = NoModelMethod()
         val captured = mutableListOf<Map<String, Any?>>()
-        val cb = object : IDLBridgeMethod.Callback {
-            override fun invoke(data: Map<String, Any?>) {
-                captured += data
+        val cb =
+            object : IDLBridgeMethod.Callback {
+                override fun invoke(data: Map<String, Any?>) {
+                    captured += data
+                }
             }
-        }
         try {
             bad.realHandle(emptyMap(), cb, BridgePlatformType.WEB)
         } catch (_: IllegalStateException) {
@@ -190,7 +206,7 @@ class AbsSparklingIDLMethodExtraTest {
         assertTrue(captured.isEmpty())
     }
 
-    /* ---------------------------------------------------------------------- */
+    // ----------------------------------------------------------------------
 
     private open class TestMethod : AbsSparklingIDLMethod<TestMethod.TestParamModel, TestMethod.TestResultModel>() {
         override val name: String = "test.method"
@@ -217,31 +233,42 @@ class AbsSparklingIDLMethodExtraTest {
         interface TestParamModel : IDLMethodBaseParamModel {
             @get:IDLMethodParamField(keyPath = "p1")
             val p1: String?
+
             @get:IDLMethodParamField(keyPath = "p2")
             val p2: Number?
+
             @get:IDLMethodParamField(keyPath = "p3")
             val p3: Number?
+
             @get:IDLMethodParamField(keyPath = "p4")
             val p4: Number?
+
             @get:IDLMethodParamField(keyPath = "p5")
             val p5: Boolean?
+
             @get:IDLMethodParamField(keyPath = "p6")
             val p6: List<Any?>?
+
             @get:IDLMethodParamField(keyPath = "p7")
             val p7: Map<String, Any?>?
+
             @get:IDLMethodParamField(keyPath = "p8")
             val p8: String?
         }
 
         @IDLMethodResultModel
-        class TestResultModel(private val value: String) : IDLMethodBaseResultModel {
+        class TestResultModel(
+            private val value: String,
+        ) : IDLMethodBaseResultModel {
             override fun convert(): MutableMap<String, Any> = mutableMapOf("result" to value)
+
             override fun toJSON(): JSONObject = JSONObject().put("result", value)
         }
     }
 
     private class NoModelMethod : AbsSparklingIDLMethod<NoModelMethod.NoModel, NoModelMethod.NoResult>() {
         override val name: String = "no.model"
+
         override fun handle(
             params: NoModel,
             callback: CompletionBlock<NoResult>,
@@ -250,8 +277,10 @@ class AbsSparklingIDLMethodExtraTest {
 
         // Note: deliberately does NOT annotate with @IDLMethodParamModel so getParamsClazz throws.
         interface NoModel : IDLMethodBaseParamModel
+
         class NoResult : IDLMethodBaseResultModel {
             override fun convert(): MutableMap<String, Any> = mutableMapOf()
+
             override fun toJSON(): JSONObject = JSONObject()
         }
     }

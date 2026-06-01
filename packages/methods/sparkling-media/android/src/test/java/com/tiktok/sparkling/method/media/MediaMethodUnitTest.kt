@@ -72,7 +72,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [33])
 class MediaMethodUnitTest {
-
     private lateinit var app: Application
     private lateinit var activity: Activity
     private lateinit var appBridgeContext: IBridgeContext
@@ -121,18 +120,22 @@ class MediaMethodUnitTest {
             hostDepend.handleJsInvoke(any(), capture(capturedParams), any())
         } answers {
             val callback = args[2] as IChooseMediaResultCallback
-            callback.onSuccess(ChooseMediaResults().apply {
-                tempFiles = listOf(
-                    ChooseMediaResults.FileInfo(
-                        tempFilePath = "/tmp/a.jpg",
-                        size = 12L,
-                        mediaType = "image",
-                    ).apply {
-                        base64Data = "abc"
-                        mimeType = "image/jpeg"
-                    },
-                )
-            })
+            callback.onSuccess(
+                ChooseMediaResults().apply {
+                    tempFiles =
+                        listOf(
+                            ChooseMediaResults
+                                .FileInfo(
+                                    tempFilePath = "/tmp/a.jpg",
+                                    size = 12L,
+                                    mediaType = "image",
+                                ).apply {
+                                    base64Data = "abc"
+                                    mimeType = "image/jpeg"
+                                },
+                        )
+                },
+            )
         }
         MediaProvider.hostMediaDepend = hostDepend
 
@@ -163,8 +166,20 @@ class MediaMethodUnitTest {
         )
 
         assertNotNull(callback.successResult)
-        assertEquals("/tmp/a.jpg", callback.successResult?.tempFiles?.firstOrNull()?.tempFilePath)
-        assertEquals("abc", callback.successResult?.tempFiles?.firstOrNull()?.base64Data)
+        assertEquals(
+            "/tmp/a.jpg",
+            callback.successResult
+                ?.tempFiles
+                ?.firstOrNull()
+                ?.tempFilePath,
+        )
+        assertEquals(
+            "abc",
+            callback.successResult
+                ?.tempFiles
+                ?.firstOrNull()
+                ?.base64Data,
+        )
         assertEquals(listOf("image", "video"), capturedParams.captured.mediaTypes)
         assertEquals(3, capturedParams.captured.maxCount)
         assertTrue(capturedParams.captured.compressImage)
@@ -267,19 +282,29 @@ class MediaMethodUnitTest {
 
     @Test
     fun saveDataUrlReportsPermissionDenied() {
-        CommonDependsProvider.hostPermissionDepend = object : IHostPermissionDepend {
-            override fun hasPermission(activity: Activity, permission: String) = false
-            override fun requestPermission(activity: Activity, callback: OnPermissionGrantCallback, permission: String) {
-                callback.onNotGranted()
+        CommonDependsProvider.hostPermissionDepend =
+            object : IHostPermissionDepend {
+                override fun hasPermission(
+                    activity: Activity,
+                    permission: String,
+                ) = false
+
+                override fun requestPermission(
+                    activity: Activity,
+                    callback: OnPermissionGrantCallback,
+                    permission: String,
+                ) {
+                    callback.onNotGranted()
+                }
+
+                override fun requestPermissions(
+                    activity: Activity,
+                    callback: OnPermissionsGrantCallback,
+                    permissions: Array<String>,
+                ) {
+                    callback.onResult(arrayOf(OnPermissionsGrantResult(permissions.first(), PackageManager.PERMISSION_DENIED)))
+                }
             }
-            override fun requestPermissions(
-                activity: Activity,
-                callback: OnPermissionsGrantCallback,
-                permissions: Array<String>,
-            ) {
-                callback.onResult(arrayOf(OnPermissionsGrantResult(permissions.first(), PackageManager.PERMISSION_DENIED)))
-            }
-        }
 
         val method = SaveDataURLMethod().apply { setBridgeContext(activityBridgeContext) }
         val callback = SaveDataURLCallbackRecorder()
@@ -295,22 +320,26 @@ class MediaMethodUnitTest {
         every { noContext.context } returns null
 
         val uploadFileNoContext = UploadFileCallbackRecorder()
-        UploadFileMethod().apply { setBridgeContext(noContext) }
+        UploadFileMethod()
+            .apply { setBridgeContext(noContext) }
             .handle(uploadFileParams(), uploadFileNoContext, BridgePlatformType.LYNX)
         assertEquals(IDLBridgeMethod.FAIL, uploadFileNoContext.failureCode)
 
         val uploadImageNoContext = UploadImageCallbackRecorder()
-        UploadImageMethod().apply { setBridgeContext(noContext) }
+        UploadImageMethod()
+            .apply { setBridgeContext(noContext) }
             .handle(uploadImageParams(), uploadImageNoContext, BridgePlatformType.LYNX)
         assertEquals(IDLBridgeMethod.FAIL, uploadImageNoContext.failureCode)
 
         val uploadFileMissingPath = UploadFileCallbackRecorder()
-        UploadFileMethod().apply { setBridgeContext(activityBridgeContext) }
+        UploadFileMethod()
+            .apply { setBridgeContext(activityBridgeContext) }
             .handle(uploadFileParams(filePath = null, formDataBody = null), uploadFileMissingPath, BridgePlatformType.LYNX)
         assertEquals(IDLBridgeMethod.INVALID_PARAM, uploadFileMissingPath.failureCode)
 
         val uploadImageMissingPath = UploadImageCallbackRecorder()
-        UploadImageMethod().apply { setBridgeContext(activityBridgeContext) }
+        UploadImageMethod()
+            .apply { setBridgeContext(activityBridgeContext) }
             .handle(uploadImageParams(filePath = null, formDataBody = null), uploadImageMissingPath, BridgePlatformType.LYNX)
         assertEquals(IDLBridgeMethod.INVALID_PARAM, uploadImageMissingPath.failureCode)
     }
@@ -321,13 +350,15 @@ class MediaMethodUnitTest {
         val uploadBody = """{"data":{"uri":"avatar-uri","url_list":["https://cdn.example.com/avatar.jpg"]},"extra":1}"""
         val networkDepend = HostNetworkDepend(stringConnection = StringConnectionStub(uploadBody, code = 201, clientCode = 17))
         CommonDependsProvider.hostNetworkDepend = networkDepend
-        val file = File(app.cacheDir, "upload-${System.nanoTime()}.jpg").apply {
-            writeBytes(byteArrayOf(1, 2, 3))
-        }
+        val file =
+            File(app.cacheDir, "upload-${System.nanoTime()}.jpg").apply {
+                writeBytes(byteArrayOf(1, 2, 3))
+            }
         file.deleteOnExit()
 
         val uploadFileCallback = UploadFileCallbackRecorder()
-        UploadFileMethod().apply { setBridgeContext(activityBridgeContext) }
+        UploadFileMethod()
+            .apply { setBridgeContext(activityBridgeContext) }
             .handle(uploadFileParams(filePath = file.absolutePath), uploadFileCallback, BridgePlatformType.LYNX)
         drainMainLooper()
         assertEquals(RequestMethod.POST, networkDepend.lastMethod)
@@ -337,7 +368,8 @@ class MediaMethodUnitTest {
         assertEquals(1, uploadFileCallback.successResult?.response?.get("extra"))
 
         val uploadImageCallback = UploadImageCallbackRecorder()
-        UploadImageMethod().apply { setBridgeContext(activityBridgeContext) }
+        UploadImageMethod()
+            .apply { setBridgeContext(activityBridgeContext) }
             .handle(uploadImageParams(filePath = file.absolutePath), uploadImageCallback, BridgePlatformType.LYNX)
         drainMainLooper()
         assertEquals("https://cdn.example.com/avatar.jpg", uploadImageCallback.successResult?.url)
@@ -349,16 +381,18 @@ class MediaMethodUnitTest {
     fun uploadFileAndUploadImageSupportFormDataBody() {
         CommonDependsProvider.hostPermissionDepend = grantingPermissionDepend()
         CommonDependsProvider.hostNetworkDepend = HostNetworkDepend()
-        val file = File(app.cacheDir, "upload-form-${System.nanoTime()}.jpg").apply {
-            writeBytes(byteArrayOf(1, 2, 3))
-        }
+        val file =
+            File(app.cacheDir, "upload-form-${System.nanoTime()}.jpg").apply {
+                writeBytes(byteArrayOf(1, 2, 3))
+            }
         file.deleteOnExit()
 
         val fileBody = mockk<AbsUploadFileMethodIDL.BridgeBeanUploadFileFormDataBody>()
         every { fileBody.key } returns "avatar"
         every { fileBody.value } returns file.absolutePath
         val uploadFileCallback = UploadFileCallbackRecorder()
-        UploadFileMethod().apply { setBridgeContext(activityBridgeContext) }
+        UploadFileMethod()
+            .apply { setBridgeContext(activityBridgeContext) }
             .handle(
                 uploadFileParams(filePath = null, formDataBody = listOf(fileBody), paramsOption = 2),
                 uploadFileCallback,
@@ -371,7 +405,8 @@ class MediaMethodUnitTest {
         every { imageBody.key } returns "image"
         every { imageBody.value } returns file.absolutePath
         val uploadImageCallback = UploadImageCallbackRecorder()
-        UploadImageMethod().apply { setBridgeContext(activityBridgeContext) }
+        UploadImageMethod()
+            .apply { setBridgeContext(activityBridgeContext) }
             .handle(
                 uploadImageParams(filePath = null, formDataBody = listOf(imageBody), paramsOption = 2),
                 uploadImageCallback,
@@ -384,20 +419,23 @@ class MediaMethodUnitTest {
     @Test
     fun uploadMethodsReportNetworkAndPathFailures() {
         CommonDependsProvider.hostPermissionDepend = grantingPermissionDepend()
-        val file = File(app.cacheDir, "upload-${System.nanoTime()}.jpg").apply {
-            writeBytes(byteArrayOf(1, 2, 3))
-        }
+        val file =
+            File(app.cacheDir, "upload-${System.nanoTime()}.jpg").apply {
+                writeBytes(byteArrayOf(1, 2, 3))
+            }
         file.deleteOnExit()
 
         val uploadFileNoNetwork = UploadFileCallbackRecorder()
-        UploadFileMethod().apply { setBridgeContext(activityBridgeContext) }
+        UploadFileMethod()
+            .apply { setBridgeContext(activityBridgeContext) }
             .handle(uploadFileParams(filePath = file.absolutePath), uploadFileNoNetwork, BridgePlatformType.LYNX)
         drainMainLooper()
         assertEquals(IDLBridgeMethod.FAIL, uploadFileNoNetwork.failureCode)
         assertEquals("networkDepend is null", uploadFileNoNetwork.failureMsg)
 
         val uploadImageNoNetwork = UploadImageCallbackRecorder()
-        UploadImageMethod().apply { setBridgeContext(activityBridgeContext) }
+        UploadImageMethod()
+            .apply { setBridgeContext(activityBridgeContext) }
             .handle(uploadImageParams(filePath = file.absolutePath), uploadImageNoNetwork, BridgePlatformType.LYNX)
         drainMainLooper()
         assertEquals(IDLBridgeMethod.FAIL, uploadImageNoNetwork.failureCode)
@@ -405,12 +443,14 @@ class MediaMethodUnitTest {
 
         val directory = File(app.cacheDir, "upload-dir-${System.nanoTime()}").apply { mkdirs() }
         val uploadFileDirectory = UploadFileCallbackRecorder()
-        UploadFileMethod().apply { setBridgeContext(activityBridgeContext) }
+        UploadFileMethod()
+            .apply { setBridgeContext(activityBridgeContext) }
             .handle(uploadFileParams(filePath = directory.absolutePath), uploadFileDirectory, BridgePlatformType.LYNX)
         assertEquals(IDLBridgeMethod.NOT_FOUND, uploadFileDirectory.failureCode)
 
         val uploadImageDirectory = UploadImageCallbackRecorder()
-        UploadImageMethod().apply { setBridgeContext(activityBridgeContext) }
+        UploadImageMethod()
+            .apply { setBridgeContext(activityBridgeContext) }
             .handle(uploadImageParams(filePath = directory.absolutePath), uploadImageDirectory, BridgePlatformType.LYNX)
         assertEquals(IDLBridgeMethod.NOT_FOUND, uploadImageDirectory.failureCode)
     }
@@ -436,9 +476,10 @@ class MediaMethodUnitTest {
 
     @Test
     fun downloadFileWritesStreamToCacheAndReportsConnectionFailures() {
-        CommonDependsProvider.hostNetworkDepend = HostNetworkDepend(
-            streamConnection = StreamConnectionStub(body = "download-body".toByteArray(), code = 206, clientCode = 5),
-        )
+        CommonDependsProvider.hostNetworkDepend =
+            HostNetworkDepend(
+                streamConnection = StreamConnectionStub(body = "download-body".toByteArray(), code = 206, clientCode = 5),
+            )
         val method = DownloadFileMethod().apply { setBridgeContext(appBridgeContext) }
         val success = DownloadFileCallbackRecorder()
         method.handle(downloadParams(url = "https://example.com/${System.nanoTime()}.txt", extension = "txt"), success, BridgePlatformType.LYNX)
@@ -450,9 +491,10 @@ class MediaMethodUnitTest {
         assertTrue(savedFile.exists())
         assertEquals("download-body", savedFile.readText())
 
-        CommonDependsProvider.hostNetworkDepend = HostNetworkDepend(
-            streamConnection = StreamConnectionStub(body = null, errorMsg = "body missing", code = 500, clientCode = 99),
-        )
+        CommonDependsProvider.hostNetworkDepend =
+            HostNetworkDepend(
+                streamConnection = StreamConnectionStub(body = null, errorMsg = "body missing", code = 500, clientCode = 99),
+            )
         val bodyMissing = DownloadFileCallbackRecorder()
         method.handle(downloadParams(url = "https://example.com/${System.nanoTime()}.txt", extension = "txt"), bodyMissing, BridgePlatformType.LYNX)
         drainMainLooper()
@@ -470,29 +512,33 @@ class MediaMethodUnitTest {
 
     @Test
     fun fileUtilityHelpersResolveSimpleUrisAndModels() {
-        val file = File(app.cacheDir, "uri-${System.nanoTime()}.txt").apply {
-            writeText("uri")
-        }
+        val file =
+            File(app.cacheDir, "uri-${System.nanoTime()}.txt").apply {
+                writeText("uri")
+            }
         file.deleteOnExit()
 
         assertNull(BdFileUtils.convertUriToPath(app, null))
         assertEquals(file.absolutePath, BdFileUtils.convertUriToPath(app, Uri.fromFile(file)))
         assertEquals("http://example.com/a.png", BdFileUtils.convertUriToPath(app, Uri.parse("http://example.com/a.png")))
         assertTrue(
-            BdFileUtils.convertUriToPath(
-                app,
-                Uri.parse("content://com.android.fileexplorer.myprovider/root/DCIM/a.jpg"),
-            )?.endsWith("/DCIM/a.jpg") == true,
+            BdFileUtils
+                .convertUriToPath(
+                    app,
+                    Uri.parse("content://com.android.fileexplorer.myprovider/root/DCIM/a.jpg"),
+                )?.endsWith("/DCIM/a.jpg") == true,
         )
         assertEquals(file.absolutePath, AppFileUtils.getOrCopiedFilePath(app, file.absolutePath))
         assertEquals(file.absolutePath, AppFileUtils.getOrCopiedFilePath(app, Uri.fromFile(file).toString()))
 
-        val response = UploadImageResponse().apply {
-            data = com.tiktok.sparkling.method.media.utils.AvatarUri().apply {
-                uri = "avatar"
-                urlList = listOf("https://cdn.example.com/a.jpg")
+        val response =
+            UploadImageResponse().apply {
+                data =
+                    com.tiktok.sparkling.method.media.utils.AvatarUri().apply {
+                        uri = "avatar"
+                        urlList = listOf("https://cdn.example.com/a.jpg")
+                    }
             }
-        }
         assertEquals("avatar", response.data?.uri)
         assertEquals("https://cdn.example.com/a.jpg", response.data?.urlList?.first())
     }
@@ -507,9 +553,10 @@ class MediaMethodUnitTest {
         assertFalse(BDMediaFileUtils.isUriExists(app, null))
         assertNotNull(BDMediaFileUtils.getCacheDir(app))
 
-        val removable = File(app.cacheDir, "remove-${System.nanoTime()}.txt").apply {
-            writeText("remove")
-        }
+        val removable =
+            File(app.cacheDir, "remove-${System.nanoTime()}.txt").apply {
+                writeText("remove")
+            }
         if (BDMediaFileUtils.isSdcardWritable) {
             assertTrue(BDMediaFileUtils.removeFile(removable.absolutePath))
         } else {
@@ -636,12 +683,21 @@ class MediaMethodUnitTest {
         return params
     }
 
-    private fun grantingPermissionDepend(): IHostPermissionDepend {
-        return object : IHostPermissionDepend {
-            override fun hasPermission(activity: Activity, permission: String) = true
-            override fun requestPermission(activity: Activity, callback: OnPermissionGrantCallback, permission: String) {
+    private fun grantingPermissionDepend(): IHostPermissionDepend =
+        object : IHostPermissionDepend {
+            override fun hasPermission(
+                activity: Activity,
+                permission: String,
+            ) = true
+
+            override fun requestPermission(
+                activity: Activity,
+                callback: OnPermissionGrantCallback,
+                permission: String,
+            ) {
                 callback.onAllGranted()
             }
+
             override fun requestPermissions(
                 activity: Activity,
                 callback: OnPermissionsGrantCallback,
@@ -652,7 +708,6 @@ class MediaMethodUnitTest {
                 )
             }
         }
-    }
 
     private fun onePixelPngBase64(): String {
         val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
@@ -673,10 +728,15 @@ class MediaMethodUnitTest {
         private val exception: Throwable? = null,
     ) : AbsStringConnection() {
         override fun getStringResponseBody(): String? = body
+
         override fun getResponseHeader(): LinkedHashMap<String, String> = linkedMapOf("h" to "v")
+
         override fun getResponseCode(): Int = code
+
         override fun getClientCode(): Int = clientCode
+
         override fun getErrorMsg(): String = errorMsg
+
         override fun getException(): Throwable? = exception
     }
 
@@ -688,12 +748,19 @@ class MediaMethodUnitTest {
         private val exception: Throwable? = null,
     ) : AbsStreamConnection() {
         var cancelled = false
+
         override fun getInputStreamResponseBody() = body?.let { ByteArrayInputStream(it) }
+
         override fun getResponseHeader(): LinkedHashMap<String, String> = linkedMapOf("h" to "v")
+
         override fun getResponseCode(): Int = code
+
         override fun getClientCode(): Int = clientCode
+
         override fun getErrorMsg(): String = errorMsg
+
         override fun getException(): Throwable? = exception
+
         override fun cancel() {
             cancelled = true
         }
@@ -706,13 +773,19 @@ class MediaMethodUnitTest {
         var lastMethod: RequestMethod? = null
         var lastRequest: HttpRequest? = null
 
-        override fun requestForString(method: RequestMethod, request: HttpRequest): AbsStringConnection {
+        override fun requestForString(
+            method: RequestMethod,
+            request: HttpRequest,
+        ): AbsStringConnection {
             lastMethod = method
             lastRequest = request
             return stringConnection
         }
 
-        override fun requestForStream(method: RequestMethod, request: HttpRequest): AbsStreamConnection {
+        override fun requestForStream(
+            method: RequestMethod,
+            request: HttpRequest,
+        ): AbsStreamConnection {
             lastMethod = method
             lastRequest = request
             return streamConnection
@@ -721,16 +794,25 @@ class MediaMethodUnitTest {
 
     private class DirectExecutorService : AbstractExecutorService() {
         private var shutdown = false
+
         override fun shutdown() {
             shutdown = true
         }
+
         override fun shutdownNow(): MutableList<Runnable> {
             shutdown = true
             return mutableListOf()
         }
+
         override fun isShutdown() = shutdown
+
         override fun isTerminated() = shutdown
-        override fun awaitTermination(timeout: Long, unit: TimeUnit) = true
+
+        override fun awaitTermination(
+            timeout: Long,
+            unit: TimeUnit,
+        ) = true
+
         override fun execute(command: Runnable) {
             command.run()
         }
@@ -740,13 +822,23 @@ class MediaMethodUnitTest {
         var successResult: AbsChooseMediaMethodIDL.ChooseMediaResultModel? = null
         var failureCode: Int? = null
         var failureMsg: String? = null
-        override fun onSuccess(result: AbsChooseMediaMethodIDL.ChooseMediaResultModel, msg: String) {
+
+        override fun onSuccess(
+            result: AbsChooseMediaMethodIDL.ChooseMediaResultModel,
+            msg: String,
+        ) {
             successResult = result
         }
-        override fun onFailure(code: Int, msg: String, data: AbsChooseMediaMethodIDL.ChooseMediaResultModel?) {
+
+        override fun onFailure(
+            code: Int,
+            msg: String,
+            data: AbsChooseMediaMethodIDL.ChooseMediaResultModel?,
+        ) {
             failureCode = code
             failureMsg = msg
         }
+
         override fun onRawSuccess(data: AbsChooseMediaMethodIDL.ChooseMediaResultModel?) = Unit
     }
 
@@ -754,13 +846,23 @@ class MediaMethodUnitTest {
         var successResult: AbsSaveDataURLMethodIDL.SaveDataURLResultModel? = null
         var failureCode: Int? = null
         var failureMsg: String? = null
-        override fun onSuccess(result: AbsSaveDataURLMethodIDL.SaveDataURLResultModel, msg: String) {
+
+        override fun onSuccess(
+            result: AbsSaveDataURLMethodIDL.SaveDataURLResultModel,
+            msg: String,
+        ) {
             successResult = result
         }
-        override fun onFailure(code: Int, msg: String, data: AbsSaveDataURLMethodIDL.SaveDataURLResultModel?) {
+
+        override fun onFailure(
+            code: Int,
+            msg: String,
+            data: AbsSaveDataURLMethodIDL.SaveDataURLResultModel?,
+        ) {
             failureCode = code
             failureMsg = msg
         }
+
         override fun onRawSuccess(data: AbsSaveDataURLMethodIDL.SaveDataURLResultModel?) = Unit
     }
 
@@ -768,13 +870,23 @@ class MediaMethodUnitTest {
         var successResult: AbsUploadFileMethodIDL.UploadFileResultModel? = null
         var failureCode: Int? = null
         var failureMsg: String? = null
-        override fun onSuccess(result: AbsUploadFileMethodIDL.UploadFileResultModel, msg: String) {
+
+        override fun onSuccess(
+            result: AbsUploadFileMethodIDL.UploadFileResultModel,
+            msg: String,
+        ) {
             successResult = result
         }
-        override fun onFailure(code: Int, msg: String, data: AbsUploadFileMethodIDL.UploadFileResultModel?) {
+
+        override fun onFailure(
+            code: Int,
+            msg: String,
+            data: AbsUploadFileMethodIDL.UploadFileResultModel?,
+        ) {
             failureCode = code
             failureMsg = msg
         }
+
         override fun onRawSuccess(data: AbsUploadFileMethodIDL.UploadFileResultModel?) = Unit
     }
 
@@ -782,13 +894,23 @@ class MediaMethodUnitTest {
         var successResult: AbsUploadImageMethodIDL.UploadImageResultModel? = null
         var failureCode: Int? = null
         var failureMsg: String? = null
-        override fun onSuccess(result: AbsUploadImageMethodIDL.UploadImageResultModel, msg: String) {
+
+        override fun onSuccess(
+            result: AbsUploadImageMethodIDL.UploadImageResultModel,
+            msg: String,
+        ) {
             successResult = result
         }
-        override fun onFailure(code: Int, msg: String, data: AbsUploadImageMethodIDL.UploadImageResultModel?) {
+
+        override fun onFailure(
+            code: Int,
+            msg: String,
+            data: AbsUploadImageMethodIDL.UploadImageResultModel?,
+        ) {
             failureCode = code
             failureMsg = msg
         }
+
         override fun onRawSuccess(data: AbsUploadImageMethodIDL.UploadImageResultModel?) = Unit
     }
 
@@ -796,13 +918,23 @@ class MediaMethodUnitTest {
         var successResult: AbsDownloadFileMethodIDL.DownloadFileResultModel? = null
         var failureCode: Int? = null
         var failureMsg: String? = null
-        override fun onSuccess(result: AbsDownloadFileMethodIDL.DownloadFileResultModel, msg: String) {
+
+        override fun onSuccess(
+            result: AbsDownloadFileMethodIDL.DownloadFileResultModel,
+            msg: String,
+        ) {
             successResult = result
         }
-        override fun onFailure(code: Int, msg: String, data: AbsDownloadFileMethodIDL.DownloadFileResultModel?) {
+
+        override fun onFailure(
+            code: Int,
+            msg: String,
+            data: AbsDownloadFileMethodIDL.DownloadFileResultModel?,
+        ) {
             failureCode = code
             failureMsg = msg
         }
+
         override fun onRawSuccess(data: AbsDownloadFileMethodIDL.DownloadFileResultModel?) = Unit
     }
 }

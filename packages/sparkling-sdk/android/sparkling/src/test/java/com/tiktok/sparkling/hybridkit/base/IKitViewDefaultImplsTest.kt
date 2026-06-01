@@ -18,22 +18,33 @@ import org.junit.Test
  * the dispatch into [HybridContext.sendEventListener] / [absSendEventListener].
  */
 class IKitViewDefaultImplsTest {
-
     /**
      * A stub implementation of [IKitView] that satisfies the abstract members
      * with no-ops. Default methods come from the interface itself.
      */
-    private class StubKitView(override var hybridContext: HybridContext) : IKitView {
+    private class StubKitView(
+        override var hybridContext: HybridContext,
+    ) : IKitView {
         override fun realView(): View? = null
+
         override fun load() {}
+
         override fun load(uri: String) {}
+
         override fun reload() {}
+
         override fun onShow() {}
+
         override fun onHide() {}
+
         override fun destroy(clearContext: Boolean) {}
+
         override fun hasDestroyed(): Boolean = false
+
         override fun getGlobalProps(): MutableMap<String, Any>? = null
+
         override fun getScheme(): String? = null
+
         override fun onLoadSuccess() {}
     }
 

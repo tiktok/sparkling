@@ -23,9 +23,9 @@ import java.lang.reflect.Method
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class WebProcessorForMapNestedTest {
-
     interface NestedModel : IDLMethodBaseModel {
         fun getName(): String
+
         fun getCount(): Int
     }
 
@@ -50,12 +50,14 @@ class WebProcessorForMapNestedTest {
     @Test
     fun proxyForNestedJsonArrayMapsEachItemToProxy() {
         val data = nestedListAnnotationData()
-        val arr = JSONArray()
-            .put(JSONObject().put("name", "a").put("count", 1))
-            .put(JSONObject().put("name", "b").put("count", 2))
+        val arr =
+            JSONArray()
+                .put(JSONObject().put("name", "a").put("count", 1))
+                .put(JSONObject().put("name", "b").put("count", 2))
         val params = JSONObject().put("items", arr)
 
         val res = WebProcessorForMap.getJavaOnlyMapParams(params, data)
+
         @Suppress("UNCHECKED_CAST")
         val list = res?.get("items") as List<NestedModel>
         assertEquals(2, list.size)
@@ -66,20 +68,22 @@ class WebProcessorForMapNestedTest {
     @Test
     fun proxyValueReturnsNullWhenNestedModelMissing() {
         // When the nested model has no IDLAnnotationModel mapping, proxyValue returns null.
-        val nestedField = IDLParamField(
-            keyPath = "nested",
-            returnType = Map::class.java,
-            nestedClassType = NestedModel::class,
-        )
+        val nestedField =
+            IDLParamField(
+                keyPath = "nested",
+                returnType = Map::class.java,
+                nestedClassType = NestedModel::class,
+            )
         val outerModel = IDLAnnotationModel(stringModel = hashMapOf("nested" to nestedField))
-        val data = IDLAnnotationData(
-            paramClass = Any::class.java,
-            resultClass = Any::class.java,
-            methodParamModel = outerModel,
-            methodResultModel = IDLAnnotationModel(),
-            // intentionally do not register NestedModel here
-            models = mapOf(IDLMethodBaseModel.Default::class.java to IDLAnnotationModel()),
-        )
+        val data =
+            IDLAnnotationData(
+                paramClass = Any::class.java,
+                resultClass = Any::class.java,
+                methodParamModel = outerModel,
+                methodResultModel = IDLAnnotationModel(),
+                // intentionally do not register NestedModel here
+                models = mapOf(IDLMethodBaseModel.Default::class.java to IDLAnnotationModel()),
+            )
         val params = JSONObject().put("nested", JSONObject().put("name", "x"))
         val res = WebProcessorForMap.getJavaOnlyMapParams(params, data)
         assertNull(res?.get("nested"))
@@ -104,112 +108,135 @@ class WebProcessorForMapNestedTest {
     private fun nestedAnnotationData(): IDLAnnotationData {
         val getName: Method = NestedModel::class.java.getMethod("getName")
         val getCount: Method = NestedModel::class.java.getMethod("getCount")
-        val nestedModel = IDLAnnotationModel(
-            methodModel = hashMapOf(
-                getName to IDLParamField(keyPath = "name", returnType = String::class.java),
-                getCount to IDLParamField(keyPath = "count", returnType = Number::class.java),
-            ),
-            stringModel = hashMapOf(
-                "name" to IDLParamField(keyPath = "name", returnType = String::class.java),
-                "count" to IDLParamField(keyPath = "count", returnType = Number::class.java),
-            ),
-        )
-        val outerModel = IDLAnnotationModel(
-            stringModel = hashMapOf(
-                "nested" to IDLParamField(
-                    keyPath = "nested",
-                    returnType = Map::class.java,
-                    nestedClassType = NestedModel::class,
-                ),
-            ),
-        )
+        val nestedModel =
+            IDLAnnotationModel(
+                methodModel =
+                    hashMapOf(
+                        getName to IDLParamField(keyPath = "name", returnType = String::class.java),
+                        getCount to IDLParamField(keyPath = "count", returnType = Number::class.java),
+                    ),
+                stringModel =
+                    hashMapOf(
+                        "name" to IDLParamField(keyPath = "name", returnType = String::class.java),
+                        "count" to IDLParamField(keyPath = "count", returnType = Number::class.java),
+                    ),
+            )
+        val outerModel =
+            IDLAnnotationModel(
+                stringModel =
+                    hashMapOf(
+                        "nested" to
+                            IDLParamField(
+                                keyPath = "nested",
+                                returnType = Map::class.java,
+                                nestedClassType = NestedModel::class,
+                            ),
+                    ),
+            )
         return IDLAnnotationData(
             paramClass = Any::class.java,
             resultClass = Any::class.java,
             methodParamModel = outerModel,
             methodResultModel = IDLAnnotationModel(),
-            models = mapOf(
-                IDLMethodBaseModel.Default::class.java to IDLAnnotationModel(),
-                NestedModel::class.java to nestedModel,
-            ),
+            models =
+                mapOf(
+                    IDLMethodBaseModel.Default::class.java to IDLAnnotationModel(),
+                    NestedModel::class.java to nestedModel,
+                ),
         )
     }
 
     private fun nestedListAnnotationData(): IDLAnnotationData {
         val getName: Method = NestedModel::class.java.getMethod("getName")
         val getCount: Method = NestedModel::class.java.getMethod("getCount")
-        val nestedModel = IDLAnnotationModel(
-            methodModel = hashMapOf(
-                getName to IDLParamField(keyPath = "name", returnType = String::class.java),
-                getCount to IDLParamField(keyPath = "count", returnType = Number::class.java),
-            ),
-            stringModel = hashMapOf(
-                "name" to IDLParamField(keyPath = "name", returnType = String::class.java),
-                "count" to IDLParamField(keyPath = "count", returnType = Number::class.java),
-            ),
-        )
-        val outerModel = IDLAnnotationModel(
-            stringModel = hashMapOf(
-                "items" to IDLParamField(
-                    keyPath = "items",
-                    returnType = List::class.java,
-                    nestedClassType = NestedModel::class,
-                ),
-            ),
-        )
+        val nestedModel =
+            IDLAnnotationModel(
+                methodModel =
+                    hashMapOf(
+                        getName to IDLParamField(keyPath = "name", returnType = String::class.java),
+                        getCount to IDLParamField(keyPath = "count", returnType = Number::class.java),
+                    ),
+                stringModel =
+                    hashMapOf(
+                        "name" to IDLParamField(keyPath = "name", returnType = String::class.java),
+                        "count" to IDLParamField(keyPath = "count", returnType = Number::class.java),
+                    ),
+            )
+        val outerModel =
+            IDLAnnotationModel(
+                stringModel =
+                    hashMapOf(
+                        "items" to
+                            IDLParamField(
+                                keyPath = "items",
+                                returnType = List::class.java,
+                                nestedClassType = NestedModel::class,
+                            ),
+                    ),
+            )
         return IDLAnnotationData(
             paramClass = Any::class.java,
             resultClass = Any::class.java,
             methodParamModel = outerModel,
             methodResultModel = IDLAnnotationModel(),
-            models = mapOf(
-                IDLMethodBaseModel.Default::class.java to IDLAnnotationModel(),
-                NestedModel::class.java to nestedModel,
-            ),
+            models =
+                mapOf(
+                    IDLMethodBaseModel.Default::class.java to IDLAnnotationModel(),
+                    NestedModel::class.java to nestedModel,
+                ),
         )
     }
 
     private fun nestedAnnotationDataWithDefaults(): IDLAnnotationData {
         val getName: Method = NestedModel::class.java.getMethod("getName")
         val getCount: Method = NestedModel::class.java.getMethod("getCount")
-        val nameField = IDLParamField(
-            keyPath = "name",
-            returnType = String::class.java,
-            defaultValue = IDLDefaultValue(type = DefaultType.STRING, stringValue = "default-name"),
-        )
-        val countField = IDLParamField(
-            keyPath = "count",
-            returnType = Number::class.java,
-            defaultValue = IDLDefaultValue(type = DefaultType.INT, intValue = 99),
-        )
-        val nestedModel = IDLAnnotationModel(
-            methodModel = hashMapOf(
-                getName to nameField,
-                getCount to countField,
-            ),
-            stringModel = hashMapOf(
-                "name" to nameField,
-                "count" to countField,
-            ),
-        )
-        val outerModel = IDLAnnotationModel(
-            stringModel = hashMapOf(
-                "nested" to IDLParamField(
-                    keyPath = "nested",
-                    returnType = Map::class.java,
-                    nestedClassType = NestedModel::class,
-                ),
-            ),
-        )
+        val nameField =
+            IDLParamField(
+                keyPath = "name",
+                returnType = String::class.java,
+                defaultValue = IDLDefaultValue(type = DefaultType.STRING, stringValue = "default-name"),
+            )
+        val countField =
+            IDLParamField(
+                keyPath = "count",
+                returnType = Number::class.java,
+                defaultValue = IDLDefaultValue(type = DefaultType.INT, intValue = 99),
+            )
+        val nestedModel =
+            IDLAnnotationModel(
+                methodModel =
+                    hashMapOf(
+                        getName to nameField,
+                        getCount to countField,
+                    ),
+                stringModel =
+                    hashMapOf(
+                        "name" to nameField,
+                        "count" to countField,
+                    ),
+            )
+        val outerModel =
+            IDLAnnotationModel(
+                stringModel =
+                    hashMapOf(
+                        "nested" to
+                            IDLParamField(
+                                keyPath = "nested",
+                                returnType = Map::class.java,
+                                nestedClassType = NestedModel::class,
+                            ),
+                    ),
+            )
         return IDLAnnotationData(
             paramClass = Any::class.java,
             resultClass = Any::class.java,
             methodParamModel = outerModel,
             methodResultModel = IDLAnnotationModel(),
-            models = mapOf(
-                IDLMethodBaseModel.Default::class.java to IDLAnnotationModel(),
-                NestedModel::class.java to nestedModel,
-            ),
+            models =
+                mapOf(
+                    IDLMethodBaseModel.Default::class.java to IDLAnnotationModel(),
+                    NestedModel::class.java to nestedModel,
+                ),
         )
     }
 }

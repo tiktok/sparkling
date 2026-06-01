@@ -20,12 +20,13 @@ import org.junit.Test
  * default behaviour, and the [threadStringToThreadTypeEnum] free function.
  */
 class ContextProviderFactoryTest {
-
     private interface SampleApi {
         fun greet(): String
     }
 
-    private class SampleImpl(private val msg: String) : SampleApi {
+    private class SampleImpl(
+        private val msg: String,
+    ) : SampleApi {
         override fun greet(): String = msg
     }
 

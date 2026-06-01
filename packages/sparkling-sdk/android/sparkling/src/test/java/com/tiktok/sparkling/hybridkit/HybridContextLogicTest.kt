@@ -36,7 +36,6 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class HybridContextLogicTest {
-
     @Before
     fun setUp() {
         clearAllMocks()
@@ -149,16 +148,18 @@ class HybridContextLogicTest {
         val ctx = HybridContext()
         val context = mockk<Context>()
         val resources = mockk<Resources>()
-        val cfg = Configuration().apply {
-            uiMode = Configuration.UI_MODE_NIGHT_YES
-        }
+        val cfg =
+            Configuration().apply {
+                uiMode = Configuration.UI_MODE_NIGHT_YES
+            }
         every { context.resources } returns resources
         every { resources.configuration } returns cfg
         assertEquals(Theme.DARK, ctx.getTheme(context))
 
-        val cfgLight = Configuration().apply {
-            uiMode = Configuration.UI_MODE_NIGHT_NO
-        }
+        val cfgLight =
+            Configuration().apply {
+                uiMode = Configuration.UI_MODE_NIGHT_NO
+            }
         every { resources.configuration } returns cfgLight
         assertEquals(Theme.LIGHT, ctx.getTheme(context))
 

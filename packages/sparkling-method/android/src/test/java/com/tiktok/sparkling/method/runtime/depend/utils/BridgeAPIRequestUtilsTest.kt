@@ -15,41 +15,44 @@ import org.robolectric.Shadows
 
 @RunWith(RobolectricTestRunner::class)
 class BridgeAPIRequestUtilsTest {
-
     @Test
     fun addParametersToUrlSerializesMapListAndTagFrom() {
-        val params = mapOf<String, Any>(
-            "map" to mapOf("k" to "v"),
-            "list" to listOf(1, "x"),
-            "plain" to 7,
-        )
+        val params =
+            mapOf<String, Any>(
+                "map" to mapOf("k" to "v"),
+                "list" to listOf(1, "x"),
+                "plain" to 7,
+            )
 
-        val lynxUrl = BridgeAPIRequestUtils.addParametersToUrl(
-            "https://example.com/path",
-            params,
-            BridgePlatformType.LYNX,
-        )
+        val lynxUrl =
+            BridgeAPIRequestUtils.addParametersToUrl(
+                "https://example.com/path",
+                params,
+                BridgePlatformType.LYNX,
+            )
         assertTrue(lynxUrl.contains("request_tag_from=lynx"))
         assertTrue(lynxUrl.contains("plain=7"))
         assertTrue(lynxUrl.contains("map=%7B%22k%22%3A%22v%22%7D"))
         assertTrue(lynxUrl.contains("list=%5B1%2C%22x%22%5D"))
 
-        val webUrl = BridgeAPIRequestUtils.addParametersToUrl(
-            "https://example.com/path",
-            emptyMap(),
-            BridgePlatformType.WEB,
-        )
+        val webUrl =
+            BridgeAPIRequestUtils.addParametersToUrl(
+                "https://example.com/path",
+                emptyMap(),
+                BridgePlatformType.WEB,
+            )
         assertTrue(webUrl.contains("request_tag_from=h5"))
     }
 
     @Test
     fun filterHeaderEmptyValueKeepsOnlyNonEmptyStrings() {
-        val source = mapOf<String, Any>(
-            "a" to "1",
-            "b" to "",
-            "c" to 3,
-            "d" to "ok",
-        )
+        val source =
+            mapOf<String, Any>(
+                "a" to "1",
+                "b" to "",
+                "c" to 3,
+                "d" to "ok",
+            )
 
         val result = BridgeAPIRequestUtils.filterHeaderEmptyValue(source)
 
@@ -62,15 +65,16 @@ class BridgeAPIRequestUtilsTest {
 
     @Test
     fun convertParamValueToStringKeepsPrimitiveTypesOnly() {
-        val source = mapOf<String, Any>(
-            "int" to 1,
-            "long" to 2L,
-            "double" to 1.5,
-            "bool" to true,
-            "str" to "s",
-            "map" to mapOf("k" to "v"),
-            "list" to listOf(1, 2),
-        )
+        val source =
+            mapOf<String, Any>(
+                "int" to 1,
+                "long" to 2L,
+                "double" to 1.5,
+                "bool" to true,
+                "str" to "s",
+                "map" to mapOf("k" to "v"),
+                "list" to listOf(1, 2),
+            )
 
         val result = BridgeAPIRequestUtils.convertParamValueToString(source)
 
@@ -85,11 +89,12 @@ class BridgeAPIRequestUtilsTest {
 
     @Test
     fun addParametersToUrlUsesEmptyTagForOtherPlatform() {
-        val otherUrl = BridgeAPIRequestUtils.addParametersToUrl(
-            "https://example.com/path",
-            null,
-            BridgePlatformType.ALL,
-        )
+        val otherUrl =
+            BridgeAPIRequestUtils.addParametersToUrl(
+                "https://example.com/path",
+                null,
+                BridgePlatformType.ALL,
+            )
 
         assertTrue(otherUrl.contains("request_tag_from="))
         assertFalse(otherUrl.contains("request_tag_from=lynx"))
@@ -108,14 +113,15 @@ class BridgeAPIRequestUtilsTest {
     @Test
     fun handleSuccessInvokesParsingFailedForInvalidJson() {
         val callback = CaptureResponseCallback()
-        val method = BridgeAPIRequestUtils::class.java.getDeclaredMethod(
-            "handleSuccess",
-            String::class.java,
-            LinkedHashMap::class.java,
-            Int::class.javaObjectType,
-            Int::class.javaObjectType,
-            IResponseCallback::class.java,
-        )
+        val method =
+            BridgeAPIRequestUtils::class.java.getDeclaredMethod(
+                "handleSuccess",
+                String::class.java,
+                LinkedHashMap::class.java,
+                Int::class.javaObjectType,
+                Int::class.javaObjectType,
+                IResponseCallback::class.java,
+            )
         method.isAccessible = true
 
         method.invoke(
@@ -135,14 +141,15 @@ class BridgeAPIRequestUtilsTest {
     @Test
     fun handleSuccessInvokesOnSuccessForValidJson() {
         val callback = CaptureResponseCallback()
-        val method = BridgeAPIRequestUtils::class.java.getDeclaredMethod(
-            "handleSuccess",
-            String::class.java,
-            LinkedHashMap::class.java,
-            Int::class.javaObjectType,
-            Int::class.javaObjectType,
-            IResponseCallback::class.java,
-        )
+        val method =
+            BridgeAPIRequestUtils::class.java.getDeclaredMethod(
+                "handleSuccess",
+                String::class.java,
+                LinkedHashMap::class.java,
+                Int::class.javaObjectType,
+                Int::class.javaObjectType,
+                IResponseCallback::class.java,
+            )
         method.isAccessible = true
 
         method.invoke(
@@ -162,11 +169,12 @@ class BridgeAPIRequestUtilsTest {
     @Test
     fun handleConnectionPropagatesNullConnectionToOnFailed() {
         val callback = CaptureResponseCallback()
-        val method = BridgeAPIRequestUtils::class.java.getDeclaredMethod(
-            "handleConnection",
-            AbsStringConnection::class.java,
-            IResponseCallback::class.java,
-        )
+        val method =
+            BridgeAPIRequestUtils::class.java.getDeclaredMethod(
+                "handleConnection",
+                AbsStringConnection::class.java,
+                IResponseCallback::class.java,
+            )
         method.isAccessible = true
         method.invoke(BridgeAPIRequestUtils, null, callback)
 
@@ -178,19 +186,25 @@ class BridgeAPIRequestUtilsTest {
     @Test
     fun handleConnectionRoutesValidJsonBodyToOnSuccess() {
         val callback = CaptureResponseCallback()
-        val connection = object : AbsStringConnection() {
-            override fun getStringResponseBody(): String = "{\"a\":1}"
-            override fun getResponseCode(): Int = 200
-            override fun getClientCode(): Int = 0
-            override fun getErrorMsg(): String = ""
-            override fun getException(): Throwable? = null
-        }
+        val connection =
+            object : AbsStringConnection() {
+                override fun getStringResponseBody(): String = "{\"a\":1}"
 
-        val method = BridgeAPIRequestUtils::class.java.getDeclaredMethod(
-            "handleConnection",
-            AbsStringConnection::class.java,
-            IResponseCallback::class.java,
-        )
+                override fun getResponseCode(): Int = 200
+
+                override fun getClientCode(): Int = 0
+
+                override fun getErrorMsg(): String = ""
+
+                override fun getException(): Throwable? = null
+            }
+
+        val method =
+            BridgeAPIRequestUtils::class.java.getDeclaredMethod(
+                "handleConnection",
+                AbsStringConnection::class.java,
+                IResponseCallback::class.java,
+            )
         method.isAccessible = true
         method.invoke(BridgeAPIRequestUtils, connection, callback)
 
@@ -202,17 +216,21 @@ class BridgeAPIRequestUtilsTest {
     @Test
     fun handleConnectionRoutesEmptyBodyToOnSuccessWhenNoError() {
         val callback = CaptureResponseCallback()
-        val connection = object : AbsStringConnection() {
-            override fun getStringResponseBody(): String? = null
-            override fun getResponseCode(): Int = 204
-            override fun getClientCode(): Int = 0
-        }
+        val connection =
+            object : AbsStringConnection() {
+                override fun getStringResponseBody(): String? = null
 
-        val method = BridgeAPIRequestUtils::class.java.getDeclaredMethod(
-            "handleConnection",
-            AbsStringConnection::class.java,
-            IResponseCallback::class.java,
-        )
+                override fun getResponseCode(): Int = 204
+
+                override fun getClientCode(): Int = 0
+            }
+
+        val method =
+            BridgeAPIRequestUtils::class.java.getDeclaredMethod(
+                "handleConnection",
+                AbsStringConnection::class.java,
+                IResponseCallback::class.java,
+            )
         method.isAccessible = true
         method.invoke(BridgeAPIRequestUtils, connection, callback)
 
@@ -225,19 +243,25 @@ class BridgeAPIRequestUtilsTest {
     fun handleConnectionPropagatesErrorMessageToOnFailed() {
         val callback = CaptureResponseCallback()
         val cause = RuntimeException("network down")
-        val connection = object : AbsStringConnection() {
-            override fun getStringResponseBody(): String? = null
-            override fun getResponseCode(): Int = 500
-            override fun getClientCode(): Int = -1
-            override fun getErrorMsg(): String = "boom"
-            override fun getException(): Throwable = cause
-        }
+        val connection =
+            object : AbsStringConnection() {
+                override fun getStringResponseBody(): String? = null
 
-        val method = BridgeAPIRequestUtils::class.java.getDeclaredMethod(
-            "handleConnection",
-            AbsStringConnection::class.java,
-            IResponseCallback::class.java,
-        )
+                override fun getResponseCode(): Int = 500
+
+                override fun getClientCode(): Int = -1
+
+                override fun getErrorMsg(): String = "boom"
+
+                override fun getException(): Throwable = cause
+            }
+
+        val method =
+            BridgeAPIRequestUtils::class.java.getDeclaredMethod(
+                "handleConnection",
+                AbsStringConnection::class.java,
+                IResponseCallback::class.java,
+            )
         method.isAccessible = true
         method.invoke(BridgeAPIRequestUtils, connection, callback)
 
@@ -250,14 +274,15 @@ class BridgeAPIRequestUtilsTest {
     @Test
     fun handleErrorReturnsFalseWhenNoErrorPresent() {
         val callback = CaptureResponseCallback()
-        val method = BridgeAPIRequestUtils::class.java.getDeclaredMethod(
-            "handleError",
-            Int::class.javaObjectType,
-            Int::class.javaObjectType,
-            String::class.java,
-            Throwable::class.java,
-            IResponseCallback::class.java,
-        )
+        val method =
+            BridgeAPIRequestUtils::class.java.getDeclaredMethod(
+                "handleError",
+                Int::class.javaObjectType,
+                Int::class.javaObjectType,
+                String::class.java,
+                Throwable::class.java,
+                IResponseCallback::class.java,
+            )
         method.isAccessible = true
         val handled = method.invoke(BridgeAPIRequestUtils, 200, 0, "", null, callback) as Boolean
 
@@ -269,14 +294,15 @@ class BridgeAPIRequestUtilsTest {
     @Test
     fun handleErrorReturnsTrueWhenOnlyErrorMessagePresent() {
         val callback = CaptureResponseCallback()
-        val method = BridgeAPIRequestUtils::class.java.getDeclaredMethod(
-            "handleError",
-            Int::class.javaObjectType,
-            Int::class.javaObjectType,
-            String::class.java,
-            Throwable::class.java,
-            IResponseCallback::class.java,
-        )
+        val method =
+            BridgeAPIRequestUtils::class.java.getDeclaredMethod(
+                "handleError",
+                Int::class.javaObjectType,
+                Int::class.javaObjectType,
+                String::class.java,
+                Throwable::class.java,
+                IResponseCallback::class.java,
+            )
         method.isAccessible = true
         val handled = method.invoke(BridgeAPIRequestUtils, 400, 1, "bad request", null, callback) as Boolean
 
@@ -291,14 +317,15 @@ class BridgeAPIRequestUtilsTest {
     fun handleSuccessJsonOverloadInvokesOnSuccess() {
         val callback = CaptureResponseCallback()
         val response = JSONObject().put("hello", "world")
-        val method = BridgeAPIRequestUtils::class.java.getDeclaredMethod(
-            "handleSuccess",
-            JSONObject::class.java,
-            LinkedHashMap::class.java,
-            Int::class.javaObjectType,
-            Int::class.javaObjectType,
-            IResponseCallback::class.java,
-        )
+        val method =
+            BridgeAPIRequestUtils::class.java.getDeclaredMethod(
+                "handleSuccess",
+                JSONObject::class.java,
+                LinkedHashMap::class.java,
+                Int::class.javaObjectType,
+                Int::class.javaObjectType,
+                IResponseCallback::class.java,
+            )
         method.isAccessible = true
         method.invoke(
             BridgeAPIRequestUtils,
@@ -345,7 +372,11 @@ class BridgeAPIRequestUtilsTest {
             parsingThrowable = throwable
         }
 
-        override fun onFailed(errorCode: Int?, clientCode: Int?, throwable: Throwable) {
+        override fun onFailed(
+            errorCode: Int?,
+            clientCode: Int?,
+            throwable: Throwable,
+        ) {
             failedCalled = true
             failedErrorCode = errorCode
             failedThrowable = throwable

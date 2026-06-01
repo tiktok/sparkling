@@ -12,7 +12,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class HybridLogServiceTest {
-
     private val service = HybridLogService()
 
     @Test

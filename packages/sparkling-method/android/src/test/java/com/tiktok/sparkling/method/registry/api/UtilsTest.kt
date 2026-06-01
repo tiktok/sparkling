@@ -15,13 +15,12 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class UtilsTest {
-
     @Test
     fun toStringOrJsonHandlesPlainAndContainerInputs() {
         assertEquals("hello", Utils.toStringOrJson("hello"))
         // Map and List should serialize to JSON-shaped strings.
         assertTrue(Utils.toStringOrJson(mapOf("k" to "v")).contains("\"k\":\"v\""))
-        assertTrue(Utils.toStringOrJson(listOf(1, 2)).contains("1") )
+        assertTrue(Utils.toStringOrJson(listOf(1, 2)).contains("1"))
     }
 
     @Test
@@ -67,11 +66,12 @@ class UtilsTest {
 
     @Test
     fun jsonArrayMapExtensionVisitsAllEntries() {
-        val arr = JSONArray().apply {
-            put("a")
-            put("b")
-            put("c")
-        }
+        val arr =
+            JSONArray().apply {
+                put("a")
+                put("b")
+                put("c")
+            }
         val collected = arr.map { it.toString() }
         assertEquals(listOf("a", "b", "c"), collected)
     }

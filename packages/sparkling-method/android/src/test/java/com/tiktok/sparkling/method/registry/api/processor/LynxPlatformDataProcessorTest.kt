@@ -19,17 +19,17 @@ import java.lang.reflect.InvocationTargetException
 
 @RunWith(RobolectricTestRunner::class)
 class LynxPlatformDataProcessorTest {
-
     @Test
     fun matchPlatformTypeAndTransformMapToPlatformDataWork() {
         val processor = LynxPlatformDataProcessor()
         assertTrue(processor.matchPlatformType(BridgePlatformType.LYNX))
         assertTrue(!processor.matchPlatformType(BridgePlatformType.WEB))
 
-        val platformData = processor.transformMapToPlatformData(
-            mapOf("name" to "sparkling", "count" to 3),
-            FakeBridgeMethod::class.java,
-        )
+        val platformData =
+            processor.transformMapToPlatformData(
+                mapOf("name" to "sparkling", "count" to 3),
+                FakeBridgeMethod::class.java,
+            )
         assertEquals("sparkling", platformData.getString("name"))
         assertEquals(3, platformData.getInt("count"))
     }
@@ -37,27 +37,31 @@ class LynxPlatformDataProcessorTest {
     @Test
     fun getJavaOnlyMapParamsAppliesDefaultAndChecksEnum() {
         val processor = LynxPlatformDataProcessor()
-        val method = LynxPlatformDataProcessor::class.java.getDeclaredMethod(
-            "getJavaOnlyMapParams",
-            HashMap::class.java,
-            Class::class.java,
-        )
+        val method =
+            LynxPlatformDataProcessor::class.java.getDeclaredMethod(
+                "getJavaOnlyMapParams",
+                HashMap::class.java,
+                Class::class.java,
+            )
         method.isAccessible = true
 
-        val ok = hashMapOf<String, Any>(
-            "name" to "sparkling",
-            "mode" to "A",
-        )
+        val ok =
+            hashMapOf<String, Any>(
+                "name" to "sparkling",
+                "mode" to "A",
+            )
         val result = method.invoke(processor, ok, DemoParamModel::class.java) as Map<*, *>
         assertEquals("sparkling", result["name"])
         assertEquals(2, (result["count"] as Number).toInt())
 
-        val invalid = hashMapOf<String, Any>(
-            "name" to "sparkling",
-            "mode" to "C",
-        )
-        val ex = runCatching { method.invoke(processor, invalid, DemoParamModel::class.java) }
-            .exceptionOrNull() as InvocationTargetException
+        val invalid =
+            hashMapOf<String, Any>(
+                "name" to "sparkling",
+                "mode" to "C",
+            )
+        val ex =
+            runCatching { method.invoke(processor, invalid, DemoParamModel::class.java) }
+                .exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 

@@ -23,9 +23,7 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class LynxKitInitParamsTest {
-
-    private fun newParams(uri: Uri? = null): LynxKitInitParams =
-        LynxKitInitParams(null, null, null, "", uri)
+    private fun newParams(uri: Uri? = null): LynxKitInitParams = LynxKitInitParams(null, null, null, "", uri)
 
     @Test
     fun secondaryConstructorPopulatesPrimaryFields() {

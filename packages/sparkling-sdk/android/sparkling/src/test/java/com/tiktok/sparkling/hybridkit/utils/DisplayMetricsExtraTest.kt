@@ -23,7 +23,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class DisplayMetricsExtraTest {
-
     @After
     fun tearDown() {
         unmockkAll()
@@ -54,10 +53,11 @@ class DisplayMetricsExtraTest {
         mockkObject(DevicesUtil)
         val activity = mockk<Activity>()
         val resources = mockk<android.content.res.Resources>()
-        val metrics = DisplayMetrics().apply {
-            density = 2.0f
-            heightPixels = 1600
-        }
+        val metrics =
+            DisplayMetrics().apply {
+                density = 2.0f
+                heightPixels = 1600
+            }
         every { activity.resources } returns resources
         every { resources.displayMetrics } returns metrics
         every { activity.window } returns null
@@ -74,10 +74,11 @@ class DisplayMetricsExtraTest {
         val window = mockk<Window>()
         val decor = mockk<View>()
         val resources = mockk<android.content.res.Resources>()
-        val metrics = DisplayMetrics().apply {
-            density = 2.0f
-            heightPixels = 2000
-        }
+        val metrics =
+            DisplayMetrics().apply {
+                density = 2.0f
+                heightPixels = 2000
+            }
         every { activity.resources } returns resources
         every { resources.displayMetrics } returns metrics
         every { activity.window } returns window
@@ -98,10 +99,11 @@ class DisplayMetricsExtraTest {
         val window = mockk<Window>()
         val decor = mockk<View>()
         val resources = mockk<android.content.res.Resources>()
-        val metrics = DisplayMetrics().apply {
-            density = 2.0f
-            heightPixels = 2400
-        }
+        val metrics =
+            DisplayMetrics().apply {
+                density = 2.0f
+                heightPixels = 2400
+            }
         every { activity.resources } returns resources
         every { resources.displayMetrics } returns metrics
         every { activity.window } returns window

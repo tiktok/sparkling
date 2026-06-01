@@ -14,24 +14,47 @@ import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class NativeStorageImplTest {
-
     private lateinit var app: Application
     private lateinit var storage: NativeStorageImpl
 
     @Before
     fun setUp() {
         app = RuntimeEnvironment.getApplication()
-        app.getSharedPreferences(PREFERENCE_NAME, Application.MODE_PRIVATE).edit().clear().commit()
-        app.getSharedPreferences("biz-a-sparkling-storage", Application.MODE_PRIVATE).edit().clear().commit()
-        app.getSharedPreferences("biz-b-sparkling-storage", Application.MODE_PRIVATE).edit().clear().commit()
+        app
+            .getSharedPreferences(PREFERENCE_NAME, Application.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .commit()
+        app
+            .getSharedPreferences("biz-a-sparkling-storage", Application.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .commit()
+        app
+            .getSharedPreferences("biz-b-sparkling-storage", Application.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .commit()
         storage = NativeStorageImpl.getInstance(app)
     }
 
     @After
     fun tearDown() {
-        app.getSharedPreferences(PREFERENCE_NAME, Application.MODE_PRIVATE).edit().clear().commit()
-        app.getSharedPreferences("biz-a-sparkling-storage", Application.MODE_PRIVATE).edit().clear().commit()
-        app.getSharedPreferences("biz-b-sparkling-storage", Application.MODE_PRIVATE).edit().clear().commit()
+        app
+            .getSharedPreferences(PREFERENCE_NAME, Application.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .commit()
+        app
+            .getSharedPreferences("biz-a-sparkling-storage", Application.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .commit()
+        app
+            .getSharedPreferences("biz-b-sparkling-storage", Application.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .commit()
     }
 
     @Test
@@ -92,7 +115,8 @@ class NativeStorageImplTest {
 
     @Test
     fun invalidWrappedJsonReturnsNull() {
-        app.getSharedPreferences(PREFERENCE_NAME, Application.MODE_PRIVATE)
+        app
+            .getSharedPreferences(PREFERENCE_NAME, Application.MODE_PRIVATE)
             .edit()
             .putString("broken", "{not-json")
             .commit()

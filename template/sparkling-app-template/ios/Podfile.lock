@@ -164,10 +164,10 @@ PODS:
     - SparklingMethod/Lynx (= 2.1.0-rc.12)
   - Sparkling/Utils (2.1.0-rc.12)
   - SparklingMethod/Core (2.1.0-rc.12):
+    - Mantle (~> 2.2.0)
   - SparklingMacro (2.1.0-rc.12):
     - SparklingMacro/RegisterMacro (= 2.1.0-rc.12)
   - SparklingMacro/RegisterMacro (2.1.0-rc.12)
-    - Mantle (~> 2.2.0)
   - SparklingMethod/Debug (2.1.0-rc.12):
     - SparklingMethod/Core
   - SparklingMethod/DIProvider (2.1.0-rc.12):

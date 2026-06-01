@@ -23,7 +23,6 @@ import org.robolectric.RobolectricTestRunner
  */
 @RunWith(RobolectricTestRunner::class)
 class IDLMethodHelperTest {
-
     @Test
     fun getActivityReturnsImmediatelyWhenContextIsActivity() {
         val activity = mockk<Activity>()

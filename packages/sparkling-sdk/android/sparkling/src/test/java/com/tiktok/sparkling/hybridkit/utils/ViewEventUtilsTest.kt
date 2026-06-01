@@ -29,7 +29,6 @@ import java.time.Duration
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class ViewEventUtilsTest {
-
     private lateinit var view: IKitView
 
     @Before
@@ -94,8 +93,8 @@ class ViewEventUtilsTest {
     @Test
     fun onShowAfterPauseTransitionsToResumedAndDelayedAppears() {
         val ctx = HybridContext()
-        ViewEventUtils.onPause(ctx)   // -> PAUSED
-        ViewEventUtils.onShow(ctx)    // -> RESUMED, no immediate viewAppeared yet
+        ViewEventUtils.onPause(ctx) // -> PAUSED
+        ViewEventUtils.onShow(ctx) // -> RESUMED, no immediate viewAppeared yet
         runMainLooperToIdle()
 
         // After the delayed branch runs in RESUMED state, it sends both

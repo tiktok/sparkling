@@ -19,15 +19,17 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class JsonAndReadableMapProcessorTest {
-
     private class StubBridge : IDLBridgeMethod {
         override val name: String = "stub"
+
         override fun realHandle(
             params: Map<String, Any?>,
             callback: IDLBridgeMethod.Callback,
             type: BridgePlatformType,
         ) = Unit
+
         override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) = Unit
+
         override fun setBridgeContext(bridgeContext: IBridgeContext) = Unit
     }
 

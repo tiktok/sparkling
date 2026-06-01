@@ -27,7 +27,6 @@ import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
 class StorageMethodUnitTest {
-
     private lateinit var app: Application
 
     @Before
@@ -113,7 +112,10 @@ class StorageMethodUnitTest {
         var failureCode: Int? = null
         var failureMsg: String? = null
 
-        override fun onSuccess(result: AbsStorageSetItemMethodIDL.IDLMethodSetStorageItemResultModel, msg: String) {
+        override fun onSuccess(
+            result: AbsStorageSetItemMethodIDL.IDLMethodSetStorageItemResultModel,
+            msg: String,
+        ) {
             successResult = result
         }
 
@@ -134,7 +136,10 @@ class StorageMethodUnitTest {
         var failureCode: Int? = null
         var failureMsg: String? = null
 
-        override fun onSuccess(result: AbsStorageGetItemMethodIDL.IDLMethodGetStorageItemResultModel, msg: String) {
+        override fun onSuccess(
+            result: AbsStorageGetItemMethodIDL.IDLMethodGetStorageItemResultModel,
+            msg: String,
+        ) {
             successResult = result
         }
 
@@ -153,7 +158,10 @@ class StorageMethodUnitTest {
     private class RemoveCallbackRecorder : CompletionBlock<AbsStorageRemoveItemMethodIDL.IDLMethodRemoveStorageItemResultModel> {
         var successResult: AbsStorageRemoveItemMethodIDL.IDLMethodRemoveStorageItemResultModel? = null
 
-        override fun onSuccess(result: AbsStorageRemoveItemMethodIDL.IDLMethodRemoveStorageItemResultModel, msg: String) {
+        override fun onSuccess(
+            result: AbsStorageRemoveItemMethodIDL.IDLMethodRemoveStorageItemResultModel,
+            msg: String,
+        ) {
             successResult = result
         }
 

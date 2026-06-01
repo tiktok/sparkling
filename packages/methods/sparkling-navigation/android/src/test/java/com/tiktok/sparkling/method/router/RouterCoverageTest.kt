@@ -39,7 +39,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [33])
 class RouterCoverageTest {
-
     private lateinit var bridgeContext: IBridgeContext
     private lateinit var context: Context
 
@@ -346,41 +345,45 @@ class RouterCoverageTest {
 
     @Test
     fun defaultOpenSchemeReturnsFalseWhenHandlerListEmpty() {
-        val depend = object : IHostRouterDepend {
-            override fun closeView(
-                bridgeContext: IBridgeContext?,
-                type: BridgePlatformType,
-                containerID: String?,
-                animated: Boolean?,
-            ) = true
-            // empty handler list (default impl)
-        }
+        val depend =
+            object : IHostRouterDepend {
+                override fun closeView(
+                    bridgeContext: IBridgeContext?,
+                    type: BridgePlatformType,
+                    containerID: String?,
+                    animated: Boolean?,
+                ) = true
+                // empty handler list (default impl)
+            }
 
-        val result = depend.openScheme(
-            bridgeContext,
-            "hybrid://lynx?bundle=a",
-            emptyMap(),
-            BridgePlatformType.LYNX,
-            context,
-        )
+        val result =
+            depend.openScheme(
+                bridgeContext,
+                "hybrid://lynx?bundle=a",
+                emptyMap(),
+                BridgePlatformType.LYNX,
+                context,
+            )
         assertFalse(result)
     }
 
     @Test
     fun defaultOpenSchemeReturnsTrueWhenFirstHandlerHandles() {
-        val handler = StubRouteOpenHandler(
-            supported = listOf(BridgePlatformType.LYNX),
-            opener = { _, _, _ -> true },
-        )
+        val handler =
+            StubRouteOpenHandler(
+                supported = listOf(BridgePlatformType.LYNX),
+                opener = { _, _, _ -> true },
+            )
         val depend = makeDependWithHandlers(listOf(handler))
 
-        val result = depend.openScheme(
-            bridgeContext,
-            "hybrid://lynx?bundle=a",
-            emptyMap(),
-            BridgePlatformType.LYNX,
-            context,
-        )
+        val result =
+            depend.openScheme(
+                bridgeContext,
+                "hybrid://lynx?bundle=a",
+                emptyMap(),
+                BridgePlatformType.LYNX,
+                context,
+            )
 
         assertTrue(result)
         assertEquals(1, handler.callCount)
@@ -388,23 +391,26 @@ class RouterCoverageTest {
 
     @Test
     fun defaultOpenSchemeFallsThroughWhenHandlerReturnsFalse() {
-        val first = StubRouteOpenHandler(
-            supported = listOf(BridgePlatformType.LYNX),
-            opener = { _, _, _ -> false },
-        )
-        val second = StubRouteOpenHandler(
-            supported = listOf(BridgePlatformType.LYNX),
-            opener = { _, _, _ -> true },
-        )
+        val first =
+            StubRouteOpenHandler(
+                supported = listOf(BridgePlatformType.LYNX),
+                opener = { _, _, _ -> false },
+            )
+        val second =
+            StubRouteOpenHandler(
+                supported = listOf(BridgePlatformType.LYNX),
+                opener = { _, _, _ -> true },
+            )
         val depend = makeDependWithHandlers(listOf(first, second))
 
-        val result = depend.openScheme(
-            bridgeContext,
-            "hybrid://lynx?bundle=a",
-            emptyMap(),
-            BridgePlatformType.LYNX,
-            context,
-        )
+        val result =
+            depend.openScheme(
+                bridgeContext,
+                "hybrid://lynx?bundle=a",
+                emptyMap(),
+                BridgePlatformType.LYNX,
+                context,
+            )
 
         assertTrue(result)
         assertEquals(1, first.callCount)
@@ -413,23 +419,26 @@ class RouterCoverageTest {
 
     @Test
     fun defaultOpenSchemeSkipsHandlerWithUnsupportedPlatform() {
-        val webOnly = StubRouteOpenHandler(
-            supported = listOf(BridgePlatformType.WEB),
-            opener = { _, _, _ -> true },
-        )
-        val lynxAll = StubRouteOpenHandler(
-            supported = listOf(BridgePlatformType.ALL),
-            opener = { _, _, _ -> true },
-        )
+        val webOnly =
+            StubRouteOpenHandler(
+                supported = listOf(BridgePlatformType.WEB),
+                opener = { _, _, _ -> true },
+            )
+        val lynxAll =
+            StubRouteOpenHandler(
+                supported = listOf(BridgePlatformType.ALL),
+                opener = { _, _, _ -> true },
+            )
         val depend = makeDependWithHandlers(listOf(webOnly, lynxAll))
 
-        val result = depend.openScheme(
-            bridgeContext,
-            "hybrid://lynx?bundle=a",
-            emptyMap(),
-            BridgePlatformType.LYNX,
-            context,
-        )
+        val result =
+            depend.openScheme(
+                bridgeContext,
+                "hybrid://lynx?bundle=a",
+                emptyMap(),
+                BridgePlatformType.LYNX,
+                context,
+            )
 
         assertTrue(result)
         assertEquals(0, webOnly.callCount)
@@ -438,36 +447,42 @@ class RouterCoverageTest {
 
     @Test
     fun defaultOpenSchemeRoutesToExceptionHandlerWhenHandlerThrows() {
-        val throwing = StubRouteOpenHandler(
-            supported = listOf(BridgePlatformType.LYNX),
-            opener = { _, _, _ -> throw RuntimeException("failed") },
-        )
-        val errorHandler = StubRouteOpenHandler(
-            supported = listOf(BridgePlatformType.LYNX),
-            opener = { _, _, _ -> true },
-        )
-        val depend = object : IHostRouterDepend {
-            override fun closeView(
-                bridgeContext: IBridgeContext?,
-                type: BridgePlatformType,
-                containerID: String?,
-                animated: Boolean?,
-            ) = true
-            override fun provideRouteOpenHandlerList(
-                contextProviderFactory: ContextProviderFactory?,
-            ) = listOf<AbsRouteOpenHandler>(throwing)
-            override fun provideRouteOpenExceptionHandler(
-                contextProviderFactory: ContextProviderFactory?,
-            ): AbsRouteOpenHandler = errorHandler
-        }
+        val throwing =
+            StubRouteOpenHandler(
+                supported = listOf(BridgePlatformType.LYNX),
+                opener = { _, _, _ -> throw RuntimeException("failed") },
+            )
+        val errorHandler =
+            StubRouteOpenHandler(
+                supported = listOf(BridgePlatformType.LYNX),
+                opener = { _, _, _ -> true },
+            )
+        val depend =
+            object : IHostRouterDepend {
+                override fun closeView(
+                    bridgeContext: IBridgeContext?,
+                    type: BridgePlatformType,
+                    containerID: String?,
+                    animated: Boolean?,
+                ) = true
 
-        val result = depend.openScheme(
-            bridgeContext,
-            "hybrid://lynx?bundle=a",
-            emptyMap(),
-            BridgePlatformType.LYNX,
-            context,
-        )
+                override fun provideRouteOpenHandlerList(
+                    contextProviderFactory: ContextProviderFactory?,
+                ) = listOf<AbsRouteOpenHandler>(throwing)
+
+                override fun provideRouteOpenExceptionHandler(
+                    contextProviderFactory: ContextProviderFactory?,
+                ): AbsRouteOpenHandler = errorHandler
+            }
+
+        val result =
+            depend.openScheme(
+                bridgeContext,
+                "hybrid://lynx?bundle=a",
+                emptyMap(),
+                BridgePlatformType.LYNX,
+                context,
+            )
 
         assertTrue(result)
         assertEquals(1, throwing.callCount)
@@ -501,6 +516,7 @@ class RouterCoverageTest {
                 containerID: String?,
                 animated: Boolean?,
             ) = true
+
             override fun provideRouteOpenHandlerList(
                 contextProviderFactory: ContextProviderFactory?,
             ) = handlers
@@ -530,7 +546,10 @@ class RouterCoverageTest {
         var failureCode: Int? = null
         var failureMsg: String? = null
 
-        override fun onSuccess(result: AbsRouterOpenMethodIDL.IDLMethodOpenResultModel, msg: String) {
+        override fun onSuccess(
+            result: AbsRouterOpenMethodIDL.IDLMethodOpenResultModel,
+            msg: String,
+        ) {
             successResult = result
         }
 
@@ -551,7 +570,10 @@ class RouterCoverageTest {
         var failureCode: Int? = null
         var failureMsg: String? = null
 
-        override fun onSuccess(result: AbsRouterCloseMethodIDL.IDLMethodCloseResultModel, msg: String) {
+        override fun onSuccess(
+            result: AbsRouterCloseMethodIDL.IDLMethodCloseResultModel,
+            msg: String,
+        ) {
             successResult = result
         }
 

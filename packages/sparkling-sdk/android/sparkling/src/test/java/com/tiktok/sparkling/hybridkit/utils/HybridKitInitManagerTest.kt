@@ -18,9 +18,9 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class HybridKitInitManagerTest {
-
     private class CountingCallback : HybridKitInitCallback {
         var calls = 0
+
         override fun isFinished() {
             calls += 1
         }

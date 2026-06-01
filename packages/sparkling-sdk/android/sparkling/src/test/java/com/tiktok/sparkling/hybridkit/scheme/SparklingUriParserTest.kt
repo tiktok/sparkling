@@ -125,10 +125,10 @@ class SparklingUriParserTest {
     }
 
     @Test
-    fun testAppendExtraQueryToUri_preservesExistingAndAddsMissing() {
+    fun testAppendMissingQueryToUri_preservesExistingAndAddsMissing() {
         val uri = Uri.parse("https://example.com?a=1")
         val merged = mapOf("a" to "fromMerged", "b" to "2")
-        val out = SparklingUriParser.appendExtraQueryToUri(uri, merged)
+        val out = SparklingUriParser.appendMissingQueryToUri(uri, merged)
         assertEquals("1", out.getQueryParameter("a"))
         assertEquals("2", out.getQueryParameter("b"))
     }
@@ -224,10 +224,10 @@ class SparklingUriParserTest {
     }
 
     @Test
-    fun testAppendExtraQueryToUri_doesNotDuplicateExistingKeys() {
+    fun testAppendMissingQueryToUri_doesNotDuplicateExistingKeys() {
         val uri = Uri.parse("https://example.com?a=1&b=2")
         val merged = mapOf("a" to "should_not_overwrite", "c" to "3")
-        val out = SparklingUriParser.appendExtraQueryToUri(uri, merged)
+        val out = SparklingUriParser.appendMissingQueryToUri(uri, merged)
 
         assertEquals("1", out.getQueryParameter("a"))
         assertEquals("2", out.getQueryParameter("b"))
@@ -235,9 +235,9 @@ class SparklingUriParserTest {
     }
 
     @Test
-    fun testAppendExtraQueryToUri_withEmptyMergedParams() {
+    fun testAppendMissingQueryToUri_withEmptyMergedParams() {
         val uri = Uri.parse("https://example.com?a=1")
-        val out = SparklingUriParser.appendExtraQueryToUri(uri, emptyMap())
+        val out = SparklingUriParser.appendMissingQueryToUri(uri, emptyMap())
         assertEquals("1", out.getQueryParameter("a"))
     }
 }

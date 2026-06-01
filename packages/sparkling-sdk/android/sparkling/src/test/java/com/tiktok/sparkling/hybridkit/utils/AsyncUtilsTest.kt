@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger
  * executor selection behaviour without leaking threads beyond test duration.
  */
 class AsyncUtilsTest {
-
     @Test
     fun submitRunsTaskOnSequenceExecutor() {
         val latch = CountDownLatch(1)

@@ -29,8 +29,10 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class PiperDataExtTest {
-
-    private fun newPiper(type: PiperData.DataType, rawData: Any?): PiperData {
+    private fun newPiper(
+        type: PiperData.DataType,
+        rawData: Any?,
+    ): PiperData {
         val ctor = PiperData::class.java.getDeclaredConstructor()
         ctor.isAccessible = true
         val piper = ctor.newInstance()
@@ -45,11 +47,9 @@ class PiperDataExtTest {
         return piper
     }
 
-    private fun stringPiper(raw: String): PiperData =
-        newPiper(PiperData.DataType.String, raw)
+    private fun stringPiper(raw: String): PiperData = newPiper(PiperData.DataType.String, raw)
 
-    private fun mapPiper(raw: Map<*, *>): PiperData =
-        newPiper(PiperData.DataType.Map, raw)
+    private fun mapPiper(raw: Map<*, *>): PiperData = newPiper(PiperData.DataType.Map, raw)
 
     private fun emptyPiper(): PiperData = newPiper(PiperData.DataType.Empty, null)
 
@@ -137,11 +137,13 @@ class PiperDataExtTest {
 
     @Test
     fun containsPiperDataWalksNestedMaps() {
-        val map = mapOf<String, Any?>(
-            "outer" to mapOf<String, Any?>(
-                "inner" to emptyPiper()
+        val map =
+            mapOf<String, Any?>(
+                "outer" to
+                    mapOf<String, Any?>(
+                        "inner" to emptyPiper(),
+                    ),
             )
-        )
         assertTrue(map.containsPiperData())
     }
 

@@ -9,7 +9,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HybridEnvironmentTest {
-
     @Test
     fun keepDependencyRulesWorkForSingleAndBatchRegistration() {
         val env = HybridEnvironment()
@@ -64,5 +63,7 @@ class HybridEnvironmentTest {
         assertNull(env.getDependency("new", String::class.java))
     }
 
-    private class Node(val name: String) : AbsDependencyIterator<Node>()
+    private class Node(
+        val name: String,
+    ) : AbsDependencyIterator<Node>()
 }

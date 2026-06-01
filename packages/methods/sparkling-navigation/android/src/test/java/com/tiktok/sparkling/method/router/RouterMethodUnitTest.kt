@@ -28,7 +28,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [33])
 class RouterMethodUnitTest {
-
     private lateinit var bridgeContext: IBridgeContext
     private lateinit var context: Context
 
@@ -152,7 +151,10 @@ class RouterMethodUnitTest {
         var failureCode: Int? = null
         var failureMsg: String? = null
 
-        override fun onSuccess(result: AbsRouterOpenMethodIDL.IDLMethodOpenResultModel, msg: String) {
+        override fun onSuccess(
+            result: AbsRouterOpenMethodIDL.IDLMethodOpenResultModel,
+            msg: String,
+        ) {
             successResult = result
         }
 
@@ -173,7 +175,10 @@ class RouterMethodUnitTest {
         var failureCode: Int? = null
         var failureMsg: String? = null
 
-        override fun onSuccess(result: AbsRouterCloseMethodIDL.IDLMethodCloseResultModel, msg: String) {
+        override fun onSuccess(
+            result: AbsRouterCloseMethodIDL.IDLMethodCloseResultModel,
+            msg: String,
+        ) {
             successResult = result
         }
 

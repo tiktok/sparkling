@@ -25,7 +25,6 @@ import java.lang.reflect.Proxy
 
 @RunWith(RobolectricTestRunner::class)
 class WebPlatformDataProcessorTest {
-
     @Test
     fun matchPlatformTypeAndTransformMapToPlatformDataWork() {
         val processor = WebPlatformDataProcessor()
@@ -41,11 +40,12 @@ class WebPlatformDataProcessorTest {
     @Test
     fun getJsonObjectParamsAppliesDefaultAndChecksEnum() {
         val processor = WebPlatformDataProcessor()
-        val method = WebPlatformDataProcessor::class.java.getDeclaredMethod(
-            "getJsonObjectParams",
-            JSONObject::class.java,
-            Class::class.java,
-        )
+        val method =
+            WebPlatformDataProcessor::class.java.getDeclaredMethod(
+                "getJsonObjectParams",
+                JSONObject::class.java,
+                Class::class.java,
+            )
         method.isAccessible = true
 
         val ok = JSONObject("{\"name\":\"sparkling\",\"mode\":\"A\"}")
@@ -54,19 +54,21 @@ class WebPlatformDataProcessorTest {
         assertEquals(2, (map["count"] as Number).toInt())
 
         val invalidEnum = JSONObject("{\"name\":\"sparkling\",\"mode\":\"C\"}")
-        val ex = runCatching { method.invoke(processor, invalidEnum, DemoParamModel::class.java) }
-            .exceptionOrNull() as InvocationTargetException
+        val ex =
+            runCatching { method.invoke(processor, invalidEnum, DemoParamModel::class.java) }
+                .exceptionOrNull() as InvocationTargetException
         assertTrue(ex.targetException is IllegalInputParamException)
     }
 
     @Test
     fun convertValueWithAnnotationBuildsNestedProxy() {
         val processor = WebPlatformDataProcessor()
-        val convertMethod = WebPlatformDataProcessor::class.java.getDeclaredMethod(
-            "convertValueWithAnnotation",
-            Any::class.java,
-            IDLMethodParamField::class.java,
-        )
+        val convertMethod =
+            WebPlatformDataProcessor::class.java.getDeclaredMethod(
+                "convertValueWithAnnotation",
+                Any::class.java,
+                IDLMethodParamField::class.java,
+            )
         convertMethod.isAccessible = true
 
         val annotation = ParentParamModel::class.java.getMethod("getNested").getAnnotation(IDLMethodParamField::class.java)
@@ -82,16 +84,18 @@ class WebPlatformDataProcessorTest {
     @Test
     fun convertValueWithAnnotationHandlesJsonArrayAndNull() {
         val processor = WebPlatformDataProcessor()
-        val convertMethod = WebPlatformDataProcessor::class.java.getDeclaredMethod(
-            "convertValueWithAnnotation",
-            Any::class.java,
-            IDLMethodParamField::class.java,
-        )
+        val convertMethod =
+            WebPlatformDataProcessor::class.java.getDeclaredMethod(
+                "convertValueWithAnnotation",
+                Any::class.java,
+                IDLMethodParamField::class.java,
+            )
         convertMethod.isAccessible = true
 
-        val safeAnnotation = DemoParamModel::class.java
-            .getMethod("getCount")
-            .getAnnotation(IDLMethodParamField::class.java)
+        val safeAnnotation =
+            DemoParamModel::class.java
+                .getMethod("getCount")
+                .getAnnotation(IDLMethodParamField::class.java)
 
         val convertedArray = convertMethod.invoke(processor, JSONArray("[1,{\"k\":\"v\"}]"), safeAnnotation)
         assertTrue(convertedArray is List<*>)
@@ -115,6 +119,7 @@ class WebPlatformDataProcessorTest {
         val mode: String?
 
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 
@@ -123,6 +128,7 @@ class WebPlatformDataProcessorTest {
         val id: String?
 
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 
@@ -131,6 +137,7 @@ class WebPlatformDataProcessorTest {
         val nested: Map<String, Any>?
 
         override fun toJSON(): JSONObject
+
         override fun convert(): Map<String, Any>?
     }
 

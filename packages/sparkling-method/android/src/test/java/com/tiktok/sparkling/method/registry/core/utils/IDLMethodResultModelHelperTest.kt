@@ -13,15 +13,15 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class IDLMethodResultModelHelperTest {
-
     @Test
     fun convertToMapByCacheValidatesAndTransformsValues() {
         val data = createAnnotationData()
-        val content = mutableMapOf<String, Any?>(
-            "name" to "sparkling",
-            "count" to 2,
-            "dynamic" to IAssignDir.Creator.create("wrapped"),
-        )
+        val content =
+            mutableMapOf<String, Any?>(
+                "name" to "sparkling",
+                "count" to 2,
+                "dynamic" to IAssignDir.Creator.create("wrapped"),
+            )
 
         IDLMethodResultModelHelper.convertToMapByCache(data, content)
 
@@ -77,30 +77,34 @@ class IDLMethodResultModelHelperTest {
         val setDynamic = CacheResultModel::class.java.getMethod("setDynamic", Any::class.java)
 
         val nameField = IDLParamField(required = true, keyPath = "name", returnType = String::class.java)
-        val countField = IDLParamField(
-            keyPath = "count",
-            isEnum = true,
-            returnType = Number::class.java,
-            intEnum = listOf(1, 2),
-            defaultValue = IDLDefaultValue(type = DefaultType.INT, intValue = 1),
-        )
+        val countField =
+            IDLParamField(
+                keyPath = "count",
+                isEnum = true,
+                returnType = Number::class.java,
+                intEnum = listOf(1, 2),
+                defaultValue = IDLDefaultValue(type = DefaultType.INT, intValue = 1),
+            )
         val dynamicField = IDLParamField(keyPath = "dynamic", returnType = Any::class.java)
 
-        val model = IDLAnnotationModel(
-            methodModel = hashMapOf(
-                getName to nameField,
-                setName to nameField.copy(isGetter = false),
-                getCount to countField,
-                setCount to countField.copy(isGetter = false),
-                getDynamic to dynamicField,
-                setDynamic to dynamicField.copy(isGetter = false),
-            ),
-            stringModel = hashMapOf(
-                "name" to nameField,
-                "count" to countField,
-                "dynamic" to dynamicField,
-            ),
-        )
+        val model =
+            IDLAnnotationModel(
+                methodModel =
+                    hashMapOf(
+                        getName to nameField,
+                        setName to nameField.copy(isGetter = false),
+                        getCount to countField,
+                        setCount to countField.copy(isGetter = false),
+                        getDynamic to dynamicField,
+                        setDynamic to dynamicField.copy(isGetter = false),
+                    ),
+                stringModel =
+                    hashMapOf(
+                        "name" to nameField,
+                        "count" to countField,
+                        "dynamic" to dynamicField,
+                    ),
+            )
 
         return IDLAnnotationData(
             paramClass = Any::class.java,

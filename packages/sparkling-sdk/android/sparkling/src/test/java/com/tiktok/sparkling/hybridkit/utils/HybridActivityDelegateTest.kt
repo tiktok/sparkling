@@ -15,7 +15,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class HybridActivityDelegateTest {
-
     @Test
     fun setTopActivityRetainsWeakReferenceToActivity() {
         val activity = mockk<Activity>(relaxed = true)

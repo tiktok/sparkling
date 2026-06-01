@@ -29,7 +29,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class DataConvertUtilsExtraTest {
-
     @Before
     fun reset() {
         DataConvertUtils.disableLongToDouble = false
@@ -44,19 +43,20 @@ class DataConvertUtilsExtraTest {
 
     @Test
     fun mapSupportPiperdataCoversAllPrimitiveBranches() {
-        val source = mapOf<String, Any?>(
-            "long" to 5L,
-            "float" to 1.5f,
-            "int" to 7,
-            "double" to 2.0,
-            "string" to "x",
-            "bool" to true,
-            "json" to JSONObject().put("k", "v"),
-            "arr" to JSONArray().put(1).put(2),
-            "nested" to mapOf("k" to 1),
-            "list" to listOf(1, 2),
-            "ignored" to Any(),
-        )
+        val source =
+            mapOf<String, Any?>(
+                "long" to 5L,
+                "float" to 1.5f,
+                "int" to 7,
+                "double" to 2.0,
+                "string" to "x",
+                "bool" to true,
+                "json" to JSONObject().put("k", "v"),
+                "arr" to JSONArray().put(1).put(2),
+                "nested" to mapOf("k" to 1),
+                "list" to listOf(1, 2),
+                "ignored" to Any(),
+            )
         DataConvertUtils.disableLongToDouble = false
         val asDouble = DataConvertUtils.mapSupportPiperdataToJSON(source)
         assertEquals(5.0, asDouble.getDouble("long"), 0.001)
@@ -79,17 +79,18 @@ class DataConvertUtilsExtraTest {
     @Test
     fun listSupportPiperdataCoversAllPrimitiveBranches() {
         val nested: List<Any> = listOf(1, "x")
-        val source: List<Any> = listOf(
-            1.5f,
-            42L,
-            3,
-            4.0,
-            "hi",
-            true,
-            mapOf("k" to 1),
-            nested,
-            Any(),
-        )
+        val source: List<Any> =
+            listOf(
+                1.5f,
+                42L,
+                3,
+                4.0,
+                "hi",
+                true,
+                mapOf("k" to 1),
+                nested,
+                Any(),
+            )
 
         DataConvertUtils.disableLongToDouble = false
         val asDouble = DataConvertUtils.listSupportPiperdataToJSON(source)
@@ -129,17 +130,18 @@ class DataConvertUtilsExtraTest {
 
     @Test
     fun convertJsonToMapAndArrayHandleAllJsonTypes() {
-        val obj = JSONObject().apply {
-            put("nested", JSONObject().put("k", "v"))
-            put("array", JSONArray().put(1).put("x"))
-            put("bool", true)
-            put("int", 1)
-            put("long", Int.MAX_VALUE.toLong() + 1L)
-            put("double", 3.14)
-            put("string", "hello")
-            put("null", JSONObject.NULL)
-            put("other", 1.5f.toDouble()) // Floats stored as Doubles
-        }
+        val obj =
+            JSONObject().apply {
+                put("nested", JSONObject().put("k", "v"))
+                put("array", JSONArray().put(1).put("x"))
+                put("bool", true)
+                put("int", 1)
+                put("long", Int.MAX_VALUE.toLong() + 1L)
+                put("double", 3.14)
+                put("string", "hello")
+                put("null", JSONObject.NULL)
+                put("other", 1.5f.toDouble()) // Floats stored as Doubles
+            }
         DataConvertUtils.disableLongToDouble = true
         val map = DataConvertUtils.convertJsonToMap(obj)
         assertNotNull(map.getMap("nested"))
@@ -162,16 +164,17 @@ class DataConvertUtilsExtraTest {
 
     @Test
     fun convertJsonToArrayCoversNullAndPrimitiveBranches() {
-        val arr = JSONArray().apply {
-            put(JSONObject().put("k", "v"))
-            put(JSONArray().put(1))
-            put(true)
-            put(42)
-            put(Int.MAX_VALUE.toLong() + 1L)
-            put(2.5)
-            put("hi")
-            put(JSONObject.NULL)
-        }
+        val arr =
+            JSONArray().apply {
+                put(JSONObject().put("k", "v"))
+                put(JSONArray().put(1))
+                put(true)
+                put(42)
+                put(Int.MAX_VALUE.toLong() + 1L)
+                put(2.5)
+                put("hi")
+                put(JSONObject.NULL)
+            }
         DataConvertUtils.disableLongToDouble = true
         val out = DataConvertUtils.convertJsonToArray(arr)
         assertNotNull(out.getMap(0))
@@ -186,12 +189,13 @@ class DataConvertUtilsExtraTest {
 
     @Test
     fun convertMapToReadableMapCoversFloatJsonAndElseBranches() {
-        val source = mapOf<String, Any?>(
-            "float" to 1.5f,
-            "json" to JSONObject().put("k", "v"),
-            "arr" to JSONArray().put(1),
-            "other" to TestRefValue("x"),
-        )
+        val source =
+            mapOf<String, Any?>(
+                "float" to 1.5f,
+                "json" to JSONObject().put("k", "v"),
+                "arr" to JSONArray().put(1),
+                "other" to TestRefValue("x"),
+            )
         val map = DataConvertUtils.convertMapToReadableMap(source)
         assertEquals(1.5, map.getDouble("float"), 0.001)
         assertNotNull(map.getMap("json"))
@@ -211,42 +215,49 @@ class DataConvertUtilsExtraTest {
     fun convertXReadableMapAndArrayHandleAllTypes() {
         val nestedMap = JSONObject().put("inner", "v")
         val nestedArray = JSONArray().put("a").put("b")
-        val source = JSONObject().apply {
-            put("string", "hi")
-            put("int", 1)
-            put("number", 1.5)
-            put("bool", true)
-            put("array", nestedArray)
-            put("map", nestedMap)
-        }
+        val source =
+            JSONObject().apply {
+                put("string", "hi")
+                put("int", 1)
+                put("number", 1.5)
+                put("bool", true)
+                put("array", nestedArray)
+                put("map", nestedMap)
+            }
 
         val xMap = ReadableMapImpl(source)
         val converted = DataConvertUtils.convertXReadableMapToReadableMap(xMap)
         assertNotNull(converted)
 
         // Build an XReadableArray via ReadableArrayImpl through the parent map.
-        val arr = JSONArray().apply {
-            put("hi")
-            put(1)
-            put(2.5)
-            put(true)
-            put(nestedArray)
-            put(nestedMap)
-        }
-        val xArr = com.tiktok.sparkling.method.registry.core.ReadableArrayImpl(arr)
+        val arr =
+            JSONArray().apply {
+                put("hi")
+                put(1)
+                put(2.5)
+                put(true)
+                put(nestedArray)
+                put(nestedMap)
+            }
+        val xArr =
+            com.tiktok.sparkling.method.registry.core
+                .ReadableArrayImpl(arr)
         val convertedArr = DataConvertUtils.convertXReadableArrayToReadableArray(xArr)
         assertNotNull(convertedArr)
     }
 
     @Test
     fun getValueRecursivelyReducesReadableMaps() {
-        val inner = JavaOnlyMap().apply {
-            putString("name", "sparkling")
-        }
-        val outer = JavaOnlyMap().apply {
-            putMap("inner", inner)
-            putString("note", "ok")
-        }
+        val inner =
+            JavaOnlyMap().apply {
+                putString("name", "sparkling")
+            }
+        val outer =
+            JavaOnlyMap().apply {
+                putMap("inner", inner)
+                putString("note", "ok")
+            }
+
         @Suppress("UNCHECKED_CAST")
         val flattened = Utils.getValue(outer) as Map<String, Any?>
         assertEquals("ok", flattened["note"])
@@ -275,7 +286,9 @@ class DataConvertUtilsExtraTest {
         assertEquals(listOf<Any?>(null), converted)
     }
 
-    private class TestRefValue(val tag: String) {
+    private class TestRefValue(
+        val tag: String,
+    ) {
         override fun toString(): String = "toString:$tag"
     }
 }

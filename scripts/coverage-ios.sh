@@ -21,7 +21,8 @@ pick_ios_destination() {
 
     if [[ -n "$runtime" && "$line" =~ ^[[:space:]]+iPhone[[:space:]] ]]; then
       sim_name="$(echo "$line" \
-        | sed -E 's/^[[:space:]]+([^(]+)\(.*$/\1/' \
+        | sed -E 's/^[[:space:]]+//' \
+        | sed -E 's/[[:space:]]+\([0-9A-Fa-f-]{36}\)[[:space:]]+\((Booted|Shutdown)\).*$//' \
         | sed -E 's/[[:space:]]+$//')"
       destination="platform=iOS Simulator,OS=$runtime,name=$sim_name"
     fi
@@ -66,6 +67,72 @@ run_pod_install() {
   fi
 }
 
+prepare_coverage_podfile() {
+  local ios_dir="$1"
+  COVERAGE_PODFILE_BACKUP_DIR=""
+
+  if [[ "$ios_dir" != "$ROOT_DIR/template/sparkling-app-template/ios" ]]; then
+    return 0
+  fi
+
+  local backup_dir
+  backup_dir="$(mktemp -d "${TMPDIR:-/tmp}/sparkling-ios-podfile.XXXXXX")"
+  cp "$ios_dir/Podfile" "$backup_dir/Podfile"
+  if [[ -f "$ios_dir/Podfile.lock" ]]; then
+    cp "$ios_dir/Podfile.lock" "$backup_dir/Podfile.lock"
+  fi
+
+  if ! ruby - "$ios_dir/Podfile" <<'RUBY'
+podfile = ARGV.fetch(0)
+content = File.read(podfile)
+replacements = {
+  /pod 'SparklingMethod', '[^']+', :subspecs =>/ =>
+    "pod 'SparklingMethod', :path => '../../../packages/sparkling-method/ios', :subspecs =>",
+  /pod 'Sparkling-Router', '[^']+'/ =>
+    "pod 'Sparkling-Router', :path => '../../../packages/methods/sparkling-navigation/ios'",
+  /pod 'Sparkling-DebugTool', '[^']+'/ =>
+    "pod 'Sparkling-DebugTool', :path => '../../../packages/sparkling-debug-tool/ios'",
+  /pod 'Sparkling', '[^']+'/ =>
+    "pod 'Sparkling', :path => '../../../packages/sparkling-sdk/ios/Sparkling'",
+  /pod 'SparklingMacro', '[^']+'/ =>
+    "pod 'SparklingMacro', :path => '../../../packages/sparkling-sdk/ios/SparklingMacro'",
+}
+replacements.each do |pattern, replacement|
+  content = content.gsub(pattern, replacement)
+end
+File.write(podfile, content)
+RUBY
+  then
+    cp "$backup_dir/Podfile" "$ios_dir/Podfile"
+    if [[ -f "$backup_dir/Podfile.lock" ]]; then
+      cp "$backup_dir/Podfile.lock" "$ios_dir/Podfile.lock"
+    fi
+    rm -rf "$backup_dir"
+    echo "[coverage:ios] Failed to prepare local template Podfile"
+    return 1
+  fi
+
+  COVERAGE_PODFILE_BACKUP_DIR="$backup_dir"
+  echo "[coverage:ios] Using local Sparkling pods for template coverage"
+}
+
+restore_coverage_podfile() {
+  local ios_dir="$1"
+  local backup_dir="$2"
+
+  if [[ -z "$backup_dir" ]]; then
+    return 0
+  fi
+
+  cp "$backup_dir/Podfile" "$ios_dir/Podfile"
+  if [[ -f "$backup_dir/Podfile.lock" ]]; then
+    cp "$backup_dir/Podfile.lock" "$ios_dir/Podfile.lock"
+  else
+    rm -f "$ios_dir/Podfile.lock"
+  fi
+  rm -rf "$backup_dir"
+}
+
 run_ios_coverage() {
   local name="$1"
   local project_path="$2"
@@ -94,7 +161,17 @@ run_ios_coverage() {
   rm -rf "$xcresult_path"
   mkdir -p "$out_dir"
 
-  run_pod_install "$ios_dir"
+  local podfile_backup_dir=""
+  if ! prepare_coverage_podfile "$ios_dir"; then
+    return 1
+  fi
+  podfile_backup_dir="$COVERAGE_PODFILE_BACKUP_DIR"
+
+  if ! run_pod_install "$ios_dir"; then
+    restore_coverage_podfile "$ios_dir" "$podfile_backup_dir"
+    echo "[coverage:ios] pod install failed for $name"
+    return 1
+  fi
 
   # Prefer the .xcworkspace next to the .xcodeproj so CocoaPods-provided
   # modules (Sparkling, SparklingMethod, Lynx, SDWebImage, ...) resolve.
@@ -141,6 +218,7 @@ run_ios_coverage() {
   fi
 
   if [[ "$run_ok" -ne 1 ]]; then
+    restore_coverage_podfile "$ios_dir" "$podfile_backup_dir"
     echo "[coverage:ios] Failed to produce coverage for $name"
     return 1
   fi
@@ -148,6 +226,7 @@ run_ios_coverage() {
   xcrun xccov view --report "$xcresult_path" > "$out_dir/summary.txt"
   xcrun xccov view --report --json "$xcresult_path" > "$out_dir/summary.json"
   echo "$used_destination" > "$out_dir/destination.txt"
+  restore_coverage_podfile "$ios_dir" "$podfile_backup_dir"
 }
 
 failures=()

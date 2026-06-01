@@ -19,7 +19,6 @@ import org.junit.Test
  * call [IDLMethodResultModelArguments.createModel] directly.
  */
 class BridgeKTXTest {
-
     @Test
     fun classCreateXModelDelegatesToArguments() {
         @Suppress("DEPRECATION")
@@ -61,6 +60,7 @@ class BridgeKTXTest {
         assertEquals("payload", wrapped.getValue())
 
         val mapWrapped = mapOf("k" to 1).assignX()
+
         @Suppress("UNCHECKED_CAST")
         val backing = mapWrapped.getValue() as Map<String, Int>
         assertEquals(1, backing["k"])

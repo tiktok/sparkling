@@ -23,7 +23,6 @@ import java.io.File
  * [AbsStringConnection] / [AbsStreamConnection] abstract base classes.
  */
 class HttpRequestTest {
-
     @Test
     fun fluentSettersUpdateAllProperties() {
         val req = HttpRequest("https://example.com/path")
@@ -34,19 +33,20 @@ class HttpRequestTest {
         val payload = ByteArray(3) { it.toByte() }
         val files = LinkedHashMap<String, File>().apply { put("upload", File("/tmp/a")) }
 
-        val chain = req
-            .cacheTime(60)
-            .headers(headers)
-            .needAddCommonParams(true)
-            .disableRedirect(true)
-            .params(params)
-            .sendData(payload)
-            .contentEncoding("gzip")
-            .contentType("application/json")
-            .connectTimeOut(1_000L)
-            .readTimeOut(2_000L)
-            .writeTimeOut(3_000L)
-            .postFilePart(files)
+        val chain =
+            req
+                .cacheTime(60)
+                .headers(headers)
+                .needAddCommonParams(true)
+                .disableRedirect(true)
+                .params(params)
+                .sendData(payload)
+                .contentEncoding("gzip")
+                .contentType("application/json")
+                .connectTimeOut(1_000L)
+                .readTimeOut(2_000L)
+                .writeTimeOut(3_000L)
+                .postFilePart(files)
 
         // each fluent call must return the same instance to support chaining
         assertSame(req, chain)

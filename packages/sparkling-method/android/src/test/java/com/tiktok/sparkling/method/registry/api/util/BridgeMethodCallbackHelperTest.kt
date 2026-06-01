@@ -14,9 +14,9 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class BridgeMethodCallbackHelperTest {
-
     private class CapturingCallback : IBridgeMethodCallback {
         var lastResult: Any? = null
+
         override fun onBridgeResult(parcel: Any) {
             lastResult = parcel
         }

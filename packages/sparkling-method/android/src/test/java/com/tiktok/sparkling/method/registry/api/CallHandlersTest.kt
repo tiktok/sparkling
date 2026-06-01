@@ -45,23 +45,22 @@ class CallHandlersStubCompatibleBridge : IDLBridgeMethod {
     }
 
     override fun setProviderFactory(contextProviderFactory: ContextProviderFactory?) = Unit
+
     override fun setBridgeContext(bridgeContext: IBridgeContext) = Unit
 }
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class CallHandlersTest {
-
     private class CapturingCallback : IBridgeMethodCallback {
         var lastResult: Any? = null
+
         override fun onBridgeResult(parcel: Any) {
             lastResult = parcel
         }
     }
 
-    private fun newBridgeContext(platform: BridgePlatformType = BridgePlatformType.ALL): BridgeContext {
-        return BridgeContext().apply { this.platform = platform }
-    }
+    private fun newBridgeContext(platform: BridgePlatformType = BridgePlatformType.ALL): BridgeContext = BridgeContext().apply { this.platform = platform }
 
     @Test
     fun defaultCallHandlerLifecycleAndRegistration() {
@@ -87,11 +86,12 @@ class CallHandlersTest {
     fun defaultCallHandlerHandleReportsBridgeNotFoundWhenUnregistered() {
         val handler = DefaultCallHandler()
         val callback = CapturingCallback()
-        val call = BridgeCall(BridgeContext()).apply {
-            bridgeName = "missing.bridge"
-            params = JSONObject()
-            platform = BridgeCall.PlatForm.Web
-        }
+        val call =
+            BridgeCall(BridgeContext()).apply {
+                bridgeName = "missing.bridge"
+                params = JSONObject()
+                platform = BridgeCall.PlatForm.Web
+            }
 
         handler.handle(newBridgeContext(BridgePlatformType.WEB), call, callback)
 
@@ -109,11 +109,12 @@ class CallHandlersTest {
 
         val callback = CapturingCallback()
         val ctx = newBridgeContext(BridgePlatformType.ALL)
-        val call = BridgeCall(ctx).apply {
-            bridgeName = "stub.compatible.bridge"
-            params = JSONObject().put("k", "v")
-            platform = BridgeCall.PlatForm.Web
-        }
+        val call =
+            BridgeCall(ctx).apply {
+                bridgeName = "stub.compatible.bridge"
+                params = JSONObject().put("k", "v")
+                platform = BridgeCall.PlatForm.Web
+            }
 
         handler.handle(ctx, call, callback)
 
@@ -137,11 +138,12 @@ class CallHandlersTest {
         val ctx = newBridgeContext(BridgePlatformType.LYNX)
         val params = JavaOnlyMap()
         params.putString("kind", "readable")
-        val call = BridgeCall(ctx).apply {
-            bridgeName = "stub.compatible.bridge"
-            this.params = params
-            platform = BridgeCall.PlatForm.Lynx
-        }
+        val call =
+            BridgeCall(ctx).apply {
+                bridgeName = "stub.compatible.bridge"
+                this.params = params
+                platform = BridgeCall.PlatForm.Lynx
+            }
 
         handler.handle(ctx, call, callback)
 
@@ -160,11 +162,12 @@ class CallHandlersTest {
 
         val callback = CapturingCallback()
         val ctx = newBridgeContext(BridgePlatformType.ALL)
-        val call = BridgeCall(ctx).apply {
-            bridgeName = "stub.compatible.bridge"
-            this.params = "ignored"
-            platform = BridgeCall.PlatForm.Other
-        }
+        val call =
+            BridgeCall(ctx).apply {
+                bridgeName = "stub.compatible.bridge"
+                this.params = "ignored"
+                platform = BridgeCall.PlatForm.Other
+            }
 
         handler.handle(ctx, call, callback)
 
@@ -200,11 +203,12 @@ class CallHandlersTest {
         val handler = BusinessCallHandler("ns")
         val callback = CapturingCallback()
         val ctx = newBridgeContext()
-        val call = BridgeCall(ctx).apply {
-            bridgeName = "missing.bridge"
-            params = JSONObject()
-            platform = BridgeCall.PlatForm.Web
-        }
+        val call =
+            BridgeCall(ctx).apply {
+                bridgeName = "missing.bridge"
+                params = JSONObject()
+                platform = BridgeCall.PlatForm.Web
+            }
 
         handler.handle(ctx, call, callback)
         val payload = callback.lastResult as JSONObject
@@ -218,11 +222,12 @@ class CallHandlersTest {
 
         val callback = CapturingCallback()
         val ctx = newBridgeContext()
-        val call = BridgeCall(ctx).apply {
-            bridgeName = "stub.compatible.bridge"
-            this.params = 42
-            platform = BridgeCall.PlatForm.Other
-        }
+        val call =
+            BridgeCall(ctx).apply {
+                bridgeName = "stub.compatible.bridge"
+                this.params = 42
+                platform = BridgeCall.PlatForm.Other
+            }
 
         handler.handle(ctx, call, callback)
         // Unknown param branch returns silently.

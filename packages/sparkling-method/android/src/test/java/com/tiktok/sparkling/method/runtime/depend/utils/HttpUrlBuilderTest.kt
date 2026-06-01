@@ -13,7 +13,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class HttpUrlBuilderTest {
-
     @Test
     fun buildWithoutParamsReturnsBaseUrl() {
         val builder = HttpUrlBuilder("https://example.com/path")
@@ -23,12 +22,13 @@ class HttpUrlBuilderTest {
 
     @Test
     fun addIntLongDoubleAndStringParamsAppendsCorrectly() {
-        val url = HttpUrlBuilder("https://api.example.com/v1/foo")
-            .addParam("intKey", 42)
-            .addParam("longKey", 100L)
-            .addParam("doubleKey", 1.5)
-            .addParam("stringKey", "hello")
-            .build()
+        val url =
+            HttpUrlBuilder("https://api.example.com/v1/foo")
+                .addParam("intKey", 42)
+                .addParam("longKey", 100L)
+                .addParam("doubleKey", 1.5)
+                .addParam("stringKey", "hello")
+                .build()
 
         // The base URL should be preserved as the prefix.
         assertTrue(url.startsWith("https://api.example.com/v1/foo?"))
@@ -42,25 +42,28 @@ class HttpUrlBuilderTest {
 
     @Test
     fun buildWithExistingQueryStringJoinsUsingAmpersand() {
-        val url = HttpUrlBuilder("https://example.com/path?existing=1")
-            .addParam("k", "v")
-            .build()
+        val url =
+            HttpUrlBuilder("https://example.com/path?existing=1")
+                .addParam("k", "v")
+                .build()
         assertEquals("https://example.com/path?existing=1&k=v", url)
     }
 
     @Test
     fun stringValueIsUrlEncodedByDefault() {
-        val url = HttpUrlBuilder("https://example.com")
-            .addParam("q", "a b/c")
-            .build()
+        val url =
+            HttpUrlBuilder("https://example.com")
+                .addParam("q", "a b/c")
+                .build()
         // Default encoding is UTF-8 -> spaces become '+', '/' becomes %2F.
         assertTrue(url.contains("q=a+b%2Fc"))
     }
 
     @Test
     fun nullEncodingMagicValueLeavesValuesUntouched() {
-        val builder = HttpUrlBuilder("https://example.com")
-            .addParam("q", "a b/c")
+        val builder =
+            HttpUrlBuilder("https://example.com")
+                .addParam("q", "a b/c")
         builder.encoding = "null_encoding"
         val url = builder.build()
         assertTrue(url.contains("q=a b/c"))
@@ -68,8 +71,9 @@ class HttpUrlBuilderTest {
 
     @Test
     fun unsupportedEncodingThrowsIllegalArgumentException() {
-        val builder = HttpUrlBuilder("https://example.com")
-            .addParam("q", "value")
+        val builder =
+            HttpUrlBuilder("https://example.com")
+                .addParam("q", "value")
         builder.encoding = "no-such-encoding"
         try {
             builder.build()
@@ -81,9 +85,10 @@ class HttpUrlBuilderTest {
 
     @Test
     fun emptyBaseUrlWithParamsReturnsJustQueryString() {
-        val url = HttpUrlBuilder("")
-            .addParam("k", "v")
-            .build()
+        val url =
+            HttpUrlBuilder("")
+                .addParam("k", "v")
+                .build()
         assertEquals("k=v", url)
     }
 }

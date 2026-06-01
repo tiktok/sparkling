@@ -23,19 +23,20 @@ import java.lang.reflect.Method
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class LynxDataProcessorForMapNestedTest {
-
     interface NestedModel : IDLMethodBaseModel {
         fun getName(): String
+
         fun getCount(): Int
     }
 
     @Test
     fun proxyForNestedReadableMapImplementsAccessors() {
         val data = nestedAnnotationData()
-        val nestedMap = JavaOnlyMap().apply {
-            putString("name", "alice")
-            putInt("count", 7)
-        }
+        val nestedMap =
+            JavaOnlyMap().apply {
+                putString("name", "alice")
+                putInt("count", 7)
+            }
         val params = hashMapOf<String, Any>("nested" to nestedMap)
 
         val res = LynxDataProcessorForMap.getJavaOnlyMapParams(params, data)
@@ -51,19 +52,25 @@ class LynxDataProcessorForMapNestedTest {
     @Test
     fun proxyForNestedReadableArrayMapsEachItemToProxy() {
         val data = nestedListAnnotationData()
-        val arr = JavaOnlyArray().apply {
-            pushMap(JavaOnlyMap().apply {
-                putString("name", "a")
-                putInt("count", 1)
-            })
-            pushMap(JavaOnlyMap().apply {
-                putString("name", "b")
-                putInt("count", 2)
-            })
-        }
+        val arr =
+            JavaOnlyArray().apply {
+                pushMap(
+                    JavaOnlyMap().apply {
+                        putString("name", "a")
+                        putInt("count", 1)
+                    },
+                )
+                pushMap(
+                    JavaOnlyMap().apply {
+                        putString("name", "b")
+                        putInt("count", 2)
+                    },
+                )
+            }
         val params = hashMapOf<String, Any>("items" to arr)
 
         val res = LynxDataProcessorForMap.getJavaOnlyMapParams(params, data)
+
         @Suppress("UNCHECKED_CAST")
         val list = res?.get("items") as List<NestedModel>
         assertEquals(2, list.size)
@@ -76,55 +83,65 @@ class LynxDataProcessorForMapNestedTest {
         val getCount: Method = NestedModel::class.java.getMethod("getCount")
         val nameField = IDLParamField(keyPath = "name", returnType = String::class.java)
         val countField = IDLParamField(keyPath = "count", returnType = Number::class.java)
-        val nestedModel = IDLAnnotationModel(
-            methodModel = hashMapOf(
-                getName to nameField,
-                getCount to countField,
-            ),
-            stringModel = hashMapOf(
-                "name" to nameField,
-                "count" to countField,
-            ),
-        )
-        val outer = IDLAnnotationModel(
-            stringModel = hashMapOf(
-                "items" to IDLParamField(
-                    keyPath = "items",
-                    returnType = List::class.java,
-                    nestedClassType = NestedModel::class,
-                ),
-            ),
-        )
+        val nestedModel =
+            IDLAnnotationModel(
+                methodModel =
+                    hashMapOf(
+                        getName to nameField,
+                        getCount to countField,
+                    ),
+                stringModel =
+                    hashMapOf(
+                        "name" to nameField,
+                        "count" to countField,
+                    ),
+            )
+        val outer =
+            IDLAnnotationModel(
+                stringModel =
+                    hashMapOf(
+                        "items" to
+                            IDLParamField(
+                                keyPath = "items",
+                                returnType = List::class.java,
+                                nestedClassType = NestedModel::class,
+                            ),
+                    ),
+            )
         return IDLAnnotationData(
             paramClass = Any::class.java,
             resultClass = Any::class.java,
             methodParamModel = outer,
             methodResultModel = IDLAnnotationModel(),
-            models = mapOf(
-                IDLMethodBaseModel.Default::class.java to IDLAnnotationModel(),
-                NestedModel::class.java to nestedModel,
-            ),
+            models =
+                mapOf(
+                    IDLMethodBaseModel.Default::class.java to IDLAnnotationModel(),
+                    NestedModel::class.java to nestedModel,
+                ),
         )
     }
 
     @Test
     fun proxyValueReturnsNullWhenNestedAnnotationModelMissing() {
-        val nestedField = IDLParamField(
-            keyPath = "nested",
-            returnType = Map::class.java,
-            nestedClassType = NestedModel::class,
-        )
+        val nestedField =
+            IDLParamField(
+                keyPath = "nested",
+                returnType = Map::class.java,
+                nestedClassType = NestedModel::class,
+            )
         val outer = IDLAnnotationModel(stringModel = hashMapOf("nested" to nestedField))
-        val data = IDLAnnotationData(
-            paramClass = Any::class.java,
-            resultClass = Any::class.java,
-            methodParamModel = outer,
-            methodResultModel = IDLAnnotationModel(),
-            models = mapOf(IDLMethodBaseModel.Default::class.java to IDLAnnotationModel()),
-        )
-        val params = hashMapOf<String, Any>(
-            "nested" to JavaOnlyMap().apply { putString("name", "x") },
-        )
+        val data =
+            IDLAnnotationData(
+                paramClass = Any::class.java,
+                resultClass = Any::class.java,
+                methodParamModel = outer,
+                methodResultModel = IDLAnnotationModel(),
+                models = mapOf(IDLMethodBaseModel.Default::class.java to IDLAnnotationModel()),
+            )
+        val params =
+            hashMapOf<String, Any>(
+                "nested" to JavaOnlyMap().apply { putString("name", "x") },
+            )
         val res = LynxDataProcessorForMap.getJavaOnlyMapParams(params, data)
         assertNull(res?.get("nested"))
     }
@@ -144,78 +161,94 @@ class LynxDataProcessorForMapNestedTest {
         val getCount: Method = NestedModel::class.java.getMethod("getCount")
         val nameField = IDLParamField(keyPath = "name", returnType = String::class.java)
         val countField = IDLParamField(keyPath = "count", returnType = Number::class.java)
-        val nestedModel = IDLAnnotationModel(
-            methodModel = hashMapOf(
-                getName to nameField,
-                getCount to countField,
-            ),
-            stringModel = hashMapOf(
-                "name" to nameField,
-                "count" to countField,
-            ),
-        )
-        val outer = IDLAnnotationModel(
-            stringModel = hashMapOf(
-                "nested" to IDLParamField(
-                    keyPath = "nested",
-                    returnType = Map::class.java,
-                    nestedClassType = NestedModel::class,
-                ),
-            ),
-        )
+        val nestedModel =
+            IDLAnnotationModel(
+                methodModel =
+                    hashMapOf(
+                        getName to nameField,
+                        getCount to countField,
+                    ),
+                stringModel =
+                    hashMapOf(
+                        "name" to nameField,
+                        "count" to countField,
+                    ),
+            )
+        val outer =
+            IDLAnnotationModel(
+                stringModel =
+                    hashMapOf(
+                        "nested" to
+                            IDLParamField(
+                                keyPath = "nested",
+                                returnType = Map::class.java,
+                                nestedClassType = NestedModel::class,
+                            ),
+                    ),
+            )
         return IDLAnnotationData(
             paramClass = Any::class.java,
             resultClass = Any::class.java,
             methodParamModel = outer,
             methodResultModel = IDLAnnotationModel(),
-            models = mapOf(
-                IDLMethodBaseModel.Default::class.java to IDLAnnotationModel(),
-                NestedModel::class.java to nestedModel,
-            ),
+            models =
+                mapOf(
+                    IDLMethodBaseModel.Default::class.java to IDLAnnotationModel(),
+                    NestedModel::class.java to nestedModel,
+                ),
         )
     }
 
     private fun nestedAnnotationDataWithDefaults(): IDLAnnotationData {
         val getName: Method = NestedModel::class.java.getMethod("getName")
         val getCount: Method = NestedModel::class.java.getMethod("getCount")
-        val nameField = IDLParamField(
-            keyPath = "name",
-            returnType = String::class.java,
-            defaultValue = IDLDefaultValue(type = DefaultType.STRING, stringValue = "default-name"),
-        )
-        val countField = IDLParamField(
-            keyPath = "count",
-            returnType = Number::class.java,
-            defaultValue = IDLDefaultValue(type = DefaultType.INT, intValue = 99),
-        )
-        val nestedModel = IDLAnnotationModel(
-            methodModel = hashMapOf(
-                getName to nameField,
-                getCount to countField,
-            ),
-            stringModel = hashMapOf(
-                "name" to nameField,
-                "count" to countField,
-            ),
-        )
-        val outer = IDLAnnotationModel(
-            stringModel = hashMapOf(
-                "nested" to IDLParamField(
-                    keyPath = "nested",
-                    returnType = Map::class.java,
-                    nestedClassType = NestedModel::class,
-                ),
-            ),
-        )
+        val nameField =
+            IDLParamField(
+                keyPath = "name",
+                returnType = String::class.java,
+                defaultValue = IDLDefaultValue(type = DefaultType.STRING, stringValue = "default-name"),
+            )
+        val countField =
+            IDLParamField(
+                keyPath = "count",
+                returnType = Number::class.java,
+                defaultValue = IDLDefaultValue(type = DefaultType.INT, intValue = 99),
+            )
+        val nestedModel =
+            IDLAnnotationModel(
+                methodModel =
+                    hashMapOf(
+                        getName to nameField,
+                        getCount to countField,
+                    ),
+                stringModel =
+                    hashMapOf(
+                        "name" to nameField,
+                        "count" to countField,
+                    ),
+            )
+        val outer =
+            IDLAnnotationModel(
+                stringModel =
+                    hashMapOf(
+                        "nested" to
+                            IDLParamField(
+                                keyPath = "nested",
+                                returnType = Map::class.java,
+                                nestedClassType = NestedModel::class,
+                            ),
+                    ),
+            )
         return IDLAnnotationData(
             paramClass = Any::class.java,
             resultClass = Any::class.java,
             methodParamModel = outer,
             methodResultModel = IDLAnnotationModel(),
-            models = mapOf(
-                IDLMethodBaseModel.Default::class.java to IDLAnnotationModel(),
-                NestedModel::class.java to nestedModel,
-            ),
+            models =
+                mapOf(
+                    IDLMethodBaseModel.Default::class.java to IDLAnnotationModel(),
+                    NestedModel::class.java to nestedModel,
+                ),
         )
     }
 }

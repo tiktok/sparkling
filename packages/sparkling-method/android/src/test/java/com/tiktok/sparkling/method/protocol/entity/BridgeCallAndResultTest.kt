@@ -22,7 +22,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class BridgeCallAndResultTest {
-
     @After
     fun tearDown() {
         BridgeSettings.bridgeCallToStringOptimization = false
@@ -58,16 +57,17 @@ class BridgeCallAndResultTest {
     @Test
     fun bridgeCallToStringIncludesAllFieldsByDefault() {
         BridgeSettings.bridgeCallToStringOptimization = false
-        val call = BridgeCall(BridgeContext()).apply {
-            callbackId = "cb1"
-            bridgeName = "test.method"
-            url = "https://x"
-            msgType = "call"
-            sdkVersion = "1.0"
-            nameSpace = "ns"
-            frameUrl = "frame"
-            hitBusinessHandler = true
-        }
+        val call =
+            BridgeCall(BridgeContext()).apply {
+                callbackId = "cb1"
+                bridgeName = "test.method"
+                url = "https://x"
+                msgType = "call"
+                sdkVersion = "1.0"
+                nameSpace = "ns"
+                frameUrl = "frame"
+                hitBusinessHandler = true
+            }
         val s = call.toString()
         assertTrue(s.contains("cb1"))
         assertTrue(s.contains("test.method"))
@@ -78,11 +78,12 @@ class BridgeCallAndResultTest {
     @Test
     fun bridgeCallToStringRespectsOptimizationFlag() {
         BridgeSettings.bridgeCallToStringOptimization = true
-        val call = BridgeCall(BridgeContext()).apply {
-            callbackId = "id"
-            bridgeName = "fn"
-            url = "url"
-        }
+        val call =
+            BridgeCall(BridgeContext()).apply {
+                callbackId = "id"
+                bridgeName = "fn"
+                url = "url"
+            }
         val s = call.toString()
         assertTrue(s.contains("id"))
         assertTrue(s.contains("fn"))

@@ -8,7 +8,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class SparklingLynxModuleWrapperTest {
-
     @Test
     fun defaultConstructorLeavesValuesNull() {
         val wrapper = SparklingLynxModuleWrapper()

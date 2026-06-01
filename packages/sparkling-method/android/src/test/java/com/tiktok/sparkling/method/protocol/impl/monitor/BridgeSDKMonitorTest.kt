@@ -18,7 +18,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class BridgeSDKMonitorTest {
-
     @Test
     fun appInfoDefaultsAreNullAndCopyableViaDataClass() {
         val info = BridgeSDKMonitor.APPInfo4Monitor()
@@ -27,12 +26,13 @@ class BridgeSDKMonitorTest {
         assertNull(info.channel)
         assertNull(info.sdkVersion)
 
-        val populated = info.copy(
-            appVersion = "1.2.3",
-            update_version_code = "10203",
-            channel = "playstore",
-            sdkVersion = "42",
-        )
+        val populated =
+            info.copy(
+                appVersion = "1.2.3",
+                update_version_code = "10203",
+                channel = "playstore",
+                sdkVersion = "42",
+            )
         assertEquals("1.2.3", populated.appVersion)
         assertEquals("10203", populated.update_version_code)
         assertEquals("playstore", populated.channel)
@@ -72,43 +72,48 @@ class BridgeSDKMonitorTest {
 
     @Test
     fun monitorEventDoesNotThrowOnFullModel() {
-        val monitor = BridgeSDKMonitor(
-            ApplicationProvider.getApplicationContext(),
-            BridgeSDKMonitor.APPInfo4Monitor(),
-        )
-        val model = BridgeSDKMonitor.MonitorModel.Builder()
-            .setMethod("foo.bar")
-            .setURL("https://example.com")
-            .setCode(0)
-            .setChannel("release")
-            .setContainerType("lynx")
-            .setRequestDataLength(123)
-            .setRequestSendTimestamp(1L)
-            .setRequestReceiveTimestamp(5L)
-            .setRequestDecodeDuration(2L)
-            .setRequestDuration()
-            .setResponseDataLength(321)
-            .setResponseSendTimestamp(7L)
-            .setResponseReceiveTimestamp(11L)
-            .setResponseEncodeDuration(3L)
-            .setResponseDuration()
-            .setDuration()
-            .build()
+        val monitor =
+            BridgeSDKMonitor(
+                ApplicationProvider.getApplicationContext(),
+                BridgeSDKMonitor.APPInfo4Monitor(),
+            )
+        val model =
+            BridgeSDKMonitor.MonitorModel
+                .Builder()
+                .setMethod("foo.bar")
+                .setURL("https://example.com")
+                .setCode(0)
+                .setChannel("release")
+                .setContainerType("lynx")
+                .setRequestDataLength(123)
+                .setRequestSendTimestamp(1L)
+                .setRequestReceiveTimestamp(5L)
+                .setRequestDecodeDuration(2L)
+                .setRequestDuration()
+                .setResponseDataLength(321)
+                .setResponseSendTimestamp(7L)
+                .setResponseReceiveTimestamp(11L)
+                .setResponseEncodeDuration(3L)
+                .setResponseDuration()
+                .setDuration()
+                .build()
         // Should not throw – exercises the full JSON serialization path.
         monitor.monitorEvent(model)
     }
 
     @Test
     fun builderComputesDurationsWhenTimestampsArePresent() {
-        val model = BridgeSDKMonitor.MonitorModel.Builder()
-            .setRequestSendTimestamp(100L)
-            .setRequestReceiveTimestamp(150L)
-            .setResponseSendTimestamp(200L)
-            .setResponseReceiveTimestamp(260L)
-            .setRequestDuration()
-            .setResponseDuration()
-            .setDuration()
-            .build()
+        val model =
+            BridgeSDKMonitor.MonitorModel
+                .Builder()
+                .setRequestSendTimestamp(100L)
+                .setRequestReceiveTimestamp(150L)
+                .setResponseSendTimestamp(200L)
+                .setResponseReceiveTimestamp(260L)
+                .setRequestDuration()
+                .setResponseDuration()
+                .setDuration()
+                .build()
         assertEquals(50L, model.request_duration)
         assertEquals(60L, model.response_duration)
         assertEquals(160L, model.duration)
@@ -116,11 +121,13 @@ class BridgeSDKMonitorTest {
 
     @Test
     fun builderLeavesDurationsNullWhenTimestampsMissing() {
-        val model = BridgeSDKMonitor.MonitorModel.Builder()
-            .setRequestDuration()
-            .setResponseDuration()
-            .setDuration()
-            .build()
+        val model =
+            BridgeSDKMonitor.MonitorModel
+                .Builder()
+                .setRequestDuration()
+                .setResponseDuration()
+                .setDuration()
+                .build()
         assertNull(model.request_duration)
         assertNull(model.response_duration)
         assertNull(model.duration)
@@ -128,24 +135,25 @@ class BridgeSDKMonitorTest {
 
     @Test
     fun monitorModelCopyAndEquality() {
-        val a = BridgeSDKMonitor.MonitorModel(
-            method = "foo",
-            code = 0,
-            channel = "ch",
-            containerType = "lynx",
-            duration = 10L,
-            url = "u",
-            request_data_length = 1,
-            request_send_timestamp = 2L,
-            request_receive_timestamp = 3L,
-            request_decode_duration = 4L,
-            request_duration = 5L,
-            response_data_length = 6,
-            response_encode_duration = 7L,
-            response_send_timestamp = 8L,
-            response_receive_timestamp = 9L,
-            response_duration = 10L,
-        )
+        val a =
+            BridgeSDKMonitor.MonitorModel(
+                method = "foo",
+                code = 0,
+                channel = "ch",
+                containerType = "lynx",
+                duration = 10L,
+                url = "u",
+                request_data_length = 1,
+                request_send_timestamp = 2L,
+                request_receive_timestamp = 3L,
+                request_decode_duration = 4L,
+                request_duration = 5L,
+                response_data_length = 6,
+                response_encode_duration = 7L,
+                response_send_timestamp = 8L,
+                response_receive_timestamp = 9L,
+                response_duration = 10L,
+            )
         val b = a.copy(method = "bar")
         assertNotEquals(a, b)
         assertEquals("bar", b.method)
@@ -155,16 +163,19 @@ class BridgeSDKMonitorTest {
 
     @Test
     fun bridgeMonitorDefaultOnBridgeEventDoesNotThrow() {
-        val sentinel = object : IBridgeMonitor {
-            var rejected = false
-            var resolved = false
-            override fun onBridgeRejected(entity: MonitorEntity) {
-                rejected = true
+        val sentinel =
+            object : IBridgeMonitor {
+                var rejected = false
+                var resolved = false
+
+                override fun onBridgeRejected(entity: MonitorEntity) {
+                    rejected = true
+                }
+
+                override fun onBridgeResolved(entity: MonitorEntity) {
+                    resolved = true
+                }
             }
-            override fun onBridgeResolved(entity: MonitorEntity) {
-                resolved = true
-            }
-        }
         // Default impl just logs – should not throw with non-null and null payloads.
         sentinel.onBridgeEvent("event", JSONObject().put("k", "v"))
         sentinel.onBridgeEvent("event", null)

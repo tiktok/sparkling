@@ -21,14 +21,17 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33], packageName = "com.tiktok.sparkling")
 class UIUtilsTest {
-
-    private fun mockContextWithDensity(density: Float, heightPixels: Int = 0): Context {
+    private fun mockContextWithDensity(
+        density: Float,
+        heightPixels: Int = 0,
+    ): Context {
         val ctx = mockk<Context>()
         val resources = mockk<android.content.res.Resources>()
-        val dm = DisplayMetrics().apply {
-            this.density = density
-            this.heightPixels = heightPixels
-        }
+        val dm =
+            DisplayMetrics().apply {
+                this.density = density
+                this.heightPixels = heightPixels
+            }
         every { ctx.resources } returns resources
         every { resources.displayMetrics } returns dm
         return ctx
