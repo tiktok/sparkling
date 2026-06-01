@@ -6,6 +6,7 @@ OUT_ROOT="$ROOT_DIR/coverage-reports/ios"
 BUNDLE_GEMFILE="${BUNDLE_GEMFILE:-$ROOT_DIR/Gemfile}"
 SKIP_POD_INSTALL="${SKIP_POD_INSTALL:-0}"
 XCODEBUILD_TIMEOUT_SECONDS="${XCODEBUILD_TIMEOUT_SECONDS:-900}"
+IOS_COVERAGE_APP_HOSTS="${IOS_COVERAGE_APP_HOSTS:-playground sparkling-app-template}"
 
 # Auto-pick an available iPhone simulator if IOS_DESTINATION isn't set,
 # so we don't fail on hosts where a specific device (e.g. iPhone 16) isn't installed.
@@ -357,15 +358,28 @@ run_ios_coverage() {
 
 failures=()
 
-run_ios_coverage \
-  "playground" \
-  "$ROOT_DIR/packages/playground/ios/SparklingGo.xcodeproj" \
-  "SparklingGo" || failures+=("playground")
+read -r -a app_hosts <<< "$IOS_COVERAGE_APP_HOSTS"
 
-run_ios_coverage \
-  "sparkling-app-template" \
-  "$ROOT_DIR/template/sparkling-app-template/ios/SparklingGo.xcodeproj" \
-  "SparklingGo" || failures+=("sparkling-app-template")
+for app_host in "${app_hosts[@]}"; do
+  case "$app_host" in
+    playground)
+      run_ios_coverage \
+        "playground" \
+        "$ROOT_DIR/packages/playground/ios/SparklingGo.xcodeproj" \
+        "SparklingGo" || failures+=("playground")
+      ;;
+    sparkling-app-template | template)
+      run_ios_coverage \
+        "sparkling-app-template" \
+        "$ROOT_DIR/template/sparkling-app-template/ios/SparklingGo.xcodeproj" \
+        "SparklingGo" || failures+=("sparkling-app-template")
+      ;;
+    *)
+      echo "[coverage:ios] Unknown app host: $app_host"
+      failures+=("$app_host")
+      ;;
+  esac
+done
 
 if [[ ${#failures[@]} -gt 0 ]]; then
   echo "[coverage:ios] Failed modules: ${failures[*]}"

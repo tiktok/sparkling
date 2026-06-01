@@ -236,7 +236,11 @@ jobs:
 
       - name: Run iOS app-host unit-test coverage
         timeout-minutes: 45
-        run: BUNDLE_GEMFILE="$GITHUB_WORKSPACE/Gemfile" bash scripts/coverage-ios.sh
+        run: |
+          IOS_COVERAGE_APP_HOSTS=playground \
+          XCODEBUILD_TIMEOUT_SECONDS=1800 \
+          BUNDLE_GEMFILE="$GITHUB_WORKSPACE/Gemfile" \
+          bash scripts/coverage-ios.sh
 
       - name: Run iOS independent method unit-test coverage
         timeout-minutes: 30
