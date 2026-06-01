@@ -90,6 +90,71 @@ should_retry_destination() {
     "$log_path"
 }
 
+prepare_coverage_scheme() {
+  local project_path="$1"
+  local scheme="$2"
+  COVERAGE_SCHEME=""
+  COVERAGE_SCHEME_PATH=""
+
+  local scheme_dir="$project_path/xcshareddata/xcschemes"
+  local source_scheme="$scheme_dir/$scheme.xcscheme"
+  local coverage_scheme="${scheme}Coverage"
+  local coverage_scheme_path="$scheme_dir/$coverage_scheme.xcscheme"
+
+  if [[ ! -f "$source_scheme" ]]; then
+    echo "[coverage:ios] Missing source scheme: $source_scheme"
+    return 1
+  fi
+
+  if ! ruby - "$source_scheme" "$coverage_scheme_path" <<'RUBY'
+require 'rexml/document'
+require 'rexml/formatters/pretty'
+
+source_scheme, coverage_scheme = ARGV
+doc = REXML::Document.new(File.read(source_scheme))
+testables = REXML::XPath.first(doc, '//TestAction/Testables')
+removed = 0
+
+if testables
+  testables.elements.to_a('TestableReference').each do |testable|
+    ref = REXML::XPath.first(testable, 'BuildableReference')
+    blueprint_name = ref&.attributes&.[]('BlueprintName').to_s
+    buildable_name = ref&.attributes&.[]('BuildableName').to_s
+    next unless blueprint_name.end_with?('UITests') || buildable_name.end_with?('UITests.xctest')
+
+    testables.delete_element(testable)
+    removed += 1
+  end
+end
+
+raise "No UI test target removed from #{source_scheme}" if removed.zero?
+
+File.open(coverage_scheme, 'w') do |file|
+  file.write(%(<?xml version="1.0" encoding="UTF-8"?>\n))
+  formatter = REXML::Formatters::Pretty.new(3)
+  formatter.compact = true
+  formatter.write(doc.root, file)
+  file.write("\n")
+end
+RUBY
+  then
+    echo "[coverage:ios] Failed to prepare coverage scheme from $source_scheme"
+    return 1
+  fi
+
+  COVERAGE_SCHEME="$coverage_scheme"
+  COVERAGE_SCHEME_PATH="$coverage_scheme_path"
+  echo "[coverage:ios] Using temporary coverage scheme: $coverage_scheme"
+}
+
+cleanup_coverage_scheme() {
+  local coverage_scheme_path="$1"
+
+  if [[ -n "$coverage_scheme_path" ]]; then
+    rm -f "$coverage_scheme_path"
+  fi
+}
+
 run_pod_install() {
   local ios_dir="$1"
 
@@ -224,6 +289,8 @@ run_ios_coverage() {
   local workspace_path="${project_path%.xcodeproj}.xcworkspace"
   local target_args
   local target_label
+  local coverage_scheme="$scheme"
+  local coverage_scheme_path=""
   if [[ -d "$workspace_path" ]]; then
     target_args=(-workspace "$workspace_path")
     target_label="workspace=$workspace_path"
@@ -232,13 +299,20 @@ run_ios_coverage() {
     target_label="project=$project_path"
   fi
 
+  if ! prepare_coverage_scheme "$project_path" "$scheme"; then
+    restore_coverage_podfile "$ios_dir" "$podfile_backup_dir"
+    return 1
+  fi
+  coverage_scheme="$COVERAGE_SCHEME"
+  coverage_scheme_path="$COVERAGE_SCHEME_PATH"
+
   echo "[coverage:ios] Running xcodebuild for $name ($target_label)"
 
   local run_ok=0
   local used_destination="$IOS_DESTINATION"
   local primary_log="$out_dir/xcodebuild-primary.log"
   if run_with_timeout "$XCODEBUILD_TIMEOUT_SECONDS" "$primary_log" xcodebuild "${target_args[@]}" \
-    -scheme "$scheme" \
+    -scheme "$coverage_scheme" \
     -destination "$IOS_DESTINATION" \
     -destination-timeout 30 \
     "${xcodebuild_test_args[@]}" \
@@ -253,7 +327,7 @@ run_ios_coverage() {
       rm -rf "$xcresult_path"
       local fallback_log="$out_dir/xcodebuild-fallback.log"
       if run_with_timeout "$XCODEBUILD_TIMEOUT_SECONDS" "$fallback_log" xcodebuild "${target_args[@]}" \
-        -scheme "$scheme" \
+        -scheme "$coverage_scheme" \
         -destination "$FALLBACK_DESTINATION" \
         -destination-timeout 30 \
         "${xcodebuild_test_args[@]}" \
@@ -268,6 +342,8 @@ run_ios_coverage() {
       echo "[coverage:ios] xcodebuild failed for $name; not retrying because this was not a destination resolution failure"
     fi
   fi
+
+  cleanup_coverage_scheme "$coverage_scheme_path"
 
   if [[ "$run_ok" -ne 1 ]]; then
     restore_coverage_podfile "$ios_dir" "$podfile_backup_dir"
