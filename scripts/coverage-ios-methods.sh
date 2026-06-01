@@ -6,6 +6,7 @@ HARNESS_DIR="$ROOT_DIR/packages/methods/ios-unit-tests"
 OUT_ROOT="$ROOT_DIR/coverage-reports/ios-methods"
 BUNDLE_GEMFILE="${BUNDLE_GEMFILE:-$ROOT_DIR/Gemfile}"
 SKIP_POD_INSTALL="${SKIP_POD_INSTALL:-0}"
+XCODEBUILD_TIMEOUT_SECONDS="${XCODEBUILD_TIMEOUT_SECONDS:-900}"
 
 pick_ios_destination() {
   local runtime=""
@@ -41,6 +42,51 @@ echo "[coverage:ios-methods] Using primary destination: $IOS_DESTINATION"
 
 rm -rf "$OUT_ROOT"
 mkdir -p "$OUT_ROOT"
+
+run_with_timeout() {
+  local timeout_seconds="$1"
+  shift
+  local log_path="$1"
+  shift
+
+  : > "$log_path"
+  echo "[coverage:ios-methods] xcodebuild log: $log_path"
+  "$@" > "$log_path" 2>&1 &
+  local command_pid=$!
+  (
+    local elapsed=0
+    while sleep 60; do
+      if ! kill -0 "$command_pid" 2>/dev/null; then
+        exit 0
+      fi
+      elapsed=$((elapsed + 60))
+      echo "[coverage:ios-methods] Command still running after ${elapsed}s: $*" >&2
+      if (( elapsed >= timeout_seconds )); then
+        echo "[coverage:ios-methods] Command timed out after ${timeout_seconds}s: $*" | tee -a "$log_path" >&2
+        kill "$command_pid" 2>/dev/null || true
+        sleep 10
+        kill -9 "$command_pid" 2>/dev/null || true
+        exit 0
+      fi
+    done
+  ) &
+  local monitor_pid=$!
+
+  local status=0
+  wait "$command_pid" || status=$?
+  kill "$monitor_pid" 2>/dev/null || true
+  wait "$monitor_pid" 2>/dev/null || true
+  cat "$log_path"
+  return "$status"
+}
+
+should_retry_destination() {
+  local log_path="$1"
+
+  grep -Eq \
+    'Unable to find a device matching the provided destination specifier|Found no destinations|Ineligible destinations' \
+    "$log_path"
+}
 
 guard_no_sparkling_sdk_dependencies() {
   local import_pattern='(^|[[:space:]])(@testable[[:space:]]+)?import[[:space:]]+Sparkling([[:space:]]|$)|@import[[:space:]]+Sparkling;'
@@ -135,7 +181,8 @@ run_scheme_coverage() {
   echo "[coverage:ios-methods] Running xcodebuild for $scheme"
 
   local run_ok=0
-  if xcodebuild -project "$project" \
+  local primary_log="$out_dir/xcodebuild-primary.log"
+  if run_with_timeout "$XCODEBUILD_TIMEOUT_SECONDS" "$primary_log" xcodebuild -project "$project" \
     -scheme "$scheme" \
     -destination "$IOS_DESTINATION" \
     -destination-timeout 30 \
@@ -145,18 +192,23 @@ run_scheme_coverage() {
     test; then
     run_ok=1
   else
-    echo "[coverage:ios-methods] Primary destination failed for $scheme, retrying with fallback: $FALLBACK_DESTINATION"
-    rm -rf "$xcresult_path"
-    if xcodebuild -project "$project" \
-      -scheme "$scheme" \
-      -destination "$FALLBACK_DESTINATION" \
-      -destination-timeout 30 \
-      "${xcodebuild_test_args[@]}" \
-      -enableCodeCoverage YES \
-      -resultBundlePath "$xcresult_path" \
-      test; then
-      run_ok=1
-      used_destination="$FALLBACK_DESTINATION"
+    if should_retry_destination "$primary_log"; then
+      echo "[coverage:ios-methods] Primary destination failed for $scheme, retrying with fallback: $FALLBACK_DESTINATION"
+      rm -rf "$xcresult_path"
+      local fallback_log="$out_dir/xcodebuild-fallback.log"
+      if run_with_timeout "$XCODEBUILD_TIMEOUT_SECONDS" "$fallback_log" xcodebuild -project "$project" \
+        -scheme "$scheme" \
+        -destination "$FALLBACK_DESTINATION" \
+        -destination-timeout 30 \
+        "${xcodebuild_test_args[@]}" \
+        -enableCodeCoverage YES \
+        -resultBundlePath "$xcresult_path" \
+        test; then
+        run_ok=1
+        used_destination="$FALLBACK_DESTINATION"
+      fi
+    else
+      echo "[coverage:ios-methods] xcodebuild failed for $scheme; not retrying because this was not a destination resolution failure"
     fi
   fi
 

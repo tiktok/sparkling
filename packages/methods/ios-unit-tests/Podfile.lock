@@ -66,10 +66,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
-  Sparkling-Media: c3ecfb7359416c6069771b202ab51f6c5de65354
-  Sparkling-Router: c5b637cff27dd4ec6471a710b3e385309a4fa305
-  Sparkling-Storage: 555ef93ea916ce6eda64a471e2ba0596c5f84d97
-  SparklingMethod: 4c72f641b1798f0c592ce01d8807ac5b3a021bee
+  Sparkling-Media: 5b0597e156dde51a3a7a629a68f03788083db47b
+  Sparkling-Router: 435ce2c203427e958a7ba61673915c17c170cc77
+  Sparkling-Storage: 5fa0fdbe4c332fc2b6ec6621c3e877aca5e728a8
+  SparklingMethod: 5f1c7723b472aaff22e02e26c19086c47b419a32
 
 PODFILE CHECKSUM: 458215e8a9dfcc327d3c3d4baa8b092bb93e090a
 

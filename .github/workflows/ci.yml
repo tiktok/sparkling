@@ -202,6 +202,7 @@ jobs:
   ios-unit-tests:
     name: iOS unit tests
     runs-on: macos-latest
+    timeout-minutes: 90
     needs: changes
     if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method == 'true' || needs.changes.outputs.sparkling_navigation == 'true' || needs.changes.outputs.sparkling_storage == 'true' || needs.changes.outputs.sparkling_media == 'true' || needs.changes.outputs.sparkling_sdk == 'true' || needs.changes.outputs.sparkling_debug_tool == 'true' || needs.changes.outputs.playground == 'true' || needs.changes.outputs.app_template == 'true'
     steps:
@@ -234,9 +235,11 @@ jobs:
           xcrun simctl list devices available
 
       - name: Run iOS app-host unit-test coverage
+        timeout-minutes: 45
         run: BUNDLE_GEMFILE="$GITHUB_WORKSPACE/Gemfile" bash scripts/coverage-ios.sh
 
       - name: Run iOS independent method unit-test coverage
+        timeout-minutes: 30
         run: BUNDLE_GEMFILE="$GITHUB_WORKSPACE/Gemfile" bash scripts/coverage-ios-methods.sh
 
       - name: Upload iOS coverage reports
