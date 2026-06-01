@@ -93,6 +93,7 @@ should_retry_destination() {
 prepare_coverage_scheme() {
   local project_path="$1"
   local scheme="$2"
+  local test_target="$3"
   COVERAGE_SCHEME=""
   COVERAGE_SCHEME_PATH=""
 
@@ -106,28 +107,32 @@ prepare_coverage_scheme() {
     return 1
   fi
 
-  if ! ruby - "$source_scheme" "$coverage_scheme_path" <<'RUBY'
+  if ! ruby - "$source_scheme" "$coverage_scheme_path" "$test_target" <<'RUBY'
 require 'rexml/document'
 require 'rexml/formatters/pretty'
 
-source_scheme, coverage_scheme = ARGV
+source_scheme, coverage_scheme, test_target = ARGV
 doc = REXML::Document.new(File.read(source_scheme))
 testables = REXML::XPath.first(doc, '//TestAction/Testables')
 removed = 0
+kept = 0
 
 if testables
   testables.elements.to_a('TestableReference').each do |testable|
     ref = REXML::XPath.first(testable, 'BuildableReference')
     blueprint_name = ref&.attributes&.[]('BlueprintName').to_s
     buildable_name = ref&.attributes&.[]('BuildableName').to_s
-    next unless blueprint_name.end_with?('UITests') || buildable_name.end_with?('UITests.xctest')
+    if blueprint_name == test_target || buildable_name == "#{test_target}.xctest"
+      kept += 1
+      next
+    end
 
     testables.delete_element(testable)
     removed += 1
   end
 end
 
-raise "No UI test target removed from #{source_scheme}" if removed.zero?
+raise "#{test_target} was not found in #{source_scheme}" if kept.zero?
 
 File.open(coverage_scheme, 'w') do |file|
   file.write(%(<?xml version="1.0" encoding="UTF-8"?>\n))
@@ -144,7 +149,7 @@ RUBY
 
   COVERAGE_SCHEME="$coverage_scheme"
   COVERAGE_SCHEME_PATH="$coverage_scheme_path"
-  echo "[coverage:ios] Using temporary coverage scheme: $coverage_scheme"
+  echo "[coverage:ios] Using temporary coverage scheme: $coverage_scheme ($test_target only)"
 }
 
 cleanup_coverage_scheme() {
@@ -253,13 +258,6 @@ run_ios_coverage() {
   local ios_dir
   local test_selection_args=(
     -only-testing:SparklingGoTests
-    -only-testing:SparklingMethodTests
-    -skip-testing:SparklingGoUITests
-    -skip-testing:SparklingMethodTests/SPKChooseMediaMethodTest
-    -skip-testing:SparklingMethodTests/SPKDownloadFileMethodTests
-    -skip-testing:SparklingMethodTests/SPKRouterTest
-    -skip-testing:SparklingMethodTests/SPKStorageTest
-    -skip-testing:SparklingMethodTests/SPKUploadFileMethodTests
   )
   local xcodebuild_test_args=(
     -parallel-testing-enabled NO
@@ -299,7 +297,7 @@ run_ios_coverage() {
     target_label="project=$project_path"
   fi
 
-  if ! prepare_coverage_scheme "$project_path" "$scheme"; then
+  if ! prepare_coverage_scheme "$project_path" "$scheme" "SparklingGoTests"; then
     restore_coverage_podfile "$ios_dir" "$podfile_backup_dir"
     return 1
   fi
