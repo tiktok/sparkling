@@ -262,8 +262,15 @@ describe('Project Creation (runInit)', () => {
         expect(await fs.pathExists(iosDir)).toBe(true);
 
         // Check for iOS-specific structure
-        const iosSourceDir = path.join(iosDir, 'Source', 'Core', 'IosModule');
+        const iosSourceDir = path.join(iosDir, 'Source', 'Core', 'iosmodule');
         expect(await fs.pathExists(iosSourceDir)).toBe(true);
+        const iosTestPath = path.join(iosDir, 'SparklingMethodTests', 'SPKIosModuleIndependentTests.swift');
+        expect(await fs.pathExists(iosTestPath)).toBe(true);
+
+        const podspec = await fs.readFile(path.join(iosDir, 'Sparkling-IosModule.podspec'), 'utf8');
+        expect(podspec).toContain("s.test_spec 'Tests'");
+        expect(podspec).toContain('tests.requires_app_host = false');
+        expect(podspec).toContain("s.dependency 'SparklingMethod/Core'");
       });
     });
   });

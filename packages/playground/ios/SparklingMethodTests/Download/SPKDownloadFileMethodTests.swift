@@ -28,9 +28,8 @@ class SPKDownloadFileMethodTests: XCTestCase {
         do {
             let params = try SPKDownloadFileMethodParamModel(dictionary: invalidParams)
             downloadMethod.invoke(withParams: params) { status, _ in
-                if status != MethodStatus.invalidParameter(message: "") {
-                    XCTFail("Should return invalid parameter status")
-                }
+                XCTAssertEqual(status.rawCode, MethodStatusCode.invalidInputParameter.rawValue)
+                XCTAssertEqual(status.message, "The URL should not be empty.")
                 expectation.fulfill()
             }
         } catch {
@@ -116,9 +115,8 @@ class SPKDownloadFileMethodTests: XCTestCase {
         do {
             let params = try SPKDownloadFileMethodParamModel(dictionary: paramsDict)
             downloadMethod.invoke(withParams: params) { status, _ in
-                if status != MethodStatus.invalidParameter(message: "") {
-                    XCTFail("Should return invalid parameter status")
-                }
+                XCTAssertEqual(status.rawCode, MethodStatusCode.invalidInputParameter.rawValue)
+                XCTAssertEqual(status.message, "The URL should not be empty.")
                 expectation.fulfill()
             }
         } catch {

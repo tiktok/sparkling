@@ -140,6 +140,16 @@ struct MethodPipeTest {
 
     private enum CallError: Error { case methodNotFound }
 
+    private func clearGlobalTestMethods() {
+        [
+            "test.success",
+            "test.failure",
+            "test.async",
+            "test.invalidParams",
+            "test.global"
+        ].forEach { MethodRegistry.global.unregister(methodName: $0) }
+    }
+
     /// Calls a registered method with the given params and waits for completion.
     private func callAndWait(
         pipe: MethodPipe,
@@ -192,6 +202,7 @@ struct MethodPipeTest {
     }
 
     @Test func testRegisterEmptyMethods() throws {
+        clearGlobalTestMethods()
         let pipe = MethodPipe()
         pipe.register(localMethods: [])
         #expect(!pipe.respondTo(methodName: "test.success"))
@@ -215,6 +226,7 @@ struct MethodPipeTest {
     // MARK: - Unregistration Tests
 
     @Test func testUnregisterLocalMethod() throws {
+        clearGlobalTestMethods()
         let pipe = MethodPipe()
         pipe.register(localMethod: TestSuccessMethod())
         #expect(pipe.respondTo(methodName: "test.success"))
@@ -244,6 +256,7 @@ struct MethodPipeTest {
     // MARK: - Method Resolution Tests
 
     @Test func testRespondToLocalMethod() throws {
+        clearGlobalTestMethods()
         let pipe = MethodPipe()
         #expect(!pipe.respondTo(methodName: "test.success"))
 

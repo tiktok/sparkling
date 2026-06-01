@@ -317,3 +317,93 @@ describe('validation utilities', () => {
         });
     });
 });
+
+import { mapPipeResponse } from '../../utils/validation';
+
+interface SampleResponse extends BaseResponse {
+    data?: {
+        filePath?: string;
+        url?: string;
+        __status_message__?: string;
+    };
+}
+
+describe('mapPipeResponse', () => {
+    it('maps pipe code 1 to business code 0 (success)', () => {
+        const raw = { code: 1, msg: 'ok', data: { filePath: '/tmp/file.jpg' } };
+        const result = mapPipeResponse<SampleResponse>(raw);
+        expect(result.code).toBe(0);
+        expect(result.msg).toBe('ok');
+        expect(result.data).toEqual({ filePath: '/tmp/file.jpg' });
+    });
+
+    it('maps pipe code 0 to business code -1 (failure)', () => {
+        const raw = { code: 0, msg: 'failed' };
+        const result = mapPipeResponse<SampleResponse>(raw);
+        expect(result.code).toBe(-1);
+        expect(result.msg).toBe('failed');
+    });
+
+    it('preserves negative pipe codes as-is', () => {
+        const raw = { code: -2, msg: 'permission denied' };
+        const result = mapPipeResponse<SampleResponse>(raw);
+        expect(result.code).toBe(-2);
+        expect(result.msg).toBe('permission denied');
+    });
+
+    it('returns code -1 and "Unknown error" for null raw value', () => {
+        const result = mapPipeResponse<SampleResponse>(null);
+        expect(result.code).toBe(-1);
+        expect(result.msg).toBe('Unknown error');
+        expect(result.data).toBeUndefined();
+    });
+
+    it('returns code -1 for undefined raw value', () => {
+        const result = mapPipeResponse<SampleResponse>(undefined);
+        expect(result.code).toBe(-1);
+        expect(result.msg).toBe('Unknown error');
+    });
+
+    it('falls back to "ok" message for success when msg is missing', () => {
+        const raw = { code: 1, data: { url: 'https://cdn.example.com/img.png' } };
+        const result = mapPipeResponse<SampleResponse>(raw);
+        expect(result.code).toBe(0);
+        expect(result.msg).toBe('ok');
+    });
+
+    it('extracts msg from data.__status_message__ when top-level msg is absent', () => {
+        const raw = { code: 0, data: { __status_message__: 'quota exceeded' } };
+        const result = mapPipeResponse<SampleResponse>(raw);
+        expect(result.msg).toBe('quota exceeded');
+    });
+
+    it('removes __status_message__ from data after extraction', () => {
+        const raw = {
+            code: 1,
+            msg: 'Success',
+            data: { filePath: '/tmp/file.jpg', __status_message__: 'internal note' },
+        };
+        const result = mapPipeResponse<SampleResponse>(raw);
+        expect(result.data).not.toHaveProperty('__status_message__');
+        expect(result.data).toHaveProperty('filePath', '/tmp/file.jpg');
+    });
+
+    it('does not fail when data is absent on success', () => {
+        const raw = { code: 1, msg: 'done' };
+        const result = mapPipeResponse<SampleResponse>(raw);
+        expect(result.code).toBe(0);
+        expect(result.data).toBeUndefined();
+    });
+
+    it('handles non-object raw value gracefully', () => {
+        const result = mapPipeResponse<SampleResponse>('unexpected string' as unknown);
+        expect(result.code).toBe(-1);
+    });
+
+    it('handles raw value with missing code field', () => {
+        const raw = { msg: 'no code here' };
+        const result = mapPipeResponse<SampleResponse>(raw);
+        expect(result.code).toBe(-1);
+        expect(result.msg).toBe('no code here');
+    });
+});

@@ -25,5 +25,12 @@ Pod::Spec.new do |s|
     ]
   end
 
+  s.test_spec 'Tests' do |tests|
+    tests.requires_app_host = false
+    tests.source_files = [
+      'SparklingMethodTests/**/*.{h,m,swift}',
+    ]
+  end
+
   s.dependency 'SparklingMethod/Core'
 end

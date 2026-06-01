@@ -5,7 +5,7 @@ import fs from 'fs-extra';
 import path from 'path';
 
 import type { ModuleConfig } from './types';
-import { androidGradleTemplate, androidManifestTemplate, iosPodspecTemplate } from './templates';
+import { androidGradleTemplate, androidManifestTemplate, iosPodspecTemplate, iosUnitTestTemplate } from './templates';
 import { normalizePackageName, toPascalCase } from './utils';
 import { isVerboseEnabled, verboseLog } from '../verbose';
 
@@ -118,6 +118,12 @@ export async function writeIosConfigs(config: ModuleConfig, projectDir: string):
   const podspecPath = path.join(iosDir, podspecName);
   if (!await fs.pathExists(podspecPath)) {
     await fs.writeFile(podspecPath, iosPodspecTemplate(moduleId), 'utf8');
+  }
+  const testsDir = path.join(iosDir, 'SparklingMethodTests');
+  await fs.ensureDir(testsDir);
+  const testPath = path.join(testsDir, `SPK${moduleId}IndependentTests.swift`);
+  if (!await fs.pathExists(testPath)) {
+    await fs.writeFile(testPath, iosUnitTestTemplate(moduleId), 'utf8');
   }
   if (isVerboseEnabled()) {
     verboseLog(`iOS podspec ensured at ${podspecPath}`);

@@ -6,9 +6,14 @@ import Testing
 import UIKit
 
 @testable import Sparkling
+@testable import SparklingMethod
 
 @MainActor
 struct SPKNavigationBarTests {
+
+    init() {
+        DefaultDIContainerProvider.inject()
+    }
 
     @Test func initialization() {
         let navBar = SPKNavigationBar()

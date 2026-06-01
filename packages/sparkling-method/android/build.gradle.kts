@@ -49,6 +49,10 @@ android {
                     "user.home",
                     buildDir.resolve("robolectric-home").absolutePath,
                 )
+                it.extensions.configure(org.gradle.testing.jacoco.plugins.JacocoTaskExtension::class.java) {
+                    isIncludeNoLocationClasses = true
+                    excludes = listOf("jdk.internal.*")
+                }
             }
         }
     }

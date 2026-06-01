@@ -26,8 +26,8 @@ class SPKChooseMediaMethodTest: XCTestCase {
     }
 
     func testMethodName() {
-        XCTAssertEqual(SPKChooseMediaMethod.methodName(), "x.chooseMedia")
-        XCTAssertEqual(chooseMediaMethod.methodName, "x.chooseMedia")
+        XCTAssertEqual(SPKChooseMediaMethod.methodName(), "media.chooseMedia")
+        XCTAssertEqual(chooseMediaMethod.methodName, "media.chooseMedia")
     }
 
     func testParamsModelClass() {

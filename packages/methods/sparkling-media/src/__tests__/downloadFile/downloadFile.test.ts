@@ -139,7 +139,7 @@ describe('downloadFile', () => {
 
       const [, , passedCallback] = mockPipe.call.mock.calls[0];
       const mockResponse = {
-        code: 0,
+        code: 1, // Pipe uses code 1 for success
         msg: 'Success',
         data: {
           httpCode: 200,
@@ -150,7 +150,7 @@ describe('downloadFile', () => {
       (passedCallback as Function)(mockResponse);
       
       expect(callback).toHaveBeenCalledWith({
-        code: 0,
+        code: 0, // mapPipeResponse converts code 1 to 0 for business layer
         msg: 'Success',
         data: mockResponse.data,
       });
@@ -170,6 +170,51 @@ describe('downloadFile', () => {
         msg: 'Unknown error',
         data: undefined,
       });
+    });
+
+    it('should handle pipe failure response (code 0)', () => {
+      const params: DownloadFileRequest = { url: TEST_CONSTANTS.VALID_URL, extension: 'jpg' };
+      const callback = jest.fn();
+
+      downloadFile(params, callback);
+
+      const [, , passedCallback] = mockPipe.call.mock.calls[0];
+      (passedCallback as Function)({ code: 0, msg: 'Network error' });
+
+      expect(callback).toHaveBeenCalledWith({
+        code: -1,
+        msg: 'Network error',
+        data: undefined,
+      });
+    });
+  });
+
+  describe('url trimming', () => {
+    it('should trim whitespace from url before passing to pipe', () => {
+      const params: DownloadFileRequest = {
+        url: `  ${TEST_CONSTANTS.VALID_URL}  `,
+        extension: 'mp4',
+      };
+      const callback = jest.fn();
+
+      downloadFile(params, callback);
+
+      expect(mockPipe.call).toHaveBeenCalledWith(
+        'media.downloadFile',
+        expect.objectContaining({ url: TEST_CONSTANTS.VALID_URL }),
+        expect.any(Function)
+      );
+    });
+
+    it('should reject whitespace-only url', (done: jest.DoneCallback) => {
+      const params: DownloadFileRequest = { url: '   ', extension: 'jpg' };
+      const callback = jest.fn((result: DownloadFileResponse) => {
+        expect(result.code).toBe(-1);
+        expect(result.msg).toContain('url');
+        done();
+      });
+
+      downloadFile(params, callback);
     });
   });
 });

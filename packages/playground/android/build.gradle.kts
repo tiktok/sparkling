@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
@@ -14,4 +16,8 @@ buildscript {
 // Apply centralized Maven Publish config for all subprojects (safe-guarded for library modules)
 subprojects {
     apply(from = "$rootDir/publish.gradle")
+
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions.jvmTarget = "11"
+    }
 }

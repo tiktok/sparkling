@@ -6,8 +6,13 @@ import Foundation
 import Testing
 
 @testable import Sparkling
+@testable import SparklingMethod
 
 struct SPKSchemeTests {
+
+    init() {
+        DefaultDIContainerProvider.inject()
+    }
 
     @Test func resolverWithValidURL() {
         let url = URL(string: "hybrid://lynxview_page?bundle=.%2Fmain.lynx.bundle")
@@ -72,6 +77,10 @@ struct SPKSchemeTests {
 }
 
 struct SPKSchemeParamTests {
+
+    init() {
+        DefaultDIContainerProvider.inject()
+    }
 
     @Test func initialization() {
         let param = SPKSchemeParam()
@@ -208,6 +217,10 @@ struct SPKSchemeParamTests {
 }
 
 struct SPKContextTests {
+
+    init() {
+        DefaultDIContainerProvider.inject()
+    }
 
     @Test func initialization() {
         let context = SPKContext()

@@ -27,6 +27,9 @@ exports[`Project Creation (runInit) snapshot testing should create consistent pr
       },
     },
     "Sparkling-SnapshotModule.podspec": "file",
+    "SparklingMethodTests": {
+      "SPKSnapshotModuleIndependentTests.swift": "file",
+    },
   },
   "module.config.json": "file",
   "package.json": "file",

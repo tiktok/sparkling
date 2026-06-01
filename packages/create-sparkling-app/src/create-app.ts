@@ -261,6 +261,7 @@ export async function createSparklingApp(
         ? packageName.split("/").pop()!
         : packageName,
       appNameCamel: toPascalCase(packageName),
+      packageNamespace,
       version: version ?? "0.0.0",
       enableESLint: enableESLintPrettier.toString(),
       enablePrettier: enableESLintPrettier.toString(),

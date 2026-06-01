@@ -206,6 +206,16 @@ class MockPipeEngine: PipeEngine {
 @Suite(.serialized)
 struct MethodPipeTest {
 
+    private func clearGlobalTestMethods() {
+        [
+            "test.success",
+            "test.failure",
+            "test.async",
+            "test.invalidParams",
+            "test.global"
+        ].forEach { MethodRegistry.global.unregister(methodName: $0) }
+    }
+
     // MARK: - Basic Registration Tests
 
     @Test func testRegisterLocalMethod() throws {
@@ -241,6 +251,7 @@ struct MethodPipeTest {
     }
 
     @Test func testRegisterEmptyMethods() throws {
+        clearGlobalTestMethods()
         let pipe = MethodPipe()
 
         pipe.register(localMethods: [])
@@ -270,6 +281,7 @@ struct MethodPipeTest {
     // MARK: - Unregistration Tests
 
     @Test func testUnregisterLocalMethod() throws {
+        clearGlobalTestMethods()
         let pipe = MethodPipe()
         let method = TestSuccessMethod()
 
@@ -307,6 +319,7 @@ struct MethodPipeTest {
     // MARK: - Method Resolution Tests
 
     @Test func testRespondToLocalMethod() throws {
+        clearGlobalTestMethods()
         let pipe = MethodPipe()
         let method = TestSuccessMethod()
 

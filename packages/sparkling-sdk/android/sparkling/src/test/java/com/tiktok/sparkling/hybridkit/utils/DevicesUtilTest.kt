@@ -200,4 +200,11 @@ class DevicesUtilTest {
         val model = DevicesUtil.model
         assertTrue(model.isNotEmpty())
     }
+
+    @Test
+    fun testGetScreenSizeWithNullContextReturnsInvalidSentinel() {
+        val result = DevicesUtil.getScreenSize(null)
+        assertEquals(-1, result[0])
+        assertEquals(-1, result[1])
+    }
 }

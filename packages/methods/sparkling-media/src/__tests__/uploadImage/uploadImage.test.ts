@@ -150,7 +150,7 @@ describe('uploadImage', () => {
 
       const [, , passedCallback] = mockPipe.call.mock.calls[0];
       const mockResponse = {
-        code: 0,
+        code: 1, // Pipe uses code 1 for success
         msg: 'Success',
         data: {
           url: 'https://cdn.example.com/image.jpg',
@@ -161,7 +161,7 @@ describe('uploadImage', () => {
       (passedCallback as Function)(mockResponse);
       
       expect(callback).toHaveBeenCalledWith({
-        code: 0,
+        code: 0, // mapPipeResponse converts code 1 to 0 for business layer
         msg: 'Success',
         data: mockResponse.data,
       });
@@ -181,6 +181,51 @@ describe('uploadImage', () => {
         msg: 'Unknown error',
         data: undefined,
       });
+    });
+
+    it('should handle pipe failure response (code 0)', () => {
+      const params: UploadImageRequest = { url: TEST_CONSTANTS.VALID_URL };
+      const callback = jest.fn();
+
+      uploadImage(params, callback);
+
+      const [, , passedCallback] = mockPipe.call.mock.calls[0];
+      (passedCallback as Function)({ code: 0, msg: 'Upload failed' });
+
+      expect(callback).toHaveBeenCalledWith({
+        code: -1,
+        msg: 'Upload failed',
+        data: undefined,
+      });
+    });
+  });
+
+  describe('formDataBody parameter', () => {
+    it('should pass formDataBody to pipe', () => {
+      const formDataBody = [{ key: 'image', value: '/local/photo.jpg' }];
+      const params: UploadImageRequest = {
+        url: TEST_CONSTANTS.VALID_URL,
+        formDataBody,
+      };
+      const callback = jest.fn();
+
+      uploadImage(params, callback);
+
+      expect(mockPipe.call).toHaveBeenCalledWith(
+        'media.uploadImage',
+        expect.objectContaining({ formDataBody }),
+        expect.any(Function)
+      );
+    });
+
+    it('should pass undefined formDataBody when not provided', () => {
+      const params: UploadImageRequest = { url: TEST_CONSTANTS.VALID_URL };
+      const callback = jest.fn();
+
+      uploadImage(params, callback);
+
+      const [, pipeParams] = mockPipe.call.mock.calls[0];
+      expect((pipeParams as any).formDataBody).toBeUndefined();
     });
   });
 });

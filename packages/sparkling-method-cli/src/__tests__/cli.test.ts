@@ -55,8 +55,8 @@ describe('sparkling-method cli', () => {
       expect(moduleConfig.moduleName).toBe('Demo');
       expect(moduleConfig.androidDsl).toBe('kts');
 
-      const androidDir = path.join(projectDir, 'android', 'src', 'main', 'java', 'com', 'example', 'toast', 'Demo');
-      const iosDir = path.join(projectDir, 'ios', 'Source', 'Core', 'Demo');
+      const androidDir = path.join(projectDir, 'android', 'src', 'main', 'java', 'com', 'example', 'toast', 'demo');
+      const iosDir = path.join(projectDir, 'ios', 'Source', 'Core', 'demo');
       await expect(fs.pathExists(androidDir)).resolves.toBe(true);
       await expect(fs.pathExists(iosDir)).resolves.toBe(true);
     });

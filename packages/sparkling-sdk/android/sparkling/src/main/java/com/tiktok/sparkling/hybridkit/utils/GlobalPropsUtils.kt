@@ -171,16 +171,13 @@ class GlobalPropsUtils {
         }
     }
 
-    fun getGlobalProps(containerID: String): MutableMap<String, Any> =
-        (stableMap + findContainerProps(containerID))
-            .apply {
-                val removableKeys = removableGlobalKeys[containerID]
-                if (removableKeys != null) {
-                    filterNot {
-                        removableKeys.contains(it.key)
-                    }
-                }
-            }.toMutableMap()
+    fun getGlobalProps(containerID: String): MutableMap<String, Any> {
+        val merged = (stableMap + findContainerProps(containerID)).toMutableMap()
+        removableGlobalKeys[containerID]?.forEach { key ->
+            merged.remove(key)
+        }
+        return merged
+    }
 
     fun flushGlobalProps(containerID: String) {
         unstableMap.remove(containerID)

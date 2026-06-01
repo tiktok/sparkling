@@ -4,8 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const DEFAULT_ANDROID_NAMESPACE = 'com.tiktok.sparkling.go';
-const DEFAULT_ANDROID_TEST_PACKAGE = 'com.tiktok.sparkling.app';
+const DEFAULT_ANDROID_NAMESPACE = 'com.example.sparkling.go';
 const DEFAULT_IOS_BUNDLE_ID = 'com.sparkling.app.SparklingGo';
 const DEFAULT_IOS_TEST_BUNDLE_ID = 'com.sparkling.app.SparklingGoTests';
 const DEFAULT_IOS_UITEST_BUNDLE_ID = 'com.sparkling.app.SparklingGoUITests';
@@ -39,11 +38,16 @@ function replaceInTree(targetPath: string, replacements: Record<string, string>)
     return;
   }
 
+  // Apply longer keys first so a shorter key that is a prefix of a longer one
+  // (e.g. main bundle id vs `${bundleId}Tests`) does not mangle the longer one.
+  const ordered = Object.entries(replacements)
+    .filter(([from]) => from)
+    .sort(([a], [b]) => b.length - a.length);
+
   let content = fs.readFileSync(targetPath, 'utf8');
   let updated = content;
 
-  for (const [from, to] of Object.entries(replacements)) {
-    if (!from) continue;
+  for (const [from, to] of ordered) {
     updated = updated.split(from).join(to);
   }
 
@@ -52,25 +56,47 @@ function replaceInTree(targetPath: string, replacements: Record<string, string>)
   }
 }
 
+function removeEmptyParentDirs(startDir: string, stopDir: string): void {
+  let current = startDir;
+  const stop = path.resolve(stopDir);
+  while (path.resolve(current) !== stop) {
+    if (!fs.existsSync(current)) {
+      current = path.dirname(current);
+      continue;
+    }
+    const stat = fs.statSync(current);
+    if (!stat.isDirectory()) {
+      return;
+    }
+    if (fs.readdirSync(current).length > 0) {
+      return;
+    }
+    fs.rmdirSync(current);
+    current = path.dirname(current);
+  }
+}
+
 function moveAndroidPackageDirs(appDir: string, oldNamespace: string, newNamespace: string): void {
+  if (oldNamespace === newNamespace) {
+    return;
+  }
+
   const oldParts = oldNamespace.split('.');
   const newParts = newNamespace.split('.');
   const srcRoots = ['main', 'androidTest', 'test'];
 
   for (const root of srcRoots) {
-    const oldPath = path.join(appDir, 'src', root, 'java', ...oldParts);
-    const newPath = path.join(appDir, 'src', root, 'java', ...newParts);
+    const javaRoot = path.join(appDir, 'src', root, 'java');
+    const oldPath = path.join(javaRoot, ...oldParts);
+    const newPath = path.join(javaRoot, ...newParts);
 
-    if (!fs.existsSync(oldPath)) {
-      continue;
-    }
-
-    if (oldPath === newPath) {
+    if (!fs.existsSync(oldPath) || oldPath === newPath) {
       continue;
     }
 
     fs.mkdirSync(path.dirname(newPath), { recursive: true });
     fs.renameSync(oldPath, newPath);
+    removeEmptyParentDirs(path.dirname(oldPath), javaRoot);
   }
 }
 
@@ -82,9 +108,11 @@ function applyAndroidNamespace(projectDir: string, namespace: string): void {
 
   const replacements: Record<string, string> = {
     [DEFAULT_ANDROID_NAMESPACE]: namespace,
-    [DEFAULT_ANDROID_TEST_PACKAGE]: namespace,
   };
 
+  // `replaceInTree` walks the entire `app` source set (main, test, androidTest,
+  // gradle/manifest files), so unit-test sources that import or declare the
+  // default package get rewritten alongside production code.
   replaceInTree(appDir, replacements);
   moveAndroidPackageDirs(appDir, DEFAULT_ANDROID_NAMESPACE, namespace);
 }
@@ -95,6 +123,9 @@ function applyIosBundleIdentifiers(projectDir: string, namespace: string): void 
     return;
   }
 
+  // Order matters: longer / more specific test bundle ids must be replaced
+  // before the shorter main bundle id (which is their prefix). `replaceInTree`
+  // sorts replacements by key length descending, so we just declare them all here.
   const replacements: Record<string, string> = {
     [DEFAULT_IOS_BUNDLE_ID]: namespace,
     [DEFAULT_IOS_TEST_BUNDLE_ID]: `${namespace}.tests`,

@@ -35,8 +35,8 @@ class SPKUploadFileMethodTests: XCTestCase {
     }
 
     func testMethodName() {
-        XCTAssertEqual(uploadMethod.methodName, "x.uploadFile")
-        XCTAssertEqual(SPKUploadFileMethod.methodName(), "x.uploadFile")
+        XCTAssertEqual(uploadMethod.methodName, "media.uploadFile")
+        XCTAssertEqual(SPKUploadFileMethod.methodName(), "media.uploadFile")
     }
 
     func testParamsModelClass() {

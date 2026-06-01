@@ -9,7 +9,13 @@
   },
   "scripts": {
     "postinstall": "echo \"All packages installed successfully\"",
-    "build": "pnpm -r build"
+    "build": "pnpm -r build",
+    "coverage:ts": "node ./scripts/coverage-ts.mjs",
+    "coverage:android": "bash ./scripts/coverage-android.sh",
+    "coverage:ios": "bash ./scripts/coverage-ios.sh && bash ./scripts/coverage-ios-methods.sh",
+    "coverage:ios:app-host": "bash ./scripts/coverage-ios.sh",
+    "coverage:ios:methods": "bash ./scripts/coverage-ios-methods.sh",
+    "coverage:all": "pnpm coverage:ts && pnpm coverage:android && pnpm coverage:ios"
   },
   "keywords": [
     "Lynx",

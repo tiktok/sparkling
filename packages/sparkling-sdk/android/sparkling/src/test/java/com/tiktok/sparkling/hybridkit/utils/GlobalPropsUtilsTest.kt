@@ -11,6 +11,7 @@ import com.tiktok.sparkling.hybridkit.config.RuntimeInfo
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -172,5 +173,25 @@ class GlobalPropsUtilsTest {
         val globalProps = GlobalPropsUtils.instance.getGlobalProps(containerId)
         // After flush, container-specific props should be cleared
         assertTrue(!globalProps.containsKey("key") || globalProps["key"] == null)
+    }
+
+    @Test
+    fun testRemoveGlobalPropsRemovesMarkedKeyFromMergedResult() {
+        val containerId = "test_container_remove"
+        GlobalPropsUtils.instance.setStableProps(mapOf("stable-keep" to "stable"))
+        GlobalPropsUtils.instance.setUnstableProps(
+            containerId,
+            mapOf(
+                "remove-me" to "value",
+                "keep-me" to "value-2",
+            ),
+        )
+
+        GlobalPropsUtils.instance.removeGlobalProps(containerId, listOf("remove-me"))
+        val globalProps = GlobalPropsUtils.instance.getGlobalProps(containerId)
+
+        assertNull(globalProps["remove-me"])
+        assertEquals("value-2", globalProps["keep-me"])
+        assertEquals("stable", globalProps["stable-keep"])
     }
 }

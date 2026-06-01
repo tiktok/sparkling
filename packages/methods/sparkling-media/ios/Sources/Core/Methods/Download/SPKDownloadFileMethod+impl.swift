@@ -29,33 +29,13 @@ extension SPKDownloadFileMethod {
             guard let self = self else { return }
 
             let httpResponse = response as? SPKHttpResponseChromium
-            let resultModel = SPKDownloadFileMethodResultModel()
-            resultModel.clientCode = 0
-            var status: SPKBridgeStatus?
-
-            if let httpResponse = httpResponse {
-                resultModel.httpCode = httpResponse.statusCode
-                resultModel.header = httpResponse.allHeaderFields as? [String: String]
-            }
-
-            if let error = error {
-                resultModel.clientCode = error._code
-                status = SPKBridgeStatus(statusCode: .failed, message: error.localizedDescription)
-            } else if httpResponse == nil {
-                status = SPKBridgeStatus(statusCode: .malformedResponse, message: "The response returned from server is malformed.")
-            } else if let filePath = fileURL?.path {
-                resultModel.filePath = filePath.spk_stringByStrippingSandboxPath()
-            }
-
-            if let status = status {
-                let errorInfo: [String: Any] = [
-                    "code": status.statusCode.rawValue,
-                    "message": status.message ?? "",
-                ]
-                completionHandler.handleCompletion(status: .failed(message: errorInfo["message"] as? String), result: resultModel)
-            } else {
-                completionHandler.handleCompletion(status: .succeeded(), result: resultModel)
-            }
+            self.finishDownloadFile(
+                httpCode: httpResponse?.statusCode,
+                header: httpResponse?.allHeaderFields as? [String: String],
+                fileURL: fileURL,
+                error: error,
+                completionHandler: completionHandler
+            )
         }
 
         let task = TTNetworkManager.shared.downloadTaskWithRequest(
@@ -94,6 +74,42 @@ extension SPKDownloadFileMethod {
         }
 
         task.resume()
+    }
+
+    func finishDownloadFile(
+        httpCode: Int?,
+        header: [String: String]?,
+        fileURL: URL?,
+        error: Error?,
+        completionHandler: CompletionHandlerProtocol
+    ) {
+        let resultModel = SPKDownloadFileMethodResultModel()
+        resultModel.clientCode = 0
+        var status: SPKBridgeStatus?
+
+        if let httpCode = httpCode {
+            resultModel.httpCode = httpCode
+            resultModel.header = header
+        }
+
+        if let error = error {
+            resultModel.clientCode = error._code
+            status = SPKBridgeStatus(statusCode: .failed, message: error.localizedDescription)
+        } else if httpCode == nil {
+            status = SPKBridgeStatus(statusCode: .malformedResponse, message: "The response returned from server is malformed.")
+        } else if let filePath = fileURL?.path {
+            resultModel.filePath = filePath.spk_stringByStrippingSandboxPath()
+        }
+
+        if let status = status {
+            let errorInfo: [String: Any] = [
+                "code": status.statusCode.rawValue,
+                "message": status.message ?? "",
+            ]
+            completionHandler.handleCompletion(status: .failed(message: errorInfo["message"] as? String), result: resultModel)
+        } else {
+            completionHandler.handleCompletion(status: .succeeded(), result: resultModel)
+        }
     }
 
     private func saveImageToAlbumWithURL(_ fileURL: URL, response: SPKHttpResponse?, spkBridgeDownloadFileCompletionHandler: @escaping SPKBridgeDownloadFileCompletionHandler) {

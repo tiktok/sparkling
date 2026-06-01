@@ -15,6 +15,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -124,5 +125,72 @@ class SparklingTest {
         assertEquals(1, Sparkling.TYPE_PAGE)
         assertEquals(2, Sparkling.TYPE_POPUP)
         assertEquals(3, Sparkling.TYPE_CARD)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun buildThrowsWhenContextIsNull() {
+        Sparkling.build(null, sparklingContext)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun buildThrowsWhenSparklingContextIsNull() {
+        Sparkling.build(application, null)
+    }
+
+    @Test
+    fun navigateReturnsTrueOnSuccess() {
+        val sparkling = Sparkling.build(application, sparklingContext)
+
+        val result = sparkling.navigate()
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun navigateStoresContextInTransferStation() {
+        val sparkling = Sparkling.build(application, sparklingContext)
+
+        sparkling.navigate()
+
+        assertNotNull(SparklingContextTransferStation.getSparklingContext(sparklingContext.containerId))
+    }
+
+    @Test
+    fun processSparklingContextSetsEngineTypeForLynxScheme() {
+        val sparkling = Sparkling.build(application, sparklingContext)
+        sparklingContext.scheme = "hybrid://lynxview_page?bundle=test_bundle"
+
+        sparkling.processSparklingContext(sparklingContext)
+
+        assertEquals(HybridKitType.LYNX, sparklingContext.hybridSchemeParam?.engineType)
+    }
+
+    @Test
+    fun processSparklingContextDoesNothingForBlankScheme() {
+        val sparkling = Sparkling.build(application, sparklingContext)
+        sparklingContext.scheme = "   "
+
+        sparkling.processSparklingContext(sparklingContext)
+
+        assertNull(sparklingContext.hybridSchemeParam)
+    }
+
+    @Test
+    fun processSparklingContextHandlesInvalidSchemeGracefully() {
+        val sparkling = Sparkling.build(application, sparklingContext)
+        sparklingContext.scheme = "not-a-valid-scheme-%%%"
+
+        sparkling.processSparklingContext(sparklingContext)
+    }
+
+    @Test
+    fun navigateStartsActivityWithNewTaskFlag() {
+        val sparkling = Sparkling.build(application, sparklingContext)
+
+        sparkling.navigate()
+
+        val startedIntent: Intent? = shadowOf(application).nextStartedActivity
+        assertNotNull(startedIntent)
+        assertTrue(startedIntent!!.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0)
     }
 }

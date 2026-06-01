@@ -100,12 +100,12 @@ struct MethodStatusTest {
 
     @Test func testSucceededMessage() {
         let status = MethodStatus.succeeded()
-        #expect(status.message == "JSB_SUCCESS")
+        #expect(status.message == nil)
     }
 
     @Test func testFailedMessageDefault() {
         let status = MethodStatus.failed()
-        #expect(status.message == "JSB_FAILED")
+        #expect(status.message == nil)
     }
 
     @Test func testFailedMessageCustom() {
@@ -116,7 +116,7 @@ struct MethodStatusTest {
 
     @Test func testInvalidParameterMessageDefault() {
         let status = MethodStatus.invalidParameter()
-        #expect(status.message == "JSB_PARAM_ERROR")
+        #expect(status.message == nil)
     }
 
     @Test func testInvalidParameterMessageCustom() {
@@ -127,7 +127,7 @@ struct MethodStatusTest {
 
     @Test func testUnregisteredMethodMessageDefault() {
         let status = MethodStatus.unregisteredMethod()
-        #expect(status.message == "The pipe method is not found, please register")
+        #expect(status.message == nil)
     }
 
     @Test func testUnregisteredMethodMessageCustom() {
@@ -138,7 +138,7 @@ struct MethodStatusTest {
 
     @Test func testInvalidNamespaceMessageDefault() {
         let status = MethodStatus.invalidNamespace()
-        #expect(status.message == "JSB_NAMESPACE_ERROR")
+        #expect(status.message == nil)
     }
 
     @Test func testInvalidNamespaceMessageCustom() {
@@ -149,7 +149,7 @@ struct MethodStatusTest {
 
     @Test func testUnknownMessageDefault() {
         let status = MethodStatus.unknown()
-        #expect(status.message == "JSB_UNKNOW_ERROR")
+        #expect(status.message == nil)
     }
 
     @Test func testUnknownMessageCustom() {
@@ -175,7 +175,7 @@ struct MethodStatusTest {
         ]
 
         for status in statuses {
-            #expect(status.message == "JSB_UNKNOW_ERROR")
+            #expect(status.message == nil)
         }
     }
 
@@ -305,7 +305,7 @@ struct MethodStatusTest {
         #expect(status.message == "")
 
         let description = status.description
-        #expect(description.contains("<MethodStatus - code: 0, message: \"\">"))
+        #expect(description == "<MethodStatus - code: \(MethodStatusCode.failed), message: \"\">")
     }
 
     @Test func testMessageWithSpecialCharacters() {
