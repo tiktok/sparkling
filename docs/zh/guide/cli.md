@@ -114,10 +114,9 @@ npx sparkling run:android
 6. 将 APK 安装到已连接的设备/模拟器
 7. 启动主 Activity
 
-真机调试时，CLI 会把 dev server 绑定到选中的局域网 IPv4，而不是 `0.0.0.0`。
-这样仍然支持无线调试，但不会同时暴露到 VPN、Docker、有线网络等无关接口。你可以
-通过 `--host <host>` 或 `app.config.ts` 中的 `dev.server.host` 覆盖 host；如果显式
-使用 `0.0.0.0`，Sparkling 会打印安全提示。
+真机调试时，CLI 会使用选中的局域网 IPv4 作为应用调试 URL 和 dev server host。
+如果自动检测选错了网络，可以通过 `--host <host>` 或 `app.config.ts` 中的
+`dev.server.host` 覆盖 host。
 
 ### `sparkling run:ios`
 

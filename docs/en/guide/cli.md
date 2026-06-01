@@ -114,11 +114,9 @@ This command will:
 6. Install the APK on a connected device/emulator
 7. Launch the main activity
 
-For physical devices, the CLI binds the dev server to the selected LAN IPv4 rather
-than `0.0.0.0`. This keeps wireless debugging working while avoiding exposure on
-unrelated interfaces such as VPN, Docker, or wired networks. You can override the
-host with `--host <host>` or `dev.server.host` in `app.config.ts`; Sparkling prints
-a warning if you explicitly use `0.0.0.0`.
+For physical devices, the CLI uses the selected LAN IPv4 for the app's debug URL
+and dev server host. If automatic detection picks the wrong network, override the
+host with `--host <host>` or `dev.server.host` in `app.config.ts`.
 
 ### `sparkling run:ios`
 

@@ -48,7 +48,6 @@ Run `sparkling --help` to see all available commands and options.
   - emulator: app uses `127.0.0.1` and CLI applies `adb reverse tcp:<port> tcp:<port>`
   - physical device: app uses your local LAN IPv4 and CLI binds the server to that same LAN IPv4
 - Use `sparkling run:android --host <host>` or `app.config.ts` `dev.server.host` when your machine has multiple network interfaces.
-- Binding to `0.0.0.0` is still allowed when explicitly requested, but Sparkling warns because it exposes the dev server on every network interface.
 
 ## Template Debug/Release Loading
 
