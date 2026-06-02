@@ -5,6 +5,9 @@
 import Sparkling
 import Testing
 
+// These cases touch main-thread-only UIKit APIs (UIApplication/UIScreen/UIDevice),
+// so the suite is isolated to the main actor to satisfy the Main Thread Checker.
+@MainActor
 struct SPKDeviceTests {
     @Test func testHwModel_notNil() {
         let model = SPKKitWrapper<UIDevice>.hwModel
