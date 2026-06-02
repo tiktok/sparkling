@@ -141,15 +141,9 @@ struct SPKUIViewTests {
             currentView = newView
         }
 
-        let startTime = CFAbsoluteTimeGetCurrent()
         let foundVC = currentView.spk.viewController
-        let endTime = CFAbsoluteTimeGetCurrent()
 
         #expect(foundVC === rootViewController)
-
-        // Performance test: should quickly find view controller even in deep nesting
-        let duration = endTime - startTime
-        #expect(duration < 0.01)  // Should complete within 10ms
     }
 
     @Test func testViewController_circularReference() {

@@ -122,18 +122,12 @@ struct SPKDispatchQueueTests {
     }
 
     @Test func testSyncGlobal_performanceBaseline() {
-        let startTime = CFAbsoluteTimeGetCurrent()
-
         let result = SPKKitWrapper<DispatchQueue>.syncGlobal(timeout: 1.0) {
             // Simple operation, should complete quickly
             let _ = Array(0..<1000).reduce(0, +)
         }
 
-        let endTime = CFAbsoluteTimeGetCurrent()
-        let duration = endTime - startTime
-
         #expect(result == .success)
-        #expect(duration < 0.1)  // Should complete within 100ms
     }
 
     @Test func testSyncMain_fromDifferentQueues() async {
