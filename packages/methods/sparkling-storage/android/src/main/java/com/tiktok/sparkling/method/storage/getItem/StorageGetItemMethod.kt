@@ -37,7 +37,7 @@ class StorageGetItemMethod : AbsStorageGetItemMethodIDL() {
                 NativeProviderFactory
                     .providerNativeStorage(context)
                     .tryGetBizStorageItem(biz, key + STORAGE_ITEM_TIME_SUFFIX)
-            if (validTime is String && !checkStorageAvailiable(validTime)) {
+            if (validTime is String && !checkStorageAvailable(validTime)) {
                 value = null
                 StorageRemoveItemMethod.Companion.removeStorage(context, biz, key)
             }
@@ -61,7 +61,7 @@ class StorageGetItemMethod : AbsStorageGetItemMethodIDL() {
         }
     }
 
-    private fun checkStorageAvailiable(time: String?): Boolean {
+    private fun checkStorageAvailable(time: String?): Boolean {
         if (time == null) {
             return true
         }
@@ -71,7 +71,7 @@ class StorageGetItemMethod : AbsStorageGetItemMethodIDL() {
             // check
             currentDate.before(validDate)
         } catch (e: Exception) {
-            Log.e(TAG, "checkStorageAvailiable: ${e.message}")
+            Log.e(TAG, "checkStorageAvailable: ${e.message}")
             false
         }
     }

@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Tests for [AsyncUtils]. These exercise both `submit` paths and verify the
- * executor selection behaviour without leaking threads beyond test duration.
+ * executor selection behavior without leaking threads beyond test duration.
  */
 class AsyncUtilsTest {
     @Test

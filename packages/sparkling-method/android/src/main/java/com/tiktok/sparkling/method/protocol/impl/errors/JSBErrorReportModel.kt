@@ -135,7 +135,7 @@ class JSBErrorReportModel {
             IDLBridgeMethod.UNKNOWN_ERROR,
             IDLBridgeMethod.PERMISSION_NO_EXIST, // internal code, due to legacy error, sdk use BridgeConstants's PERMISSION_NO_EXIST
             IDLBridgeMethod.ANNOTATION_ERROR, // when annotation can't get
-            IDLBridgeMethod.ILLEGAL_OPERATION_ERROR, // when call a illegal method of proxy
+            IDLBridgeMethod.ILLEGAL_OPERATION_ERROR, // when call an illegal method of proxy
             IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED, // bridge call be intercepted
             IDLBridgeMethod.BRIDGE_HAS_BEEN_RELEASED,
         )

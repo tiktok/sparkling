@@ -19,7 +19,7 @@ import java.io.File
 
 /**
  * Tests for [HttpRequest], its fluent setters, the [RequestMethod] enum,
- * [NetworkRequestImpl] delegation, and the default no-op behaviour of the
+ * [NetworkRequestImpl] delegation, and the default no-op behavior of the
  * [AbsStringConnection] / [AbsStreamConnection] abstract base classes.
  */
 class HttpRequestTest {

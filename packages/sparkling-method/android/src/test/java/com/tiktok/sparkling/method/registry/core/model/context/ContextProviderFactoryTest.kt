@@ -17,7 +17,7 @@ import org.junit.Test
 /**
  * Tests for [ContextProviderFactory], its supporting holders ([ContextHolder],
  * [WeakContextHolder], [WeakHostContextHolder]), the [BridgeCallThreadTypeConfig]
- * default behaviour, and the [threadStringToThreadTypeEnum] free function.
+ * default behavior, and the [threadStringToThreadTypeEnum] free function.
  */
 class ContextProviderFactoryTest {
     private interface SampleApi {

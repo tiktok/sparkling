@@ -45,7 +45,7 @@ internal class InnerBridge {
     }
 
     /**
-     * use this to pass the bridge to mBridgeContext, to and you can use the custom auth ability.
+     * use this to pass the bridge to mBridgeContext, and you can use the custom auth ability.
      */
     fun init(
         view: View,

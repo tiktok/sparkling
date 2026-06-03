@@ -61,7 +61,7 @@ class SparklingBridge : IReleasable {
 
         /**
          * JSB SDK Error report block jsb list.
-         * if you set jsb name here, it's jsb error message will not reported.
+         * if you set jsb name here, it's jsb error message will not report.
          */
         val jsbErrorReportBlockList = ArrayList<String>()
 

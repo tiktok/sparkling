@@ -28,11 +28,11 @@ interface IDLBridgeMethod {
         const val UNKNOWN_ERROR = -1000
         const val PERMISSION_NO_EXIST = -1128 // internal code, due to legacy error, sdk use BridgeConstants's PERMISSION_NO_EXIST
         const val ANNOTATION_ERROR = -2000 // when annotation can't get
-        const val ILLEGAL_OPERATION_ERROR = -2001 // when call a illegal method of proxy
+        const val ILLEGAL_OPERATION_ERROR = -2001 // when call an illegal method of proxy
 
         // other error codes
         const val UNAUTHORIZED_ACCESS = -6 // UnauthorizedAccess, unauthorized to access some resources, like camera, microphone
-        const val CANCELLED = -7 // OperationCancelled, user cancelled certain operation
+        const val CANCELLED = -7 // OperationCancelled, user canceled certain operation
         const val OPERATION_TIMEOUT = -8 // OperationTimeout
         const val NOT_FOUND = -9 // NOT_FOUND
 
