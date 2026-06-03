@@ -6,7 +6,7 @@ Thanks for your interest in Sparkling! This guide explains how contributors can 
 
 ### Reporting Bugs
 - Use clear, descriptive titles and fill in steps to reproduce.
-- Include environment details (host OS, platform target Android/iOS, Node.js version, pnpm version, Lynx version,Sparkling version) and screenshots/logs when possible.
+- Include environment details (host OS, platform target Android/iOS, Node.js version, pnpm version, Lynx version, Sparkling version) and screenshots/logs when possible.
 
 ### Suggesting Enhancements
 - Open a feature request issue describing the problem and the value to Sparkling developers.
