@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 object SparklingDebugToolRegistry {
     @Volatile
     private var testProviders: List<SparklingDebugToolProvider>? = null
+
     @Volatile
     private var serviceProviders: List<SparklingDebugToolProvider>? = null
     private val methodObserverInstalled = AtomicBoolean(false)
@@ -29,11 +30,17 @@ object SparklingDebugToolRegistry {
         testProviders = providers
     }
 
-    fun notifyKitViewCreated(containerId: String, kitView: IKitView) {
+    fun notifyKitViewCreated(
+        containerId: String,
+        kitView: IKitView,
+    ) {
         providers().forEach { runCatching { it.onKitViewCreated(containerId, kitView) } }
     }
 
-    fun notifyKitViewDestroyed(containerId: String, kitView: IKitView?) {
+    fun notifyKitViewDestroyed(
+        containerId: String,
+        kitView: IKitView?,
+    ) {
         providers().forEach { runCatching { it.onKitViewDestroyed(containerId, kitView) } }
     }
 
@@ -51,12 +58,14 @@ object SparklingDebugToolRegistry {
             return it
         }
         serviceProviders?.let { return it }
-        val loaded = runCatching {
-            ServiceLoader.load(SparklingDebugToolProvider::class.java)
-                .iterator()
-                .asSequence()
-                .toList()
-        }.getOrDefault(emptyList())
+        val loaded =
+            runCatching {
+                ServiceLoader
+                    .load(SparklingDebugToolProvider::class.java)
+                    .iterator()
+                    .asSequence()
+                    .toList()
+            }.getOrDefault(emptyList())
         configureProviders(loaded)
         serviceProviders = loaded
         return loaded

@@ -21,7 +21,6 @@ import com.tiktok.sparkling.debugtool.R
 class ConsoleLogAdapter(
     private val context: Context,
 ) : RecyclerView.Adapter<ConsoleLogAdapter.Holder>() {
-
     private var rawLogs: List<ConsoleLog> = emptyList()
     private var filtered: List<ConsoleLog> = emptyList()
 
@@ -60,20 +59,30 @@ class ConsoleLogAdapter(
         notifyDataSetChanged()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_sparkling_console, parent, false)
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): Holder {
+        val view =
+            LayoutInflater
+                .from(parent.context)
+                .inflate(R.layout.item_sparkling_console, parent, false)
         return Holder(view)
     }
 
     override fun getItemCount(): Int = filtered.size
 
-    override fun onBindViewHolder(holder: Holder, position: Int) {
+    override fun onBindViewHolder(
+        holder: Holder,
+        position: Int,
+    ) {
         val log = filtered[position]
         holder.bind(log)
     }
 
-    inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class Holder(
+        itemView: View,
+    ) : RecyclerView.ViewHolder(itemView) {
         private val text: TextView = itemView.findViewById(R.id.txt_console_message)
         private val copy: ImageButton = itemView.findViewById(R.id.btn_console_copy)
 
@@ -103,19 +112,21 @@ class ConsoleLogAdapter(
     }
 
     private fun colorFor(level: Int): Int {
-        val resId = when (level) {
-            Log.DEBUG -> R.color.sparkling_console_debug
-            Log.INFO -> R.color.sparkling_console_info
-            Log.WARN -> R.color.sparkling_console_warn
-            Log.ERROR -> R.color.sparkling_console_error
-            else -> R.color.sparkling_console_verbose
-        }
+        val resId =
+            when (level) {
+                Log.DEBUG -> R.color.sparkling_console_debug
+                Log.INFO -> R.color.sparkling_console_info
+                Log.WARN -> R.color.sparkling_console_warn
+                Log.ERROR -> R.color.sparkling_console_error
+                else -> R.color.sparkling_console_verbose
+            }
         return ContextCompat.getColor(context, resId)
     }
 
     private fun copyToClipboard(text: String) {
-        val cm = context.applicationContext
-            .getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+        val cm =
+            context.applicationContext
+                .getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
         cm?.setPrimaryClip(ClipData.newPlainText("sparkling-console", text))
         Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_SHORT).show()
     }

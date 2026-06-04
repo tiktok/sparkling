@@ -71,7 +71,10 @@ class BusinessCallHandler(
         registry.registerMethodProvider(name, IDLMethodProvider { factory() }, scope, clazz)
     }
 
-    fun getBridge(bridgeContext: BridgeContext, bridgeName: String) : IDLBridgeMethod? {
+    fun getBridge(
+        bridgeContext: BridgeContext,
+        bridgeName: String,
+    ): IDLBridgeMethod? {
         val platformType = BridgeContext.getPlatformByBridgeContext(bridgeContext)
         val provider = registry.findMethodProvider(platformType, bridgeName) ?: return null
         val newInstance = provider.provideMethod()

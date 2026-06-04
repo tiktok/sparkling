@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicBoolean
  * `SparklingDebugToolProviderImpl` via [SparklingDebugToolRegistry].
  */
 internal object SparklingDebugAutoWiring {
-
     private val installed = AtomicBoolean(false)
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -33,7 +32,10 @@ internal object SparklingDebugAutoWiring {
         KitViewManager.getKitViews().values.forEach { attachConsoleWithRetry(it.realView()) }
     }
 
-    fun attachConsoleWithRetry(view: Any?, attempt: Int = 0) {
+    fun attachConsoleWithRetry(
+        view: Any?,
+        attempt: Int = 0,
+    ) {
         LynxConsoleLogDelegate.installOnce()
         val attached = (view as? LynxView)?.let { LynxConsoleSink.attach(it) } ?: false
         if (attached || attempt >= 6) return

@@ -16,9 +16,15 @@ import com.tiktok.sparkling.method.registry.api.SparklingMethodInvocationCenter
 interface SparklingDebugToolProvider {
     fun openInspectorPanel(activity: FragmentActivity)
 
-    fun onKitViewCreated(containerId: String, kitView: IKitView) = Unit
+    fun onKitViewCreated(
+        containerId: String,
+        kitView: IKitView,
+    ) = Unit
 
-    fun onKitViewDestroyed(containerId: String, kitView: IKitView?) = Unit
+    fun onKitViewDestroyed(
+        containerId: String,
+        kitView: IKitView?,
+    ) = Unit
 
     fun onMethodInvocationStart(event: SparklingMethodInvocationCenter.Event) = Unit
 

@@ -240,12 +240,11 @@ class GlobalPropsUtils {
 
     private fun parseQueryMap(
         hybridContext: HybridContext,
-        containerInitTime: String
-    ): MutableMap<String, String> {
-        return SparklingUriParser.queryParsedParams(hybridContext.containerId).apply {
+        containerInitTime: String,
+    ): MutableMap<String, String> =
+        SparklingUriParser.queryParsedParams(hybridContext.containerId).apply {
             put(CONTAINER_INIT_TIME_KEY, containerInitTime)
         }
-    }
 
     private fun ensureContainerInitTime(hybridContext: HybridContext): String {
         val containerProps = findContainerProps(hybridContext.containerId)
@@ -254,8 +253,9 @@ class GlobalPropsUtils {
             return existing
         }
 
-        val createdAt = hybridContext.getDependency(HybridLoadSession::class.java)?.openTime
-            ?: System.currentTimeMillis()
+        val createdAt =
+            hybridContext.getDependency(HybridLoadSession::class.java)?.openTime
+                ?: System.currentTimeMillis()
         val value = createdAt.toString()
         containerProps[CONTAINER_INIT_TIME_KEY] = value
         return value
@@ -273,7 +273,5 @@ class GlobalPropsUtils {
     /**
      * @return Map<String, Any>
      */
-    fun getStableGlobalProps(): Map<String, Any> {
-        return stableMap
-    }
+    fun getStableGlobalProps(): Map<String, Any> = stableMap
 }

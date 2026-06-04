@@ -28,11 +28,10 @@ object SparklingBridgeManager {
     @JvmStatic
     @JvmOverloads
     fun findIDLMethodProvider(
-        platformType: BridgePlatformType, name: String,
-        namespace:String = DEFAULT_NAMESPACE
-    ): IDLMethodProvider? {
-        return localBridge.findIDLMethodProvider(platformType, name, namespace)
-    }
+        platformType: BridgePlatformType,
+        name: String,
+        namespace: String = DEFAULT_NAMESPACE,
+    ): IDLMethodProvider? = localBridge.findIDLMethodProvider(platformType, name, namespace)
 
     @JvmStatic
     @JvmOverloads
@@ -49,7 +48,7 @@ object SparklingBridgeManager {
     fun registerIDLMethod(
         name: String,
         scope: BridgePlatformType = BridgePlatformType.ALL,
-        namespace:String = DEFAULT_NAMESPACE,
+        namespace: String = DEFAULT_NAMESPACE,
         factory: IDLMethodProvider,
     ) {
         localBridge.registerIDLMethod(name, factory, scope, namespace)
@@ -58,7 +57,7 @@ object SparklingBridgeManager {
     fun registerIDLMethod(
         name: String,
         scope: BridgePlatformType = BridgePlatformType.ALL,
-        namespace:String = DEFAULT_NAMESPACE,
+        namespace: String = DEFAULT_NAMESPACE,
         clazz: Class<out IDLBridgeMethod>? = null,
         factory: () -> IDLBridgeMethod,
     ) {

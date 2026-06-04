@@ -4,6 +4,19 @@
 
 import Foundation
 
+private enum MethodInvocationPayloadKeys {
+    static let code = "code"
+    static let data = "data"
+    static let message = "message"
+    static let msg = "msg"
+    static let containerID = "containerID"
+    static let protocolVersion = "protocolVersion"
+}
+
+private func methodInvocationStatusCode(_ status: MethodStatus) -> Int {
+    status.code == .notFound ? MethodStatusCode.unregisteredMethod.rawValue : status.rawCode
+}
+
 extension MethodPipe {
     func executeMethod(methodName: String, params: [String: Any]?, thread: MethodThread = .mainThread, completion: CommonPipeCompletion?) {
         let invocationId = UUID().uuidString
@@ -12,13 +25,13 @@ extension MethodPipe {
         let invocationNamespace: String? = "method-pipe"
         let callbackPayload: (MethodStatus, [String: Any]?) -> [String: Any] = { status, data in
             var payload: [String: Any] = [
-                LynxKeys.code: LynxPipeStatusCode(status).rawValue,
-                LynxKeys.data: data ?? NSNull(),
-                LynxKeys.protocolVersion: "1.1.0",
+                MethodInvocationPayloadKeys.code: methodInvocationStatusCode(status),
+                MethodInvocationPayloadKeys.data: data ?? NSNull(),
+                MethodInvocationPayloadKeys.protocolVersion: "1.1.0",
             ]
-            payload[LynxKeys.msg] = status.message ?? NSNull()
-            if let containerID = params?[LynxKeys.containerID] as? String {
-                payload[LynxKeys.containerID] = containerID
+            payload[MethodInvocationPayloadKeys.msg] = status.message ?? NSNull()
+            if let containerID = params?[MethodInvocationPayloadKeys.containerID] as? String {
+                payload[MethodInvocationPayloadKeys.containerID] = containerID
             }
             return payload
         }
@@ -47,7 +60,7 @@ extension MethodPipe {
                 platform: "core",
                 params: params,
                 result: callbackPayload(status, nil),
-                statusCode: LynxPipeStatusCode(status).rawValue,
+                statusCode: methodInvocationStatusCode(status),
                 statusMessage: status.message ?? "notFound",
                 startTime: invocationStart,
                 endTime: Date()
@@ -88,7 +101,7 @@ extension MethodPipe {
                     platform: "core",
                     params: params,
                     result: callbackResult,
-                    statusCode: LynxPipeStatusCode(fStatus).rawValue,
+                    statusCode: methodInvocationStatusCode(fStatus),
                     statusMessage: fStatus.message,
                     startTime: invocationStart,
                     endTime: Date()
@@ -108,8 +121,8 @@ extension MethodPipe {
                     namespace: invocationNamespace,
                     platform: "core",
                     params: params,
-                    result: callbackPayload(status, [LynxKeys.message: message]),
-                    statusCode: LynxPipeStatusCode(status).rawValue,
+                    result: callbackPayload(status, [MethodInvocationPayloadKeys.message: message]),
+                    statusCode: methodInvocationStatusCode(status),
                     statusMessage: message,
                     startTime: invocationStart,
                     endTime: Date()

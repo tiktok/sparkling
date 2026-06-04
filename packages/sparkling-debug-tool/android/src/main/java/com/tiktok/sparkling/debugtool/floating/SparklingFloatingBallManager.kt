@@ -26,7 +26,6 @@ import java.lang.ref.WeakReference
  * [Application.ActivityLifecycleCallbacks].
  */
 object SparklingFloatingBallManager {
-
     /** Optional callbacks that override the default tap / long-press actions. */
     interface ActionHandler {
         /** Called on a tap. Return `true` to consume; default action is skipped. */
@@ -43,26 +42,36 @@ object SparklingFloatingBallManager {
     private val debugEntryByActivity = mutableMapOf<Int, DebugEntry>()
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    private val lifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
-        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
-        override fun onActivityStarted(activity: Activity) = Unit
+    private val lifecycleCallbacks =
+        object : Application.ActivityLifecycleCallbacks {
+            override fun onActivityCreated(
+                activity: Activity,
+                savedInstanceState: Bundle?,
+            ) = Unit
 
-        override fun onActivityResumed(activity: Activity) {
-            currentActivityRef = WeakReference(activity)
-            if (enabled) attachTo(activity)
-        }
+            override fun onActivityStarted(activity: Activity) = Unit
 
-        override fun onActivityPaused(activity: Activity) = Unit
-        override fun onActivityStopped(activity: Activity) = Unit
-        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+            override fun onActivityResumed(activity: Activity) {
+                currentActivityRef = WeakReference(activity)
+                if (enabled) attachTo(activity)
+            }
 
-        override fun onActivityDestroyed(activity: Activity) {
-            detachFrom(activity)
-            if (currentActivityRef?.get() === activity) {
-                currentActivityRef = null
+            override fun onActivityPaused(activity: Activity) = Unit
+
+            override fun onActivityStopped(activity: Activity) = Unit
+
+            override fun onActivitySaveInstanceState(
+                activity: Activity,
+                outState: Bundle,
+            ) = Unit
+
+            override fun onActivityDestroyed(activity: Activity) {
+                detachFrom(activity)
+                if (currentActivityRef?.get() === activity) {
+                    currentActivityRef = null
+                }
             }
         }
-    }
 
     @JvmStatic
     fun install(application: Application) {
@@ -144,12 +153,13 @@ object SparklingFloatingBallManager {
     private fun createDebugGestureListener(activity: Activity): View.OnTouchListener {
         var pending = false
         var triggered = false
-        val trigger = Runnable {
-            if (pending && !triggered) {
-                triggered = true
-                handleLongPress(activity)
+        val trigger =
+            Runnable {
+                if (pending && !triggered) {
+                    triggered = true
+                    handleLongPress(activity)
+                }
             }
-        }
         return View.OnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_POINTER_DOWN, MotionEvent.ACTION_MOVE -> {
@@ -159,6 +169,7 @@ object SparklingFloatingBallManager {
                         mainHandler.postDelayed(trigger, 500)
                     }
                 }
+
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
                     if (event.pointerCount < 2 || event.actionMasked == MotionEvent.ACTION_CANCEL) {
                         pending = false

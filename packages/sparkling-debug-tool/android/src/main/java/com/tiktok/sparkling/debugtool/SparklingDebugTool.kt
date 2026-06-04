@@ -84,7 +84,10 @@ object SparklingDebugTool {
     private var currentConfig = Config()
 
     @JvmStatic
-    fun init(application: Application, config: Config = Config()) {
+    fun init(
+        application: Application,
+        config: Config = Config(),
+    ) {
         currentConfig = config
         ConsoleLogStore.setCapacity(config.consoleBufferSize)
         if (!isDebuggableApp(application) && !config.enableInNonDebuggableApp) {
@@ -133,8 +136,12 @@ object SparklingDebugTool {
     fun getFlags(context: Context): DebugFlags = resolveFlags(context)
 
     @JvmStatic
-    fun setFlags(context: Context, flags: DebugFlags) {
-        prefs(context).edit()
+    fun setFlags(
+        context: Context,
+        flags: DebugFlags,
+    ) {
+        prefs(context)
+            .edit()
             .putBoolean(KEY_LYNX_DEBUG, flags.lynxDebugEnabled)
             .putBoolean(KEY_DEVTOOL, flags.devtoolEnabled)
             .putBoolean(KEY_LOGBOX, flags.logboxEnabled)
@@ -146,14 +153,21 @@ object SparklingDebugTool {
     }
 
     @JvmStatic
-    fun getDevUrl(context: Context, fallback: String): String {
+    fun getDevUrl(
+        context: Context,
+        fallback: String,
+    ): String {
         val stored = prefs(context).getString(KEY_DEV_URL, null)?.trim()
         return if (stored.isNullOrEmpty()) fallback else stored
     }
 
     @JvmStatic
-    fun setDevUrl(context: Context, url: String) {
-        prefs(context).edit()
+    fun setDevUrl(
+        context: Context,
+        url: String,
+    ) {
+        prefs(context)
+            .edit()
             .putString(KEY_DEV_URL, url.trim())
             .apply()
     }
@@ -187,7 +201,8 @@ object SparklingDebugTool {
     ) {
         val fm = activity.supportFragmentManager
         if (fm.findFragmentByTag(SparklingInspectorFragment.FRAGMENT_TAG) != null) return
-        SparklingInspectorFragment.newInstance(initialTab)
+        SparklingInspectorFragment
+            .newInstance(initialTab)
             .show(fm, SparklingInspectorFragment.FRAGMENT_TAG)
     }
 
@@ -246,7 +261,11 @@ object SparklingDebugTool {
      * alongside JS console messages captured via [attachConsoleSink].
      */
     @JvmStatic
-    fun recordConsoleLine(level: String, tag: String, message: String) {
+    fun recordConsoleLine(
+        level: String,
+        tag: String,
+        message: String,
+    ) {
         ConsoleLogStore.add(ConsoleLog.fromPlain(level, tag, message))
     }
 
@@ -255,8 +274,7 @@ object SparklingDebugTool {
      * rendered the console as a single text dump.
      */
     @JvmStatic
-    fun getConsoleLines(): List<String> =
-        ConsoleLogStore.snapshot().map { "[${it.type}] ${if (it.tag.isEmpty()) "" else it.tag + ": "}${it.message}" }
+    fun getConsoleLines(): List<String> = ConsoleLogStore.snapshot().map { "[${it.type}] ${if (it.tag.isEmpty()) "" else it.tag + ": "}${it.message}" }
 
     @JvmStatic
     fun clearConsoleLines() {
@@ -274,12 +292,13 @@ object SparklingDebugTool {
             return
         }
 
-        val input = EditText(activity).apply {
-            setText(initialUrl ?: "")
-            hint = "http://127.0.0.1:5969/main.lynx.bundle"
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
-            setSelection(text.length)
-        }
+        val input =
+            EditText(activity).apply {
+                setText(initialUrl ?: "")
+                hint = "http://127.0.0.1:5969/main.lynx.bundle"
+                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+                setSelection(text.length)
+            }
 
         val dialog =
             AlertDialog
@@ -312,12 +331,9 @@ object SparklingDebugTool {
         dialog.show()
     }
 
-    private fun prefs(context: Context) =
-        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private fun prefs(context: Context) = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    private fun isDebuggableApp(context: Context): Boolean {
-        return (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
-    }
+    private fun isDebuggableApp(context: Context): Boolean = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
     private fun resolveFlags(context: Context): DebugFlags {
         val prefs = prefs(context)

@@ -19,7 +19,10 @@ object KitViewManager {
     }
 
     fun interface KitViewDestroyedListener {
-        fun onKitViewDestroyed(containerId: String, kitView: IKitView?)
+        fun onKitViewDestroyed(
+            containerId: String,
+            kitView: IKitView?,
+        )
     }
 
     /** Register a listener that fires once per [IKitView] right after creation. */

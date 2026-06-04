@@ -123,7 +123,10 @@ internal class InnerBridge {
         mBridgeContext.monitor.add(monitor)
     }
 
-    fun sendEvent(event: String, data: JSONObject?) {
+    fun sendEvent(
+        event: String,
+        data: JSONObject?,
+    ) {
         SparklingMethodInvocationCenter.notifyNativeToJsEvent(
             name = event,
             params = data,
@@ -141,7 +144,10 @@ internal class InnerBridge {
         }
     }
 
-    fun sendJSRuntimeEvent(event: String, data: JSONObject?) {
+    fun sendJSRuntimeEvent(
+        event: String,
+        data: JSONObject?,
+    ) {
         SparklingMethodInvocationCenter.notifyNativeToJsEvent(
             name = event,
             params = data,

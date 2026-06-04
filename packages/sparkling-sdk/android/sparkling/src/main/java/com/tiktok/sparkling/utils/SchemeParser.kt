@@ -52,16 +52,24 @@ object SchemeParser {
             return baseValue
         }
 
-        val isDark = when (forceThemeStyle?.lowercase()) {
-            "dark" -> true
-            "light" -> false
-            else -> {
-                val nightMode = runCatching {
-                    ColorUtil.appContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-                }.getOrDefault(Configuration.UI_MODE_NIGHT_NO)
-                nightMode == Configuration.UI_MODE_NIGHT_YES
+        val isDark =
+            when (forceThemeStyle?.lowercase()) {
+                "dark" -> {
+                    true
+                }
+
+                "light" -> {
+                    false
+                }
+
+                else -> {
+                    val nightMode =
+                        runCatching {
+                            ColorUtil.appContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+                        }.getOrDefault(Configuration.UI_MODE_NIGHT_NO)
+                    nightMode == Configuration.UI_MODE_NIGHT_YES
+                }
             }
-        }
 
         return if (isDark) {
             darkValue ?: lightValue ?: baseValue

@@ -32,11 +32,19 @@ class PlaygroundDebugHooksImpl : PlaygroundDebugHooks {
         builder.setLogConfig(
             LogConfig(
                 object : HybridLogger {
-                    override fun onLog(msg: String, logLevel: LogLevel, tag: String) {
+                    override fun onLog(
+                        msg: String,
+                        logLevel: LogLevel,
+                        tag: String,
+                    ) {
                         SparklingDebugTool.recordConsoleLine(logLevel.name, tag, msg)
                     }
 
-                    override fun onReject(e: Throwable, extraMsg: String, tag: String) {
+                    override fun onReject(
+                        e: Throwable,
+                        extraMsg: String,
+                        tag: String,
+                    ) {
                         val suffix = if (extraMsg.isBlank()) e.message.orEmpty() else "$extraMsg ${e.message.orEmpty()}".trim()
                         SparklingDebugTool.recordConsoleLine("E", tag, suffix)
                     }

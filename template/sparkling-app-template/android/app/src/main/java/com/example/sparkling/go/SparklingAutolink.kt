@@ -14,10 +14,11 @@ object SparklingAutolink {
                 name = "sparkling-navigation",
                 androidPackage = "com.tiktok.sparkling.method.router",
                 className = "RouterMethod",
-                methodClassNames = listOf(
-                    "com.tiktok.sparkling.method.router.open.RouterOpenMethod",
-                    "com.tiktok.sparkling.method.router.close.RouterCloseMethod",
-                ),
+                methodClassNames =
+                    listOf(
+                        "com.tiktok.sparkling.method.router.open.RouterOpenMethod",
+                        "com.tiktok.sparkling.method.router.close.RouterCloseMethod",
+                    ),
             ),
         )
 }

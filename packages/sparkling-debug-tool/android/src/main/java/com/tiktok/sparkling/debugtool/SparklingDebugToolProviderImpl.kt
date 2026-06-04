@@ -22,12 +22,18 @@ class SparklingDebugToolProviderImpl : SparklingDebugToolProvider {
         SparklingDebugTool.openInspectorPanel(activity)
     }
 
-    override fun onKitViewCreated(containerId: String, kitView: IKitView) {
+    override fun onKitViewCreated(
+        containerId: String,
+        kitView: IKitView,
+    ) {
         SparklingDebugAutoWiring.attachConsoleWithRetry(kitView.realView())
         GlobalPropsRegistry.notifyChanged()
     }
 
-    override fun onKitViewDestroyed(containerId: String, kitView: IKitView?) {
+    override fun onKitViewDestroyed(
+        containerId: String,
+        kitView: IKitView?,
+    ) {
         (kitView?.realView() as? LynxView)?.let { LynxConsoleSink.detach(it) }
         GlobalPropsRegistry.notifyChanged()
     }
@@ -45,10 +51,12 @@ class SparklingDebugToolProviderImpl : SparklingDebugToolProvider {
             collector().map { (containerId, kitView) ->
                 val raw = kitView.getGlobalProps().orEmpty()
                 val templateUrl = kitView.getScheme()
+
                 @Suppress("UNCHECKED_CAST")
-                val queryItems = (raw[RuntimeInfo.QUERY_ITEMS] as? Map<String, Any?>)
-                    ?.takeIf { it.isNotEmpty() }
-                    ?: parseQueryItems(templateUrl)
+                val queryItems =
+                    (raw[RuntimeInfo.QUERY_ITEMS] as? Map<String, Any?>)
+                        ?.takeIf { it.isNotEmpty() }
+                        ?: parseQueryItems(templateUrl)
                 GlobalPropsSnapshot(
                     containerId = containerId,
                     templateUrl = templateUrl,

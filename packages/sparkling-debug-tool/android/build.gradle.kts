@@ -46,9 +46,10 @@ dependencies {
     implementation(libs.lynx.service.devtool)
     implementation(libs.lynx.devtool)
 
-    val sparklingVersion = (findProperty("SPARKLING_ANDROID_SDK_VERSION") as? String)
-        ?: System.getenv("SPARKLING_ANDROID_SDK_VERSION")
-        ?: "2.1.0-rc.12"
+    val sparklingVersion =
+        (findProperty("SPARKLING_ANDROID_SDK_VERSION") as? String)
+            ?: System.getenv("SPARKLING_ANDROID_SDK_VERSION")
+            ?: "2.1.0-rc.12"
     val localSparkling = rootProject.findProject(":sparkling")
     if (localSparkling != null) {
         compileOnly(localSparkling)

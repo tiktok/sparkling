@@ -10,10 +10,12 @@ import com.tiktok.sparkling.SparklingContext
 class SparklingVariantHooksImpl : SparklingVariantHooks {
     override fun onApplicationCreate(application: Application) = Unit
 
-    override fun createMainContext(activity: Activity, initialDataJson: String): SparklingContext {
-        return SparklingContext().apply {
+    override fun createMainContext(
+        activity: Activity,
+        initialDataJson: String,
+    ): SparklingContext =
+        SparklingContext().apply {
             scheme = "hybrid://lynxview_page?bundle=main.lynx.bundle&hide_nav_bar=1&screen_orientation=portrait"
             withInitData(initialDataJson)
         }
-    }
 }

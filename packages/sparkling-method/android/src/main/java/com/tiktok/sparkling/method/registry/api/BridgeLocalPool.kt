@@ -42,15 +42,18 @@ class BridgeLocalPool : IReleasable {
         localBridge.registerIDLMethod(name, IDLMethodProvider { factory() }, scope, clazz = clazz)
     }
 
-    fun getBridge(bridgeName: String, platformType: BridgePlatformType): IDLBridgeMethod? {
+    fun getBridge(
+        bridgeName: String,
+        platformType: BridgePlatformType,
+    ): IDLBridgeMethod? {
         val method = map[platformType]?.get(bridgeName) ?: map[BridgePlatformType.ALL]?.get(bridgeName)
         if (method != null) {
             return method
         } else {
             val provider =
-                localBridge.findIDLMethodProvider(platformType, bridgeName) ?:
-                SparklingBridgeManager.findIDLMethodProvider(platformType, bridgeName) ?:
-                return null
+                localBridge.findIDLMethodProvider(platformType, bridgeName)
+                    ?: SparklingBridgeManager.findIDLMethodProvider(platformType, bridgeName)
+                    ?: return null
             val newInstance = provider.provideMethod()
             getPlatformTypeCache(platformType)[bridgeName] = newInstance
             return newInstance

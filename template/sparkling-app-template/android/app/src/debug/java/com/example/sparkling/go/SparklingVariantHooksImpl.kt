@@ -24,7 +24,10 @@ class SparklingVariantHooksImpl : SparklingVariantHooks {
         )
     }
 
-    override fun createMainContext(activity: Activity, initialDataJson: String): SparklingContext {
+    override fun createMainContext(
+        activity: Activity,
+        initialDataJson: String,
+    ): SparklingContext {
         val debugScheme = DebugDevUrlSupport.buildMainPageScheme(activity)
         return SparklingContext().apply {
             scheme = debugScheme

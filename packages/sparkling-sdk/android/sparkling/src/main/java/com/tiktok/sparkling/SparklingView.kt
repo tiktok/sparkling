@@ -431,20 +431,22 @@ class SparklingView(
 
     private fun addDebugTagView() {
         if (debugInfoTag != null || !shouldShowDebugTag()) return
-        debugInfoTag = TextView(context).apply {
-            text = "sparkling-${RuntimeInfo.SPARKLING_VERSION_VALUE}"
-            setTextColor(Color.WHITE)
-            textSize = 12f
-            gravity = Gravity.CENTER
-            setPadding(dp(8), 0, dp(8), 0)
-            setBackgroundColor(Color.rgb(0, 122, 255))
-            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, dp(28)).apply {
-                gravity = Gravity.BOTTOM or Gravity.START
-                leftMargin = 0
-                bottomMargin = dp(12)
+        debugInfoTag =
+            TextView(context).apply {
+                text = "sparkling-${RuntimeInfo.SPARKLING_VERSION_VALUE}"
+                setTextColor(Color.WHITE)
+                textSize = 12f
+                gravity = Gravity.CENTER
+                setPadding(dp(8), 0, dp(8), 0)
+                setBackgroundColor(Color.rgb(0, 122, 255))
+                layoutParams =
+                    LayoutParams(LayoutParams.WRAP_CONTENT, dp(28)).apply {
+                        gravity = Gravity.BOTTOM or Gravity.START
+                        leftMargin = 0
+                        bottomMargin = dp(12)
+                    }
+                setOnClickListener { openDebugInspector() }
             }
-            setOnClickListener { openDebugInspector() }
-        }
         addView(debugInfoTag)
         debugInfoTag?.bringToFront()
     }
@@ -460,13 +462,12 @@ class SparklingView(
         SparklingDebugToolRegistry.openInspectorPanel(activity)
     }
 
-    private fun findActivity(ctx: Context?): android.app.Activity? {
-        return when (ctx) {
+    private fun findActivity(ctx: Context?): android.app.Activity? =
+        when (ctx) {
             is android.app.Activity -> ctx
             is ContextWrapper -> findActivity(ctx.baseContext)
             else -> null
         }
-    }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 

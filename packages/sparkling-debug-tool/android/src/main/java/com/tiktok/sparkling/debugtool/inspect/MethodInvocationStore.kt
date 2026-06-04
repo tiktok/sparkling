@@ -12,7 +12,6 @@ import java.util.ArrayDeque
  * panel renders. Listeners are dispatched on the main thread.
  */
 object MethodInvocationStore {
-
     interface Listener {
         fun onMethodInvocationsChanged()
     }
@@ -24,11 +23,12 @@ object MethodInvocationStore {
     private val listeners = mutableListOf<Listener>()
     private var capacity: Int = 300
 
-    fun setCapacity(capacity: Int) = synchronized(lock) {
-        this.capacity = capacity.coerceAtLeast(1)
-        trimToCapacity()
-        notifyChanged()
-    }
+    fun setCapacity(capacity: Int) =
+        synchronized(lock) {
+            this.capacity = capacity.coerceAtLeast(1)
+            trimToCapacity()
+            notifyChanged()
+        }
 
     fun add(record: MethodInvocation) {
         synchronized(lock) {

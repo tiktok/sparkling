@@ -25,11 +25,12 @@ internal fun DialogFragment.applyHalfSheetWindow(heightFraction: Float = 0.66f) 
     val metrics = ctx.resources.displayMetrics
     val height = (metrics.heightPixels * heightFraction).roundToInt()
 
-    val bg = GradientDrawable().apply {
-        shape = GradientDrawable.RECTANGLE
-        setColor(Color.TRANSPARENT)
-        cornerRadius = 0f
-    }
+    val bg =
+        GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            setColor(Color.TRANSPARENT)
+            cornerRadius = 0f
+        }
     window.setBackgroundDrawable(bg)
 
     val params = window.attributes

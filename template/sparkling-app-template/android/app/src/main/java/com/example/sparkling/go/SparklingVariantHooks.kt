@@ -10,7 +10,10 @@ import com.tiktok.sparkling.SparklingContext
 interface SparklingVariantHooks {
     fun onApplicationCreate(application: Application)
 
-    fun createMainContext(activity: Activity, initialDataJson: String): SparklingContext
+    fun createMainContext(
+        activity: Activity,
+        initialDataJson: String,
+    ): SparklingContext
 }
 
 internal fun createSparklingVariantHooks(): SparklingVariantHooks = SparklingVariantHooksImpl()

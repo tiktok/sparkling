@@ -29,17 +29,23 @@ class IDLMethodRegistryCache {
             var name = cache[clazz]
             if (name == null) {
                 cacheMethodClass(clazz)
-                clazz.superclass.declaredFields.find {
-                    it.getAnnotation(IDLMethodName::class.java) != null
-                }?.getAnnotation(IDLMethodName::class.java)?.name?.let {
-                    cache[clazz] = it
-                    name = cache[clazz]
-                } ?: clazz.declaredFields.find {
-                    it.getAnnotation(IDLMethodName::class.java) != null
-                }?.getAnnotation(IDLMethodName::class.java)?.name?.let {
-                    cache[clazz] = it
-                    name = cache[clazz]
-                }
+                clazz.superclass.declaredFields
+                    .find {
+                        it.getAnnotation(IDLMethodName::class.java) != null
+                    }?.getAnnotation(IDLMethodName::class.java)
+                    ?.name
+                    ?.let {
+                        cache[clazz] = it
+                        name = cache[clazz]
+                    } ?: clazz.declaredFields
+                    .find {
+                        it.getAnnotation(IDLMethodName::class.java) != null
+                    }?.getAnnotation(IDLMethodName::class.java)
+                    ?.name
+                    ?.let {
+                        cache[clazz] = it
+                        name = cache[clazz]
+                    }
             }
             name ?: ""
         } catch (e: Throwable) {

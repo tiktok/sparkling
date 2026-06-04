@@ -245,7 +245,7 @@ class SparklingBridge : IReleasable {
     fun registerIDLMethod(
         name: String,
         scope: BridgePlatformType = BridgePlatformType.ALL,
-        namespace:String = DEFAULT_NAMESPACE,
+        namespace: String = DEFAULT_NAMESPACE,
         clazz: Class<out IDLBridgeMethod>? = null,
         factory: () -> IDLBridgeMethod,
     ) {
@@ -279,9 +279,7 @@ class SparklingBridge : IReleasable {
         innerBridge.getBridgeContext().defaultCallHandler.registerLocalIDLMethod(name, scope, clazz, factory)
     }
 
-    fun getBridgeSDKContext(): IBridgeContext {
-        return bridgeSdkContext
-    }
+    fun getBridgeSDKContext(): IBridgeContext = bridgeSdkContext
 
 //    @Deprecated("don't use this method")
     fun getBridgeContext(): BridgeContext = innerBridge.getBridgeContext()

@@ -17,7 +17,6 @@ import java.util.concurrent.CopyOnWriteArrayList
  * expected to deep-copy or stringify on the listener side if needed.
  */
 object SparklingMethodInvocationCenter {
-
     /**
      * Snapshot describing one method invocation. `id` correlates [onStart]
      * with the matching [onEnd]. Most fields are nullable because earlier
@@ -72,17 +71,18 @@ object SparklingMethodInvocationCenter {
         startTimeMs: Long,
     ) {
         if (observers.isEmpty()) return
-        val event = Event(
-            id = id,
-            name = call.bridgeName,
-            namespace = namespace,
-            platform = platform,
-            params = call.params,
-            result = null,
-            code = null,
-            startTimeMs = startTimeMs,
-            endTimeMs = null,
-        )
+        val event =
+            Event(
+                id = id,
+                name = call.bridgeName,
+                namespace = namespace,
+                platform = platform,
+                params = call.params,
+                result = null,
+                code = null,
+                startTimeMs = startTimeMs,
+                endTimeMs = null,
+            )
         observers.forEach { runCatching { it.onStart(event) } }
     }
 
@@ -98,17 +98,18 @@ object SparklingMethodInvocationCenter {
         code: Int?,
     ) {
         if (observers.isEmpty()) return
-        val event = Event(
-            id = id,
-            name = call.bridgeName,
-            namespace = namespace,
-            platform = platform,
-            params = call.params,
-            result = result,
-            code = code,
-            startTimeMs = startTimeMs,
-            endTimeMs = endTimeMs,
-        )
+        val event =
+            Event(
+                id = id,
+                name = call.bridgeName,
+                namespace = namespace,
+                platform = platform,
+                params = call.params,
+                result = result,
+                code = code,
+                startTimeMs = startTimeMs,
+                endTimeMs = endTimeMs,
+            )
         observers.forEach { runCatching { it.onEnd(event) } }
     }
 
@@ -120,24 +121,30 @@ object SparklingMethodInvocationCenter {
     ) {
         if (observers.isEmpty()) return
         val now = System.currentTimeMillis()
-        val event = Event(
-            id = java.util.UUID.randomUUID().toString(),
-            name = name,
-            namespace = "native-to-js",
-            platform = BridgePlatformType.LYNX,
-            params = mapOf(
-                "event" to name,
-                "params" to params,
-                "containerID" to containerId,
-            ),
-            result = mapOf(
-                "status" to "sent",
-                "direction" to "Native -> JS",
-            ),
-            code = 1,
-            startTimeMs = now,
-            endTimeMs = now,
-        )
+        val event =
+            Event(
+                id =
+                    java.util.UUID
+                        .randomUUID()
+                        .toString(),
+                name = name,
+                namespace = "native-to-js",
+                platform = BridgePlatformType.LYNX,
+                params =
+                    mapOf(
+                        "event" to name,
+                        "params" to params,
+                        "containerID" to containerId,
+                    ),
+                result =
+                    mapOf(
+                        "status" to "sent",
+                        "direction" to "Native -> JS",
+                    ),
+                code = 1,
+                startTimeMs = now,
+                endTimeMs = now,
+            )
         observers.forEach { runCatching { it.onEnd(event) } }
     }
 }

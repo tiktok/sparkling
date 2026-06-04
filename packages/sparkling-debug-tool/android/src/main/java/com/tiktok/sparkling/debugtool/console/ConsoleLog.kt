@@ -41,32 +41,35 @@ data class ConsoleLog(
         const val TYPE_WARN = "warn"
         const val TYPE_ERROR = "error"
 
-        fun levelFromType(type: String?): Int = when (type?.lowercase()) {
-            TYPE_DEBUG -> Log.DEBUG
-            TYPE_INFO -> Log.INFO
-            TYPE_WARN -> Log.WARN
-            TYPE_ERROR -> Log.ERROR
-            TYPE_LOG -> Log.VERBOSE
-            else -> Log.VERBOSE
-        }
+        fun levelFromType(type: String?): Int =
+            when (type?.lowercase()) {
+                TYPE_DEBUG -> Log.DEBUG
+                TYPE_INFO -> Log.INFO
+                TYPE_WARN -> Log.WARN
+                TYPE_ERROR -> Log.ERROR
+                TYPE_LOG -> Log.VERBOSE
+                else -> Log.VERBOSE
+            }
 
-        fun levelFromName(name: String?): Int = when (name?.uppercase()) {
-            "V", "VERBOSE" -> Log.VERBOSE
-            "D", "DEBUG" -> Log.DEBUG
-            "I", "INFO" -> Log.INFO
-            "W", "WARN", "WARNING" -> Log.WARN
-            "E", "ERROR" -> Log.ERROR
-            else -> Log.INFO
-        }
+        fun levelFromName(name: String?): Int =
+            when (name?.uppercase()) {
+                "V", "VERBOSE" -> Log.VERBOSE
+                "D", "DEBUG" -> Log.DEBUG
+                "I", "INFO" -> Log.INFO
+                "W", "WARN", "WARNING" -> Log.WARN
+                "E", "ERROR" -> Log.ERROR
+                else -> Log.INFO
+            }
 
-        fun typeFromLevel(level: Int): String = when (level) {
-            Log.VERBOSE -> TYPE_LOG
-            Log.DEBUG -> TYPE_DEBUG
-            Log.INFO -> TYPE_INFO
-            Log.WARN -> TYPE_WARN
-            Log.ERROR -> TYPE_ERROR
-            else -> TYPE_LOG
-        }
+        fun typeFromLevel(level: Int): String =
+            when (level) {
+                Log.VERBOSE -> TYPE_LOG
+                Log.DEBUG -> TYPE_DEBUG
+                Log.INFO -> TYPE_INFO
+                Log.WARN -> TYPE_WARN
+                Log.ERROR -> TYPE_ERROR
+                else -> TYPE_LOG
+            }
 
         /** Parse one Lynx inspector console message JSON payload. */
         fun fromJson(raw: String): ConsoleLog? {
@@ -91,7 +94,11 @@ data class ConsoleLog(
         }
 
         /** Build a plain console line that didn't come through the JSON inspector pipe. */
-        fun fromPlain(level: String, tag: String, message: String): ConsoleLog {
+        fun fromPlain(
+            level: String,
+            tag: String,
+            message: String,
+        ): ConsoleLog {
             val lvl = levelFromName(level)
             return ConsoleLog(
                 type = typeFromLevel(lvl),

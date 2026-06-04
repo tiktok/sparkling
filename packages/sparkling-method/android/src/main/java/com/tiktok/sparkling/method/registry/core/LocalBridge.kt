@@ -41,14 +41,14 @@ class LocalBridge {
     }
 
     fun findIDLMethodProvider(
-        platformType: BridgePlatformType, name: String,
-        namespace:String = DEFAULT_NAMESPACE
+        platformType: BridgePlatformType,
+        name: String,
+        namespace: String = DEFAULT_NAMESPACE,
     ): IDLMethodProvider? {
         idlRegistryMap[namespace] ?: return null
 
         return idlRegistryMap[namespace]?.findMethodProvider(platformType, name)
     }
-
 
     fun registerIDLMethod(
         clazz: Class<out IDLBridgeMethod>?,
@@ -67,7 +67,7 @@ class LocalBridge {
         name: String,
         methodProvider: IDLMethodProvider,
         scope: BridgePlatformType = BridgePlatformType.ALL,
-        namespace:String = DEFAULT_NAMESPACE,
+        namespace: String = DEFAULT_NAMESPACE,
         clazz: Class<out IDLBridgeMethod>? = null,
     ) {
         if (idlRegistryMap[namespace] == null) {

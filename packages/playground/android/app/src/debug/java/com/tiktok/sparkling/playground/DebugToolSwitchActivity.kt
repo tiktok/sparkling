@@ -11,12 +11,14 @@ import com.tiktok.sparkling.debugtool.SparklingDebugTool
 class DebugToolSwitchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val container = androidx.fragment.app.FragmentContainerView(this).apply {
-            id = View.generateViewId()
-        }
+        val container =
+            androidx.fragment.app.FragmentContainerView(this).apply {
+                id = View.generateViewId()
+            }
         setContentView(container)
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
+            supportFragmentManager
+                .beginTransaction()
                 .replace(container.id, SparklingDebugTool.createFragment())
                 .commit()
         }

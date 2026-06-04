@@ -57,7 +57,7 @@ class BridgeDispatcher {
         context: BridgeContext,
         call: BridgeCall,
         callback: IBridgeCallback,
-        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?
+        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?,
     ): Boolean {
         val result = context.jsbMockInterceptor!!.invokeBridgeResult(call)
         result?.let {
@@ -104,27 +104,29 @@ class BridgeDispatcher {
         val shouldHandleBridgeCallResultModel =
             context.bridgeLifeClientImp.shouldHandleBridgeCall(call, context)
         if (!shouldHandleBridgeCallResultModel.shouldHandleBridgeCall) {
-            val callbackResult = BridgeResult.toJsonResult(
-                IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED,
-                IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED_MSG + ", reason: " + shouldHandleBridgeCallResultModel.reason,
-                null
-            )
+            val callbackResult =
+                BridgeResult.toJsonResult(
+                    IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED,
+                    IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED_MSG + ", reason: " + shouldHandleBridgeCallResultModel.reason,
+                    null,
+                )
             invocation.notifyEnd(call, callbackResult)
             callback.onBridgeResult(callbackResult, call, monitorBuilder)
             return
         }
 
-        val callbackHandler = object : IBridgeMethodCallback {
-            override fun onBridgeResult(parcel: Any) {
-                client.onBridgeCallback()
-                val bridgeResult =
-                    context.jsbMockInterceptor?.interceptBridgeResult(call, BridgeResult(parcel))
-                        ?: BridgeResult(parcel)
-                invocation.notifyEnd(call, bridgeResult)
-                callback.onBridgeResult(bridgeResult, call, monitorBuilder)
-                if (getToastSetting()) toastJsbError(call, bridgeResult.toJSONObject(), context)
+        val callbackHandler =
+            object : IBridgeMethodCallback {
+                override fun onBridgeResult(parcel: Any) {
+                    client.onBridgeCallback()
+                    val bridgeResult =
+                        context.jsbMockInterceptor?.interceptBridgeResult(call, BridgeResult(parcel))
+                            ?: BridgeResult(parcel)
+                    invocation.notifyEnd(call, bridgeResult)
+                    callback.onBridgeResult(bridgeResult, call, monitorBuilder)
+                    if (getToastSetting()) toastJsbError(call, bridgeResult.toJSONObject(), context)
+                }
             }
-        }
 
         if (context.shouldHandleWithBusinessHandler(call)) {
             call.hitBusinessHandler = true
@@ -246,7 +248,10 @@ class BridgeDispatcher {
             )
         }
 
-        fun notifyEnd(call: BridgeCall, result: BridgeResult) {
+        fun notifyEnd(
+            call: BridgeCall,
+            result: BridgeResult,
+        ) {
             val endTimeMs = System.currentTimeMillis()
             SparklingMethodInvocationCenter.notifyEnd(
                 id = id,
@@ -256,20 +261,25 @@ class BridgeDispatcher {
                 startTimeMs = startTimeMs,
                 endTimeMs = endTimeMs,
                 result = result.parcel,
-                code = result.toJSONObject().takeIf { it.has(IDLBridgeMethod.PARAM_CODE) }
-                    ?.optInt(IDLBridgeMethod.PARAM_CODE),
+                code =
+                    result
+                        .toJSONObject()
+                        .takeIf { it.has(IDLBridgeMethod.PARAM_CODE) }
+                        ?.optInt(IDLBridgeMethod.PARAM_CODE),
             )
         }
 
         companion object {
-            fun from(context: BridgeContext, call: BridgeCall): MethodInvocationSnapshot {
-                return MethodInvocationSnapshot(
+            fun from(
+                context: BridgeContext,
+                call: BridgeCall,
+            ): MethodInvocationSnapshot =
+                MethodInvocationSnapshot(
                     id = UUID.randomUUID().toString(),
                     namespace = call.nameSpace.takeIf { it.isNotBlank() } ?: context.getNamespace() ?: "bridge-dispatcher",
                     platform = BridgeContext.getPlatformByBridgeContext(context),
                     startTimeMs = System.currentTimeMillis(),
                 )
-            }
         }
     }
 }

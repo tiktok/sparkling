@@ -38,11 +38,15 @@ object LynxConsoleSink {
         installDelegate(lynxView, null)
     }
 
-    private fun installDelegate(lynxView: LynxView, delegate: LynxInspectorConsoleDelegate?): Boolean {
-        val owner = runCatching { lynxView.baseInspectorOwner }.getOrNull() ?: run {
-            Log.w(TAG, "LynxView.baseInspectorOwner is null; devtool not initialized?")
-            return false
-        }
+    private fun installDelegate(
+        lynxView: LynxView,
+        delegate: LynxInspectorConsoleDelegate?,
+    ): Boolean {
+        val owner =
+            runCatching { lynxView.baseInspectorOwner }.getOrNull() ?: run {
+                Log.w(TAG, "LynxView.baseInspectorOwner is null; devtool not initialized?")
+                return false
+            }
         return try {
             owner.setLynxInspectorConsoleDelegate(delegate)
             true

@@ -75,25 +75,29 @@ class BridgeDispatcherTest {
     @Test
     fun testOnDispatchBridgeMethodReportsStartAndEndFromDispatcher() {
         val context = BridgeContext()
-        val call = BridgeCall(context).apply {
-            bridgeName = "storage.getItem"
-            nameSpace = ""
-            params = JSONObject().put("key", "foo")
-            platform = BridgeCall.PlatForm.Lynx
-        }
-        val dispatcher = BridgeDispatcher()
-        dispatcher.registerHandler(object : IBridgeHandler {
-            override fun handle(
-                bridgeContext: BridgeContext,
-                call: BridgeCall,
-                callback: IBridgeMethodCallback
-            ) {
-                callback.onBridgeResult(JSONObject().put(IDLBridgeMethod.PARAM_CODE, IDLBridgeMethod.SUCCESS))
+        val call =
+            BridgeCall(context).apply {
+                bridgeName = "storage.getItem"
+                nameSpace = ""
+                params = JSONObject().put("key", "foo")
+                platform = BridgeCall.PlatForm.Lynx
             }
+        val dispatcher = BridgeDispatcher()
+        dispatcher.registerHandler(
+            object : IBridgeHandler {
+                override fun handle(
+                    bridgeContext: BridgeContext,
+                    call: BridgeCall,
+                    callback: IBridgeMethodCallback,
+                ) {
+                    callback.onBridgeResult(JSONObject().put(IDLBridgeMethod.PARAM_CODE, IDLBridgeMethod.SUCCESS))
+                }
 
-            override fun onRelease() = Unit
-            override fun isReleased(): Boolean = false
-        })
+                override fun onRelease() = Unit
+
+                override fun isReleased(): Boolean = false
+            },
+        )
         val observer = RecordingInvocationObserver()
         SparklingMethodInvocationCenter.addObserver(observer)
         try {
@@ -126,7 +130,13 @@ class BridgeDispatcherTest {
         assertEquals(1, observer.starts.size)
         assertEquals(1, observer.ends.size)
         assertEquals(IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED, observer.ends.single().code)
-        assertTrue(observer.ends.single().result.toString().contains("blocked"))
+        assertTrue(
+            observer.ends
+                .single()
+                .result
+                .toString()
+                .contains("blocked"),
+        )
     }
 
     // @Test TODO: Fix test - NullPointerException at line 78

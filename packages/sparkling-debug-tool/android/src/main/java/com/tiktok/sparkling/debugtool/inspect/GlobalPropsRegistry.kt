@@ -25,7 +25,6 @@ data class GlobalPropsSnapshot(
  * [collectAll] every time it is opened or refreshed.
  */
 object GlobalPropsRegistry {
-
     fun interface Provider {
         fun collect(): List<GlobalPropsSnapshot>
     }

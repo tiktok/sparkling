@@ -18,11 +18,12 @@ internal object SearchInputSupport {
         input.setHintTextColor(input.context.getColor(R.color.sparkling_panel_text_hint))
         input.compoundDrawablePadding = dp(input, 4)
 
-        val clearDrawable = input.context.getDrawable(R.drawable.sparkling_ic_close)?.mutate()?.apply {
-            val size = dp(input, 18)
-            setBounds(0, 0, size, size)
-            setTint(input.context.getColor(R.color.sparkling_panel_text_hint))
-        }
+        val clearDrawable =
+            input.context.getDrawable(R.drawable.sparkling_ic_close)?.mutate()?.apply {
+                val size = dp(input, 18)
+                setBounds(0, 0, size, size)
+                setTint(input.context.getColor(R.color.sparkling_panel_text_hint))
+            }
 
         fun updateClearIcon() {
             input.setCompoundDrawablesRelative(
@@ -33,13 +34,27 @@ internal object SearchInputSupport {
             )
         }
 
-        input.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
-            override fun afterTextChanged(s: Editable?) {
-                updateClearIcon()
-            }
-        })
+        input.addTextChangedListener(
+            object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int,
+                ) = Unit
+
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int,
+                ) = Unit
+
+                override fun afterTextChanged(s: Editable?) {
+                    updateClearIcon()
+                }
+            },
+        )
         input.setOnTouchListener { _, event ->
             val drawable = input.compoundDrawablesRelative[2] ?: return@setOnTouchListener false
             if (event.action == MotionEvent.ACTION_UP) {
@@ -55,6 +70,8 @@ internal object SearchInputSupport {
         updateClearIcon()
     }
 
-    private fun dp(input: EditText, value: Int): Int =
-        (value * input.resources.displayMetrics.density).toInt()
+    private fun dp(
+        input: EditText,
+        value: Int,
+    ): Int = (value * input.resources.displayMetrics.density).toInt()
 }

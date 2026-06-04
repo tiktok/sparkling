@@ -22,16 +22,18 @@ class IDLMethodRegistry(
                 namespace = bridgeRegistry.namespace
                 bridgeRegistry.methodMap.entries.forEach { outerEntry ->
                     val platformType = outerEntry.key
-                    val innerMap = ConcurrentHashMap<String, IDLMethodProvider>().apply {
-                        this.putAll(outerEntry.value)
-                    }
+                    val innerMap =
+                        ConcurrentHashMap<String, IDLMethodProvider>().apply {
+                            this.putAll(outerEntry.value)
+                        }
                     this.methodMap[platformType] = innerMap
                 }
                 bridgeRegistry.methodClassMap.entries.forEach { outerEntry ->
                     val platformType = outerEntry.key
-                    val innerMap = ConcurrentHashMap<String, Class<out IDLBridgeMethod>>().apply {
-                        this.putAll(outerEntry.value)
-                    }
+                    val innerMap =
+                        ConcurrentHashMap<String, Class<out IDLBridgeMethod>>().apply {
+                            this.putAll(outerEntry.value)
+                        }
                     this.methodClassMap[platformType] = innerMap
                 }
             }
@@ -59,7 +61,10 @@ class IDLMethodRegistry(
         }
     }
 
-    private fun innerRegisterMethod(clazz: Class<out IDLBridgeMethod>, scope: BridgePlatformType) {
+    private fun innerRegisterMethod(
+        clazz: Class<out IDLBridgeMethod>,
+        scope: BridgePlatformType,
+    ) {
         val name = methodNameFor(clazz)
         if (!name.isNullOrEmpty()) {
             innerRegisterMethod(name, methodProviderFor(clazz), scope, clazz)
@@ -104,7 +109,11 @@ class IDLMethodRegistry(
         }
     }
 
-    private fun innerRegisterMethod(clazz: Class<out IDLBridgeMethod>, scope: BridgePlatformType, name: String) {
+    private fun innerRegisterMethod(
+        clazz: Class<out IDLBridgeMethod>,
+        scope: BridgePlatformType,
+        name: String,
+    ) {
         innerRegisterMethod(name, methodProviderFor(clazz), scope, clazz)
     }
 
@@ -122,11 +131,17 @@ class IDLMethodRegistry(
                 methodRegistryCache?.cacheMethodClass(it)
             }
         }
-        (if (scope == BridgePlatformType.ALL) listOf(
-            BridgePlatformType.ALL,
-            BridgePlatformType.WEB,
-            BridgePlatformType.LYNX,
-        ) else listOf(scope)).forEach {
+        (
+            if (scope == BridgePlatformType.ALL) {
+                listOf(
+                    BridgePlatformType.ALL,
+                    BridgePlatformType.WEB,
+                    BridgePlatformType.LYNX,
+                )
+            } else {
+                listOf(scope)
+            }
+        ).forEach {
             innerRegisterMethod(name, methodProvider, it, clazz)
         }
     }
@@ -164,7 +179,7 @@ class IDLMethodRegistry(
 
     fun findMethodProvider(
         platformType: BridgePlatformType,
-        name: String
+        name: String,
     ): IDLMethodProvider? {
         if (platformType == BridgePlatformType.NONE) {
             return null
@@ -177,10 +192,8 @@ class IDLMethodRegistry(
 
     fun isMethodExists(
         name: String,
-        platformType: BridgePlatformType = BridgePlatformType.ALL
-    ): Boolean {
-        return findMethodProvider(platformType, name) != null || findMethodClass(platformType, name) != null
-    }
+        platformType: BridgePlatformType = BridgePlatformType.ALL,
+    ): Boolean = findMethodProvider(platformType, name) != null || findMethodClass(platformType, name) != null
 
     fun getMethodList(platformType: BridgePlatformType): MutableMap<String, Class<out IDLBridgeMethod>>? {
         if (platformType == BridgePlatformType.NONE) {
@@ -208,6 +221,5 @@ class IDLMethodRegistry(
     }
 
     @Suppress("DEPRECATION")
-    private fun methodProviderFor(clazz: Class<out IDLBridgeMethod>): IDLMethodProvider =
-        IDLMethodProvider { clazz.newInstance() }
+    private fun methodProviderFor(clazz: Class<out IDLBridgeMethod>): IDLMethodProvider = IDLMethodProvider { clazz.newInstance() }
 }

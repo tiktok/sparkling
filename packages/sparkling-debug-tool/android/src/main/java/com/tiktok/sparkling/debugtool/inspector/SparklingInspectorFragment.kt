@@ -25,7 +25,6 @@ import com.tiktok.sparkling.debugtool.ui.applyHalfSheetWindow
  * window attach, so switching tabs doesn't trigger heavyweight re-creation.
  */
 class SparklingInspectorFragment : DialogFragment() {
-
     enum class Tab { CONSOLE, GLOBAL_PROPS, METHODS }
 
     private var initialTab: Tab = Tab.CONSOLE
@@ -53,7 +52,10 @@ class SparklingInspectorFragment : DialogFragment() {
         savedInstanceState: Bundle?,
     ): View = inflater.inflate(R.layout.fragment_sparkling_inspector, container, false)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         val close = view.findViewById<ImageButton>(R.id.btn_inspector_close)
         close.setOnClickListener { dismissAllowingStateLoss() }
@@ -68,27 +70,33 @@ class SparklingInspectorFragment : DialogFragment() {
         tabMethods.setOnClickListener { selectTab(Tab.METHODS) }
 
         val container = view.findViewById<FrameLayout>(R.id.inspector_content)
-        consolePanel = SparklingConsolePanelView(requireContext()).also {
-            it.layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT,
-            )
-            container.addView(it)
-        }
-        globalPropsPanel = SparklingGlobalPropsPanelView(requireContext()).also {
-            it.layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT,
-            )
-            container.addView(it)
-        }
-        methodPanel = SparklingMethodPanelView(requireContext()).also {
-            it.layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT,
-            )
-            container.addView(it)
-        }
+        consolePanel =
+            SparklingConsolePanelView(requireContext()).also {
+                it.layoutParams =
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                    )
+                container.addView(it)
+            }
+        globalPropsPanel =
+            SparklingGlobalPropsPanelView(requireContext()).also {
+                it.layoutParams =
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                    )
+                container.addView(it)
+            }
+        methodPanel =
+            SparklingMethodPanelView(requireContext()).also {
+                it.layoutParams =
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                    )
+                container.addView(it)
+            }
         selectTab(initialTab)
     }
 
@@ -116,14 +124,17 @@ class SparklingInspectorFragment : DialogFragment() {
     }
 
     private fun resolvePageName(): String {
-        val url = GlobalPropsRegistry.collectAll()
-            .firstOrNull()
-            ?.templateUrl
-            .orEmpty()
+        val url =
+            GlobalPropsRegistry
+                .collectAll()
+                .firstOrNull()
+                ?.templateUrl
+                .orEmpty()
         if (url.isBlank()) return "Unknown"
-        val fromQuery = runCatching { Uri.parse(url).getQueryParameter("bundle") }
-            .getOrNull()
-            ?.takeIf { it.isNotBlank() }
+        val fromQuery =
+            runCatching { Uri.parse(url).getQueryParameter("bundle") }
+                .getOrNull()
+                ?.takeIf { it.isNotBlank() }
         if (fromQuery != null) return fromQuery
         val withoutQuery = url.substringBefore('?').trimEnd('/')
         return withoutQuery.substringAfterLast('/').ifBlank { withoutQuery.ifBlank { "Unknown" } }

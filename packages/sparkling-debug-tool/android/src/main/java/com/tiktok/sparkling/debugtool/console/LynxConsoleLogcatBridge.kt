@@ -31,15 +31,15 @@ internal object LynxConsoleLogcatBridge {
 
     fun flushRecent() {
         runCatching {
-            val process = ProcessBuilder(
-                "logcat",
-                "-d",
-                "--pid=${Process.myPid()}",
-                "-v",
-                "brief",
-            )
-                .redirectErrorStream(true)
-                .start()
+            val process =
+                ProcessBuilder(
+                    "logcat",
+                    "-d",
+                    "--pid=${Process.myPid()}",
+                    "-v",
+                    "brief",
+                ).redirectErrorStream(true)
+                    .start()
             BufferedReader(InputStreamReader(process.inputStream)).useLines { lines ->
                 lines.forEach { line -> parseLine(line)?.let(ConsoleLogStore::add) }
             }
@@ -50,14 +50,14 @@ internal object LynxConsoleLogcatBridge {
 
     private fun runLoop() {
         runCatching {
-            val process = ProcessBuilder(
-                "logcat",
-                "--pid=${Process.myPid()}",
-                "-v",
-                "brief",
-            )
-                .redirectErrorStream(true)
-                .start()
+            val process =
+                ProcessBuilder(
+                    "logcat",
+                    "--pid=${Process.myPid()}",
+                    "-v",
+                    "brief",
+                ).redirectErrorStream(true)
+                    .start()
             BufferedReader(InputStreamReader(process.inputStream)).useLines { lines ->
                 lines.forEach { line -> parseLine(line)?.let(ConsoleLogStore::add) }
             }
@@ -71,13 +71,14 @@ internal object LynxConsoleLogcatBridge {
         if (!seenLines.add(line)) {
             return null
         }
-        val level = when {
-            line.contains(":ERROR:") || line.startsWith("E/") -> Log.ERROR
-            line.contains(":WARNING:") || line.contains(":WARN:") || line.startsWith("W/") -> Log.WARN
-            line.contains(":DEBUG:") || line.startsWith("D/") -> Log.DEBUG
-            line.contains(":INFO:") || line.startsWith("I/") -> Log.INFO
-            else -> Log.VERBOSE
-        }
+        val level =
+            when {
+                line.contains(":ERROR:") || line.startsWith("E/") -> Log.ERROR
+                line.contains(":WARNING:") || line.contains(":WARN:") || line.startsWith("W/") -> Log.WARN
+                line.contains(":DEBUG:") || line.startsWith("D/") -> Log.DEBUG
+                line.contains(":INFO:") || line.startsWith("I/") -> Log.INFO
+                else -> Log.VERBOSE
+            }
         return ConsoleLog(
             type = ConsoleLog.typeFromLevel(level),
             level = level,
@@ -89,13 +90,15 @@ internal object LynxConsoleLogcatBridge {
     private fun normalize(line: String): String {
         val start = line.indexOf(")]")
         if (start != -1) {
-            return line.substring(start + 2)
+            return line
+                .substring(start + 2)
                 .replace("   ||   ", " ")
                 .replace('\n', ' ')
                 .replace('\r', ' ')
                 .trim()
         }
-        return line.substringAfter("lynx_console.cc", line)
+        return line
+            .substringAfter("lynx_console.cc", line)
             .replace("   ||   ", " ")
             .replace('\n', ' ')
             .replace('\r', ' ')
