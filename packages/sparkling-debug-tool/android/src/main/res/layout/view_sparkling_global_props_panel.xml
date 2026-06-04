@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GlobalProps + queryItems body for SparklingInspectorFragment.
+     Toolbar mirrors the other panels: 32dp filter chip + 32dp Refresh chip. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:background="@drawable/sparkling_chip_bg">
+
+            <EditText
+                android:id="@+id/input_global_props_filter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:hint="Filter by key or value"
+                android:textColorHint="@color/sparkling_panel_text_hint"
+                android:textColor="@color/sparkling_panel_text_primary"
+                android:textSize="13sp"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:singleLine="true"
+                android:paddingHorizontal="12dp" />
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/btn_global_props_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:text="Refresh"
+            android:textColor="@color/sparkling_panel_text_primary"
+            android:textSize="13sp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:paddingHorizontal="12dp"
+            android:textAllCaps="false"
+            android:background="@drawable/sparkling_chip_bg" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list_global_props"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/sparkling_panel_background"
+        android:nestedScrollingEnabled="true"
+        android:scrollbars="vertical" />
+
+    <TextView
+        android:id="@+id/txt_global_props_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp"
+        android:gravity="center"
+        android:textColor="@color/sparkling_panel_text_hint"
+        android:background="@color/sparkling_panel_background"
+        android:text="No live LynxView found yet. Open a Lynx page first."
+        android:visibility="gone" />
+</merge>

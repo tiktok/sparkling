@@ -28,11 +28,37 @@ public class SPKLynxNativeModule: NSObject, LynxModule {
 
     public func call(name: String, params: [String: Any], callback: LynxCallbackBlock?) {
         let message = LynxRecvMessage(methodName: name, rawData: params)
-        guard let containerID = message.containerID?.isEmpty == false ? message.containerID : containerID else { return }
+        guard let containerID = message.containerID?.isEmpty == false ?  message.containerID : containerID else {
+            let result = LynxSendMessage.paramsErrorMessage(
+                with: message.containerID,
+                errorMsg: "missing container id"
+            ).toDict()
+            SparklingMethodInvocationCenter.shared.notifyCompletedInvocation(
+                name: name,
+                namespace: "spkPipe",
+                platform: "lynx",
+                params: params,
+                result: result,
+                statusCode: LynxPipeStatusCode.parameterError.rawValue,
+                statusMessage: "missing container id"
+            )
+            callback?(result)
+            return
+        }
         guard let engine = LynxPipeEnginePool.engine(for: containerID) else {
             var errorSendMsg = LynxSendMessage.paramsErrorMessage(with: containerID, errorMsg: "error container id")
             errorSendMsg.recvMessage = message
-            callback?(errorSendMsg.toDict())
+            let result = errorSendMsg.toDict()
+            SparklingMethodInvocationCenter.shared.notifyCompletedInvocation(
+                name: name,
+                namespace: "spkPipe",
+                platform: "lynx",
+                params: params,
+                result: result,
+                statusCode: LynxPipeStatusCode.parameterError.rawValue,
+                statusMessage: "error container id"
+            )
+            callback?(result)
             return
         }
 

@@ -15,6 +15,16 @@ import SparklingMethod
 @objcMembers
 open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
 
+    /// Posted once a `SPKWrapperLynxView` has finished initialising. The
+    /// notification's `object` is the newly created view. Debug tools (for
+    /// example the in-app JS console panel) subscribe to this hook to attach
+    /// per-view inspectors without coupling the SDK to the debug module.
+    public static let didCreateNotification = Notification.Name("SPKWrapperLynxView.didCreate")
+
+    /// Posted right before a `SPKWrapperLynxView` is deallocated so debug
+    /// tools can clean up any per-view resources.
+    public static let willDestroyNotification = Notification.Name("SPKWrapperLynxView.willDestroy")
+
     /// The hybrid context containing configuration and global properties.
     ///
     /// This computed property provides access to the context from the
@@ -84,6 +94,23 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
     /// This private property holds the LynxTemplateData containing
     /// global properties that are passed to the Lynx template.
     private var globalProps: LynxTemplateData?
+
+    /// Read-only snapshot of the current global properties as a plain Swift
+    /// dictionary. Debug tools (for example the GlobalProps inspector panel)
+    /// use this to display the props passed to the underlying Lynx template
+    /// without reaching into the private `LynxTemplateData` storage.
+    public var globalPropsDictionary: [String: Any] {
+        guard let dict = self.globalProps?.dictionary() else { return [:] }
+        var result: [String: Any] = [:]
+        for (key, value) in dict {
+            if let stringKey = key as? String {
+                result[stringKey] = value
+            } else {
+                result["\(key)"] = value
+            }
+        }
+        return result
+    }
 
     /// Shared global resource provider for all Lynx views.
     ///
@@ -175,6 +202,12 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
         self.addLifecycleClient(self)
         self.loadState = .SPKLoadStateNotLoad
         self.triggerLayout()
+
+        NotificationCenter.default.post(name: SPKWrapperLynxView.didCreateNotification, object: self)
+    }
+
+    deinit {
+        NotificationCenter.default.post(name: SPKWrapperLynxView.willDestroyNotification, object: self)
     }
 
     /// Sets up the method pipe for communication between native and Lynx environments.
@@ -196,7 +229,7 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
     /// properties are shared across the entire Lynx runtime and can be accessed
     /// by JavaScript code through the global props object.
     public func setupGlobalProps() {
-        var defaultParams = [
+        let defaultParams: [String: Any] = [
             "containerInitTime": self.containerInitTimeStamp() ?? 0
         ]
 
@@ -204,15 +237,16 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
             return
         }
 
-        self.globalProps = SPKLynxKitUtils.globalProps(
-            withParams: params,
-            onDictionaryParamsCreated: { params in
-                var newParams = params
-                newParams?.merge(defaultParams, uniquingKeysWith: { _, new in new })
-                var queryItems = params?.spk.dictionary(forKey: "queryItems") ?? [:]
-                queryItems.merge(defaultParams, uniquingKeysWith: { _, new in new })
-                newParams?["queryItems"] = queryItems
-            })
+        self.globalProps = SPKLynxKitUtils.globalProps(withParams: params, onDictionaryParamsCreated: { params in
+            defaultParams.forEach { key, value in
+                params[key] = value
+            }
+            var queryItems: [String: Any] = params.spk.dictionary(forKey: "queryItems") ?? [:]
+            defaultParams.forEach { key, value in
+                queryItems[key] = value
+            }
+            params["queryItems"] = queryItems
+        })
     }
 
     /// Returns the container initialization timestamp.
@@ -220,10 +254,14 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
     /// This method provides the timestamp when the container was initialized,
     /// which can be used for performance monitoring and analytics.
     ///
-    /// - Returns: The timestamp when the container was initialized, currently returns 0
+    /// - Returns: The timestamp when the container was initialized.
     public func containerInitTimeStamp() -> Int64? {
-        //TODO: update monitor later.
-        return 0
+        if let timestamp = self.params?.context?.containerInitTime {
+            return timestamp.int64Value
+        }
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        self.params?.context?.containerInitTime = NSNumber(value: timestamp)
+        return timestamp
     }
 
     required public init?(coder: NSCoder) {

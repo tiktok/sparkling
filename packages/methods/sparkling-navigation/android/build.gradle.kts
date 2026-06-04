@@ -57,7 +57,11 @@ dependencies {
         (findProperty("SPARKLING_ANDROID_SDK_VERSION") as? String)
             ?: System.getenv("SPARKLING_ANDROID_SDK_VERSION")
             ?: "2.1.0-rc.12"
-    api("com.tiktok.sparkling:sparkling-method:$sparklingVersion")
+    if (rootProject.findProject(":sparkling-method") != null) {
+        api(project(":sparkling-method"))
+    } else {
+        api("com.tiktok.sparkling:sparkling-method:$sparklingVersion")
+    }
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {

@@ -102,6 +102,35 @@ describe('project builder and template utilities', () => {
     expect(appConfig).not.toContain('com.example.sparkling.go');
     expect(appConfig).not.toContain('com.sparkling.app.SparklingGo');
     expect(appConfig).not.toContain('{{packageNamespace}}');
+
+    const textFiles: string[] = [];
+    const collectTextFiles = (dir: string) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const filePath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          if (!['node_modules', 'Pods', '.gradle', 'build', 'dist'].includes(entry.name)) {
+            collectTextFiles(filePath);
+          }
+          continue;
+        }
+
+        const buffer = fs.readFileSync(filePath);
+        if (!buffer.includes(0)) {
+          textFiles.push(filePath);
+        }
+      }
+    };
+    collectTextFiles(to);
+
+    const copiedTemplateText = textFiles
+      .map(file => fs.readFileSync(file, 'utf8'))
+      .join('\n');
+    expect(copiedTemplateText).not.toContain('SPARKLING_REPO_ROOT');
+    expect(copiedTemplateText).not.toContain('../../../packages/');
+    expect(copiedTemplateText).not.toContain('workspace:*');
+    expect(copiedTemplateText).not.toContain('file:');
+    expect(copiedTemplateText).not.toContain('project(":sparkling")');
+    expect(copiedTemplateText).not.toContain('project(":sparkling-method")');
   });
 
   it('keeps prerelease versions exact and updates selected dependency versions', () => {

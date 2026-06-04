@@ -4,20 +4,26 @@
 package com.tiktok.sparkling
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.util.Size
 import android.view.View
 import android.widget.FrameLayout
-import com.tiktok.sparkling.hybridkit.HybridCommon
+import android.widget.TextView
+import androidx.fragment.app.FragmentActivity
+import com.tiktok.sparkling.debug.SparklingDebugToolProvider
+import com.tiktok.sparkling.debug.SparklingDebugToolRegistry
 import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.HybridKit
 import com.tiktok.sparkling.hybridkit.base.HybridContainerType
 import com.tiktok.sparkling.hybridkit.base.HybridKitError
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
+import com.tiktok.sparkling.hybridkit.base.HybridLoadSession
 import com.tiktok.sparkling.hybridkit.base.IHybridKitLifeCycle
 import com.tiktok.sparkling.hybridkit.base.IKitView
 import com.tiktok.sparkling.hybridkit.base.IPerformanceView
+import com.tiktok.sparkling.hybridkit.config.RuntimeInfo
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 import io.mockk.clearAllMocks
@@ -46,11 +52,14 @@ import org.robolectric.annotation.Config
 class SparklingViewTest {
     private lateinit var context: Context
     private lateinit var baseContext: SparklingContext
+    private var originalApplicationFlags: Int = 0
 
     @Before
     fun setUp() {
         clearAllMocks()
         context = RuntimeEnvironment.getApplication()
+        originalApplicationFlags = context.applicationInfo.flags
+        SparklingDebugToolRegistry.setProvidersForTest(null)
         mockkObject(HybridKit)
 
         baseContext =
@@ -67,6 +76,11 @@ class SparklingViewTest {
 
     @After
     fun tearDown() {
+        context.applicationInfo.flags = originalApplicationFlags
+        if (::baseContext.isInitialized) {
+            baseContext.removeAllDependencies()
+        }
+        SparklingDebugToolRegistry.setProvidersForTest(null)
         unmockkAll()
     }
 
@@ -112,6 +126,42 @@ class SparklingViewTest {
 
         assertTrue(kitView.loadCalled)
         assertEquals(IPerformanceView.LoadStatus.LOADING, sparklingView.loadStatus())
+    }
+
+    @Test
+    fun prepareSeedsLoadSessionOpenTimeFromViewCreation() {
+        val kitView = RecordingKitView(context)
+        every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+        val beforeCreate = System.currentTimeMillis()
+        val sparklingView = SparklingView(context)
+        val afterCreate = System.currentTimeMillis()
+
+        sparklingView.prepare(baseContext)
+
+        val loadSession = baseContext.getDependency(HybridLoadSession::class.java)
+        assertNotNull(loadSession)
+        val openTime = loadSession?.openTime ?: 0L
+        assertTrue(openTime >= beforeCreate)
+        assertTrue(openTime <= afterCreate)
+    }
+
+    @Test
+    fun prepareDoesNotOverrideExistingLoadSessionOpenTime() {
+        val kitView = RecordingKitView(context)
+        every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+        val expectedOpenTime = 1234L
+        baseContext.putDependency(
+            HybridLoadSession::class.java,
+            HybridLoadSession().apply {
+                openTime = expectedOpenTime
+            },
+        )
+        val sparklingView = SparklingView(context)
+
+        sparklingView.prepare(baseContext)
+
+        val loadSession = baseContext.getDependency(HybridLoadSession::class.java)
+        assertEquals(expectedOpenTime, loadSession?.openTime)
     }
 
     @Test
@@ -472,28 +522,33 @@ class SparklingViewTest {
         assertEquals(Color.WHITE, color)
     }
 
-    // Tests for addDebugTagView are disabled because the method is commented out in SparklingView.kt
-    // @Test
-    // fun addDebugTagViewHonoursDebugFlag() {
-    //   mockkObject(HybridCommon)
-    //   every { HybridCommon.hybridConfig?.baseInfoConfig?.isDebug } returns true
-    //   val sparklingView = SparklingView(context)
-    //
-    //   sparklingView.addDebugTagView()
-    //
-    //   assertEquals(1, sparklingView.childCount)
-    // }
+    @Test
+    fun handleUIShowsVersionedDebugTagWhenDebugToolProviderExists() {
+        context.applicationInfo.flags = context.applicationInfo.flags or ApplicationInfo.FLAG_DEBUGGABLE
+        SparklingDebugToolRegistry.setProvidersForTest(listOf(FakeDebugToolProvider()))
+        val kitView = RecordingKitView(context)
+        every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+        val sparklingView = SparklingView(context)
 
-    // @Test
-    // fun addDebugTagViewSkipsWhenDebugDisabled() {
-    //   mockkObject(HybridCommon)
-    //   every { HybridCommon.hybridConfig?.baseInfoConfig?.isDebug } returns false
-    //   val sparklingView = SparklingView(context)
-    //
-    //   sparklingView.addDebugTagView()
-    //
-    //   assertEquals(0, sparklingView.childCount)
-    // }
+        sparklingView.prepare(baseContext)
+
+        val debugTag = sparklingView.findDebugTag()
+        assertNotNull(debugTag)
+        assertEquals("sparkling-${RuntimeInfo.SPARKLING_VERSION_VALUE}", debugTag?.text.toString())
+    }
+
+    @Test
+    fun handleUISkipsDebugTagWhenDebugToolProviderMissing() {
+        context.applicationInfo.flags = context.applicationInfo.flags or ApplicationInfo.FLAG_DEBUGGABLE
+        SparklingDebugToolRegistry.setProvidersForTest(emptyList())
+        val kitView = RecordingKitView(context)
+        every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+        val sparklingView = SparklingView(context)
+
+        sparklingView.prepare(baseContext)
+
+        assertNull(sparklingView.findDebugTag())
+    }
 
     @Test
     fun sparklingViewIsFrameLayout() {
@@ -706,7 +761,7 @@ class SparklingViewTest {
 
         sparklingView.prepare(baseContext)
         sparklingView.release()
-        sparklingView.release() // Second call should be no-op
+        sparklingView.release()
 
         assertTrue(sparklingView.hasRelease())
         assertNull(sparklingView.sparklingContext)
@@ -766,8 +821,22 @@ class SparklingViewTest {
     @Test
     fun processAfterUseCachedDoesNotThrow() {
         val sparklingView = SparklingView(context)
-        // Should not throw
         sparklingView.processAfterUseCached(baseContext)
         sparklingView.processAfterUseCached(null)
+    }
+
+    private class FakeDebugToolProvider : SparklingDebugToolProvider {
+        override fun openInspectorPanel(activity: FragmentActivity) {
+        }
+    }
+
+    private fun SparklingView.findDebugTag(): TextView? {
+        for (i in 0 until childCount) {
+            val child = getChildAt(i)
+            if (child is TextView && child.text.toString().startsWith("sparkling-")) {
+                return child
+            }
+        }
+        return null
     }
 }

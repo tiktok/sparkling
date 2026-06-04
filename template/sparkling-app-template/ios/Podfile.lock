@@ -134,6 +134,7 @@ PODS:
     - Sparkling/Service (= 2.1.0-rc.12)
     - Sparkling/Utils (= 2.1.0-rc.12)
   - Sparkling-DebugTool (2.1.0-rc.12):
+    - DebugRouter
     - Lynx (~> 3.6.0)
     - LynxDevtool/Framework (~> 3.6.0)
     - LynxService/Devtool (~> 3.6.0)
@@ -157,8 +158,6 @@ PODS:
     - SparklingMethod/Core (= 2.1.0-rc.12)
   - Sparkling/Service/LynxService (2.1.0-rc.12):
     - Lynx/Framework (= 3.6.0)
-    - LynxBase/Framework (= 3.6.0)
-    - LynxServiceAPI (= 3.6.0)
     - Sparkling/Utils
     - SparklingMethod/Core (= 2.1.0-rc.12)
     - SparklingMethod/Lynx (= 2.1.0-rc.12)
@@ -235,12 +234,12 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: 295a6573c512f54ad2dd58098e64e17dcf008499
   SnapKit: d612e99e678a2d3b95bf60b0705ed0a35c03484a
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  Sparkling: 034718bb6a56d5ff1ca2abda1dbe1a4a0e0a1d37
-  Sparkling-DebugTool: 5715a16e6ee38ea6308fdaf761592822325953de
-  Sparkling-Router: 093e97e8ded7be91c1c976d82f52a436eb9050f4
-  SparklingMethod: a8da97a23b54eb3ca869abd854bfaa264cc57255
+  Sparkling: 72083ec4a80f6925659afd4f031c0a91c00d6874
+  Sparkling-DebugTool: df37fd5ae9e98dbb25d78e61b62fd4cddfe1336c
+  Sparkling-Router: 9ffe457e08a6000c0ade5b1016fe29a0a0cb17a2
+  SparklingMethod: e0009ef011f5eff7542031074987314a39fcea50
   SparklingMacro: 6f8bf9d96dbb30baef5511a73545280935ba5085
 
-PODFILE CHECKSUM: 463d4547103ad4eb84afdecf5eb91f55190cce4f
+PODFILE CHECKSUM: a448b8e879827670969e9d1c8934318f9d1487d4
 
 COCOAPODS: 1.16.2

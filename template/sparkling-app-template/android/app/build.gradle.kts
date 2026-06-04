@@ -31,69 +31,73 @@ android {
             (project.findProperty("sparklingDevServerPort") as String?) ?: "5969"
         buildConfigField("String", "SPARKLING_DEV_SERVER_HOST", "\"$sparklingDevServerHost\"")
         buildConfigField("int", "SPARKLING_DEV_SERVER_PORT", sparklingDevServerPort)
+    }
 
-        buildTypes {
-            release {
-                isMinifyEnabled = true
-                isShrinkResources = true
-                proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro",
-                )
-            }
-        }
-
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_11
-            targetCompatibility = JavaVersion.VERSION_11
-        }
-        kotlinOptions {
-            jvmTarget = "11"
-        }
-
-        // Default integrate assets from dist; switch to native assets when env is set
-        val useNativeAssets =
-            System.getenv("SPARKLING_USE_NATIVE_ASSETS")?.equals("true", ignoreCase = true) ?: false
-        sourceSets {
-            getByName("main").apply {
-                if (useNativeAssets) {
-                    // Use native assets directory (used in --copy mode)
-                    assets.setSrcDirs(listOf("src/main/assets"))
-                } else {
-                    // Default: use dist directly; no copy required
-                    assets.setSrcDirs(listOf("../../dist"))
-                }
-            }
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 
-    dependencies {
-        implementation(libs.androidx.core.ktx)
-        implementation(libs.androidx.appcompat)
-        testImplementation(libs.junit)
-        androidTestImplementation(libs.androidx.junit)
-        androidTestImplementation(libs.androidx.espresso.core)
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
 
-        implementation("com.tiktok.sparkling:sparkling:2.1.0-rc.12") {
-            exclude(group = "org.lynxsdk.lynx", module = "lynx-service-devtool")
-            exclude(group = "org.lynxsdk.lynx", module = "lynx-devtool")
-            exclude(group = "org.lynxsdk.lynx", module = "debug-router")
-            exclude(group = "org.lynxsdk.lynx", module = "base-devtool")
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+
+    // Default integrate assets from dist; switch to native assets when env is set
+    val useNativeAssets =
+        System.getenv("SPARKLING_USE_NATIVE_ASSETS")?.equals("true", ignoreCase = true) ?: false
+    sourceSets {
+        getByName("main").apply {
+            if (useNativeAssets) {
+                // Use native assets directory (used in --copy mode)
+                assets.setSrcDirs(listOf("src/main/assets"))
+            } else {
+                // Default: use dist directly; no copy required
+                assets.setSrcDirs(listOf("../../dist"))
+            }
         }
-        implementation("com.tiktok.sparkling:sparkling-method:2.1.0-rc.12")
-        implementation("com.squareup.okhttp3:okhttp:4.9.0")
+        getByName("debug").manifest.srcFile("src/debug/AndroidManifest.xml")
+        getByName("release").java.srcDirs("src/release/java")
+        getByName("debug").java.srcDirs("src/debug/java")
+    }
+}
 
-        implementation(libs.fresco)
-        implementation(libs.fresco.animated.gif)
-        implementation(libs.fresco.animated.webp)
-        implementation(libs.fresco.webp.support)
-        implementation(libs.fresco.animated.base)
+dependencies {
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+
+    implementation("com.tiktok.sparkling:sparkling:2.1.0-rc.12") {
+        exclude(group = "org.lynxsdk.lynx", module = "lynx-service-devtool")
+        exclude(group = "org.lynxsdk.lynx", module = "lynx-devtool")
+        exclude(group = "org.lynxsdk.lynx", module = "debug-router")
+        exclude(group = "org.lynxsdk.lynx", module = "base-devtool")
+    }
+    implementation("com.tiktok.sparkling:sparkling-method:2.1.0-rc.12")
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
+
+    implementation(libs.fresco)
+    implementation(libs.fresco.animated.gif)
+    implementation(libs.fresco.animated.webp)
+    implementation(libs.fresco.webp.support)
+    implementation(libs.fresco.animated.base)
 
 //    kapt(libs.lynx.processor)
 
-        // BEGIN SPARKLING AUTOLINK
-        implementation(project(":sparkling-navigation"))
-        debugImplementation(project(":sparkling-debug-tool"))
-        // END SPARKLING AUTOLINK
-    }
+    // BEGIN SPARKLING AUTOLINK
+    implementation(project(":sparkling-navigation"))
+    debugImplementation(project(":sparkling-debug-tool"))
+    // END SPARKLING AUTOLINK
 }

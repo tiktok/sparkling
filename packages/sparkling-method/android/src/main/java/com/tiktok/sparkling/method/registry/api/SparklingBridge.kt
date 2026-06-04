@@ -223,12 +223,33 @@ class SparklingBridge : IReleasable {
         }
     }
 
+    fun registerBusinessIDLMethod(
+        name: String,
+        scope: BridgePlatformType = BridgePlatformType.ALL,
+        clazz: Class<out IDLBridgeMethod>? = null,
+        factory: () -> IDLBridgeMethod,
+    ) {
+        getBridgeContext().getNamespace()?.let {
+            getBridgeContext().businessCallHandler?.registerMethod(name, scope, clazz, factory)
+        }
+    }
+
     fun registerIDLMethod(
         clazz: Class<out IDLBridgeMethod>?,
         scope: BridgePlatformType = BridgePlatformType.ALL,
         namespace: String = DEFAULT_NAMESPACE,
     ) {
         SparklingBridgeManager.registerIDLMethod(clazz, scope, namespace)
+    }
+
+    fun registerIDLMethod(
+        name: String,
+        scope: BridgePlatformType = BridgePlatformType.ALL,
+        namespace:String = DEFAULT_NAMESPACE,
+        clazz: Class<out IDLBridgeMethod>? = null,
+        factory: () -> IDLBridgeMethod,
+    ) {
+        SparklingBridgeManager.registerIDLMethod(name, scope, namespace, clazz, factory)
     }
 
     fun isBusinessIDLMethodExists(
@@ -249,7 +270,18 @@ class SparklingBridge : IReleasable {
         innerBridge.getBridgeContext().defaultCallHandler.registerLocalIDLMethod(clazz, scope)
     }
 
-    fun getBridgeSDKContext(): IBridgeContext = bridgeSdkContext
+    fun registerLocalIDLMethod(
+        name: String,
+        scope: BridgePlatformType = BridgePlatformType.ALL,
+        clazz: Class<out IDLBridgeMethod>? = null,
+        factory: () -> IDLBridgeMethod,
+    ) {
+        innerBridge.getBridgeContext().defaultCallHandler.registerLocalIDLMethod(name, scope, clazz, factory)
+    }
+
+    fun getBridgeSDKContext(): IBridgeContext {
+        return bridgeSdkContext
+    }
 
 //    @Deprecated("don't use this method")
     fun getBridgeContext(): BridgeContext = innerBridge.getBridgeContext()

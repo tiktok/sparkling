@@ -251,6 +251,7 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
         self.context = context
         self.context?.originURL = self.originURL?.absoluteString
 
+        self.ensureContainerInitTime()
         self.addContainerDefaultGlobalProps()
         if self.containerLifecycleDelegate == nil {
             self.containerLifecycleDelegate = context.containerLifecycleDelegate
@@ -295,6 +296,17 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
                 "SPK_version": SPKVersion.SPKVersion()
             ])
         return
+    }
+
+    private func ensureContainerInitTime() {
+        guard let context = self.context, context.containerInitTime == nil else {
+            return
+        }
+        let timestamp =
+            self.initStartTimeStamp > 0
+            ? self.initStartTimeStamp
+            : Date().timeIntervalSince1970 * 1000
+        context.containerInitTime = NSNumber(value: Int64(timestamp))
     }
 
     /// Lays out the view's subviews.

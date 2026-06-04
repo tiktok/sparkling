@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sparkling_panel_background">#FF111111</color>
+    <color name="sparkling_panel_toolbar_bg">#FF1C1C1E</color>
+    <color name="sparkling_panel_toolbar_separator">#33FFFFFF</color>
+    <color name="sparkling_panel_section_bg">#FF1F2937</color>
+
+    <color name="sparkling_panel_text_primary">#FFF5F5F7</color>
+    <color name="sparkling_panel_text_secondary">#FFB8C0CC</color>
+    <color name="sparkling_panel_text_hint">#FF707A86</color>
+
+    <color name="sparkling_console_background">#FF111111</color>
+    <color name="sparkling_console_toolbar_bg">@color/sparkling_panel_toolbar_bg</color>
+    <color name="sparkling_console_verbose">#FF9CA3AF</color>
+    <color name="sparkling_console_debug">#FF7AA2FF</color>
+    <color name="sparkling_console_info">#FFF5F5F7</color>
+    <color name="sparkling_console_warn">#FFFFB86B</color>
+    <color name="sparkling_console_error">#FFFF7A7A</color>
+</resources>

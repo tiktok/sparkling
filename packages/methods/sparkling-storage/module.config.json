@@ -41,7 +41,7 @@
     }
   },
   "android": {
-    "packageName": "com.tiktok.sparkling.methods.storage",
+    "packageName": "com.tiktok.sparkling.method.storage",
     "className": "StorageMethod",
     "buildGradle": "android/build.gradle.kts"
   },

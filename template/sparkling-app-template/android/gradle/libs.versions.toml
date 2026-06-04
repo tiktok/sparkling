@@ -12,7 +12,11 @@ fragmentKtx = "1.5.6"
 lynxSdk="3.7.0"
 primjs="3.7.0"
 coroutines="1.5.6"
+
 fresco = "2.3.0"
+material = "1.12.0"
+retrofit = "2.9.0"
+okhttp = "4.12.0"
 
 
 [libraries]
@@ -21,6 +25,9 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
+coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
 
 lynx = { group = "org.lynxsdk.lynx", name = "lynx", version.ref = "lynxSdk" }
 lynx-devtool = { module = "org.lynxsdk.lynx:lynx-devtool", version.ref = "lynxSdk" }
@@ -32,12 +39,19 @@ lynx-service-log = { group = "org.lynxsdk.lynx", name = "lynx-service-log", vers
 lynx-service-http = { group = "org.lynxsdk.lynx", name = "lynx-service-http", version.ref = "lynxSdk" }
 lynx-service-devtool = { group = "org.lynxsdk.lynx", name = "lynx-service-devtool", version.ref = "lynxSdk" }
 lynx-processor = { group = "org.lynxsdk.lynx", name = "lynx-processor", version.ref = "lynxSdk" }
+lynx-xelement = { group = "org.lynxsdk.lynx", name = "xelement", version.ref = "lynxSdk" }
+lynx-xelement-input = { group = "org.lynxsdk.lynx", name = "xelement-input", version.ref = "lynxSdk" }
+okhttp = {group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp"}
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 
 fresco = { group = "com.facebook.fresco", name = "fresco", version.ref = "fresco" }
 fresco-animated-gif = { group = "com.facebook.fresco", name = "animated-gif", version.ref = "fresco" }
 fresco-animated-webp = { group = "com.facebook.fresco", name = "animated-webp", version.ref = "fresco" }
 fresco-webp-support = { group = "com.facebook.fresco", name = "webpsupport", version.ref = "fresco" }
 fresco-animated-base = { group = "com.facebook.fresco", name = "animated-base", version.ref = "fresco" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 
 [plugins]

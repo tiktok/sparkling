@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lines wrap by default so long stack traces aren't cut off on the right.
+     Tap to toggle between collapsed (4-line) preview and full-text view. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="12dp"
+    android:paddingEnd="6dp"
+    android:background="@color/sparkling_panel_background">
+
+    <TextView
+        android:id="@+id/txt_console_message"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingVertical="8dp"
+        android:textSize="14sp"
+        android:textIsSelectable="false"
+        android:breakStrategy="simple"
+        android:hyphenationFrequency="none"
+        android:textColor="@color/sparkling_console_info" />
+
+    <ImageButton
+        android:id="@+id/btn_console_copy"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:padding="7dp"
+        android:src="@drawable/sparkling_ic_copy"
+        android:tint="@color/sparkling_panel_text_primary"
+        android:background="@android:color/transparent"
+        android:contentDescription="Copy log" />
+</LinearLayout>

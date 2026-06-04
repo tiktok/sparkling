@@ -29,7 +29,7 @@
     }
   },
   "android": {
-    "packageName": "com.tiktok.sparkling.methods.router",
+    "packageName": "com.tiktok.sparkling.method.router",
     "className": "RouterMethod",
     "buildGradle": "android/build.gradle.kts"
   },

@@ -45,25 +45,29 @@ object SchemeParser {
         forceThemeStyle: String?,
     ): String? {
         val baseValue = uri.safeGetQueryParameter(key)
-        val isDark =
-            when (forceThemeStyle?.lowercase()) {
-                "dark" -> {
-                    true
-                }
+        val lightValue = uri.safeGetQueryParameter("${key}_light")
+        val darkValue = uri.safeGetQueryParameter("${key}_dark")
 
-                "light" -> {
-                    false
-                }
+        if (lightValue == null && darkValue == null) {
+            return baseValue
+        }
 
-                else -> {
-                    val nightMode =
-                        ColorUtil.appContext.resources.configuration.uiMode and
-                            Configuration.UI_MODE_NIGHT_MASK
-                    nightMode == Configuration.UI_MODE_NIGHT_YES
-                }
+        val isDark = when (forceThemeStyle?.lowercase()) {
+            "dark" -> true
+            "light" -> false
+            else -> {
+                val nightMode = runCatching {
+                    ColorUtil.appContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+                }.getOrDefault(Configuration.UI_MODE_NIGHT_NO)
+                nightMode == Configuration.UI_MODE_NIGHT_YES
             }
-        val suffix = if (isDark) "_dark" else "_light"
-        return uri.safeGetQueryParameter("$key$suffix") ?: baseValue
+        }
+
+        return if (isDark) {
+            darkValue ?: lightValue ?: baseValue
+        } else {
+            lightValue ?: darkValue ?: baseValue
+        }
     }
 
     @JvmStatic

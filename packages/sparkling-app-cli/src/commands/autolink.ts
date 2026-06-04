@@ -248,6 +248,11 @@ async function discoverModules(cwd: string): Promise<MethodModuleConfig[]> {
 
       const androidConfig = config.android as Record<string, unknown> | undefined;
       const iosConfig = config.ios as Record<string, unknown> | undefined;
+      const methodsConfig = config.methods && typeof config.methods === 'object'
+        ? config.methods as Record<string, unknown>
+        : undefined;
+      const androidPackageName = typeof androidConfig?.packageName === 'string' ? androidConfig.packageName : undefined;
+      const androidClassName = typeof androidConfig?.className === 'string' ? androidConfig.className : undefined;
 
       const androidBuild = (androidConfig?.buildGradle && typeof androidConfig.buildGradle === 'string')
         ? path.resolve(moduleRoot, androidConfig.buildGradle)
@@ -269,8 +274,13 @@ async function discoverModules(cwd: string): Promise<MethodModuleConfig[]> {
         root: moduleRoot,
         devtool: config.devtool === true,
         android: {
-          packageName: typeof androidConfig?.packageName === 'string' ? androidConfig.packageName : undefined,
-          className: typeof androidConfig?.className === 'string' ? androidConfig.className : undefined,
+          packageName: androidPackageName,
+          className: androidClassName,
+          methodClassNames: inferAndroidMethodClassNames(
+            androidPackageName,
+            androidClassName,
+            Object.keys(methodsConfig ?? {}),
+          ),
           projectDir: path.dirname(androidBuild),
           buildGradle: androidBuild,
         },
@@ -312,6 +322,28 @@ function resolveDefaultAndroidBuildGradle(moduleRoot: string): string {
   if (fs.existsSync(kts)) return kts;
   if (fs.existsSync(groovy)) return groovy;
   return kts;
+}
+
+function upperFirst(value: string): string {
+  return value ? `${value.charAt(0).toUpperCase()}${value.slice(1)}` : value;
+}
+
+function inferAndroidMethodClassNames(
+  androidPackageName: string | undefined,
+  androidClassName: string | undefined,
+  methodNames: string[],
+): string[] {
+  if (!androidPackageName || !androidClassName || methodNames.length === 0) {
+    return [];
+  }
+
+  const classPrefix = androidClassName.endsWith('Method')
+    ? androidClassName.slice(0, -'Method'.length)
+    : androidClassName;
+
+  return methodNames
+    .filter((name) => name && /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(name))
+    .map((name) => `${androidPackageName}.${name}.${classPrefix}${upperFirst(name)}Method`);
 }
 
 function stripExistingAndroidIncludes(content: string, moduleNames: string[]): string {
@@ -779,11 +811,20 @@ function writeAndroidRegistry(modules: MethodModuleConfig[], appPackage: string,
   const entries = modules.map(m => {
     const pkg = m.android?.packageName ?? '';
     const cls = m.android?.className ?? '';
+    const methodClassNames = m.android?.methodClassNames ?? [];
+    const methodClassNameLines = methodClassNames.length
+      ? [
+        '                methodClassNames = listOf(',
+        ...methodClassNames.map(name => `                    "${name}",`),
+        '                ),',
+      ]
+      : [];
     return [
       '            SparklingAutolinkModule(',
       `                name = "${m.name}",`,
       `                androidPackage = "${pkg}",`,
       `                className = "${cls}",`,
+      ...methodClassNameLines,
       '            ),',
     ].join('\n');
   }).join('\n');
@@ -804,6 +845,7 @@ function writeAndroidRegistry(modules: MethodModuleConfig[], appPackage: string,
     '    val name: String,',
     '    val androidPackage: String?,',
     '    val className: String?,',
+    '    val methodClassNames: List<String> = emptyList(),',
     ')',
     '',
     'object SparklingAutolink {',

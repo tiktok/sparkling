@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.tiktok.sparkling.debugtool.floating.SparklingFloatingView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="2dp"
+    android:background="@android:color/transparent">
+
+    <!-- CardView elevation provides the drop shadow. Kept intentionally light
+         (2dp) so the halo around the ball stays subtle without disappearing
+         on light app backgrounds. -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        app:cardBackgroundColor="#FFFFFFFF"
+        app:cardCornerRadius="26dp"
+        app:cardElevation="2dp"
+        app:cardPreventCornerOverlap="false"
+        app:cardUseCompatPadding="false">
+
+        <ImageView
+            android:id="@+id/sparkling_floating_ball_icon"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_gravity="center"
+            android:contentDescription="Sparkling debug tool"
+            android:src="@drawable/sparkling_floating_logo" />
+    </androidx.cardview.widget.CardView>
+</com.tiktok.sparkling.debugtool.floating.SparklingFloatingView>

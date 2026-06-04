@@ -71,6 +71,7 @@ export interface MethodModuleConfig {
   android?: {
     packageName?: string;
     className?: string;
+    methodClassNames?: string[];
     projectDir?: string;
     buildGradle?: string;
   };

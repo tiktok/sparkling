@@ -15,8 +15,16 @@ Pod::Spec.new do |s|
     'Sources/**/*.{h,m,swift}'
   ]
 
-  s.dependency 'Lynx'
-  s.dependency 'LynxService/Devtool'
-  s.dependency 'LynxDevtool/Framework'
+  s.resource_bundles = {
+    'SparklingDebugToolAssets' => [
+      'packages/sparkling-debug-tool/ios/Resources/**/*.{png,xcassets,json}',
+      'ios/Resources/**/*.{png,xcassets,json}',
+      'Resources/**/*.{png,xcassets,json}'
+    ]
+  }
+
+  s.dependency 'Lynx', '~> 3.7.0'
+  s.dependency 'LynxService/Devtool', '~> 3.7.0'
+  s.dependency 'LynxDevtool/Framework', '~> 3.7.0'
   s.dependency 'DebugRouter'
 end

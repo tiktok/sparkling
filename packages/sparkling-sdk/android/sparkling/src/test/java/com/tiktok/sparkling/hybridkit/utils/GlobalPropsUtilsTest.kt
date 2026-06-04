@@ -5,6 +5,7 @@ package com.tiktok.sparkling.hybridkit.utils
 
 import android.app.Application
 import android.content.Context
+import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.HybridEnvironment
 import com.tiktok.sparkling.hybridkit.config.BaseInfoConfig
 import com.tiktok.sparkling.hybridkit.config.RuntimeInfo
@@ -193,5 +194,29 @@ class GlobalPropsUtilsTest {
         assertNull(globalProps["remove-me"])
         assertEquals("value-2", globalProps["keep-me"])
         assertEquals("stable", globalProps["stable-keep"])
+    }
+
+    @Test
+    fun testContainerInitTimeUsesSingleSourceForGlobalPropsAndQueryItems() {
+        val hybridContext =
+            HybridContext().apply {
+                scheme = "sslocal://lynxview?url=https%3A%2F%2Fexample.com%2Ftemplate.js%3Ffoo%3Dbar"
+            }
+
+        GlobalPropsUtils.instance.init(hybridContext, context)
+
+        val globalProps = GlobalPropsUtils.instance.getGlobalProps(hybridContext.containerId)
+        val containerInitTime = globalProps["containerInitTime"] as String
+        val queryItems = globalProps[RuntimeInfo.QUERY_ITEMS] as Map<*, *>
+
+        assertEquals(containerInitTime, queryItems["containerInitTime"])
+        assertTrue(containerInitTime.toLong() > 0)
+        assertEquals("bar", queryItems["foo"])
+
+        val updatedProps = GlobalPropsUtils.instance.updateUnstablePropsSupplier(hybridContext, context)
+        val updatedQueryItems = updatedProps[RuntimeInfo.QUERY_ITEMS] as Map<*, *>
+
+        assertEquals(containerInitTime, updatedProps["containerInitTime"])
+        assertEquals(containerInitTime, updatedQueryItems["containerInitTime"])
     }
 }

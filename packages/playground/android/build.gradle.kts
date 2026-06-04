@@ -20,4 +20,12 @@ subprojects {
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions.jvmTarget = "11"
     }
+
+    configurations.configureEach {
+        resolutionStrategy.dependencySubstitution {
+            substitute(module("com.tiktok.sparkling:sparkling-method"))
+                .using(project(":sparkling-method"))
+                .because("Use the local sparkling-method project when building the workspace playground")
+        }
+    }
 }

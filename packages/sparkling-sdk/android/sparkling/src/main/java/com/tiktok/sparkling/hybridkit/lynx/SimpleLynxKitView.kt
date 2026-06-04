@@ -21,6 +21,7 @@ import com.tiktok.sparkling.hybridkit.utils.GlobalPropsUtils
 import com.tiktok.sparkling.hybridkit.utils.LogLevel
 import com.tiktok.sparkling.hybridkit.utils.LogUtils
 import com.tiktok.sparkling.hybridkit.utils.ViewEventUtils
+import com.tiktok.sparkling.method.registry.api.SparklingMethodInvocationCenter
 import org.json.JSONObject
 
 @SuppressLint("ViewConstructor")
@@ -219,7 +220,11 @@ class SimpleLynxKitView :
 
     override fun hasDestroyed(): Boolean = hasDestroyed
 
-    override fun getGlobalProps(): MutableMap<String, Any>? = hybridContext.globalProps
+    override fun getGlobalProps(): MutableMap<String, Any>? {
+        return GlobalPropsUtils.instance.getGlobalProps(hybridContext.containerId).apply {
+            putAll(hybridContext.globalProps)
+        }
+    }
 
     override fun getScheme(): String? = hybridContext.resolveFullScheme()
 
@@ -247,16 +252,22 @@ class SimpleLynxKitView :
         hybridContext.bridge?.sendEvent(eventName, params)
     }
 
-    private fun sendGlobalEventInternal(
-        eventName: String,
-        params: List<Any>?,
-    ) {
-        val data =
-            if (params != null) {
-                JavaOnlyArray.from(params)
-            } else {
-                JavaOnlyArray()
-            }
+    override fun sendEventByMap(eventName: String, params: Map<String, Any?>?) {
+        super.sendEventByMap(eventName, params)
+        hybridContext.bridge?.sendEvent(eventName, params?.let { JSONObject(it) })
+    }
+
+    private fun sendGlobalEventInternal(eventName: String, params: List<Any>?) {
+        SparklingMethodInvocationCenter.notifyNativeToJsEvent(
+            name = eventName,
+            params = params,
+            containerId = hybridContext.containerId,
+        )
+        val data = if (params != null) {
+            JavaOnlyArray.from(params)
+        } else {
+            JavaOnlyArray()
+        }
         sendGlobalEvent(eventName, data)
     }
 

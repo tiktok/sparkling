@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unified Sparkling debug inspector. Renders a half-sheet with three tabs:
+     Console / GlobalProps / Method calls. Close icon lives on the top-right;
+     the host needs no per-tab integration. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/sparkling_panel_background">
+
+    <!-- Top bar: title + close icon (right) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="6dp">
+
+        <TextView
+            android:id="@+id/txt_inspector_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:text="Sparkling Inspector"
+            android:textColor="@color/sparkling_panel_text_primary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btn_inspector_close"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="6dp"
+            android:src="@drawable/sparkling_ic_close"
+            android:tint="@color/sparkling_panel_text_primary"
+            android:background="@drawable/sparkling_inspector_close_bg"
+            android:contentDescription="Close" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/sparkling_panel_toolbar_separator" />
+
+    <!-- Tab strip -->
+    <LinearLayout
+        android:id="@+id/inspector_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:paddingHorizontal="0dp"
+        android:paddingVertical="0dp">
+
+        <TextView
+            android:id="@+id/tab_console"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Log"
+            android:textSize="13sp"
+            android:textStyle="normal"
+            android:textColor="@color/sparkling_inspector_tab_text"
+            android:background="@drawable/sparkling_flat_tab_bg"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/tab_methods"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Sparkling Method"
+            android:textSize="13sp"
+            android:textStyle="normal"
+            android:textColor="@color/sparkling_inspector_tab_text"
+            android:background="@drawable/sparkling_flat_tab_bg"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/tab_global_props"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="GlobalProps"
+            android:textSize="13sp"
+            android:textStyle="normal"
+            android:textColor="@color/sparkling_inspector_tab_text"
+            android:background="@drawable/sparkling_flat_tab_bg"
+            android:clickable="true"
+            android:focusable="true" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/sparkling_panel_toolbar_separator" />
+
+    <!-- Content area; each panel toggles its visibility -->
+    <FrameLayout
+        android:id="@+id/inspector_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

@@ -84,6 +84,15 @@ class DefaultCallHandler : IBridgeHandler {
         pool.registerLocalIDLMethod(clazz, scope)
     }
 
+    fun registerLocalIDLMethod(
+        name: String,
+        scope: BridgePlatformType = BridgePlatformType.ALL,
+        clazz: Class<out IDLBridgeMethod>? = null,
+        factory: () -> IDLBridgeMethod,
+    ) {
+        pool.registerLocalIDLMethod(name, scope, clazz, factory)
+    }
+
     fun setBridgeContext(context: IBridgeContext) {
         this.context = context
         this.pool.setBridgeContext(context)

@@ -4,6 +4,8 @@
 package com.tiktok.sparkling
 
 import android.content.Context
+import android.content.ContextWrapper
+import android.content.pm.ApplicationInfo
 import android.graphics.Color
 import android.os.Looper
 import android.util.AttributeSet
@@ -13,17 +15,20 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.fragment.app.FragmentActivity
 import com.lynx.tasm.LynxView
 // import androidx.core.graphics.toColorInt
-import com.tiktok.sparkling.hybridkit.HybridCommon
+import com.tiktok.sparkling.debug.SparklingDebugToolRegistry
 import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.HybridKit
 import com.tiktok.sparkling.hybridkit.base.HybridKitError
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
+import com.tiktok.sparkling.hybridkit.base.HybridLoadSession
 import com.tiktok.sparkling.hybridkit.base.IHybridKitLifeCycle
 import com.tiktok.sparkling.hybridkit.base.IHybridView
 import com.tiktok.sparkling.hybridkit.base.IKitView
 import com.tiktok.sparkling.hybridkit.base.IPerformanceView
+import com.tiktok.sparkling.hybridkit.config.RuntimeInfo
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 import org.json.JSONObject
 
@@ -42,7 +47,8 @@ class SparklingView(
     private var kitViewDelegate: IKitView? = null
     private var observedKitRealView: View? = null
     var sparklingContext: SparklingContext? = null
-    // private var debugInfoTag: TextView? = null
+    private val initStartTimestamp = System.currentTimeMillis()
+    private var debugInfoTag: TextView? = null
 
     var sparkContentMode: SparklingViewContentMode = SparklingViewContentMode.FIXED_SIZE
     var contentSize: Size = Size(0, 0)
@@ -80,6 +86,7 @@ class SparklingView(
 
     fun prepare(sparklingContext: SparklingContext) {
         this.sparklingContext = sparklingContext
+        ensureLoadSession(sparklingContext)
 
         val uiProvider = sparklingContext.sparklingUIProvider
         if (uiProvider != null) {
@@ -331,6 +338,17 @@ class SparklingView(
         )
     }
 
+    private fun ensureLoadSession(sparklingContext: SparklingContext) {
+        val loadSession =
+            sparklingContext.getDependency(HybridLoadSession::class.java)
+                ?: HybridLoadSession().also {
+                    sparklingContext.putDependency(HybridLoadSession::class.java, it)
+                }
+        if (loadSession.openTime == null) {
+            loadSession.openTime = initStartTimestamp
+        }
+    }
+
     override fun getHybridViewContext(): Context = context
 
     override fun loadUrl() {
@@ -385,6 +403,8 @@ class SparklingView(
         observedKitRealView?.removeOnLayoutChangeListener(kitLayoutChangeListener)
         observedKitRealView = null
         kitViewDelegate?.destroy(true)
+        debugInfoTag?.let { removeView(it) }
+        debugInfoTag = null
         loadingView = null
         errorView = null
         sparklingContext = null
@@ -406,27 +426,49 @@ class SparklingView(
                     ?.setBackgroundColor(ColorUtil.parseColorSafely(it))
             }
         }
-        // addDebugTagView()
+        addDebugTagView()
     }
 
-    /*
-    fun addDebugTagView() {
-        if (HybridCommon.hybridConfig?.baseInfoConfig?.isDebug == true) {
-            debugInfoTag = TextView(context).apply {
-                text = "Sparkling-LynxView"
-                setTextColor(Color.BLACK)
-                textSize = 10f
-                setPadding(55, 4, 7, 4)
-                setBackgroundColor("#440066CC".toColorInt())
-                layoutParams =
-                    LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).apply {
-                        gravity = Gravity.BOTTOM or Gravity.START
-                    }
+    private fun addDebugTagView() {
+        if (debugInfoTag != null || !shouldShowDebugTag()) return
+        debugInfoTag = TextView(context).apply {
+            text = "sparkling-${RuntimeInfo.SPARKLING_VERSION_VALUE}"
+            setTextColor(Color.WHITE)
+            textSize = 12f
+            gravity = Gravity.CENTER
+            setPadding(dp(8), 0, dp(8), 0)
+            setBackgroundColor(Color.rgb(0, 122, 255))
+            layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, dp(28)).apply {
+                gravity = Gravity.BOTTOM or Gravity.START
+                leftMargin = 0
+                bottomMargin = dp(12)
             }
-            addView(debugInfoTag)
+            setOnClickListener { openDebugInspector() }
+        }
+        addView(debugInfoTag)
+        debugInfoTag?.bringToFront()
+    }
+
+    private fun shouldShowDebugTag(): Boolean {
+        val appDebug = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        if (!appDebug) return false
+        return SparklingDebugToolRegistry.hasDebugToolProvider()
+    }
+
+    private fun openDebugInspector() {
+        val activity = findActivity(context) as? FragmentActivity ?: return
+        SparklingDebugToolRegistry.openInspectorPanel(activity)
+    }
+
+    private fun findActivity(ctx: Context?): android.app.Activity? {
+        return when (ctx) {
+            is android.app.Activity -> ctx
+            is ContextWrapper -> findActivity(ctx.baseContext)
+            else -> null
         }
     }
-     */
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     fun showLoadingView() {
         if (hideLoading) return

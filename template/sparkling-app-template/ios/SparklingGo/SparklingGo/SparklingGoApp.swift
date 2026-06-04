@@ -29,6 +29,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         SPKKit.DIContainer.register(SPKTrackerService.self, scope: ServiceScope.transient) {
             SparklingGoTrackerService()
         }
+        DebugConsoleSupport.setup()
         return true
     }
 }
