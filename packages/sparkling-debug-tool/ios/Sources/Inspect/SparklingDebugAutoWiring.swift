@@ -218,20 +218,14 @@ private final class LiveWrapperLynxRegistry {
     }
 }
 
-/// Default floating-ball action handler installed by the debug tool when no
-/// custom handler is set; opens the unified inspector panel.
+/// Default debugTag action handler installed by the debug tool when no custom
+/// handler is set; opens the unified inspector panel.
 internal final class SparklingDefaultFloatingBallHandler: NSObject, SparklingFloatingBallActionHandler {
     static let shared = SparklingDefaultFloatingBallHandler()
 
     func sparklingFloatingBallDidTap(presenter: UIViewController?) -> Bool {
         guard let presenter = presenter else { return false }
         SparklingDebugTool.presentInspectorPanel(from: presenter)
-        return true
-    }
-
-    func sparklingFloatingBallDidLongPress(presenter: UIViewController?) -> Bool {
-        guard let presenter = presenter else { return false }
-        SparklingDebugTool.presentInspectorPanel(from: presenter, initialTab: .console)
         return true
     }
 }

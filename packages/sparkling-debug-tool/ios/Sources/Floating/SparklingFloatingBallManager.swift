@@ -5,16 +5,17 @@
 import Foundation
 import UIKit
 
-/// Optional callbacks that override the floating ball default actions.
+/// Optional callbacks that override the debugTag default actions.
 /// Return `true` to consume the event; the default action is then skipped.
 @objc public protocol SparklingFloatingBallActionHandler: AnyObject {
     @objc optional func sparklingFloatingBallDidTap(presenter: UIViewController?) -> Bool
+    /// Legacy callback kept for source compatibility. Sparkling no longer
+    /// installs a long-press gesture to invoke this hook.
     @objc optional func sparklingFloatingBallDidLongPress(presenter: UIViewController?) -> Bool
 }
 
-/// Owns the overlay window that hosts the [SparklingFloatingBall], routing
-/// tap and long-press events to the registered handler or the default
-/// in-app debug entry points.
+/// Owns the overlay window that hosts the bottom-left debugTag, routing taps
+/// to the registered handler or the default in-app debug entry point.
 @objcMembers
 public final class SparklingFloatingBallManager: NSObject {
     public static let shared = SparklingFloatingBallManager()
@@ -22,18 +23,10 @@ public final class SparklingFloatingBallManager: NSObject {
     private var overlayWindow: UIWindow?
     private weak var actionHandler: SparklingFloatingBallActionHandler?
     private var debugTag: UILabel?
-    private weak var gestureHostView: UIView?
-    private var twoFingerLongPress: UILongPressGestureRecognizer?
     private var enabled: Bool = false
 
     private override init() {
         super.init()
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(didChangeStatusBarOrientation),
-            name: UIApplication.didChangeStatusBarOrientationNotification,
-            object: nil
-        )
         if #available(iOS 13.0, *) {
             NotificationCenter.default.addObserver(
                 self,
@@ -91,13 +84,13 @@ public final class SparklingFloatingBallManager: NSObject {
         host.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         window.rootViewController = host
         // Force the host view into the window's bounds before positioning the
-        // ball (otherwise the view stays at its zero/intrinsic size on some
-        // SwiftUI hosts and the ball lands off-screen).
+        // tag (otherwise the view stays at its zero/intrinsic size on some
+        // SwiftUI hosts and the tag lands off-screen).
         host.view.frame = window.bounds
         host.view.layoutIfNeeded()
 
         let tag = UILabel()
-        tag.text = "debugTag"
+        tag.text = "sparkling"
         tag.font = .systemFont(ofSize: 12, weight: .semibold)
         tag.textColor = .white
         tag.backgroundColor = UIColor(red: 0.0, green: 0.43, blue: 1.0, alpha: 1.0)
@@ -110,7 +103,7 @@ public final class SparklingFloatingBallManager: NSObject {
         host.view.addSubview(tag)
         NSLayoutConstraint.activate([
             tag.leadingAnchor.constraint(equalTo: host.view.leadingAnchor),
-            tag.bottomAnchor.constraint(equalTo: host.view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
+            tag.bottomAnchor.constraint(equalTo: host.view.bottomAnchor),
             tag.widthAnchor.constraint(greaterThanOrEqualToConstant: 72),
             tag.heightAnchor.constraint(equalToConstant: 28),
         ])
@@ -119,33 +112,14 @@ public final class SparklingFloatingBallManager: NSObject {
 
         self.debugTag = tag
         self.overlayWindow = window
-        attachTwoFingerLongPressIfNeeded()
     }
 
     private func uninstall() {
-        if let recognizer = twoFingerLongPress, let host = gestureHostView {
-            host.removeGestureRecognizer(recognizer)
-        }
-        twoFingerLongPress = nil
-        gestureHostView = nil
         debugTag?.removeFromSuperview()
         debugTag = nil
         overlayWindow?.isHidden = true
         overlayWindow?.rootViewController = nil
         overlayWindow = nil
-    }
-
-    private func attachTwoFingerLongPressIfNeeded() {
-        guard twoFingerLongPress == nil else { return }
-        guard let host = keyWindowForPresentation()?.rootViewController?.view else { return }
-        let recognizer = UILongPressGestureRecognizer(target: self, action: #selector(handleTwoFingerLongPress(_:)))
-        recognizer.numberOfTouchesRequired = 2
-        recognizer.minimumPressDuration = 0.5
-        recognizer.cancelsTouchesInView = false
-        recognizer.delegate = self
-        host.addGestureRecognizer(recognizer)
-        twoFingerLongPress = recognizer
-        gestureHostView = host
     }
 
     @available(iOS 13.0, *)
@@ -184,46 +158,18 @@ public final class SparklingFloatingBallManager: NSObject {
         defaultTap(presenter: presenter)
     }
 
-    private func handleLongPress() {
-        let presenter = topPresentedViewController()
-        if actionHandler?.sparklingFloatingBallDidLongPress?(presenter: presenter) == true {
-            return
-        }
-        defaultLongPress(presenter: presenter)
-    }
-
     @objc private func debugTagTapped() {
         handleTap()
-    }
-
-    @objc private func handleTwoFingerLongPress(_ recognizer: UILongPressGestureRecognizer) {
-        guard recognizer.state == .began else { return }
-        handleLongPress()
     }
 
     private func defaultTap(presenter: UIViewController?) {
         guard let presenter else { return }
         SparklingDebugTool.presentConsolePanel(from: presenter)
     }
-
-    private func defaultLongPress(presenter: UIViewController?) {
-        guard let presenter else { return }
-        SparklingDebugTool.presentInspectorPanel(from: presenter, initialTab: .console)
-    }
-
-    @objc private func didChangeStatusBarOrientation() {
-        attachTwoFingerLongPressIfNeeded()
-    }
-}
-
-extension SparklingFloatingBallManager: UIGestureRecognizerDelegate {
-    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
-    }
 }
 
 /// A UIWindow whose empty regions allow touches to pass through to the
-/// host app's regular windows, so the floating ball doesn't intercept user
+/// host app's regular windows, so the debugTag doesn't intercept user
 /// interaction outside its own bounds.
 private final class PassthroughWindow: UIWindow {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {

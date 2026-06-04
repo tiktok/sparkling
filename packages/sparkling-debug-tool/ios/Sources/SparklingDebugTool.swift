@@ -57,27 +57,26 @@ public class SparklingDebugTool: NSObject {
         SparklingLynxConsoleSink.detach(from: lynxView)
     }
 
-    /// Show or hide the Sparkling debug floating ball. The ball is hosted in
+    /// Show or hide the Sparkling bottom-left debugTag. The tag is hosted in
     /// a dedicated overlay window so it follows the foreground scene.
-    /// Enabling the ball also auto-installs the LynxView lifecycle tracker so
+    /// Enabling the tag also auto-installs the LynxView lifecycle tracker so
     /// the JS console + GlobalProps panels start receiving data without any
     /// host wiring.
     public static func setFloatingBallEnabled(_ enabled: Bool) {
         SparklingFloatingBallManager.shared.setEnabled(enabled)
         if enabled {
             SparklingDebugAutoWiring.installOnce()
-            // The default tap presents the unified inspector; long press
-            // routes to the same destination for now.
+            // The default tap presents the unified inspector.
             SparklingFloatingBallManager.shared.setActionHandler(SparklingDefaultFloatingBallHandler.shared)
         }
     }
 
-    /// Whether the floating ball is currently enabled.
+    /// Whether the debugTag entry is currently enabled.
     public static var isFloatingBallEnabled: Bool {
         SparklingFloatingBallManager.shared.isEnabled
     }
 
-    /// Override the default tap / long-press behaviour of the floating ball.
+    /// Override the default tap behaviour of the debugTag entry.
     public static func setFloatingBallActionHandler(_ handler: SparklingFloatingBallActionHandler?) {
         SparklingFloatingBallManager.shared.setActionHandler(handler)
     }

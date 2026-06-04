@@ -8,6 +8,7 @@ import android.content.pm.ApplicationInfo
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.util.Size
+import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -23,7 +24,6 @@ import com.tiktok.sparkling.hybridkit.base.HybridLoadSession
 import com.tiktok.sparkling.hybridkit.base.IHybridKitLifeCycle
 import com.tiktok.sparkling.hybridkit.base.IKitView
 import com.tiktok.sparkling.hybridkit.base.IPerformanceView
-import com.tiktok.sparkling.hybridkit.config.RuntimeInfo
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 import io.mockk.clearAllMocks
@@ -523,7 +523,7 @@ class SparklingViewTest {
     }
 
     @Test
-    fun handleUIShowsVersionedDebugTagWhenDebugToolProviderExists() {
+    fun handleUIShowsDebugTagPinnedToBottomStartWhenDebugToolProviderExists() {
         context.applicationInfo.flags = context.applicationInfo.flags or ApplicationInfo.FLAG_DEBUGGABLE
         SparklingDebugToolRegistry.setProvidersForTest(listOf(FakeDebugToolProvider()))
         val kitView = RecordingKitView(context)
@@ -534,7 +534,11 @@ class SparklingViewTest {
 
         val debugTag = sparklingView.findDebugTag()
         assertNotNull(debugTag)
-        assertEquals("sparkling-${RuntimeInfo.SPARKLING_VERSION_VALUE}", debugTag?.text.toString())
+        assertEquals("sparkling", debugTag?.text.toString())
+        val params = debugTag?.layoutParams as FrameLayout.LayoutParams
+        assertEquals(Gravity.BOTTOM or Gravity.START, params.gravity)
+        assertEquals(0, params.leftMargin)
+        assertEquals(0, params.bottomMargin)
     }
 
     @Test
@@ -833,7 +837,7 @@ class SparklingViewTest {
     private fun SparklingView.findDebugTag(): TextView? {
         for (i in 0 until childCount) {
             val child = getChildAt(i)
-            if (child is TextView && child.text.toString().startsWith("sparkling-")) {
+            if (child is TextView && child.text.toString() == "sparkling") {
                 return child
             }
         }

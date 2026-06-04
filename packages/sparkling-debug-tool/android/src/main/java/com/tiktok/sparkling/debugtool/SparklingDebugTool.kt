@@ -37,7 +37,7 @@ import com.tiktok.sparkling.debugtool.inspector.SparklingInspectorFragment
  * Entry point for the Sparkling debug tool. The host typically only needs to
  * call [init] once during `Application.onCreate`; everything else
  * (Lynx debug flags, JS console capture, GlobalProps tracking, Sparkling
- * Method observation, floating-ball overlay) is wired up automatically when
+ * Method observation, debugTag entry) is wired up automatically when
  * `enableFloatingBall = true`.
  */
 object SparklingDebugTool {
@@ -45,7 +45,7 @@ object SparklingDebugTool {
         /**
          * When `true` the host app is expected to call [attachConsoleSink] for each
          * created `LynxView` so JS console messages are captured. When the
-         * floating ball is enabled the debug tool wires this up itself via
+         * debugTag entry is enabled the debug tool wires this up itself via
          * `KitViewManager`, so this flag is mainly here for explicit override.
          */
         val enableJsConsole: Boolean = false,
@@ -53,9 +53,9 @@ object SparklingDebugTool {
         /** Maximum number of console messages kept in the in-memory ring buffer. */
         val consoleBufferSize: Int = 300,
         /**
-         * When `true` a draggable Sparkling floating ball is shown on top of every
-         * Activity. Tapping the ball opens the unified inspector; turning this on
-         * also auto-enables every Lynx debug capability and wires up the
+         * When `true` SparklingView shows its bottom-left debugTag entry. Tapping
+         * the tag opens the unified inspector; turning this on also auto-enables
+         * every Lynx debug capability and wires up the
          * console / globalProps / method tracers.
          */
         val enableFloatingBall: Boolean = false,
@@ -63,7 +63,7 @@ object SparklingDebugTool {
 
     /**
      * @deprecated Switches are no longer surfaced in the inspector. The tool
-     * applies the all-on configuration whenever the floating ball is enabled.
+     * applies the all-on configuration whenever the debugTag entry is enabled.
      * The class is kept for binary compatibility with hosts that still call
      * [getFlags] / [setFlags] directly.
      */
@@ -106,7 +106,7 @@ object SparklingDebugTool {
         }
     }
 
-    /** Show or hide the floating ball at runtime. */
+    /** Show or hide the bottom-left debugTag entry at runtime. */
     @JvmStatic
     fun setFloatingBallEnabled(enabled: Boolean) {
         SparklingFloatingBallManager.setEnabled(enabled)
@@ -118,15 +118,15 @@ object SparklingDebugTool {
         }
     }
 
-    /** Override the default tap / long-press behaviour of the floating ball. */
+    /** Legacy hook kept for compatibility; debugTag clicks use SparklingView's default action. */
     @JvmStatic
     fun setFloatingBallActionHandler(handler: SparklingFloatingBallManager.ActionHandler?) {
         SparklingFloatingBallManager.setActionHandler(handler)
     }
 
     /**
-     * Build a fresh inspector fragment. Equivalent to invoking the floating
-     * ball's default tap action; useful for hosts that want to surface the
+     * Build a fresh inspector fragment. Equivalent to invoking the debugTag's
+     * default tap action; useful for hosts that want to surface the
      * inspector via a menu / button.
      */
     @JvmStatic
@@ -179,7 +179,7 @@ object SparklingDebugTool {
      * Hook the Lynx inspector console delegate so that every `console.*` call from
      * the JS context is captured into the shared [ConsoleLogStore]. The debug
      * tool already wires this up automatically via `KitViewManager` when the
-     * floating ball is enabled; this entry point is kept for hosts that don't
+     * debugTag entry is enabled; this entry point is kept for hosts that don't
      * use `KitViewManager`.
      *
      * Returns `true` if the delegate was successfully installed.

@@ -28,7 +28,6 @@ import com.tiktok.sparkling.hybridkit.base.IHybridKitLifeCycle
 import com.tiktok.sparkling.hybridkit.base.IHybridView
 import com.tiktok.sparkling.hybridkit.base.IKitView
 import com.tiktok.sparkling.hybridkit.base.IPerformanceView
-import com.tiktok.sparkling.hybridkit.config.RuntimeInfo
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 import org.json.JSONObject
 
@@ -433,7 +432,7 @@ class SparklingView(
         if (debugInfoTag != null || !shouldShowDebugTag()) return
         debugInfoTag =
             TextView(context).apply {
-                text = "sparkling-${RuntimeInfo.SPARKLING_VERSION_VALUE}"
+                text = "sparkling"
                 setTextColor(Color.WHITE)
                 textSize = 12f
                 gravity = Gravity.CENTER
@@ -443,7 +442,7 @@ class SparklingView(
                     LayoutParams(LayoutParams.WRAP_CONTENT, dp(28)).apply {
                         gravity = Gravity.BOTTOM or Gravity.START
                         leftMargin = 0
-                        bottomMargin = dp(12)
+                        bottomMargin = 0
                     }
                 setOnClickListener { openDebugInspector() }
             }

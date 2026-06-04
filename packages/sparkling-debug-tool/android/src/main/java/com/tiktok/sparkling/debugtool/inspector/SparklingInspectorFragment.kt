@@ -18,7 +18,7 @@ import com.tiktok.sparkling.debugtool.ui.applyHalfSheetWindow
 
 /**
  * Unified Sparkling debug inspector. Half-sheet dialog with three tabs
- * (`Console` / `GlobalProps` / `Method`), opened by tapping the floating ball
+ * (`Console` / `GlobalProps` / `Method`), opened by tapping the debugTag
  * or via [com.tiktok.sparkling.debugtool.SparklingDebugTool.openInspectorPanel].
  *
  * Each tab is a self-contained view that lazily attaches store listeners on
