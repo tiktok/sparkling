@@ -55,14 +55,6 @@ Please refer to our [contributing guide][contributing] for details.
 
 [contributing]: CONTRIBUTING.md
 
-## Maintainers
-| Role | Github |
-| --- | --- |
-| Creator & Lead Maintainer | [@Kunyang Lee](https://github.com/leeekyrie) |
-| Lead Maintainer | [@HuxPro](https://github.com/HuxPro) |
-| Core Maintainer | [@Chen-Jr](https://github.com/Chen-Jr) |
-| Core Contributor | [@Yujie Zhang](https://github.com/zhangyujie9999) |
-
 For bug reports, feature requests, and maintenance discussions, please open an issue in this repository.
 
 
