@@ -50,6 +50,7 @@ packages/common/test-utils/*.d.ts.map
 
 # Build artifacts
 .temp-templates/
+.e2e-artifacts/
 coverage-reports/
 
 # Local Xcode overrides (per-developer signing, etc.)
