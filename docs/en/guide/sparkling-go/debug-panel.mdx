@@ -1,0 +1,84 @@
+# Debug Panel
+
+The Sparkling Debug Panel is the in-app inspector for Sparkling debug builds. Use
+it when you need to inspect Lynx JS logs, Sparkling Method calls, and runtime
+GlobalProps without connecting a desktop debugger.
+
+It is separate from Lynx's own DevTool and long-press debug menu. Sparkling opens
+this panel from the bottom-left `sparkling` debugTag.
+
+## Open the Debug Panel
+
+The debugTag appears only when all of these are true:
+
+- The app is running a debug build.
+- `sparkling-debug-tool` is integrated.
+- The host enables the debug entry:
+  - Android: call `SparklingDebugTool.init(...)` with `enableFloatingBall = true`.
+  - iOS: call `SparklingDebugTool.setFloatingBallEnabled(true)`.
+
+Sparkling Go and the default app template already do this in their debug-only
+host wiring.
+
+To open the panel, tap the blue `sparkling` tag pinned to the bottom-left edge of
+the screen:
+
+<img src="/guide/sparkling-go/debug-panel-entry.png" width="300" alt="Bottom-left sparkling debugTag entry" />
+
+Release builds do not show the tag. Sparkling also no longer installs a
+two-finger long-press entry, so this click target does not compete with Lynx's
+native debug gestures.
+
+## Log
+
+The **Log** tab shows JS console output emitted by the current Lynx page.
+
+<img src="/guide/sparkling-go/debug-panel-log.png" width="320" alt="Sparkling Debug Panel Log tab" />
+
+Use it to:
+
+- Inspect `console.log`, `console.warn`, and `console.error` output in the app.
+- Filter logs by level.
+- Search log text.
+- Clear the current log buffer.
+- Copy a log row when you need to paste it into an issue or PR comment.
+
+## Sparkling Method
+
+The **Sparkling Method** tab records JS-to-native method invocations.
+
+<img src="/guide/sparkling-go/debug-panel-method.png" width="320" alt="Sparkling Debug Panel Sparkling Method tab" />
+
+Use it to:
+
+- See which Sparkling Method APIs were called.
+- Check the platform, namespace, result code, and duration for each call.
+- Spot calls that are still running or returned an error.
+- Tap a row to expand request parameters and response data.
+- Copy a method record for debugging bridge issues.
+
+## GlobalProps
+
+The **GlobalProps** tab shows the latest runtime snapshot for the live LynxView.
+
+<img src="/guide/sparkling-go/debug-panel-globalprops.png" width="320" alt="Sparkling Debug Panel GlobalProps tab" />
+
+Use it to:
+
+- Confirm which container and template URL are active.
+- Inspect `globalProps` passed into Lynx.
+- Expand `queryItems`, including the bundle or URL used to load the current page.
+- Search keys and values.
+- Refresh the snapshot after navigation or runtime updates.
+- Copy a key-value row when reporting environment-specific issues.
+
+## When the tag is missing
+
+Check these in order:
+
+1. Confirm the app is a debug build.
+2. Confirm `sparkling-debug-tool` is included in the native target.
+3. Confirm the host calls `SparklingDebugTool.init(...)` on Android or
+   `SparklingDebugTool.setup()` plus `setFloatingBallEnabled(true)` on iOS.
+4. On Android, the `sparkling-debug-tool` provider must be discoverable by the
+   Sparkling SDK. The default template wires this through the debug source set.

@@ -230,16 +230,18 @@ Native 侧存储位置：
 ## 调试功能
 
 当 `sparkling-debug-tool` 集成并初始化（iOS 上 `SparklingDebugTool.setup()`，
-Android 上 `.init(application)`）后，会启用：
+Android 上 `.init(application)`）后，会启用基础 Lynx debug flags
+（`lynxDebugEnabled`、`devtoolEnabled`、`logBoxEnabled`）和错误 LogBox。
+
+Sparkling 自己的端内调试入口是 **Debug Panel**。在 debug 构建中，点击左下角
+`sparkling` debugTag 即可打开。入口和每个页签的截图请看
+[Debug Panel 指南](./debug-panel)。
 
 | 功能 | iOS | Android |
 |------|-----|---------|
-| Lynx DevTools | ✓ | ✓ |
+| Sparkling Debug Panel（Log、Sparkling Method、GlobalProps） | debug build 中可用 | debug build 中可用 |
 | 错误 LogBox 浮层 | ✓ | ✓ |
-| 长按调试菜单 | — | ✓ |
-
-这些自动启用——`setup()` / `init()` 会将 `LynxEnv.devtoolEnabled`、
-`LynxEnv.logBoxEnabled` 和 `LynxEnv.lynxDebugEnabled` 设为 `true`。
+| Lynx DevTool（元素检查、JS 调试） | 需要额外接入 | 需要额外接入 |
 
 ## 常见问题
 
