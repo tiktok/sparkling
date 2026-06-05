@@ -29,6 +29,95 @@ Release builds do not show the tag. Sparkling also no longer installs a
 two-finger long-press entry, so this click target does not compete with Lynx's
 native debug gestures.
 
+## Integration guide
+
+### Apps created from the template
+
+Apps created with the default Sparkling template already include the Debug Panel
+in debug builds and exclude it from release builds.
+
+On Android, the template uses `debugImplementation(project(":sparkling-debug-tool"))`
+and keeps the debug-tool setup in `app/src/debug`. The debug source set calls:
+
+```kotlin
+SparklingDebugTool.init(
+    application,
+    SparklingDebugTool.Config(
+        enableJsConsole = true,
+        enableFloatingBall = true,
+    ),
+)
+```
+
+The release source set is a no-op and does not initialize the debug tool.
+
+On iOS, the template has two app targets:
+
+| Target | Debug Panel |
+|--------|-------------|
+| `SparklingGoInHouse` | Includes `Sparkling-DebugTool`; used for day-to-day development |
+| `SparklingGo` | Does not link `Sparkling-DebugTool`; production-style target |
+
+The template wraps every debug-tool call with `canImport(Sparkling_DebugTool)`.
+When the debug pod is linked, startup calls `SparklingDebugTool.setup()` and then
+enables the bottom-left debugTag with:
+
+```swift
+SparklingDebugTool.setFloatingBallEnabled(true)
+```
+
+This means a template-created app has the Debug Panel in its debug package by
+default, while its release package does not ship the panel, DebugRouter, or Lynx
+DevTool dependencies.
+
+### Custom Android host
+
+If you are integrating Sparkling into an existing Android app, keep the debug tool
+in debug-only dependencies:
+
+```kotlin
+dependencies {
+    implementation("com.tiktok.sparkling:sparkling:<version>")
+    debugImplementation("com.tiktok.sparkling:sparkling-debug-tool:<version>")
+}
+```
+
+Then initialize it from debug-only app code:
+
+```kotlin
+SparklingDebugTool.init(
+    application,
+    SparklingDebugTool.Config(
+        enableJsConsole = true,
+        enableFloatingBall = true,
+    ),
+)
+```
+
+`enableFloatingBall = true` is the switch that makes each eligible `SparklingView`
+show the bottom-left `sparkling` debugTag.
+
+### Custom iOS host
+
+If you are integrating Sparkling into an existing iOS app, link
+`Sparkling-DebugTool` only in the development target or debug configuration. Then
+guard the calls so production builds can compile without the debug-tool module:
+
+```swift
+#if canImport(Sparkling_DebugTool)
+import Sparkling_DebugTool
+#endif
+
+#if canImport(Sparkling_DebugTool)
+SparklingDebugTool.setup()
+SparklingDebugTool.setFloatingBallEnabled(true)
+#endif
+```
+
+`setup()` enables the Lynx debug flags and DebugRouter integration. `setFloatingBallEnabled(true)`
+shows the bottom-left `sparkling` debugTag and wires the default tap action to the
+Debug Panel.
+
 ## Log
 
 The **Log** tab shows JS console output emitted by the current Lynx page.

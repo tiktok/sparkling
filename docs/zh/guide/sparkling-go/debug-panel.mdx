@@ -26,6 +26,92 @@ Sparkling Go 和默认应用模板已经在 debug-only 的宿主代码里完成�
 Release 构建不会显示这个标签。Sparkling 也不再安装双指长按入口，因此这个点击入口
 不会和 Lynx 自己的原生调试手势竞争。
 
+## 集成指南
+
+### 基于默认模板创建的应用
+
+使用默认 Sparkling 模板创建的应用，默认就是 **debug 包包含 Debug Panel，release 包
+不包含 Debug Panel**。
+
+Android 上，模板通过 `debugImplementation(project(":sparkling-debug-tool"))` 引入
+debug tool，并把初始化代码放在 `app/src/debug`。debug source set 会调用：
+
+```kotlin
+SparklingDebugTool.init(
+    application,
+    SparklingDebugTool.Config(
+        enableJsConsole = true,
+        enableFloatingBall = true,
+    ),
+)
+```
+
+release source set 是 no-op，不会初始化 debug tool。
+
+iOS 上，模板有两个 app target：
+
+| Target | Debug Panel |
+|--------|-------------|
+| `SparklingGoInHouse` | 引入 `Sparkling-DebugTool`，用于日常开发 |
+| `SparklingGo` | 不链接 `Sparkling-DebugTool`，作为 production-style target |
+
+模板用 `canImport(Sparkling_DebugTool)` 包住所有 debug-tool 调用。debug pod 被链接时，
+启动流程会调用 `SparklingDebugTool.setup()`，然后通过下面的调用启用左下角
+debugTag：
+
+```swift
+SparklingDebugTool.setFloatingBallEnabled(true)
+```
+
+因此，模板创建出的 app 默认在 debug 包里有 Debug Panel；release 包不会带上这个
+面板，也不会带上 DebugRouter 或 Lynx DevTool 相关依赖。
+
+### 自定义 Android 宿主
+
+如果你把 Sparkling 接入已有 Android 应用，建议只在 debug 依赖中引入 debug tool：
+
+```kotlin
+dependencies {
+    implementation("com.tiktok.sparkling:sparkling:<version>")
+    debugImplementation("com.tiktok.sparkling:sparkling-debug-tool:<version>")
+}
+```
+
+然后在 debug-only 的应用代码中初始化：
+
+```kotlin
+SparklingDebugTool.init(
+    application,
+    SparklingDebugTool.Config(
+        enableJsConsole = true,
+        enableFloatingBall = true,
+    ),
+)
+```
+
+`enableFloatingBall = true` 是让符合条件的 `SparklingView` 显示左下角 `sparkling`
+debugTag 的开关。
+
+### 自定义 iOS 宿主
+
+如果你把 Sparkling 接入已有 iOS 应用，只在开发 target 或 debug configuration 中
+链接 `Sparkling-DebugTool`。同时用条件编译保护调用，保证生产构建不依赖 debug-tool
+module：
+
+```swift
+#if canImport(Sparkling_DebugTool)
+import Sparkling_DebugTool
+#endif
+
+#if canImport(Sparkling_DebugTool)
+SparklingDebugTool.setup()
+SparklingDebugTool.setFloatingBallEnabled(true)
+#endif
+```
+
+`setup()` 会启用 Lynx debug flags 和 DebugRouter 集成；`setFloatingBallEnabled(true)`
+会显示左下角 `sparkling` debugTag，并把默认点击行为接到 Debug Panel。
+
 ## Log
 
 **Log** 页签展示当前 Lynx 页面产生的 JS console 输出。
