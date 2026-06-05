@@ -19,6 +19,7 @@ object SparklingFloatingBallManager {
     }
 
     private var enabled = false
+
     @Suppress("UNUSED_PARAMETER")
     @JvmStatic
     fun install(application: Application) = Unit
