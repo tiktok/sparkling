@@ -118,8 +118,8 @@ describe('chooseMedia', () => {
       expect(mockPipe.call).toHaveBeenCalledWith(
         'media.chooseMedia',
         expect.objectContaining({
-          mediaTypes: [1],
-          sourceType: 1,
+          mediaTypes: ['image'],
+          sourceType: 'album',
           maxCount: 1,
         }),
         expect.any(Function)
@@ -139,9 +139,9 @@ describe('chooseMedia', () => {
       expect(mockPipe.call).toHaveBeenCalledWith(
         'media.chooseMedia',
         expect.objectContaining({
-          mediaTypes: [1, 2],
-          sourceType: 2,
-          cameraType: 2,
+          mediaTypes: ['image', 'video'],
+          sourceType: 'camera',
+          cameraType: 'back',
         }),
         expect.any(Function)
       );
@@ -240,7 +240,7 @@ describe('chooseMedia', () => {
   });
 
   describe('optional pipe parameters', () => {
-    it('should map front camera type correctly', () => {
+    it('should pass front camera type as a string enum', () => {
       const params: ChooseMediaRequest = {
         mediaTypes: ['image'],
         sourceType: 'camera',
@@ -252,12 +252,12 @@ describe('chooseMedia', () => {
 
       expect(mockPipe.call).toHaveBeenCalledWith(
         'media.chooseMedia',
-        expect.objectContaining({ cameraType: 1 }),
+        expect.objectContaining({ cameraType: 'front' }),
         expect.any(Function)
       );
     });
 
-    it('should map video mediaType to numeric 2', () => {
+    it('should pass video mediaType as a string enum', () => {
       const params: ChooseMediaRequest = {
         mediaTypes: ['video'],
         sourceType: 'album',
@@ -268,12 +268,12 @@ describe('chooseMedia', () => {
 
       expect(mockPipe.call).toHaveBeenCalledWith(
         'media.chooseMedia',
-        expect.objectContaining({ mediaTypes: [2] }),
+        expect.objectContaining({ mediaTypes: ['video'] }),
         expect.any(Function)
       );
     });
 
-    it('should default unknown mediaType entry to 0', () => {
+    it('should pass mediaTypes without numeric remapping', () => {
       const params = {
         mediaTypes: ['image', 'unknown_type' as any],
         sourceType: 'album',
@@ -283,7 +283,7 @@ describe('chooseMedia', () => {
       chooseMedia(params, callback);
 
       const [, pipeParams] = mockPipe.call.mock.calls[0];
-      expect((pipeParams as any).mediaTypes).toEqual([1, 0]);
+      expect((pipeParams as any).mediaTypes).toEqual(['image', 'unknown_type']);
     });
 
     it('should pass isNeedCut and crop ratio parameters', () => {
@@ -377,7 +377,7 @@ describe('chooseMedia', () => {
       );
     });
 
-    it('should default cameraType to 0 when sourceType is album', () => {
+    it('should default cameraType to an empty string when sourceType is album', () => {
       const params: ChooseMediaRequest = {
         mediaTypes: ['image'],
         sourceType: 'album',
@@ -387,7 +387,7 @@ describe('chooseMedia', () => {
       chooseMedia(params, callback);
 
       const [, pipeParams] = mockPipe.call.mock.calls[0];
-      expect((pipeParams as any).cameraType).toBe(0);
+      expect((pipeParams as any).cameraType).toBe('');
     });
   });
 });

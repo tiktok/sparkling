@@ -17,4 +17,9 @@ class SparklingGoUnitTest {
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
+
+    @Test
+    fun debugDefaultMainBundleSourceUsesPackagedBundle() {
+        assertEquals("main.lynx.bundle", DEFAULT_MAIN_BUNDLE_SOURCE)
+    }
 }

@@ -27,6 +27,7 @@ In **Debug** builds, the dev URL input supports two forms:
 
 Behavior:
 
+- The default Debug source is the packaged local bundle: `main.lynx.bundle`
 - `http(s)://...` -> app loads with `url=...`
 - `*.lynx.bundle` (or other non-http value) -> app loads with `bundle=...`
 

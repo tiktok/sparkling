@@ -17,15 +17,14 @@ import com.tiktok.sparkling.SparklingContext
 import com.tiktok.sparkling.SparklingUIProvider
 import com.tiktok.sparkling.debugtool.SparklingDebugTool
 
-private val DEFAULT_MAIN_DEV_BUNDLE_URL: String
-    get() = "http://${BuildConfig.SPARKLING_DEV_SERVER_HOST}:${BuildConfig.SPARKLING_DEV_SERVER_PORT}/main.lynx.bundle"
+private const val DEFAULT_MAIN_BUNDLE_SOURCE = "main.lynx.bundle"
 
 object DebugDevUrlSupport {
     // Debug input supports both remote URL and local bundle source.
     // Examples:
     // - http://127.0.0.1:5969/main.lynx.bundle
     // - main.lynx.bundle
-    fun currentMainBundleSource(context: Context): String = SparklingDebugTool.getDevUrl(context, DEFAULT_MAIN_DEV_BUNDLE_URL)
+    fun currentMainBundleSource(context: Context): String = SparklingDebugTool.getDevUrl(context, DEFAULT_MAIN_BUNDLE_SOURCE)
 
     fun buildMainPageScheme(context: Context): String {
         val source = currentMainBundleSource(context)
@@ -86,7 +85,12 @@ private class DebugDevUrlErrorView(
         layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
         val textView =
             TextView(context).apply {
-                text = "Failed to load remote bundle. Please update Dev URL."
+                text =
+                    if (DebugDevUrlSupport.networkBundleUrlFromScheme(currentScheme) != null) {
+                        "Failed to load remote bundle. Please update Dev URL."
+                    } else {
+                        "Failed to load packaged bundle."
+                    }
                 gravity = Gravity.CENTER
                 setPadding(48, 48, 48, 48)
             }

@@ -50,9 +50,9 @@ class SPKMediaTest: XCTestCase {
 
     func testChooseMediaParamModelJsonMapping() {
         let paramModel = SPKChooseMediaMethodParamModel()
-        paramModel.mediaTypes = [1, 2]  // image and video
-        paramModel.sourceType = 1  // album
-        paramModel.cameraType = 1  // front
+        paramModel.mediaTypes = ["image", "video"]
+        paramModel.sourceType = "album"
+        paramModel.cameraType = "front"
         paramModel.maxCount = 5
         paramModel.compressOption = 1  // both
 
@@ -267,7 +267,7 @@ class SPKMediaTest: XCTestCase {
         XCTAssertEqual(invalidTypeRecorder.status?.message, "Invalid parameter model type")
 
         let invalidSource = SPKChooseMediaMethodParamModel()
-        invalidSource.sourceType = 999
+        invalidSource.sourceType = "invalid"
         let invalidSourceRecorder = MediaCompletionRecorder()
         method.call(withParamModel: invalidSource, completionHandler: invalidSourceRecorder)
         XCTAssertEqual(invalidSourceRecorder.status?.rawCode, MethodStatusCode.invalidInputParameter.rawValue)
@@ -547,11 +547,8 @@ class SPKMediaTest: XCTestCase {
     func testDefaultMediaPickerAlbumPickerAndCancelFlow() {
         let picker = SPKDefaultMediaPicker()
         let paramModel = SPKChooseMediaMethodParamModel()
-        paramModel.sourceType = SPKChooseMediaMediaSourceType.album.rawValue
-        paramModel.mediaTypes = [
-            SPKChooseMediaMediaType.image.rawValue,
-            SPKChooseMediaMediaType.video.rawValue
-        ]
+        paramModel.sourceType = "album"
+        paramModel.mediaTypes = ["image", "video"]
 
         var completedStatus: SPKStatus?
         let controller = picker.mediaPicker(with: paramModel) { _, status in
@@ -573,7 +570,7 @@ class SPKMediaTest: XCTestCase {
     func testDefaultMediaPickerImageDataHelpers() {
         let picker = SPKDefaultMediaPicker()
         let paramModel = SPKChooseMediaMethodParamModel()
-        paramModel.sourceType = SPKChooseMediaMediaSourceType.album.rawValue
+        paramModel.sourceType = "album"
         paramModel.compressOption = SPKChooseMediaCompressOption.both.rawValue
         paramModel.compressWidth = 8
         paramModel.compressHeight = 8
@@ -599,8 +596,8 @@ class SPKMediaTest: XCTestCase {
     func testDefaultMediaPickerFinishesImageSelection() {
         let picker = SPKDefaultMediaPicker()
         let paramModel = SPKChooseMediaMethodParamModel()
-        paramModel.sourceType = SPKChooseMediaMediaSourceType.album.rawValue
-        paramModel.mediaTypes = [SPKChooseMediaMediaType.image.rawValue]
+        paramModel.sourceType = "album"
+        paramModel.mediaTypes = ["image"]
         paramModel.compressOption = SPKChooseMediaCompressOption.none.rawValue
         paramModel.needBase64Data = true
 
@@ -633,8 +630,8 @@ class SPKMediaTest: XCTestCase {
     func testDefaultMediaPickerFinishesVideoSelection() {
         let picker = SPKDefaultMediaPicker()
         let paramModel = SPKChooseMediaMethodParamModel()
-        paramModel.sourceType = SPKChooseMediaMediaSourceType.album.rawValue
-        paramModel.mediaTypes = [SPKChooseMediaMediaType.video.rawValue]
+        paramModel.sourceType = "album"
+        paramModel.mediaTypes = ["video"]
         let videoURL = tempFileURL(fileExtension: "mov", contents: Data([0, 1, 2, 3, 4, 5]))
         defer { try? FileManager.default.removeItem(at: videoURL) }
 
@@ -663,8 +660,8 @@ class SPKMediaTest: XCTestCase {
     func testDefaultMediaPickerReportsInvalidMediaSelection() {
         let picker = SPKDefaultMediaPicker()
         let paramModel = SPKChooseMediaMethodParamModel()
-        paramModel.sourceType = SPKChooseMediaMediaSourceType.album.rawValue
-        paramModel.mediaTypes = [SPKChooseMediaMediaType.image.rawValue]
+        paramModel.sourceType = "album"
+        paramModel.mediaTypes = ["image"]
 
         var completedStatus: SPKStatus?
         guard let imagePicker = picker.mediaPicker(with: paramModel, completionHandler: { _, status in

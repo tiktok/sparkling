@@ -15,8 +15,8 @@ extension SPKChooseMediaMethod {
             return
         }
 
-        switch SPKChooseMediaMediaSourceType(rawValue: typedParamModel.sourceType) {
-        case .album:
+        switch typedParamModel.sourceType.lowercased() {
+        case SPKChooseMediaParamValue.album:
             checkAlbumPermission(with: typedParamModel) { [weak self] hasPermission in
                 guard let self = self else { return }
                 if hasPermission {
@@ -25,7 +25,7 @@ extension SPKChooseMediaMethod {
                     self.handleAlbumDenyAction(with: typedParamModel, completionHandler: completionHandler)
                 }
             }
-        case .camera:
+        case SPKChooseMediaParamValue.camera:
             guard AVCaptureDevice.default(for: .video) != nil else {
                 completionHandler.handleCompletion(status: .failed(message: "Camera is not available on this device."), result: nil)
                 return
@@ -150,9 +150,8 @@ extension SPKChooseMediaMethod {
         let mediaPicker = SPKDefaultMediaPicker()
         SPKChooseMediaMethod._activeMediaPicker = mediaPicker
 
-        let pickerVC = mediaPicker.mediaPicker(with: paramModel) { [weak self] resultModel, error in
+        let pickerVC = mediaPicker.mediaPicker(with: paramModel) { resultModel, error in
             SPKChooseMediaMethod._activeMediaPicker = nil
-            guard self != nil else { return }
 
             if let error = error {
                 completionHandler.handleCompletion(status: .failed(message: error.message), result: nil)

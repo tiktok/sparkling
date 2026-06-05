@@ -46,9 +46,9 @@ class SPKChooseMediaMethodTest: XCTestCase {
 
     func testParamModelJsonMapping() {
         let paramModel = SPKChooseMediaMethodParamModel()
-        paramModel.mediaTypes = [1, 2]
-        paramModel.sourceType = 1
-        paramModel.cameraType = 1
+        paramModel.mediaTypes = ["image", "video"]
+        paramModel.sourceType = "album"
+        paramModel.cameraType = "front"
         paramModel.maxCount = 5
         paramModel.compressOption = 1
 
@@ -79,13 +79,13 @@ class SPKChooseMediaMethodTest: XCTestCase {
         let mediaPicker = SPKDefaultMediaPicker()
         let paramModel = SPKChooseMediaMethodParamModel()
 
-        paramModel.mediaTypes = [1]
+        paramModel.mediaTypes = ["image"]
         XCTAssertNotNil(mediaPicker.mediaPicker(with: paramModel) { _, _ in })
 
-        paramModel.mediaTypes = [2]
+        paramModel.mediaTypes = ["video"]
         XCTAssertNotNil(mediaPicker.mediaPicker(with: paramModel) { _, _ in })
 
-        paramModel.mediaTypes = [1, 2]
+        paramModel.mediaTypes = ["image", "video"]
         XCTAssertNotNil(mediaPicker.mediaPicker(with: paramModel) { _, _ in })
     }
 
@@ -113,12 +113,12 @@ class SPKChooseMediaMethodTest: XCTestCase {
     func testCameraTypeSetting() {
         let mediaPicker = SPKDefaultMediaPicker()
         let paramModel = SPKChooseMediaMethodParamModel()
-        paramModel.sourceType = 2
+        paramModel.sourceType = "camera"
 
-        paramModel.cameraType = 1
+        paramModel.cameraType = "front"
         XCTAssertNotNil(mediaPicker.mediaPicker(with: paramModel) { _, _ in })
 
-        paramModel.cameraType = 2
+        paramModel.cameraType = "back"
         XCTAssertNotNil(mediaPicker.mediaPicker(with: paramModel) { _, _ in })
     }
 }
