@@ -71,15 +71,31 @@ runs:
           exit 1
         fi
 
-        BEARER_TOKEN=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64)
-        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-          -H "Authorization: Bearer ${BEARER_TOKEN}" \
-          "https://ossrh-staging-api.central.sonatype.com/manual/search/repositories?ip=any&profile_id=com.tiktok.sparkling")
-        if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
-          echo "::error::Maven Central API auth check failed (HTTP $HTTP_CODE)."
-          exit 1
-        fi
-        echo "✅ Maven Central auth looks valid"
+        BEARER_TOKEN=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64 | tr -d '\n')
+        HTTP_CODE=""
+        for attempt in 1 2 3; do
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${BEARER_TOKEN}" \
+            "https://ossrh-staging-api.central.sonatype.com/manual/search/repositories?ip=any&profile_id=com.tiktok.sparkling")
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "✅ Maven Central auth looks valid"
+            exit 0
+          fi
+          echo "::warning::Maven Central API preflight attempt ${attempt}/3 returned HTTP ${HTTP_CODE}."
+          if [ "$attempt" != "3" ]; then
+            sleep 20
+          fi
+        done
+
+        case "$HTTP_CODE" in
+          403|429|5*)
+            echo "::warning::Maven Central API preflight is inconclusive (HTTP ${HTTP_CODE}); continuing so the publish step can validate credentials directly."
+            ;;
+          *)
+            echo "::error::Maven Central API auth check failed (HTTP ${HTTP_CODE})."
+            exit 1
+            ;;
+        esac
 
     - name: Setup Ruby
       if: ${{ inputs.publish_ios == 'true' }}
