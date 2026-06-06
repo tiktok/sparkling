@@ -223,27 +223,32 @@ def wait_for_maven(version, attempts=90, delay=20):
         raise SystemExit("::error::Maven artifacts unavailable")
 
 
-def wait_for_cocoapods_cdn(version, attempts=60, delay=30):
+def wait_for_cocoapods_cdn(version, attempts=120, delay=30):
     section("Waiting for CocoaPods CDN podspecs")
     pods = [entry["pod_name"] for entry in json.loads(IOS_PODS_CONFIG.read_text())]
-    missing = []
-    for pod in pods:
-        found = False
-        last_reason = ""
-        for i in range(1, attempts + 1):
+    pending = list(pods)
+    last_reasons = {}
+
+    for i in range(1, attempts + 1):
+        next_pending = []
+        for pod in pending:
             ready, reason = cocoapods_cdn_spec_ready(pod, version)
-            last_reason = reason
             if ready:
                 log(f"  cdn ok: {pod} {version} (after {i} check(s))")
-                found = True
-                break
+                continue
+            last_reasons[pod] = reason
+            next_pending.append(pod)
             log(f"  waiting for CDN {pod} {version}... ({i}/{attempts}, next check in {delay}s): {reason}")
+
+        pending = next_pending
+        if not pending:
+            return
+        if i < attempts:
             time.sleep(delay)
-        if not found:
-            log(f"::error::{pod} {version} not ready on CocoaPods CDN after {attempts * delay}s: {last_reason}")
-            missing.append(pod)
-    if missing:
-        raise SystemExit("::error::CocoaPods CDN podspecs unavailable")
+
+    for pod in pending:
+        log(f"::error::{pod} {version} not ready on CocoaPods CDN after {attempts * delay}s: {last_reasons.get(pod, '<unknown>')}")
+    raise SystemExit("::error::CocoaPods CDN podspecs unavailable")
 
 
 def wait_for_trunk(version, attempts=20, delay=30):

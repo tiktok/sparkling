@@ -119,6 +119,31 @@ class CocoaPodsCdnTest(unittest.TestCase):
         self.assertFalse(ready)
         self.assertIn("DIProvider", reason)
 
+    def test_wait_for_cocoapods_cdn_polls_pending_pods_together(self):
+        calls = []
+        call_counts = {}
+
+        class PodsConfig:
+            def read_text(self):
+                return '[{"pod_name":"SparklingMacro"},{"pod_name":"SparklingMethod"}]'
+
+        def fake_spec_ready(pod, version):
+            calls.append(pod)
+            call_counts[pod] = call_counts.get(pod, 0) + 1
+            if pod == "SparklingMacro" and call_counts[pod] == 1:
+                return False, f"{pod} {version} pending"
+            return True, f"{pod} {version} ready"
+
+        with (
+            patch.object(verify_template, "IOS_PODS_CONFIG", PodsConfig()),
+            patch.object(verify_template, "cocoapods_cdn_spec_ready", fake_spec_ready),
+            patch.object(verify_template.time, "sleep") as sleep,
+        ):
+            verify_template.wait_for_cocoapods_cdn("2.1.0-rc.30", attempts=2, delay=0)
+
+        self.assertEqual(calls, ["SparklingMacro", "SparklingMethod", "SparklingMacro"])
+        sleep.assert_called_once_with(0)
+
 
 if __name__ == "__main__":
     unittest.main()
