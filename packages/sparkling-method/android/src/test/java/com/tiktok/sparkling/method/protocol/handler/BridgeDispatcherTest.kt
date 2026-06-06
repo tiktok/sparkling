@@ -9,12 +9,18 @@ import com.tiktok.sparkling.method.protocol.entity.BridgeResult
 import com.tiktok.sparkling.method.protocol.impl.interceptor.BridgeMockInterceptor
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeCallback
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeHandler
+import com.tiktok.sparkling.method.protocol.interfaces.IBridgeMethodCallback
 import com.tiktok.sparkling.method.protocol.interfaces.ShouldHandleBridgeCallResultModel
 import com.tiktok.sparkling.method.registry.api.BusinessCallHandler
 import com.tiktok.sparkling.method.protocol.DefaultBridgeClientImp
 import com.tiktok.sparkling.method.protocol.DefaultBridgeLifeClientImp
 import com.tiktok.sparkling.method.registry.api.SparklingBridge
+import com.tiktok.sparkling.method.registry.api.SparklingMethodInvocationCenter
+import com.tiktok.sparkling.method.registry.core.BridgePlatformType
+import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
 import org.json.JSONObject
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,6 +52,12 @@ class BridgeDispatcherTest {
         `when`(mockBridgeContext.bridgeClient).thenReturn(mockBridgeClient)
         `when`(mockBridgeContext.bridgeLifeClientImp).thenReturn(mockBridgeLifeClient)
         `when`(mockBridgeContext.businessCallHandler).thenReturn(mockBusinessCallHandler)
+        `when`(mockBridgeContext.platform).thenReturn(BridgePlatformType.LYNX)
+        `when`(mockBridgeContext.getNamespace()).thenReturn(null)
+        `when`(mockBridgeCall.bridgeName).thenReturn("test.method")
+        `when`(mockBridgeCall.nameSpace).thenReturn("")
+        `when`(mockBridgeCall.params).thenReturn(JSONObject())
+        `when`(mockBridgeMockInterceptor.interceptBridgeCall(mockBridgeCall)).thenReturn(mockBridgeCall)
 
         // Mock default behavior for lifecycle client - don't use any() in setUp
         `when`(mockBridgeLifeClient.shouldHandleBridgeCall(mockBridgeCall, mockBridgeContext)).thenReturn(ShouldHandleBridgeCallResultModel(true, null))
@@ -58,6 +70,73 @@ class BridgeDispatcherTest {
         `when`(mockBridgeMockInterceptor.invokeBridgeResult(mockBridgeCall)).thenReturn(mockResult)
         bridgeDispatcher.onDispatchBridgeMethod(mockBridgeCall, mockBridgeCallback, mockBridgeContext)
         verify(mockBridgeCallback).onBridgeResult(mockResult, mockBridgeCall, null)
+    }
+
+    @Test
+    fun testOnDispatchBridgeMethodReportsStartAndEndFromDispatcher() {
+        val context = BridgeContext()
+        val call =
+            BridgeCall(context).apply {
+                bridgeName = "storage.getItem"
+                nameSpace = ""
+                params = JSONObject().put("key", "foo")
+                platform = BridgeCall.PlatForm.Lynx
+            }
+        val dispatcher = BridgeDispatcher()
+        dispatcher.registerHandler(
+            object : IBridgeHandler {
+                override fun handle(
+                    bridgeContext: BridgeContext,
+                    call: BridgeCall,
+                    callback: IBridgeMethodCallback,
+                ) {
+                    callback.onBridgeResult(JSONObject().put(IDLBridgeMethod.PARAM_CODE, IDLBridgeMethod.SUCCESS))
+                }
+
+                override fun onRelease() = Unit
+
+                override fun isReleased(): Boolean = false
+            },
+        )
+        val observer = RecordingInvocationObserver()
+        SparklingMethodInvocationCenter.addObserver(observer)
+        try {
+            dispatcher.onDispatchBridgeMethod(call, mockBridgeCallback, context)
+        } finally {
+            SparklingMethodInvocationCenter.removeObserver(observer)
+        }
+
+        assertEquals(1, observer.starts.size)
+        assertEquals(1, observer.ends.size)
+        assertEquals(observer.starts.single().id, observer.ends.single().id)
+        assertEquals("storage.getItem", observer.ends.single().name)
+        assertEquals(IDLBridgeMethod.SUCCESS, observer.ends.single().code)
+    }
+
+    @Test
+    fun testOnDispatchBridgeMethodReportsLifecycleInterceptFailure() {
+        val observer = RecordingInvocationObserver()
+        `when`(mockBridgeMockInterceptor.invokeBridgeResult(mockBridgeCall)).thenReturn(null)
+        `when`(mockBridgeLifeClient.shouldHandleBridgeCall(mockBridgeCall, mockBridgeContext))
+            .thenReturn(ShouldHandleBridgeCallResultModel(false, "blocked"))
+
+        SparklingMethodInvocationCenter.addObserver(observer)
+        try {
+            bridgeDispatcher.onDispatchBridgeMethod(mockBridgeCall, mockBridgeCallback, mockBridgeContext)
+        } finally {
+            SparklingMethodInvocationCenter.removeObserver(observer)
+        }
+
+        assertEquals(1, observer.starts.size)
+        assertEquals(1, observer.ends.size)
+        assertEquals(IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED, observer.ends.single().code)
+        assertTrue(
+            observer.ends
+                .single()
+                .result
+                .toString()
+                .contains("blocked"),
+        )
     }
 
     // @Test TODO: Fix test - NullPointerException at line 78
@@ -91,4 +170,17 @@ class BridgeDispatcherTest {
     //     bridgeDispatcher.registerHandler(newHandler)
     //     // No direct assertion, but ensures the method runs without error.
     // }
+
+    private class RecordingInvocationObserver : SparklingMethodInvocationCenter.Observer {
+        val starts = mutableListOf<SparklingMethodInvocationCenter.Event>()
+        val ends = mutableListOf<SparklingMethodInvocationCenter.Event>()
+
+        override fun onStart(event: SparklingMethodInvocationCenter.Event) {
+            starts += event
+        }
+
+        override fun onEnd(event: SparklingMethodInvocationCenter.Event) {
+            ends += event
+        }
+    }
 }

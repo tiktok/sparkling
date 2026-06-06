@@ -159,6 +159,87 @@ class SparklingUriParserTest {
 
         assertTrue(result.isEmpty())
     }
+
+    @Test
+    fun testParseUriWithNoQueryParameters() {
+        val uri = Uri.parse("https://example.com/path")
+        val result = SparklingUriParser.parseUri(uri)
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun testParseUriWithEncodedValues() {
+        val uri = Uri.parse("https://example.com?path=${Uri.encode("/some/path with spaces")}")
+        val result = SparklingUriParser.parseUri(uri)
+        assertEquals("/some/path with spaces", result["path"])
+    }
+
+    @Test
+    fun testSaveAndQueryParsedParamsOverwrite() {
+        val containerId = "container-overwrite"
+        val first = mutableMapOf("k" to "v1")
+        val second = mutableMapOf("k" to "v2", "k2" to "extra")
+
+        SparklingUriParser.saveUriAndQueries(containerId, first)
+        SparklingUriParser.saveUriAndQueries(containerId, second)
+        val result = SparklingUriParser.queryParsedParams(containerId)
+
+        assertEquals("v2", result["k"])
+        assertEquals("extra", result["k2"])
+    }
+
+    @Test
+    fun testParseQueryMapWithBundleUrlKeyIsExpandedIntoMap() {
+        val nestedUrl = "https://nested.example.com?nested_key=nested_val"
+        val bundle = Bundle().apply { putString("url", nestedUrl) }
+        val uri = Uri.parse("https://outer.example.com?outer_key=outer_val")
+
+        val result = SparklingUriParser.parseQueryMap(uri, bundle = bundle)
+
+        assertTrue(result.containsKey("nested_key"))
+        assertEquals("nested_val", result["nested_key"])
+        assertEquals("outer_val", result["outer_key"])
+    }
+
+    @Test
+    fun testParseQueryMapExtraUrlKeyIsExpandedIntoMap() {
+        val nestedUrl = "https://nested.example.com?extra_key=extra_val"
+        val extra = mapOf("url" to nestedUrl)
+        val uri = Uri.parse("https://outer.example.com?outer_key=outer_val")
+
+        val result = SparklingUriParser.parseQueryMap(uri, extra)
+
+        assertTrue(result.containsKey("extra_key"))
+        assertEquals("extra_val", result["extra_key"])
+    }
+
+    @Test
+    fun testOuterUriParametersTakePriorityOverNestedUrlParameters() {
+        val nestedUrl = "https://nested.example.com?shared_key=from_nested"
+        val uri = Uri.parse("https://outer.example.com?shared_key=from_outer&url=${Uri.encode(nestedUrl)}")
+
+        val result = SparklingUriParser.parseQueryMap(uri)
+
+        assertEquals("from_outer", result["shared_key"])
+    }
+
+    @Test
+    fun testAppendMissingQueryToUri_doesNotDuplicateExistingKeys() {
+        val uri = Uri.parse("https://example.com?a=1&b=2")
+        val merged = mapOf("a" to "should_not_overwrite", "c" to "3")
+        val out = SparklingUriParser.appendMissingQueryToUri(uri, merged)
+
+        assertEquals("1", out.getQueryParameter("a"))
+        assertEquals("2", out.getQueryParameter("b"))
+        assertEquals("3", out.getQueryParameter("c"))
+    }
+
+    @Test
+    fun testAppendMissingQueryToUri_withEmptyMergedParams() {
+        val uri = Uri.parse("https://example.com?a=1")
+        val out = SparklingUriParser.appendMissingQueryToUri(uri, emptyMap())
+        assertEquals("1", out.getQueryParameter("a"))
+    }
 }
 
 class TestSchemeParam : BaseSchemeParam(HybridKitType.LYNX)
@@ -236,5 +317,43 @@ class ApplyEngineTest {
         }
 
         assertEquals(HybridKitType.UNKNOWN, schemeParam.engineType)
+    }
+
+    @Test
+    fun testApplyEngineSetsPageContainerTypeForLynxViewPage() {
+        val uri = Uri.parse("https://lynxview_page.example.com/path")
+        val schemeParam = HybridSchemeParam()
+
+        with(SparklingUriParser) {
+            schemeParam.applyEngine(uri)
+        }
+
+        assertEquals(HybridKitType.LYNX, schemeParam.engineType)
+        assertEquals(HybridContainerType.PAGE, schemeParam.containerType)
+    }
+
+    @Test
+    fun testApplyEngineContainerTypeUnknownForWebViewHost() {
+        val uri = Uri.parse("https://webview.example.com/path")
+        val schemeParam = HybridSchemeParam()
+
+        with(SparklingUriParser) {
+            schemeParam.applyEngine(uri)
+        }
+
+        assertEquals(HybridKitType.WEB, schemeParam.engineType)
+        assertEquals(HybridContainerType.UNKNOWN, schemeParam.containerType)
+    }
+
+    @Test
+    fun testApplyEngineHostMatchingIsCaseInsensitive() {
+        val uri = Uri.parse("https://WEBVIEW.example.com/path")
+        val schemeParam = TestSchemeParam()
+
+        with(SparklingUriParser) {
+            schemeParam.applyEngine(uri)
+        }
+
+        assertEquals(HybridKitType.WEB, schemeParam.engineType)
     }
 }

@@ -29,6 +29,8 @@ class GlobalPropsUtils {
     private val removableGlobalKeys = SafeConcurrentHashMap<String, MutableList<String>>()
 
     companion object {
+        private const val CONTAINER_INIT_TIME_KEY = "containerInitTime"
+
         val instance by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
             GlobalPropsUtils()
         }
@@ -110,6 +112,7 @@ class GlobalPropsUtils {
         context: Context,
     ) {
         val containerID = hybridContext.containerId
+        ensureContainerInitTime(hybridContext)
 
         hybridContext.scheme?.let { scheme ->
             runCatching {
@@ -171,16 +174,13 @@ class GlobalPropsUtils {
         }
     }
 
-    fun getGlobalProps(containerID: String): MutableMap<String, Any> =
-        (stableMap + findContainerProps(containerID))
-            .apply {
-                val removableKeys = removableGlobalKeys[containerID]
-                if (removableKeys != null) {
-                    filterNot {
-                        removableKeys.contains(it.key)
-                    }
-                }
-            }.toMutableMap()
+    fun getGlobalProps(containerID: String): MutableMap<String, Any> {
+        val merged = (stableMap + findContainerProps(containerID)).toMutableMap()
+        removableGlobalKeys[containerID]?.forEach { key ->
+            merged.remove(key)
+        }
+        return merged
+    }
 
     fun flushGlobalProps(containerID: String) {
         unstableMap.remove(containerID)
@@ -221,13 +221,13 @@ class GlobalPropsUtils {
         context: Context?,
     ): ConcurrentHashMap<String, Any> {
         val unstableMap = ConcurrentHashMap<String, Any>()
+        val containerInitTime = ensureContainerInitTime(hybridContext)
         findContainerProps(hybridContext.containerId).apply {
             unstableMap.apply {
                 put(RuntimeInfo.CONTAINER_ID, hybridContext.containerId)
                 put(RuntimeInfo.TEMPLATE_RES_DATA, hybridContext.templateResData)
-                put(RuntimeInfo.QUERY_ITEMS, parseQueryMap(hybridContext))
-                val loadSession = hybridContext.getDependency(HybridLoadSession::class.java)
-                put("containerInitTime", loadSession?.openTime.toString())
+                put(RuntimeInfo.QUERY_ITEMS, parseQueryMap(hybridContext, containerInitTime))
+                put(CONTAINER_INIT_TIME_KEY, containerInitTime)
                 val isPortrait = DevicesUtil.isScreenPortrait(HybridEnvironment.instance.context)
                 put("screenOrientation", if (isPortrait) "Portrait" else "Landscape")
                 put("orientation", if (isPortrait) 0 else 1)
@@ -238,13 +238,28 @@ class GlobalPropsUtils {
         return unstableMap
     }
 
-    private fun parseQueryMap(hybridContext: HybridContext): MutableMap<String, String> =
+    private fun parseQueryMap(
+        hybridContext: HybridContext,
+        containerInitTime: String,
+    ): MutableMap<String, String> =
         SparklingUriParser.queryParsedParams(hybridContext.containerId).apply {
-            val openTime =
-                hybridContext.getDependency(HybridLoadSession::class.java)?.openTime
-                    ?: System.currentTimeMillis()
-            put("containerInitTime", openTime.toString())
+            put(CONTAINER_INIT_TIME_KEY, containerInitTime)
         }
+
+    private fun ensureContainerInitTime(hybridContext: HybridContext): String {
+        val containerProps = findContainerProps(hybridContext.containerId)
+        val existing = containerProps[CONTAINER_INIT_TIME_KEY]?.toString()
+        if (!existing.isNullOrBlank()) {
+            return existing
+        }
+
+        val createdAt =
+            hybridContext.getDependency(HybridLoadSession::class.java)?.openTime
+                ?: System.currentTimeMillis()
+        val value = createdAt.toString()
+        containerProps[CONTAINER_INIT_TIME_KEY] = value
+        return value
+    }
 
     private fun reGenerateCheck(): Boolean {
         builtInStableFields.keys.forEach { key ->

@@ -5,17 +5,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { execSync } from 'node:child_process';
-import { getConfiguredDevServerPorts, loadAppConfig, resolveDevServerPort } from '../config';
+import { getConfiguredDevServerPorts, loadAppConfig, resolveDevServerHost, resolveDevServerPort } from '../config';
 import { autolink } from './autolink';
 import { buildProject } from './build';
 import { runCommand } from '../utils/exec';
 import { ui } from '../utils/ui';
 import { isVerboseEnabled, verboseLog } from '../utils/verbose';
 import { ensureDevServerRunning } from '../utils/dev-server';
+import { warnIfWildcardDevServerHost } from '../utils/dev-server-host';
 
 export interface RunAndroidOptions {
   cwd: string;
   skipCopy?: boolean;
+  host?: string;
 }
 
 interface AndroidDevice {
@@ -121,12 +123,15 @@ export async function runAndroid(options: RunAndroidOptions): Promise<void> {
     ));
   }
   const devPort = resolveDevServerPort(config);
+  const configuredHost = resolveDevServerHost(config, options.host);
   const connectedDevices = listConnectedAndroidDevices();
   const emulatorSerials = connectedDevices.filter(d => d.isEmulator).map(d => d.serial);
-  const devServerHostForApp = emulatorSerials.length > 0 ? '127.0.0.1' : resolveLocalIPv4();
-  const devServerHostForCli = emulatorSerials.length > 0 ? '127.0.0.1' : '0.0.0.0';
+  const hasPhysicalDevice = connectedDevices.some(d => !d.isEmulator);
+  const useEmulatorLocalhost = !configuredHost && emulatorSerials.length > 0 && !hasPhysicalDevice;
+  const devServerHost = configuredHost ?? (useEmulatorLocalhost ? '127.0.0.1' : resolveLocalIPv4());
+  warnIfWildcardDevServerHost(devServerHost);
 
-  await ensureDevServerRunning(options.cwd, devPort, devServerHostForCli);
+  await ensureDevServerRunning(options.cwd, devPort, devServerHost);
 
   for (const serial of emulatorSerials) {
     await runCommand('adb', ['-s', serial, 'reverse', `tcp:${devPort}`, `tcp:${devPort}`], {
@@ -137,7 +142,7 @@ export async function runAndroid(options: RunAndroidOptions): Promise<void> {
 
   if (isVerboseEnabled()) {
     verboseLog(
-      `run:android options -> skipCopy: ${options.skipCopy === true}, devPort: ${devPort}, devHost: ${devServerHostForApp}, emulatorCount: ${emulatorSerials.length}`,
+      `run:android options -> skipCopy: ${options.skipCopy === true}, devPort: ${devPort}, devHost: ${devServerHost}, emulatorCount: ${emulatorSerials.length}`,
     );
   }
   await autolink({ cwd: options.cwd, platform: 'android' });
@@ -153,7 +158,7 @@ export async function runAndroid(options: RunAndroidOptions): Promise<void> {
   }
   // Always build first so artifacts exist even when no device is connected
   const gradleArgs = [
-    `-PsparklingDevServerHost=${devServerHostForApp}`,
+    `-PsparklingDevServerHost=${devServerHost}`,
     `-PsparklingDevServerPort=${devPort}`,
   ];
 

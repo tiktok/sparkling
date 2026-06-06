@@ -11,8 +11,13 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function pingDevServer(port: number): Promise<boolean> {
-  const hosts = ['127.0.0.1', 'localhost'];
+function getPingHosts(host?: string): string[] {
+  const requestedHost = host?.trim();
+  return requestedHost ? [requestedHost] : ['127.0.0.1', 'localhost'];
+}
+
+async function pingDevServer(port: number, host?: string): Promise<boolean> {
+  const hosts = getPingHosts(host);
   for (const host of hosts) {
     if (await pingDevServerHost(host, port)) {
       return true;
@@ -37,14 +42,14 @@ async function pingDevServerHost(host: string, port: number): Promise<boolean> {
   }
 }
 
-export async function isDevServerRunning(port = DEV_SERVER_PORT): Promise<boolean> {
-  return pingDevServer(port);
+export async function isDevServerRunning(port = DEV_SERVER_PORT, host?: string): Promise<boolean> {
+  return pingDevServer(port, host);
 }
 
 export async function ensureDevServerRunning(cwd: string, port = DEV_SERVER_PORT, host = '127.0.0.1'): Promise<void> {
-  if (await isDevServerRunning(port)) {
+  if (await isDevServerRunning(port, host)) {
     if (isVerboseEnabled()) {
-      verboseLog(`Detected running sparkling dev server on port ${port}.`);
+      verboseLog(`Detected running sparkling dev server on ${host}:${port}.`);
     }
     return;
   }
@@ -55,7 +60,7 @@ export async function ensureDevServerRunning(cwd: string, port = DEV_SERVER_PORT
   }
 
   const cliPath = path.resolve(cliEntry);
-  console.log(ui.info(`No sparkling dev server found on port ${port}; starting one...`));
+  console.log(ui.info(`No sparkling dev server found on ${host}:${port}; starting one...`));
 
   const isDarwin = process.platform === 'darwin';
   const command = isDarwin ? 'script' : process.execPath;
@@ -72,15 +77,15 @@ export async function ensureDevServerRunning(cwd: string, port = DEV_SERVER_PORT
   child.unref();
 
   for (let i = 0; i < 30; i += 1) {
-    if (await isDevServerRunning(port)) {
-      console.log(ui.success(`Sparkling dev server is running on port ${port}.`));
+    if (await isDevServerRunning(port, host)) {
+      console.log(ui.success(`Sparkling dev server is running on ${host}:${port}.`));
       return;
     }
     await sleep(500);
   }
 
   console.warn(ui.warn(
-    `Timed out waiting for sparkling dev server on port ${port}. ` +
-    'run:ios/run:android will continue, but localhost bundle loading may fail.',
+    `Timed out waiting for sparkling dev server on ${host}:${port}. ` +
+    'run:ios/run:android will continue, but dev bundle loading may fail.',
   ));
 }

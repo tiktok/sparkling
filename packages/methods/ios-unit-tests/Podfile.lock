@@ -1,0 +1,76 @@
+PODS:
+  - Mantle (2.2.0):
+    - Mantle/extobjc (= 2.2.0)
+  - Mantle/extobjc (2.2.0)
+  - Sparkling-Media (2.1.0-rc.12):
+    - Mantle (~> 2.2.0)
+    - Sparkling-Media/Core (= 2.1.0-rc.12)
+    - SparklingMethod/Core
+    - SparklingMethod/DIProvider
+  - Sparkling-Media/Core (2.1.0-rc.12):
+    - Mantle (~> 2.2.0)
+    - SparklingMethod/Core
+    - SparklingMethod/DIProvider
+  - Sparkling-Media/Tests (2.1.0-rc.12):
+    - Mantle (~> 2.2.0)
+    - SparklingMethod/Core
+    - SparklingMethod/DIProvider
+  - Sparkling-Router (2.1.0-rc.12):
+    - Mantle (~> 2.2.0)
+    - Sparkling-Router/Core (= 2.1.0-rc.12)
+    - SparklingMethod/Core
+    - SparklingMethod/DIProvider
+  - Sparkling-Router/Core (2.1.0-rc.12):
+    - Mantle (~> 2.2.0)
+    - SparklingMethod/Core
+    - SparklingMethod/DIProvider
+  - Sparkling-Router/Tests (2.1.0-rc.12):
+    - Mantle (~> 2.2.0)
+    - SparklingMethod/Core
+    - SparklingMethod/DIProvider
+  - Sparkling-Storage (2.1.0-rc.12):
+    - Sparkling-Storage/Core (= 2.1.0-rc.12)
+    - SparklingMethod/Core
+  - Sparkling-Storage/Core (2.1.0-rc.12):
+    - SparklingMethod/Core
+  - Sparkling-Storage/Tests (2.1.0-rc.12):
+    - SparklingMethod/Core
+  - SparklingMethod/Core (2.1.0-rc.12):
+    - Mantle (~> 2.2.0)
+  - SparklingMethod/DIProvider (2.1.0-rc.12):
+    - SparklingMethod/Core
+
+DEPENDENCIES:
+  - Sparkling-Media (from `../sparkling-media/ios`)
+  - Sparkling-Media/Tests (from `../sparkling-media/ios`)
+  - Sparkling-Router (from `../sparkling-navigation/ios`)
+  - Sparkling-Router/Tests (from `../sparkling-navigation/ios`)
+  - Sparkling-Storage (from `../sparkling-storage/ios`)
+  - Sparkling-Storage/Tests (from `../sparkling-storage/ios`)
+  - SparklingMethod/Core (from `../../sparkling-method/ios`)
+  - SparklingMethod/DIProvider (from `../../sparkling-method/ios`)
+
+SPEC REPOS:
+  trunk:
+    - Mantle
+
+EXTERNAL SOURCES:
+  Sparkling-Media:
+    :path: "../sparkling-media/ios"
+  Sparkling-Router:
+    :path: "../sparkling-navigation/ios"
+  Sparkling-Storage:
+    :path: "../sparkling-storage/ios"
+  SparklingMethod:
+    :path: "../../sparkling-method/ios"
+
+SPEC CHECKSUMS:
+  Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
+  Sparkling-Media: 5b0597e156dde51a3a7a629a68f03788083db47b
+  Sparkling-Router: 435ce2c203427e958a7ba61673915c17c170cc77
+  Sparkling-Storage: 5fa0fdbe4c332fc2b6ec6621c3e877aca5e728a8
+  SparklingMethod: 5f1c7723b472aaff22e02e26c19086c47b419a32
+
+PODFILE CHECKSUM: 458215e8a9dfcc327d3c3d4baa8b092bb93e090a
+
+COCOAPODS: 1.16.2

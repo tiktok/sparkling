@@ -4,7 +4,6 @@
 
 package com.tiktok.sparkling.method.registry.core
 
-import com.tiktok.sparkling.method.registry.api.BridgeSettings
 import com.tiktok.sparkling.method.registry.api.util.ThreadPool
 import com.tiktok.sparkling.method.protocol.impl.errors.JSBErrorReportModel
 import com.tiktok.sparkling.method.protocol.utils.LogUtils
@@ -29,23 +28,24 @@ class IDLMethodRegistryCache {
         try {
             var name = cache[clazz]
             if (name == null) {
-                ThreadPool.runInBackGround(Runnable { addAnnotationCache(clazz) })
-                if (!BridgeSettings.bridgeRegistryOptimize) {
-                    clazz.newInstance().run {
-                        cache.put(clazz, this.name)
+                cacheMethodClass(clazz)
+                clazz.superclass.declaredFields
+                    .find {
+                        it.getAnnotation(IDLMethodName::class.java) != null
+                    }?.getAnnotation(IDLMethodName::class.java)
+                    ?.name
+                    ?.let {
+                        cache[clazz] = it
+                        name = cache[clazz]
+                    } ?: clazz.declaredFields
+                    .find {
+                        it.getAnnotation(IDLMethodName::class.java) != null
+                    }?.getAnnotation(IDLMethodName::class.java)
+                    ?.name
+                    ?.let {
+                        cache[clazz] = it
+                        name = cache[clazz]
                     }
-                    name = cache[clazz]
-                } else {
-                    clazz.superclass.declaredFields
-                        .find {
-                            it.getAnnotation(IDLMethodName::class.java) != null
-                        }?.getAnnotation(IDLMethodName::class.java)
-                        ?.name
-                        ?.let {
-                            cache[clazz] = it
-                            name = cache[clazz]
-                        }
-                }
             }
             name ?: ""
         } catch (e: Throwable) {
@@ -54,6 +54,10 @@ class IDLMethodRegistryCache {
             JSBErrorReportModel.putGlobalExtension("register_error_${clazz.name}", errorMsg)
             ""
         }
+
+    fun cacheMethodClass(clazz: Class<out IDLBridgeMethod>) {
+        ThreadPool.runInBackGround(Runnable { addAnnotationCache(clazz) })
+    }
 
     private fun addAnnotationCache(clazz: Class<out IDLBridgeMethod>) {
 //        println("run in ${Thread.currentThread().name}")

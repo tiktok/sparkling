@@ -6,7 +6,6 @@ package com.example.sparkling.go
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.tiktok.sparkling.Sparkling
-import com.tiktok.sparkling.SparklingContext
 import com.tiktok.sparkling.method.registry.core.utils.JsonUtils
 
 class SplashActivity : AppCompatActivity() {
@@ -20,16 +19,7 @@ class SplashActivity : AppCompatActivity() {
         val initialData: String = JsonUtils.toJson(initData)
         val initialDataJson = "{ \"initial_data\":$initialData}"
 
-        val context = SparklingContext()
-        context.scheme =
-            if (BuildConfig.DEBUG) {
-                val debugScheme = DebugDevUrlSupport.buildMainPageScheme(this)
-                context.sparklingUIProvider = DebugSparklingUiProvider(initialDataJson, debugScheme)
-                debugScheme
-            } else {
-                "hybrid://lynxview_page?bundle=main.lynx.bundle&hide_nav_bar=1&screen_orientation=portrait"
-            }
-        context.withInitData(initialDataJson)
+        val context = createSparklingVariantHooks().createMainContext(this, initialDataJson)
         Sparkling.build(this, context).navigate()
         finish()
     }

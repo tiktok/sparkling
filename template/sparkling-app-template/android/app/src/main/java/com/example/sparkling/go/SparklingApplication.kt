@@ -4,6 +4,7 @@
 package com.example.sparkling.go
 
 import android.app.Application
+import android.util.Log
 
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.imagepipeline.core.ImagePipelineConfig
@@ -13,6 +14,7 @@ import com.tiktok.sparkling.hybridkit.HybridKit
 import com.tiktok.sparkling.hybridkit.config.BaseInfoConfig
 import com.tiktok.sparkling.hybridkit.config.SparklingHybridConfig
 import com.tiktok.sparkling.hybridkit.config.SparklingLynxConfig
+import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
 import com.tiktok.sparkling.method.registry.core.SparklingBridgeManager
 import com.tiktok.sparkling.method.router.close.RouterCloseMethod
 import com.tiktok.sparkling.method.router.open.RouterOpenMethod
@@ -33,9 +35,7 @@ class SparklingApplication : Application() {
     }
 
     private fun initSparkling() {
-        if (BuildConfig.DEBUG) {
-            SparklingDebugBridge.init(this)
-        }
+        createSparklingVariantHooks().onApplicationCreate(this)
         initHybridKit()
         initSparklingMethods()
     }
@@ -56,8 +56,34 @@ class SparklingApplication : Application() {
     }
 
     private fun initSparklingMethods() {
-        SparklingBridgeManager.registerIDLMethod(RouterOpenMethod::class.java)
-        SparklingBridgeManager.registerIDLMethod(RouterCloseMethod::class.java)
+        val autolinked = registerAutolinkMethods()
+        if (!autolinked) {
+            SparklingBridgeManager.registerIDLMethod(RouterOpenMethod::class.java)
+            SparklingBridgeManager.registerIDLMethod(RouterCloseMethod::class.java)
+        }
         RouterProvider.hostRouterDepend = SparklingHostRouterDepend()
+    }
+
+    private fun registerAutolinkMethods(): Boolean {
+        var registered = false
+        for (module in SparklingAutolink.modules) {
+            for (className in module.methodClassNames) {
+                val clazz =
+                    runCatching {
+                        Class.forName(className).asSubclass(IDLBridgeMethod::class.java)
+                    }.getOrElse { error ->
+                        Log.w(TAG, "Failed to load ${module.name} method $className", error)
+                        null
+                    }
+                if (clazz == null) continue
+                SparklingBridgeManager.registerIDLMethod(clazz)
+                registered = true
+            }
+        }
+        return registered
+    }
+
+    private companion object {
+        const val TAG = "SparklingApplication"
     }
 }

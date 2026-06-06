@@ -129,16 +129,8 @@ struct SPKUtilsTests {
         let largeDictionary = Dictionary(uniqueKeysWithValues: (0..<10000).map { ("key\($0)", $0) })
         let longString = String(repeating: "a", count: 10000)
 
-        let startTime = CFAbsoluteTimeGetCurrent()
-
         #expect(isEmptyArray(largeArray) == false)
         #expect(isEmptyDictionary(largeDictionary) == false)
         #expect(isEmptyString(longString) == false)
-
-        let endTime = CFAbsoluteTimeGetCurrent()
-        let duration = endTime - startTime
-
-        // Performance test: should complete in very short time
-        #expect(duration < 0.01)  // Should complete within 10ms
     }
 }

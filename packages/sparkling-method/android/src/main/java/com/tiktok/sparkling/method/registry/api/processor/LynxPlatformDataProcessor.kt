@@ -98,9 +98,7 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
         classMap: HashMap<String, Pair<Method, IDLMethodParamField>>,
         params: HashMap<String, Any>,
     ) {
-        /**
-         * check value
-         */
+        // Check value.
         classMap.forEach {
             val field = it.value.second
             val method = it.value.first
@@ -215,9 +213,7 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
                 }
                 _map
             } ?: return null
-        /**
-         * init default value
-         */
+        // Init default value.
         classMap.filter { map[it.key] == null && it.value.second.defaultValue.type != DefaultType.NONE }.forEach {
             val annotation = it.value.second
             map[it.key] = parseStringByReturnType(it.value.first, annotation)
@@ -256,9 +252,7 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
         return methods?.fold(hashMapOf()) { acc, method ->
             val annotation = method.getAnnotation(IDLMethodParamField::class.java)
             val value = map[annotation.keyPath]
-            /**
-             * init default value
-             */
+            // Init default value.
             if (value == null && annotation.defaultValue.type != DefaultType.NONE) {
                 val defaultValue = parseStringByReturnType(method, annotation)
                 map[annotation.keyPath] = defaultValue

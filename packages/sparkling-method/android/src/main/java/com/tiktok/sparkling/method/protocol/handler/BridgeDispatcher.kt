@@ -16,10 +16,13 @@ import com.tiktok.sparkling.method.protocol.interfaces.IBridgeHandler
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeMethodCallback
 import com.tiktok.sparkling.method.protocol.utils.BridgeConstants
 import com.tiktok.sparkling.method.protocol.utils.LogUtils
-import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
 import com.tiktok.sparkling.method.registry.api.SparklingBridge
 import com.tiktok.sparkling.method.registry.api.SparklingBridge.Companion.getToastSetting
+import com.tiktok.sparkling.method.registry.api.SparklingMethodInvocationCenter
+import com.tiktok.sparkling.method.registry.core.BridgePlatformType
+import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
 import org.json.JSONObject
+import java.util.UUID
 
 class BridgeDispatcher {
     companion object {
@@ -41,7 +44,7 @@ class BridgeDispatcher {
         monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder? = null,
     ) {
         if (context.jsbMockInterceptor != null) {
-            if (!shouldInvokeResult(context, call, callback)) {
+            if (!shouldInvokeResult(context, call, callback, monitorBuilder)) {
                 val bridgeCall = context.jsbMockInterceptor!!.interceptBridgeCall(call)
                 realDispatchBridgeMethod(bridgeCall, callback, context, monitorBuilder)
             }
@@ -54,10 +57,14 @@ class BridgeDispatcher {
         context: BridgeContext,
         call: BridgeCall,
         callback: IBridgeCallback,
+        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?,
     ): Boolean {
         val result = context.jsbMockInterceptor!!.invokeBridgeResult(call)
         result?.let {
-            callback.onBridgeResult(it, call, null)
+            val invocation = MethodInvocationSnapshot.from(context, call)
+            invocation.notifyStart(call)
+            invocation.notifyEnd(call, it)
+            callback.onBridgeResult(it, call, monitorBuilder)
             return true
         }
         return false
@@ -70,6 +77,9 @@ class BridgeDispatcher {
         monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?,
     ) {
         LogUtils.d(TAG, "realDispatchBridgeMethod: ${Thread.currentThread()} and call is \n$call")
+
+        val invocation = MethodInvocationSnapshot.from(context, call)
+        invocation.notifyStart(call)
 
         SparklingBridge.bridgeFactoryManager?.checkAndInitBridge(context, call)
 
@@ -84,11 +94,9 @@ class BridgeDispatcher {
             )
         ) {
             client.onBridgeCallback()
-            callback.onBridgeResult(
-                context.jsbMockInterceptor?.interceptBridgeResult(call, result) ?: result,
-                call,
-                monitorBuilder,
-            )
+            val callbackResult = context.jsbMockInterceptor?.interceptBridgeResult(call, result) ?: result
+            invocation.notifyEnd(call, callbackResult)
+            callback.onBridgeResult(callbackResult, call, monitorBuilder)
             if (getToastSetting()) toastJsbError(call, result.toJSONObject(), context)
             return
         }
@@ -96,15 +104,14 @@ class BridgeDispatcher {
         val shouldHandleBridgeCallResultModel =
             context.bridgeLifeClientImp.shouldHandleBridgeCall(call, context)
         if (!shouldHandleBridgeCallResultModel.shouldHandleBridgeCall) {
-            callback.onBridgeResult(
+            val callbackResult =
                 BridgeResult.toJsonResult(
                     IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED,
                     IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED_MSG + ", reason: " + shouldHandleBridgeCallResultModel.reason,
                     null,
-                ),
-                call,
-                monitorBuilder,
-            )
+                )
+            invocation.notifyEnd(call, callbackResult)
+            callback.onBridgeResult(callbackResult, call, monitorBuilder)
             return
         }
 
@@ -112,11 +119,12 @@ class BridgeDispatcher {
             object : IBridgeMethodCallback {
                 override fun onBridgeResult(parcel: Any) {
                     client.onBridgeCallback()
-                    val result =
+                    val bridgeResult =
                         context.jsbMockInterceptor?.interceptBridgeResult(call, BridgeResult(parcel))
                             ?: BridgeResult(parcel)
-                    callback.onBridgeResult(result, call, monitorBuilder)
-                    if (getToastSetting()) toastJsbError(call, result.toJSONObject(), context)
+                    invocation.notifyEnd(call, bridgeResult)
+                    callback.onBridgeResult(bridgeResult, call, monitorBuilder)
+                    if (getToastSetting()) toastJsbError(call, bridgeResult.toJSONObject(), context)
                 }
             }
 
@@ -221,6 +229,57 @@ class BridgeDispatcher {
                         ).show()
                 }
             }
+        }
+    }
+
+    private data class MethodInvocationSnapshot(
+        val id: String,
+        val namespace: String?,
+        val platform: BridgePlatformType,
+        val startTimeMs: Long,
+    ) {
+        fun notifyStart(call: BridgeCall) {
+            SparklingMethodInvocationCenter.notifyStart(
+                id = id,
+                call = call,
+                namespace = namespace,
+                platform = platform,
+                startTimeMs = startTimeMs,
+            )
+        }
+
+        fun notifyEnd(
+            call: BridgeCall,
+            result: BridgeResult,
+        ) {
+            val endTimeMs = System.currentTimeMillis()
+            SparklingMethodInvocationCenter.notifyEnd(
+                id = id,
+                call = call,
+                namespace = namespace,
+                platform = platform,
+                startTimeMs = startTimeMs,
+                endTimeMs = endTimeMs,
+                result = result.parcel,
+                code =
+                    result
+                        .toJSONObject()
+                        .takeIf { it.has(IDLBridgeMethod.PARAM_CODE) }
+                        ?.optInt(IDLBridgeMethod.PARAM_CODE),
+            )
+        }
+
+        companion object {
+            fun from(
+                context: BridgeContext,
+                call: BridgeCall,
+            ): MethodInvocationSnapshot =
+                MethodInvocationSnapshot(
+                    id = UUID.randomUUID().toString(),
+                    namespace = call.nameSpace.takeIf { it.isNotBlank() } ?: context.getNamespace() ?: "bridge-dispatcher",
+                    platform = BridgeContext.getPlatformByBridgeContext(context),
+                    startTimeMs = System.currentTimeMillis(),
+                )
         }
     }
 }

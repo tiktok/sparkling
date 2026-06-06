@@ -32,33 +32,13 @@ extension SPKUploadFileMethod {
             guard let self = self else { return }
 
             let httpResponse = response as? SPKHttpResponseChromium
-            let resultModel = SPKUploadFileMethodResultModel()
-            resultModel.clientCode = 0
-            var status: SPKUploadStatus?
-
-            if let httpResponse = httpResponse {
-                resultModel.httpCode = httpResponse.statusCode
-                resultModel.header = httpResponse.allHeaderFields as? [String: String]
-            }
-
-            if let error = error {
-                resultModel.clientCode = error._code
-                status = SPKUploadStatus(statusCode: .failed, message: error.localizedDescription)
-            } else if httpResponse == nil {
-                status = SPKUploadStatus(statusCode: .malformedResponse, message: "The response returned from server is malformed.")
-            } else {
-                resultModel.responseData = responseData as? [String: Any]
-            }
-
-            if let status = status {
-                let errorInfo: [String: Any] = [
-                    "code": status.statusCode.rawValue,
-                    "message": status.message ?? "",
-                ]
-                completionHandler.handleCompletion(status: .failed(message: errorInfo["message"] as? String), result: resultModel)
-            } else {
-                completionHandler.handleCompletion(status: .succeeded(), result: resultModel)
-            }
+            self.finishUploadFile(
+                httpCode: httpResponse?.statusCode,
+                header: httpResponse?.allHeaderFields as? [String: String],
+                responseData: responseData,
+                error: error,
+                completionHandler: completionHandler
+            )
         }
 
         let uploadName = typedParamModel.name ?? "file"
@@ -87,7 +67,43 @@ extension SPKUploadFileMethod {
         task.resume()
     }
 
-    private func guessMimeType(for fileURL: URL) -> String {
+    func finishUploadFile(
+        httpCode: Int?,
+        header: [String: String]?,
+        responseData: Any?,
+        error: Error?,
+        completionHandler: CompletionHandlerProtocol
+    ) {
+        let resultModel = SPKUploadFileMethodResultModel()
+        resultModel.clientCode = 0
+        var status: SPKUploadStatus?
+
+        if let httpCode = httpCode {
+            resultModel.httpCode = httpCode
+            resultModel.header = header
+        }
+
+        if let error = error {
+            resultModel.clientCode = error._code
+            status = SPKUploadStatus(statusCode: .failed, message: error.localizedDescription)
+        } else if httpCode == nil {
+            status = SPKUploadStatus(statusCode: .malformedResponse, message: "The response returned from server is malformed.")
+        } else {
+            resultModel.responseData = responseData as? [String: Any]
+        }
+
+        if let status = status {
+            let errorInfo: [String: Any] = [
+                "code": status.statusCode.rawValue,
+                "message": status.message ?? "",
+            ]
+            completionHandler.handleCompletion(status: .failed(message: errorInfo["message"] as? String), result: resultModel)
+        } else {
+            completionHandler.handleCompletion(status: .succeeded(), result: resultModel)
+        }
+    }
+
+    func guessMimeType(for fileURL: URL) -> String {
         let pathExtension = fileURL.pathExtension.lowercased()
 
         switch pathExtension {

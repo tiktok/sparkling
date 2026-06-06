@@ -9,7 +9,20 @@ import Testing
 @Suite(.serialized)
 struct MethodRegistryTest {
 
+    private func clearAutoRegisteredMethods() {
+        [
+            OpenMethod.methodName(),
+            "test.success",
+            "test.failure",
+            "test.async",
+            "test.invalidParams",
+            "test.global"
+        ].forEach { MethodRegistry.global.unregister(methodName: $0) }
+    }
+
     @Test func testGlobalBasicApis() throws {
+        defer { MethodRegistry.global.unregister(methodName: OpenMethod.methodName()) }
+
         MethodRegistry.global.register(methodType: OpenMethod.self)
         #expect(MethodRegistry.global.respondTo(methodName: OpenMethod.methodName()))
 
@@ -26,6 +39,8 @@ struct MethodRegistryTest {
     }
 
     @Test func testAutoRegister() throws {
+        defer { clearAutoRegisteredMethods() }
+
         MethodRegistry.autoRegisterGlobalMethods()
         #expect(MethodRegistry.global.respondTo(methodName: OpenMethod.methodName()))
         let openMethod = MethodRegistry.global.method(forName: OpenMethod.methodName())

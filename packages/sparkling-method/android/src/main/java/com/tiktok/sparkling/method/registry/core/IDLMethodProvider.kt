@@ -7,6 +7,6 @@ package com.tiktok.sparkling.method.registry.core
 /**
  * Desc:
  */
-interface IDLMethodProvider {
+fun interface IDLMethodProvider {
     fun provideMethod(): IDLBridgeMethod
 }

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reference-style Log panel:
+     row 1: clear icon + filter input
+     row 2: All / Info / Debug / Warn / Error text tabs
+     rows: message + copy icon. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@color/sparkling_panel_background">
+
+        <ImageButton
+            android:id="@+id/console_clear_button"
+            android:layout_width="36dp"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:src="@android:drawable/ic_menu_delete"
+            android:tint="@color/sparkling_panel_text_primary"
+            android:background="@android:color/transparent"
+            android:contentDescription="Clear logs" />
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="match_parent"
+            android:background="@color/sparkling_panel_toolbar_separator" />
+
+        <EditText
+            android:id="@+id/console_filter_input"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:hint="input to filter log"
+            android:textColorHint="@color/sparkling_panel_text_hint"
+            android:textColor="@color/sparkling_panel_text_primary"
+            android:textSize="14sp"
+            android:singleLine="true"
+            android:inputType="text"
+            android:imeOptions="actionDone"
+            android:paddingHorizontal="14dp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/sparkling_panel_toolbar_separator" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:orientation="horizontal">
+
+        <RadioGroup
+            android:id="@+id/console_level_group"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+        android:background="@color/sparkling_panel_background">
+
+            <RadioButton
+                android:id="@+id/console_level_verbose"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:button="@null"
+                android:text="All"
+                android:textSize="14sp"
+                android:textColor="@color/sparkling_log_level_tab_text"
+                android:background="@drawable/sparkling_log_level_tab_bg"
+                android:checked="true" />
+
+            <RadioButton
+                android:id="@+id/console_level_info"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:button="@null"
+                android:text="Info"
+                android:textSize="14sp"
+                android:textColor="@color/sparkling_log_level_tab_text"
+                android:background="@drawable/sparkling_log_level_tab_bg" />
+
+            <RadioButton
+                android:id="@+id/console_level_debug"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:button="@null"
+                android:text="Debug"
+                android:textSize="14sp"
+                android:textColor="@color/sparkling_log_level_tab_text"
+                android:background="@drawable/sparkling_log_level_tab_bg" />
+
+            <RadioButton
+                android:id="@+id/console_level_warn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:button="@null"
+                android:text="Warn"
+                android:textSize="14sp"
+                android:textColor="@color/sparkling_log_level_tab_text"
+                android:background="@drawable/sparkling_log_level_tab_bg" />
+
+            <RadioButton
+                android:id="@+id/console_level_error"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:button="@null"
+                android:text="Error"
+                android:textSize="14sp"
+                android:textColor="@color/sparkling_log_level_tab_text"
+                android:background="@drawable/sparkling_log_level_tab_bg" />
+        </RadioGroup>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/sparkling_panel_toolbar_separator" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/console_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/sparkling_console_background"
+        android:scrollbars="vertical"
+        android:overScrollMode="never"
+        android:nestedScrollingEnabled="true"
+        android:padding="0dp" />
+</merge>

@@ -117,6 +117,19 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
         return size
     }
 
+    open override var intrinsicContentSize: CGSize {
+        switch self.sparkContentMode {
+        case .SPKContainerViewContentModeFitSize:
+            return self.contentSize
+        case .SPKContainerViewContentModeFixedWidth:
+            return CGSize(width: self.frame.size.width, height: self.contentSize.height)
+        case .SPKContainerViewContentModeFixedHeight:
+            return CGSize(width: self.contentSize.width, height: self.frame.size.height)
+        default:
+            return self.frame.size
+        }
+    }
+
     /// The preferred status bar style for this view.
     ///
     /// This property controls the appearance of the status bar when this view is active.
@@ -238,6 +251,7 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
         self.context = context
         self.context?.originURL = self.originURL?.absoluteString
 
+        self.ensureContainerInitTime()
         self.addContainerDefaultGlobalProps()
         if self.containerLifecycleDelegate == nil {
             self.containerLifecycleDelegate = context.containerLifecycleDelegate
@@ -282,6 +296,17 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
                 "SPK_version": SPKVersion.SPKVersion()
             ])
         return
+    }
+
+    private func ensureContainerInitTime() {
+        guard let context = self.context, context.containerInitTime == nil else {
+            return
+        }
+        let timestamp =
+            self.initStartTimeStamp > 0
+            ? self.initStartTimeStamp
+            : Date().timeIntervalSince1970 * 1000
+        context.containerInitTime = NSNumber(value: Int64(timestamp))
     }
 
     /// Lays out the view's subviews.
@@ -372,6 +397,9 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
     /// This method safely removes the current loading view from the view hierarchy,
     /// stops any ongoing loading animations, and ensures proper cleanup.
     public func removeLoadingView() {
+        if self.config?.disableAutoRemoveLoading == true {
+            return
+        }
         if self.loadingView?.superview != nil {
             self.loadingView?.stopLoadingAnimation?()
             self.loadingView?.removeFromSuperview()
@@ -520,6 +548,7 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
     ///
     /// - Parameter context: The hybrid context to use for reloading
     public func reload(_ context: SPKHybridContext?) {
+        self.loadState = .SPKLoadStateLoading
         self.addLoadingViewIfNeeded()
 
         self.containerLifecycleDelegate?.containerWillReload?(self)
@@ -616,6 +645,7 @@ extension SPKContainerView: SPKWrapperViewLifecycleProtocol {
     }
 
     public func viewDidStartLoading(_ view: (any SPKWrapperViewProtocol)?) {
+        self.loadState = .SPKLoadStateLoading
         self.containerLifecycleDelegate?.containerDidStartLoading?(self)
     }
 
@@ -628,6 +658,7 @@ extension SPKContainerView: SPKWrapperViewLifecycleProtocol {
     }
 
     public func view(_ view: (any SPKWrapperViewProtocol)?, didLoadFailedWithURL url: URL?, error: (any Error)?) {
+        self.loadState = .SPKLoadStateFailed
         self.loadError = error
         self.removeLoadingView()
 
@@ -649,6 +680,7 @@ extension SPKContainerView: SPKWrapperViewLifecycleProtocol {
     }
 
     public func view(_ view: (any SPKWrapperViewProtocol)?, didFinishLoadWithURL url: URL?) {
+        self.loadState = .SPKLoadStateSucceed
         self.loadError = nil
         self.didMount = true
 
@@ -696,8 +728,8 @@ extension SPKContainerView: SPKWrapperViewLifecycleProtocol {
             self.frame = CGRect(x: frame.origin.x, y: frame.origin.y, width: self.frame.size.width, height: frame.size.height)
         case .SPKContainerViewContentModeFixedHeight:
             self.frame = CGRect(x: frame.origin.x, y: frame.origin.y, width: frame.size.width, height: self.frame.size.height)
-        default:
-            self.frame = frame
+        case .SPKContainerViewContentModeFixedSize:
+            break
         }
 
         if self.sparkContentMode != .SPKContainerViewContentModeFixedSize {

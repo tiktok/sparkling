@@ -172,7 +172,7 @@ class UploadImageMethod : AbsUploadImageMethodIDL() {
                                 },
                             )
                         } catch (throwable: Throwable) {
-                            Log.e(tag, "parse post reponse body failed", throwable)
+                            Log.e(tag, "parse post response body failed", throwable)
                         }
                     }
 

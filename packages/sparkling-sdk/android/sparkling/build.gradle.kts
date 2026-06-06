@@ -48,6 +48,10 @@ android {
                     "user.home",
                     buildDir.resolve("robolectric-home").absolutePath,
                 )
+                it.extensions.configure(org.gradle.testing.jacoco.plugins.JacocoTaskExtension::class.java) {
+                    isIncludeNoLocationClasses = true
+                    excludes = listOf("jdk.internal.*")
+                }
             }
         }
     }
@@ -73,12 +77,8 @@ dependencies {
     api(libs.lynx.trace)
     api(libs.primjs)
     api(libs.lynx.service.image)
-    api(libs.lynx.service.log)
     api(libs.lynx.service.http)
 //    api(libs.okhttp)
-
-    api(libs.lynx.service.devtool)
-    api(libs.lynx.devtool)
 }
 
 tasks.withType<Test>().configureEach {

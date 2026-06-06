@@ -11,6 +11,7 @@ import com.tiktok.sparkling.method.protocol.interfaces.IBridgeHandler
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeMethodCallback
 import com.tiktok.sparkling.method.registry.core.IBridgeContext
 import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
+import com.tiktok.sparkling.method.registry.core.IDLMethodProvider
 import com.tiktok.sparkling.method.registry.core.IDLMethodRegistry
 import com.tiktok.sparkling.method.registry.core.BridgePlatformType
 import com.tiktok.sparkling.method.registry.api.util.BridgeMethodCallbackHelper
@@ -23,7 +24,8 @@ class BusinessCallHandler(
     val nameSpace: String,
 ) : IBridgeHandler {
     private var context: IBridgeContext? = null
-    private var registry = IDLMethodRegistry().apply { namespace = nameSpace }
+    private var registry =
+        IDLMethodRegistry(inferMethodNameFromInstance = true).apply { namespace = nameSpace }
     private var pool: ConcurrentHashMap<BridgePlatformType, ConcurrentHashMap<String, IDLBridgeMethod>> = ConcurrentHashMap()
     private var isRelease = false
 
@@ -60,13 +62,22 @@ class BusinessCallHandler(
         registry.registerMethod(clazz, scope)
     }
 
+    fun registerMethod(
+        name: String,
+        scope: BridgePlatformType = BridgePlatformType.ALL,
+        clazz: Class<out IDLBridgeMethod>? = null,
+        factory: () -> IDLBridgeMethod,
+    ) {
+        registry.registerMethodProvider(name, IDLMethodProvider { factory() }, scope, clazz)
+    }
+
     fun getBridge(
         bridgeContext: BridgeContext,
         bridgeName: String,
     ): IDLBridgeMethod? {
         val platformType = BridgeContext.getPlatformByBridgeContext(bridgeContext)
-        val clazz = registry.findMethodClass(platformType, bridgeName) ?: return null
-        val newInstance = clazz.newInstance()
+        val provider = registry.findMethodProvider(platformType, bridgeName) ?: return null
+        val newInstance = provider.provideMethod()
         getPlatformTypeCache(platformType)[bridgeName] = newInstance
         return newInstance
     }

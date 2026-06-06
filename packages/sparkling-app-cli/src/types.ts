@@ -46,7 +46,7 @@ export interface AppConfig {
     server?: {
       /** Preferred dev server port for sparkling-app-cli dev/run commands. Defaults to 5969. */
       port?: number;
-      /** Preferred dev server host for sparkling-app-cli dev command. */
+      /** Preferred dev server host for sparkling-app-cli dev/run commands. */
       host?: string;
     };
   };
@@ -71,6 +71,7 @@ export interface MethodModuleConfig {
   android?: {
     packageName?: string;
     className?: string;
+    methodClassNames?: string[];
     projectDir?: string;
     buildGradle?: string;
   };

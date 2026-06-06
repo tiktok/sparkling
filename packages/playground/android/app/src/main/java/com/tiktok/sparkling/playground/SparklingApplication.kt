@@ -30,12 +30,13 @@ import com.tiktok.sparkling.method.media.uploadimage.UploadImageMethod
 import com.tiktok.sparkling.method.media.utils.MediaProvider
 import com.tiktok.sparkling.playground.depend.AppMediaDepend
 import com.tiktok.sparkling.playground.provider.BuiltinTemplateProvider
-import com.tiktok.sparkling.debugtool.SparklingDebugTool
 import com.tiktok.sparkling.playground.depend.AppNetworkDepend
 import com.tiktok.sparkling.playground.depend.AppPermissionDepend
 import com.tiktok.sparkling.playground.depend.AppThreadPoolDepend
 
 class SparklingApplication : Application() {
+    private val debugHooks by lazy { createPlaygroundDebugHooks() }
+
     override fun onCreate() {
         super.onCreate()
         initFresco()
@@ -49,9 +50,7 @@ class SparklingApplication : Application() {
     }
 
     private fun initSparkling() {
-        if (BuildConfig.DEBUG) {
-            SparklingDebugTool.init(this)
-        }
+        debugHooks.onApplicationCreate(this)
         initHybridKit()
         initDepends()
         initSparklingMethods()
@@ -68,25 +67,26 @@ class SparklingApplication : Application() {
         val hybridConfig =
             SparklingHybridConfig.build(baseInfoConfig) {
                 setLynxConfig(lynxConfig)
+                debugHooks.configureHybridConfig(this)
             }
         HybridKit.setHybridConfig(hybridConfig, this)
         HybridKit.initLynxKit()
     }
 
     private fun initSparklingMethods() {
-        SparklingBridgeManager.registerIDLMethod(RouterOpenMethod::class.java)
-        SparklingBridgeManager.registerIDLMethod(RouterCloseMethod::class.java)
+        SparklingBridgeManager.registerIDLMethod("router.open", clazz = RouterOpenMethod::class.java) { RouterOpenMethod() }
+        SparklingBridgeManager.registerIDLMethod("router.close", clazz = RouterCloseMethod::class.java) { RouterCloseMethod() }
         RouterProvider.hostRouterDepend = SparklingHostRouterDepend()
 
-        SparklingBridgeManager.registerIDLMethod(StorageSetItemMethod::class.java)
-        SparklingBridgeManager.registerIDLMethod(StorageGetItemMethod::class.java)
-        SparklingBridgeManager.registerIDLMethod(StorageRemoveItemMethod::class.java)
+        SparklingBridgeManager.registerIDLMethod("storage.setItem", clazz = StorageSetItemMethod::class.java) { StorageSetItemMethod() }
+        SparklingBridgeManager.registerIDLMethod("storage.getItem", clazz = StorageGetItemMethod::class.java) { StorageGetItemMethod() }
+        SparklingBridgeManager.registerIDLMethod("storage.removeItem", clazz = StorageRemoveItemMethod::class.java) { StorageRemoveItemMethod() }
 
-        SparklingBridgeManager.registerIDLMethod(ChooseMediaMethod::class.java)
-        SparklingBridgeManager.registerIDLMethod(DownloadFileMethod::class.java)
-        SparklingBridgeManager.registerIDLMethod(SaveDataURLMethod::class.java)
-        SparklingBridgeManager.registerIDLMethod(UploadFileMethod::class.java)
-        SparklingBridgeManager.registerIDLMethod(UploadImageMethod::class.java)
+        SparklingBridgeManager.registerIDLMethod("media.chooseMedia", clazz = ChooseMediaMethod::class.java) { ChooseMediaMethod() }
+        SparklingBridgeManager.registerIDLMethod("media.downloadFile", clazz = DownloadFileMethod::class.java) { DownloadFileMethod() }
+        SparklingBridgeManager.registerIDLMethod("media.saveDataURL", clazz = SaveDataURLMethod::class.java) { SaveDataURLMethod() }
+        SparklingBridgeManager.registerIDLMethod("media.uploadFile", clazz = UploadFileMethod::class.java) { UploadFileMethod() }
+        SparklingBridgeManager.registerIDLMethod("media.uploadImage", clazz = UploadImageMethod::class.java) { UploadImageMethod() }
         MediaProvider.hostMediaDepend = AppMediaDepend.register(this)
     }
 

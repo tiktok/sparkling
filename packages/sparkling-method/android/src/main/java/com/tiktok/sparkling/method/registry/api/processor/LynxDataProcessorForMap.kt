@@ -77,9 +77,7 @@ object LynxDataProcessorForMap {
         classMap: IDLAnnotationModel,
         params: HashMap<String, Any>,
     ) {
-        /**
-         * check value
-         */
+        // Check value.
         classMap.stringModel.forEach {
             val field = it.key
             val method = it.value
@@ -182,9 +180,7 @@ object LynxDataProcessorForMap {
         classMap: IDLAnnotationModel?,
         map: HashMap<String, Any>,
     ): IDLAnnotationModel? {
-        /**
-         * init default value
-         */
+        // Init default value.
         if (classMap == null) return null
         classMap.stringModel.filter { map[it.key] == null && it.value.defaultValue.type != DefaultType.NONE }.forEach {
             val idlParamField = it.value
@@ -225,9 +221,7 @@ object LynxDataProcessorForMap {
         val stringModel = model.stringModel
         return stringModel.mapValues {
             val value = map[it.value.keyPath]
-            /**
-             * init default value
-             */
+            // Init default value.
             if (value == null && it.value.defaultValue.type != DefaultType.NONE) {
                 val defaultValue = parseStringByReturnType(it.value.returnType, it.value)
                 map[it.value.keyPath] = defaultValue

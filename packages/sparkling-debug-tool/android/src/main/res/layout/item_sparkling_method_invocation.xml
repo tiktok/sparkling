@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="10dp"
+    android:background="@color/sparkling_panel_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/txt_method_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:layout_marginEnd="8dp"
+            android:textColor="#FFFFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txt_method_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/sparkling_panel_text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:fontFamily="monospace" />
+
+        <TextView
+            android:id="@+id/txt_method_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/sparkling_panel_text_secondary"
+            android:textSize="11sp" />
+
+        <ImageButton
+            android:id="@+id/btn_method_copy"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="6dp"
+            android:padding="7dp"
+            android:src="@drawable/sparkling_ic_copy"
+            android:tint="@color/sparkling_panel_text_primary"
+            android:background="@android:color/transparent"
+            android:contentDescription="Copy Sparkling Method call" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txt_method_meta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="@color/sparkling_panel_text_secondary"
+        android:textSize="10sp" />
+
+    <TextView
+        android:id="@+id/txt_method_payload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textColor="@color/sparkling_panel_text_primary"
+        android:textSize="11sp"
+        android:fontFamily="monospace"
+        android:textIsSelectable="true"
+        android:visibility="gone" />
+</LinearLayout>

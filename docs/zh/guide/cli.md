@@ -42,6 +42,7 @@ npx sparkling dev
 | --- | --- |
 | `--config <path>` | `app.config.ts` 路径（默认：`app.config.ts`） |
 | `--port <number>` | 开发服务器端口（默认：`app.config.ts -> dev.server.port`，兜底 `5969`） |
+| `--host <host>` | 开发服务器 host（默认：`app.config.ts -> dev.server.host`，否则使用 Rspeedy 默认值） |
 
 默认端口 **5969** 对应手机九宫格键盘上的 **LYNX**（L=5, Y=9, N=6, X=9）。
 
@@ -99,6 +100,7 @@ npx sparkling run:android
 | --- | --- |
 | `--copy` | 将资源复制到原生 Shell |
 | `--skip-copy` | 跳过资源复制（默认行为） |
+| `--host <host>` | Android 设备使用的 dev server host，适用于自动检测的局域网 IPv4 不是目标网络时 |
 
 该命令会依次执行：
 

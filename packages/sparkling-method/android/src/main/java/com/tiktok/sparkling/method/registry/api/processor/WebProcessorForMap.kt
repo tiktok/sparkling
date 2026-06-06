@@ -100,9 +100,7 @@ object WebProcessorForMap {
         classMap: IDLAnnotationModel,
         params: JSONObject,
     ) {
-        /**
-         * check value
-         */
+        // Check value.
         classMap.stringModel.forEach {
             val field = it.key
             val method = it.value
@@ -209,9 +207,7 @@ object WebProcessorForMap {
         classMap: IDLAnnotationModel?,
         map: JSONObject,
     ): IDLAnnotationModel? {
-        /**
-         * init default value
-         */
+        // Init default value.
         if (classMap == null) return null
         classMap.stringModel.filter { (map.opt(it.key) == null || map.opt(it.key) == JSONObject.NULL) && it.value.defaultValue.type != DefaultType.NONE }.forEach {
             val idlParamField = it.value
@@ -253,9 +249,7 @@ object WebProcessorForMap {
         return JSONObject(
             stringModel.mapValues {
                 val value = map.opt(it.value.keyPath)
-                /**
-                 * init default value
-                 */
+                // Init default value.
                 if ((value == null || value == JSONObject.NULL) && it.value.defaultValue.type != DefaultType.NONE) {
                     val defaultValue = parseStringByReturnType(it.value.returnType, it.value)
                     map.put(it.value.keyPath, defaultValue)

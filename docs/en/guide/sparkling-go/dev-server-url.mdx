@@ -114,7 +114,9 @@ manual restart.
 ## Connecting from a real device
 
 On a simulator, `localhost` just works. On a **real device**, the app needs your
-machine's LAN IP address.
+machine's LAN IP address. `sparkling run:android` uses that LAN IP for physical devices.
+If automatic detection picks the wrong network, use `--host <host>` or set
+`dev.server.host` in `app.config.ts`.
 
 ### The problem
 
@@ -163,7 +165,7 @@ and shows a live indicator:
 | **Green dot** — Connected to dev server | The bundle was loaded over HTTP. The server origin is shown. |
 | **Gray dot** — Running from local assets | The bundle was loaded from a local path (production). |
 
-<img src="/sparkling/guide/sparkling-go/dev-url-idle.png" width="300" alt="Connected to dev server, URL loaded" />
+<img src="/guide/sparkling-go/dev-url-idle.png" width="300" alt="Connected to dev server, URL loaded" />
 
 #### Editing the URL
 
@@ -172,8 +174,8 @@ UI gives you inline feedback:
 
 | State | Screenshot |
 |-------|-----------|
-| **Validation error** — URL must start with `http://` or `https://` | <img src="/sparkling/guide/sparkling-go/dev-url-validation.png" width="260" /> |
-| **Ready to save** — valid URL, differs from current | <img src="/sparkling/guide/sparkling-go/dev-url-save-active.png" width="260" /> |
+| **Validation error** — URL must start with `http://` or `https://` | <img src="/guide/sparkling-go/dev-url-validation.png" width="260" /> |
+| **Ready to save** — valid URL, differs from current | <img src="/guide/sparkling-go/dev-url-save-active.png" width="260" /> |
 
 #### Save feedback
 
@@ -181,16 +183,16 @@ Tapping **Save** persists the URL on the native side. The result is shown inline
 
 | State | Screenshot |
 |-------|-----------|
-| **Success** — restart the app to apply | <img src="/sparkling/guide/sparkling-go/dev-url-save-success.png" width="260" /> |
-| **Error** — shows the native error message | <img src="/sparkling/guide/sparkling-go/dev-url-save-error.png" width="260" /> |
+| **Success** — restart the app to apply | <img src="/guide/sparkling-go/dev-url-save-success.png" width="260" /> |
+| **Error** — shows the native error message | <img src="/guide/sparkling-go/dev-url-save-error.png" width="260" /> |
 
 #### Edge cases
 
 | State | Screenshot |
 |-------|-----------|
-| **Loading** — fetching config from native side | <img src="/sparkling/guide/sparkling-go/dev-url-loading.png" width="260" /> |
-| **Pipe methods not available** — `sparkling-debug-tool` not integrated | <img src="/sparkling/guide/sparkling-go/dev-url-pipe-error.png" width="260" /> |
-| **URL mismatch** — configured server differs from active connection | <img src="/sparkling/guide/sparkling-go/dev-url-mismatch.png" width="260" /> |
+| **Loading** — fetching config from native side | <img src="/guide/sparkling-go/dev-url-loading.png" width="260" /> |
+| **Pipe methods not available** — `sparkling-debug-tool` not integrated | <img src="/guide/sparkling-go/dev-url-pipe-error.png" width="260" /> |
+| **URL mismatch** — configured server differs from active connection | <img src="/guide/sparkling-go/dev-url-mismatch.png" width="260" /> |
 
 ### Option B: Pipe API (custom integration)
 
@@ -239,7 +241,11 @@ the correct dev server URL. This is handled by `DebugDevURLSupport` in the nativ
 
 `SparklingDebugTool.setup()` (iOS) / `.init(application)` (Android) turns on the basic
 debug flags (`lynxDebugEnabled`, `devtoolEnabled`, `logBoxEnabled`). This enables
-**LogBox** (the error overlay) and the **long-press debug menu** (Android).
+**LogBox** (the error overlay) and the Lynx debug runtime flags.
+
+Sparkling's own in-app inspector is the **Debug Panel**. In debug builds, tap the
+bottom-left `sparkling` debugTag to open it. See the [Debug Panel guide](./debug-panel)
+for screenshots of the entry point and each panel tab.
 
 For the full **Lynx DevTool** experience (element inspector, JS debugging, network
 monitor), you need to complete the additional integration steps described in the
@@ -249,8 +255,8 @@ loaders — without these, the DevTool desktop app cannot connect to your runnin
 
 | Feature | Status |
 |---------|--------|
+| Sparkling Debug Panel (Log, Sparkling Method, GlobalProps) | Works in debug builds with `sparkling-debug-tool`; open it from the bottom-left `sparkling` tag |
 | Error LogBox overlay | Works out of the box |
-| Long-press debug menu (Android) | Works out of the box |
 | Lynx DevTool (inspector, JS debug) | Requires [additional setup](https://lynxjs.org/guide/start/integrate-lynx-devtool) |
 
 ## Troubleshooting

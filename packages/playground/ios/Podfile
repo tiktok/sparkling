@@ -29,8 +29,6 @@ def sparkling_devtool
   # BEGIN SPARKLING AUTOLINK
   pod 'Sparkling-DebugTool', :path => '../../sparkling-debug-tool/ios'
   # END SPARKLING AUTOLINK
-  pod 'DebugRouter', '5.0.15'
-  pod 'DebugRouter/MessageTransceiverEnable', '5.0.15'
 end
 
 def sparkling_kit

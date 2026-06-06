@@ -61,7 +61,7 @@ class SparklingBridge : IReleasable {
 
         /**
          * JSB SDK Error report block jsb list.
-         * if you set jsb name here, it's jsb error message will not reported.
+         * if you set jsb name here, it's jsb error message will not report.
          */
         val jsbErrorReportBlockList = ArrayList<String>()
 
@@ -223,12 +223,33 @@ class SparklingBridge : IReleasable {
         }
     }
 
+    fun registerBusinessIDLMethod(
+        name: String,
+        scope: BridgePlatformType = BridgePlatformType.ALL,
+        clazz: Class<out IDLBridgeMethod>? = null,
+        factory: () -> IDLBridgeMethod,
+    ) {
+        getBridgeContext().getNamespace()?.let {
+            getBridgeContext().businessCallHandler?.registerMethod(name, scope, clazz, factory)
+        }
+    }
+
     fun registerIDLMethod(
         clazz: Class<out IDLBridgeMethod>?,
         scope: BridgePlatformType = BridgePlatformType.ALL,
         namespace: String = DEFAULT_NAMESPACE,
     ) {
         SparklingBridgeManager.registerIDLMethod(clazz, scope, namespace)
+    }
+
+    fun registerIDLMethod(
+        name: String,
+        scope: BridgePlatformType = BridgePlatformType.ALL,
+        namespace: String = DEFAULT_NAMESPACE,
+        clazz: Class<out IDLBridgeMethod>? = null,
+        factory: () -> IDLBridgeMethod,
+    ) {
+        SparklingBridgeManager.registerIDLMethod(name, scope, namespace, clazz, factory)
     }
 
     fun isBusinessIDLMethodExists(
@@ -247,6 +268,15 @@ class SparklingBridge : IReleasable {
         scope: BridgePlatformType = BridgePlatformType.ALL,
     ) {
         innerBridge.getBridgeContext().defaultCallHandler.registerLocalIDLMethod(clazz, scope)
+    }
+
+    fun registerLocalIDLMethod(
+        name: String,
+        scope: BridgePlatformType = BridgePlatformType.ALL,
+        clazz: Class<out IDLBridgeMethod>? = null,
+        factory: () -> IDLBridgeMethod,
+    ) {
+        innerBridge.getBridgeContext().defaultCallHandler.registerLocalIDLMethod(name, scope, clazz, factory)
     }
 
     fun getBridgeSDKContext(): IBridgeContext = bridgeSdkContext

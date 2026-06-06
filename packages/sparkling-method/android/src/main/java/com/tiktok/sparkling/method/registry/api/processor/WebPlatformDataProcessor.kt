@@ -69,9 +69,7 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
                 }
                 map
             } ?: return null
-        /**
-         * init default value
-         */
+        // Init default value.
         classMap.filter { !params.has(it.key) && it.value.second.defaultValue.type != DefaultType.NONE }.forEach {
             val annotation = it.value.second
             params.put(it.key, parseStringByReturnType(it.value.first, annotation))
@@ -84,9 +82,7 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
         classMap: HashMap<String, Pair<Method, IDLMethodParamField>>,
         params: JSONObject,
     ) {
-        /**
-         * check value
-         */
+        // Check value.
         classMap.forEach {
             val field = it.value.second
             val method = it.value.first
@@ -259,9 +255,7 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
 
             val value = json.opt(annotation.keyPath)
 
-            /**
-             * init default value
-             */
+            // Init default value.
             if ((value == null || value == JSONObject.NULL) && annotation.defaultValue.type != DefaultType.NONE) {
                 val defaultValue = parseStringByReturnType(method, annotation)
                 json.put(annotation.keyPath, defaultValue)
@@ -302,9 +296,7 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
 
             val value = map.opt(annotation.keyPath)
 
-            /**
-             * init default value
-             */
+            // Init default value.
             if ((value == null || value == JSONObject.NULL) && annotation.defaultValue.type != DefaultType.NONE) {
                 val defaultValue = parseStringByReturnType(method, annotation)
                 map.put(annotation.keyPath, defaultValue)

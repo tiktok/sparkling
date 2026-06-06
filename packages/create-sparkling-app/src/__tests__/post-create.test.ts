@@ -30,12 +30,12 @@ describe('post-create detectPackageManager', () => {
 
   it('falls back to probing binaries when user agent is not set', () => {
     process.env.npm_config_user_agent = '';
-    mockedExecSync.mockImplementation((command: any) => {
-      if (typeof command === 'string' && command.startsWith('pnpm')) {
-        return undefined as unknown as Buffer;
+    mockedExecSync.mockImplementation(((command: string) => {
+      if (command.startsWith('pnpm')) {
+        return Buffer.from('');
       }
       throw new Error('not installed');
-    });
+    }) as typeof execSync);
 
     const result = detectPackageManager();
 

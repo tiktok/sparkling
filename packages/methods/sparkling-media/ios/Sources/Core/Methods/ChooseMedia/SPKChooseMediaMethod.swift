@@ -38,9 +38,9 @@ public class SPKChooseMediaMethodParamModel: SPKMethodModel {
         return nil
     }
 
-    @objc public var mediaTypes: [Int]?
-    @objc public var sourceType: Int = SPKChooseMediaMediaSourceType.album.rawValue
-    @objc public var cameraType: Int = SPKChooseMediaCameraType.back.rawValue
+    @objc public var mediaTypes: [String]?
+    @objc public var sourceType: String = SPKChooseMediaParamValue.album
+    @objc public var cameraType: String = SPKChooseMediaParamValue.back
     @objc public var maxCount: Int = 1
     @objc public var quality: Float = 1.0
     @objc public var videoMaxDuration: Double = 60.0

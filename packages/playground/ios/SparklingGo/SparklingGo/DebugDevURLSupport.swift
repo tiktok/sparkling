@@ -11,20 +11,15 @@ import UIKit
 #endif
 
 enum DebugDevURLSupport {
-    private static let defaultHost = "127.0.0.1"
-    private static let defaultPort = 5969
-    private static let defaultPath = "/main.lynx.bundle"
+    private static let defaultBundleSource = "./main.lynx.bundle"
 
-    private static func fallbackDevURL() -> String {
-        let env = ProcessInfo.processInfo.environment
-        let host = env["SPARKLING_DEV_SERVER_HOST"] ?? defaultHost
-        let port = Int(env["SPARKLING_DEV_SERVER_PORT"] ?? "") ?? defaultPort
-        return "http://\(host):\(port)\(defaultPath)"
+    private static func fallbackBundleSource() -> String {
+        return defaultBundleSource
     }
 
     static func mainScheme() -> String {
         #if DEBUG
-            let source = storedDevURL(fallback: fallbackDevURL())
+            let source = storedDevURL(fallback: fallbackBundleSource())
             return mainScheme(withSource: source)
         #else
             return "hybrid://lynxview_page?bundle=.%2Fmain.lynx.bundle&trans_status_bar=1&hide_nav_bar=1"
@@ -83,7 +78,7 @@ enum DebugDevURLSupport {
         #if canImport(Sparkling_DebugTool)
             SparklingDebugTool.showDevURLDialog(from: controller, initialURL: initialURL, onSaved: onSaved)
         #else
-            onSaved(initialURL ?? fallbackDevURL())
+            onSaved(initialURL ?? fallbackBundleSource())
         #endif
     }
 }

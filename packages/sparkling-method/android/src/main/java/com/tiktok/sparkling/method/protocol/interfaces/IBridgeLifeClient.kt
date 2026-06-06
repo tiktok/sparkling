@@ -9,9 +9,6 @@ import com.tiktok.sparkling.method.protocol.entity.BridgeCall
 import com.tiktok.sparkling.method.protocol.entity.BridgeResult
 
 /**
- */
-
-/**
  * when shouldHandleBridgeCall is false, you should give a reason to explain it
  */
 class ShouldHandleBridgeCallResultModel(

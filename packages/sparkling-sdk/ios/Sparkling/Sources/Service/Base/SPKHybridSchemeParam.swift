@@ -33,6 +33,15 @@ public enum SPKHybridEngineType: Int {
     case SPKHybridEngineTypeLynx
 }
 
+@objc
+public enum SPKHybridContainerType: Int {
+    case SPKHybridContainerTypeUnknown = 0
+
+    case SPKHybridContainerTypePage
+
+    case SPKHybridContainerTypeCard
+}
+
 /// Parameter container for hybrid scheme URL resolution and configuration.
 ///
 /// This class handles parsing and resolving hybrid scheme URLs, extracting
@@ -45,7 +54,13 @@ open class SPKHybridSchemeParam: NSObject {
     ///
     /// The first element (`"lynxview"`) is the canonical form used for normalization
     /// in `resolveBundleStyle` and `resolveURLStyle`.
-    static let lynxViewSchemes: [String] = ["lynxview", "lynxview_page"]
+    static let lynxViewScheme = "lynxview"
+
+    static let lynxViewPageScheme = "lynxview_page"
+
+    static let lynxViewCardScheme = "lynxview_card"
+
+    static let lynxViewSchemes: [String] = [lynxViewScheme, lynxViewPageScheme, lynxViewCardScheme]
 
     /// Scheme identifier for web view rendering.
     ///
@@ -66,6 +81,8 @@ open class SPKHybridSchemeParam: NSObject {
     /// Automatically set based on the scheme URL analysis to indicate
     /// which rendering engine should be used.
     open var engineType: SPKHybridEngineType = .SPKHybridEngineTypeUnknown
+
+    open var containerType: SPKHybridContainerType = .SPKHybridContainerTypeUnknown
 
     /// The original URL that was passed for scheme resolution.
     ///
@@ -130,6 +147,7 @@ open class SPKHybridSchemeParam: NSObject {
         self.originURL = newParam.originURL
         self.resolvedURL = newParam.resolvedURL
         self.engineType = newParam.engineType
+        self.containerType = newParam.containerType
     }
 
     /// Resolves a scheme URL into a hybrid scheme parameter configuration.
@@ -176,6 +194,7 @@ open class SPKHybridSchemeParam: NSObject {
 
         if let host = innerScheme?.host, Self.lynxViewSchemes.contains(host) {
             param.engineType = .SPKHybridEngineTypeLynx
+            param.containerType = Self.containerType(withHost: host)
         } else if innerScheme?.host == Self.webViewScheme {
             param.engineType = .SPKHybridEngineTypeWeb
         }
@@ -252,7 +271,7 @@ open class SPKHybridSchemeParam: NSObject {
         if let host = originURL?.host, Self.lynxViewSchemes.contains(host) {
             var lynxQuery = queries
             lynxQuery?.removeValue(forKey: "url")
-            let resolved = URL.spk.url(string: "hybrid://\(Self.lynxViewSchemes[0])", queryItems: lynxQuery)
+            let resolved = URL.spk.url(string: "hybrid://\(host)", queryItems: lynxQuery)
             return resolved
         } else if originURL?.host == Self.webViewScheme {
             let baseUrl = "hybrid://\(Self.webViewScheme)"
@@ -264,10 +283,26 @@ open class SPKHybridSchemeParam: NSObject {
 
     static public func resolveBundleStyle(toHybridScheme originURL: URL?, queries: [String: String]?) -> URL? {
         let bundle = queries?.spk.string(forKey: "bundle") ?? ""
-        let baseURL = "hybrid://\(Self.lynxViewSchemes[0])?bundle=\(bundle)"
+        let host = originURL?.host
+        let lynxHost = host.flatMap { Self.lynxViewSchemes.contains($0) ? $0 : nil } ?? Self.lynxViewScheme
+        let baseURL = "hybrid://\(lynxHost)?bundle=\(bundle)"
         var lynxQuery = queries ?? [:]
         lynxQuery.removeValue(forKey: "bundle")
         let url = URL.spk.url(string: baseURL, queryItems: lynxQuery)
         return url
+    }
+
+    static public func containerType(withHost host: String?) -> SPKHybridContainerType {
+        guard let host = host else {
+            return .SPKHybridContainerTypeUnknown
+        }
+        switch host {
+        case Self.lynxViewCardScheme:
+            return .SPKHybridContainerTypeCard
+        case Self.lynxViewScheme, Self.lynxViewPageScheme:
+            return .SPKHybridContainerTypePage
+        default:
+            return .SPKHybridContainerTypeUnknown
+        }
     }
 }

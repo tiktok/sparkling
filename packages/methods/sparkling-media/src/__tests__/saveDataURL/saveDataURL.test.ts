@@ -165,7 +165,7 @@ describe('saveDataURL', () => {
 
       const [, , passedCallback] = mockPipe.call.mock.calls[0];
       const mockResponse = {
-        code: 0,
+        code: 1, // Pipe uses code 1 for success
         msg: 'Success',
         data: {
           filePath: '/tmp/test_file.png',
@@ -175,7 +175,7 @@ describe('saveDataURL', () => {
       (passedCallback as Function)(mockResponse);
       
       expect(callback).toHaveBeenCalledWith({
-        code: 0,
+        code: 0, // mapPipeResponse converts code 1 to 0 for business layer
         msg: 'Success',
         data: mockResponse.data,
       });
@@ -199,6 +199,94 @@ describe('saveDataURL', () => {
         msg: 'Unknown error',
         data: undefined,
       });
+    });
+
+    it('should handle pipe failure response (code 0)', () => {
+      const params: SaveDataURLRequest = {
+        dataURL: TEST_CONSTANTS.VALID_DATA_URL,
+        filename: TEST_CONSTANTS.VALID_FILENAME,
+        extension: TEST_CONSTANTS.VALID_EXTENSION,
+      };
+      const callback = jest.fn();
+
+      saveDataURL(params, callback);
+
+      const [, , passedCallback] = mockPipe.call.mock.calls[0];
+      (passedCallback as Function)({ code: 0, msg: 'Write failed' });
+
+      expect(callback).toHaveBeenCalledWith({
+        code: -1,
+        msg: 'Write failed',
+        data: undefined,
+      });
+    });
+  });
+
+  describe('field trimming', () => {
+    it('should trim whitespace from dataURL', () => {
+      const params: SaveDataURLRequest = {
+        dataURL: `  ${TEST_CONSTANTS.VALID_DATA_URL}  `,
+        filename: TEST_CONSTANTS.VALID_FILENAME,
+        extension: TEST_CONSTANTS.VALID_EXTENSION,
+      };
+      const callback = jest.fn();
+
+      saveDataURL(params, callback);
+
+      expect(mockPipe.call).toHaveBeenCalledWith(
+        'media.saveDataURL',
+        expect.objectContaining({ dataURL: TEST_CONSTANTS.VALID_DATA_URL }),
+        expect.any(Function)
+      );
+    });
+
+    it('should trim whitespace from filename', () => {
+      const params: SaveDataURLRequest = {
+        dataURL: TEST_CONSTANTS.VALID_DATA_URL,
+        filename: `  ${TEST_CONSTANTS.VALID_FILENAME}  `,
+        extension: TEST_CONSTANTS.VALID_EXTENSION,
+      };
+      const callback = jest.fn();
+
+      saveDataURL(params, callback);
+
+      expect(mockPipe.call).toHaveBeenCalledWith(
+        'media.saveDataURL',
+        expect.objectContaining({ filename: TEST_CONSTANTS.VALID_FILENAME }),
+        expect.any(Function)
+      );
+    });
+
+    it('should trim whitespace from extension', () => {
+      const params: SaveDataURLRequest = {
+        dataURL: TEST_CONSTANTS.VALID_DATA_URL,
+        filename: TEST_CONSTANTS.VALID_FILENAME,
+        extension: `  ${TEST_CONSTANTS.VALID_EXTENSION}  `,
+      };
+      const callback = jest.fn();
+
+      saveDataURL(params, callback);
+
+      expect(mockPipe.call).toHaveBeenCalledWith(
+        'media.saveDataURL',
+        expect.objectContaining({ extension: TEST_CONSTANTS.VALID_EXTENSION }),
+        expect.any(Function)
+      );
+    });
+
+    it('should reject whitespace-only dataURL', (done: jest.DoneCallback) => {
+      const params: SaveDataURLRequest = {
+        dataURL: '   ',
+        filename: TEST_CONSTANTS.VALID_FILENAME,
+        extension: TEST_CONSTANTS.VALID_EXTENSION,
+      };
+      const callback = jest.fn((result: SaveDataURLResponse) => {
+        expect(result.code).toBe(-1);
+        expect(result.msg).toContain('dataURL');
+        done();
+      });
+
+      saveDataURL(params, callback);
     });
   });
 });

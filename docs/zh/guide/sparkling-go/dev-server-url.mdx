@@ -110,6 +110,8 @@ plugins: [
 ## 从真机连接
 
 在模拟器上，`localhost` 直接可用。在**真机**上，应用需要你机器的局域网 IP 地址。
+`sparkling run:android` 会为真机使用这个局域网 IP。如果自动检测选错了网络，可以
+传入 `--host <host>`，或在 `app.config.ts` 中设置 `dev.server.host`。
 
 ### 问题
 
@@ -155,7 +157,7 @@ Sparkling Go 的 Settings 页面包含一个 **Dev Server** 卡片，仅在开�
 | **绿点** — Connected to dev server | Bundle 通过 HTTP 加载。显示 server origin。 |
 | **灰点** — Running from local assets | Bundle 从本地路径加载（生产环境）。 |
 
-<img src="/sparkling/guide/sparkling-go/dev-url-idle.png" width="300" alt="Connected to dev server, URL loaded" />
+<img src="/guide/sparkling-go/dev-url-idle.png" width="300" alt="Connected to dev server, URL loaded" />
 
 #### 编辑 URL
 
@@ -163,8 +165,8 @@ Sparkling Go 的 Settings 页面包含一个 **Dev Server** 卡片，仅在开�
 
 | 状态 | 截图 |
 |------|------|
-| **校验错误** — URL 必须以 `http://` 或 `https://` 开头 | <img src="/sparkling/guide/sparkling-go/dev-url-validation.png" width="260" /> |
-| **可以保存** — URL 合法且与当前值不同 | <img src="/sparkling/guide/sparkling-go/dev-url-save-active.png" width="260" /> |
+| **校验错误** — URL 必须以 `http://` 或 `https://` 开头 | <img src="/guide/sparkling-go/dev-url-validation.png" width="260" /> |
+| **可以保存** — URL 合法且与当前值不同 | <img src="/guide/sparkling-go/dev-url-save-active.png" width="260" /> |
 
 #### 保存反馈
 
@@ -172,16 +174,16 @@ Sparkling Go 的 Settings 页面包含一个 **Dev Server** 卡片，仅在开�
 
 | 状态 | 截图 |
 |------|------|
-| **成功** — 重启应用以生效 | <img src="/sparkling/guide/sparkling-go/dev-url-save-success.png" width="260" /> |
-| **失败** — 显示 native 侧错误信息 | <img src="/sparkling/guide/sparkling-go/dev-url-save-error.png" width="260" /> |
+| **成功** — 重启应用以生效 | <img src="/guide/sparkling-go/dev-url-save-success.png" width="260" /> |
+| **失败** — 显示 native 侧错误信息 | <img src="/guide/sparkling-go/dev-url-save-error.png" width="260" /> |
 
 #### 边界情况
 
 | 状态 | 截图 |
 |------|------|
-| **加载中** — 正在从 native 侧获取配置 | <img src="/sparkling/guide/sparkling-go/dev-url-loading.png" width="260" /> |
-| **Pipe 方法不可用** — `sparkling-debug-tool` 未集成 | <img src="/sparkling/guide/sparkling-go/dev-url-pipe-error.png" width="260" /> |
-| **URL 不匹配** — 配置的 server 与活跃连接不同 | <img src="/sparkling/guide/sparkling-go/dev-url-mismatch.png" width="260" /> |
+| **加载中** — 正在从 native 侧获取配置 | <img src="/guide/sparkling-go/dev-url-loading.png" width="260" /> |
+| **Pipe 方法不可用** — `sparkling-debug-tool` 未集成 | <img src="/guide/sparkling-go/dev-url-pipe-error.png" width="260" /> |
+| **URL 不匹配** — 配置的 server 与活跃连接不同 | <img src="/guide/sparkling-go/dev-url-mismatch.png" width="260" /> |
 
 ### 方式 B：Pipe API（自定义集成）
 
@@ -228,16 +230,18 @@ Native 侧存储位置：
 ## 调试功能
 
 当 `sparkling-debug-tool` 集成并初始化（iOS 上 `SparklingDebugTool.setup()`，
-Android 上 `.init(application)`）后，会启用：
+Android 上 `.init(application)`）后，会启用基础 Lynx debug flags
+（`lynxDebugEnabled`、`devtoolEnabled`、`logBoxEnabled`）和错误 LogBox。
+
+Sparkling 自己的端内调试入口是 **Debug Panel**。在 debug 构建中，点击左下角
+`sparkling` debugTag 即可打开。入口和每个页签的截图请看
+[Debug Panel 指南](./debug-panel)。
 
 | 功能 | iOS | Android |
 |------|-----|---------|
-| Lynx DevTools | ✓ | ✓ |
+| Sparkling Debug Panel（Log、Sparkling Method、GlobalProps） | debug build 中可用 | debug build 中可用 |
 | 错误 LogBox 浮层 | ✓ | ✓ |
-| 长按调试菜单 | — | ✓ |
-
-这些自动启用——`setup()` / `init()` 会将 `LynxEnv.devtoolEnabled`、
-`LynxEnv.logBoxEnabled` 和 `LynxEnv.lynxDebugEnabled` 设为 `true`。
+| Lynx DevTool（元素检查、JS 调试） | 需要额外接入 | 需要额外接入 |
 
 ## 常见问题
 

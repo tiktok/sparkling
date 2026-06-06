@@ -21,16 +21,21 @@ jobs:
     outputs:
       force_all: ${{ github.event_name == 'workflow_dispatch' }}
       run_all: ${{ steps.filter.outputs.shared == 'true' || steps.filter.outputs.tooling == 'true' || github.event_name == 'workflow_dispatch' }}
-      any_unit_tests: ${{ steps.filter.outputs.create_sparkling_app == 'true' || steps.filter.outputs.sparkling_method_cli == 'true' || steps.filter.outputs.sparkling_method == 'true' || steps.filter.outputs.sparkling_router == 'true' || steps.filter.outputs.sparkling_storage == 'true' || steps.filter.outputs.playground == 'true' || steps.filter.outputs.app_template == 'true' || steps.filter.outputs.shared == 'true' || steps.filter.outputs.tooling == 'true' || github.event_name == 'workflow_dispatch' }}
+      any_unit_tests: ${{ steps.filter.outputs.create_sparkling_app == 'true' || steps.filter.outputs.sparkling_app_cli == 'true' || steps.filter.outputs.sparkling_method_cli == 'true' || steps.filter.outputs.sparkling_method == 'true' || steps.filter.outputs.sparkling_router == 'true' || steps.filter.outputs.sparkling_navigation == 'true' || steps.filter.outputs.sparkling_storage == 'true' || steps.filter.outputs.sparkling_media == 'true' || steps.filter.outputs.playground == 'true' || steps.filter.outputs.app_template == 'true' || steps.filter.outputs.shared == 'true' || steps.filter.outputs.tooling == 'true' || github.event_name == 'workflow_dispatch' }}
       build_playground: ${{ steps.filter.outputs.playground == 'true' || steps.filter.outputs.sparkling_sdk == 'true' || steps.filter.outputs.sparkling_method == 'true' || steps.filter.outputs.sparkling_debug_tool == 'true' || steps.filter.outputs.sparkling_navigation == 'true' || steps.filter.outputs.sparkling_media == 'true' || steps.filter.outputs.sparkling_storage == 'true' || steps.filter.outputs.shared == 'true' || steps.filter.outputs.tooling == 'true' || github.event_name == 'workflow_dispatch' }}
       ios_swift: ${{ steps.filter.outputs.ios_swift }}
       clang: ${{ steps.filter.outputs.clang }}
       android_kotlin: ${{ steps.filter.outputs.android_kotlin }}
       create_sparkling_app: ${{ steps.filter.outputs.create_sparkling_app }}
+      sparkling_app_cli: ${{ steps.filter.outputs.sparkling_app_cli }}
       sparkling_method_cli: ${{ steps.filter.outputs.sparkling_method_cli }}
       sparkling_method: ${{ steps.filter.outputs.sparkling_method }}
       sparkling_router: ${{ steps.filter.outputs.sparkling_router }}
+      sparkling_navigation: ${{ steps.filter.outputs.sparkling_navigation }}
       sparkling_storage: ${{ steps.filter.outputs.sparkling_storage }}
+      sparkling_media: ${{ steps.filter.outputs.sparkling_media }}
+      sparkling_sdk: ${{ steps.filter.outputs.sparkling_sdk }}
+      sparkling_debug_tool: ${{ steps.filter.outputs.sparkling_debug_tool }}
       playground: ${{ steps.filter.outputs.playground }}
       app_template: ${{ steps.filter.outputs.app_template }}
       shared: ${{ steps.filter.outputs.shared }}
@@ -49,6 +54,8 @@ jobs:
           filters: |
             create_sparkling_app:
               - 'packages/create-sparkling-app/**'
+            sparkling_app_cli:
+              - 'packages/sparkling-app-cli/**'
             sparkling_method_cli:
               - 'packages/sparkling-method-cli/**'
             sparkling_method:
@@ -79,6 +86,9 @@ jobs:
               - 'eslint.config.js'
               - '.npmrc'
               - '.prettierrc'
+              - 'Gemfile'
+              - 'scripts/**'
+              - 'packages/methods/ios-unit-tests/**'
               - '.github/workflows/**'
             ios_swift:
               - 'packages/**/*.swift'
@@ -100,99 +110,151 @@ jobs:
               - '.editorconfig'
 
   unit-tests:
-    name: Unit tests (disabled)
+    name: TypeScript unit tests
     runs-on: ubuntu-latest
     needs: changes
+    if: needs.changes.outputs.any_unit_tests == 'true'
     steps:
       - name: Trigger log
         run: |
           echo "event_name=${{ github.event_name }}"
-          echo "actor=${{ github.actor }}"
-          echo "repository=${{ github.repository }}"
-          echo "workflow=${{ github.workflow }}"
           echo "ref=${{ github.ref }}"
           echo "base_ref=${{ github.base_ref }}"
           echo "head_ref=${{ github.head_ref }}"
           echo "sha=${{ github.sha }}"
-          echo "run_id=${{ github.run_id }}"
-          echo "run_number=${{ github.run_number }}"
           echo ""
           echo "changed_filters=${{ needs.changes.outputs.changed_filters }}"
-          echo "force_all=${{ needs.changes.outputs.force_all }}"
           echo "run_all=${{ needs.changes.outputs.run_all }}"
           echo "any_unit_tests=${{ needs.changes.outputs.any_unit_tests }}"
-          echo ""
-          echo "create_sparkling_app=${{ needs.changes.outputs.create_sparkling_app }}"
-          echo "sparkling_method_cli=${{ needs.changes.outputs.sparkling_method_cli }}"
-          echo "sparkling_method=${{ needs.changes.outputs.sparkling_method }}"
-          echo "sparkling_router=${{ needs.changes.outputs.sparkling_router }}"
-          echo "sparkling_storage=${{ needs.changes.outputs.sparkling_storage }}"
-          echo "playground=${{ needs.changes.outputs.playground }}"
-          echo "app_template=${{ needs.changes.outputs.app_template }}"
-          echo "shared=${{ needs.changes.outputs.shared }}"
-          echo "tooling=${{ needs.changes.outputs.tooling }}"
 
-      # NOTE: Test running config is intentionally disabled in CI.
-      # Uncomment the steps below to re-enable tests.
-      #
-      # - name: Show change summary
-      #   run: |
-      #     echo "changed_filters=${{ needs.changes.outputs.changed_filters }}"
-      #     echo "run_all=${{ needs.changes.outputs.run_all }}"
-      #     echo "any_unit_tests=${{ needs.changes.outputs.any_unit_tests }}"
-      #
-      # - name: Checkout
-      #   if: needs.changes.outputs.any_unit_tests == 'true'
-      #   uses: actions/checkout@v4
-      #
-      # - name: Setup pnpm
-      #   if: needs.changes.outputs.any_unit_tests == 'true'
-      #   uses: pnpm/action-setup@v4
-      #   with:
-      #     version: 10.26.0
-      #
-      # - name: Setup Node.js
-      #   if: needs.changes.outputs.any_unit_tests == 'true'
-      #   uses: actions/setup-node@v4
-      #   with:
-      #     node-version: 22.21.1
-      #     cache: pnpm
-      #
-      # - name: Install dependencies
-      #   if: needs.changes.outputs.any_unit_tests == 'true'
-      #   run: pnpm install --frozen-lockfile
-      #
-      # - name: Build sparkling-method (for router/storage tests)
-      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method == 'true' || needs.changes.outputs.sparkling_router == 'true' || needs.changes.outputs.sparkling_storage == 'true'
-      #   run: pnpm --filter sparkling-method build
-      #
-      # - name: Test create-sparkling-app
-      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.create_sparkling_app == 'true'
-      #   run: pnpm --filter create-sparkling-app test
-      #
-      # - name: Test sparkling-method-cli
-      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method_cli == 'true'
-      #   run: pnpm --filter sparkling-method test
-      #
-      # - name: Test sparkling-router
-      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method == 'true' || needs.changes.outputs.sparkling_router == 'true'
-      #   run: pnpm --filter sparkling-router test
-      #
-      # - name: Test sparkling-storage
-      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method == 'true' || needs.changes.outputs.sparkling_storage == 'true'
-      #   run: pnpm --filter sparkling-storage test
-      #
-      # - name: Build playground deps (router/storage)
-      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.playground == 'true'
-      #   run: pnpm --filter sparkling-playground^... run --if-present build
-      #
-      # - name: Test playground
-      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.playground == 'true'
-      #   run: pnpm --filter sparkling-playground test
-      #
-      # - name: Test sparkling-app-template
-      #   if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.app_template == 'true'
-      #   run: pnpm --filter sparkling-app-template test
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run TypeScript unit-test coverage
+        run: pnpm coverage:ts
+
+      - name: Upload TypeScript coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ts-coverage
+          path: coverage-reports/ts/
+          if-no-files-found: ignore
+
+  android-unit-tests:
+    name: Android unit tests
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method == 'true' || needs.changes.outputs.sparkling_navigation == 'true' || needs.changes.outputs.sparkling_storage == 'true' || needs.changes.outputs.sparkling_media == 'true' || needs.changes.outputs.sparkling_sdk == 'true' || needs.changes.outputs.sparkling_debug_tool == 'true' || needs.changes.outputs.playground == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run JaCoCo unit-test coverage
+        working-directory: packages/playground/android
+        run: |
+          ./gradlew \
+            :sparkling:jacocoTestReport \
+            :sparkling-method:jacocoTestReport \
+            :sparkling-media:jacocoTestReport \
+            :sparkling-navigation:jacocoTestReport \
+            :sparkling-storage:jacocoTestReport \
+            :app:jacocoTestReport \
+            --no-daemon
+
+      - name: Upload Android coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-coverage
+          path: |
+            packages/sparkling-sdk/android/sparkling/build/reports/jacoco/jacocoTestReport/
+            packages/sparkling-method/android/build/reports/jacoco/jacocoTestReport/
+            packages/methods/sparkling-media/android/build/reports/jacoco/jacocoTestReport/
+            packages/methods/sparkling-navigation/android/build/reports/jacoco/jacocoTestReport/
+            packages/methods/sparkling-storage/android/build/reports/jacoco/jacocoTestReport/
+            packages/playground/android/app/build/reports/jacoco/jacocoTestReport/
+          if-no-files-found: ignore
+
+  ios-unit-tests:
+    name: iOS unit tests
+    runs-on: macos-latest
+    timeout-minutes: 90
+    needs: changes
+    if: needs.changes.outputs.run_all == 'true' || needs.changes.outputs.sparkling_method == 'true' || needs.changes.outputs.sparkling_navigation == 'true' || needs.changes.outputs.sparkling_storage == 'true' || needs.changes.outputs.sparkling_media == 'true' || needs.changes.outputs.sparkling_sdk == 'true' || needs.changes.outputs.sparkling_debug_tool == 'true' || needs.changes.outputs.playground == 'true' || needs.changes.outputs.app_template == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2.6'
+          bundler-cache: true
+
+      - name: Show Xcode and simulator state
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available
+
+      - name: Run iOS app-host unit-test coverage
+        timeout-minutes: 45
+        run: |
+          IOS_COVERAGE_APP_HOSTS=playground \
+          XCODEBUILD_TIMEOUT_SECONDS=1800 \
+          BUNDLE_GEMFILE="$GITHUB_WORKSPACE/Gemfile" \
+          bash scripts/coverage-ios.sh
+
+      - name: Run iOS independent method unit-test coverage
+        timeout-minutes: 30
+        run: BUNDLE_GEMFILE="$GITHUB_WORKSPACE/Gemfile" bash scripts/coverage-ios-methods.sh
+
+      - name: Upload iOS coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-coverage
+          path: |
+            coverage-reports/ios/
+            coverage-reports/ios-methods/
+          if-no-files-found: ignore
 
   # ──────────────────────────────────────────────────────────────
   # Playground build checks — block PR if any platform fails
@@ -324,4 +386,3 @@ jobs:
 
       - name: Lint Swift files
         run: scripts/lint.sh swift
-

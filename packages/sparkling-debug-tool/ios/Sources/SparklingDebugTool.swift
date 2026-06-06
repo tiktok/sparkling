@@ -45,6 +45,108 @@ public class SparklingDebugTool: NSObject {
         UserDefaults.standard.set(normalized, forKey: devURLKey)
     }
 
+    /// Attach the JS console sink to the given LynxView so that any
+    /// `console.*` payload it emits flows into [SparklingConsoleStore].
+    @discardableResult
+    public static func attachConsoleSink(to lynxView: LynxView) -> Bool {
+        return SparklingLynxConsoleSink.attach(to: lynxView)
+    }
+
+    /// Detach the JS console sink previously attached via [attachConsoleSink].
+    public static func detachConsoleSink(from lynxView: LynxView) {
+        SparklingLynxConsoleSink.detach(from: lynxView)
+    }
+
+    /// Show or hide the Sparkling bottom-left debugTag. The tag is hosted in
+    /// a dedicated overlay window so it follows the foreground scene.
+    /// Enabling the tag also auto-installs the LynxView lifecycle tracker so
+    /// the JS console + GlobalProps panels start receiving data without any
+    /// host wiring.
+    public static func setFloatingBallEnabled(_ enabled: Bool) {
+        SparklingFloatingBallManager.shared.setEnabled(enabled)
+        if enabled {
+            SparklingDebugAutoWiring.installOnce()
+            // The default tap presents the unified inspector.
+            SparklingFloatingBallManager.shared.setActionHandler(SparklingDefaultFloatingBallHandler.shared)
+        }
+    }
+
+    /// Whether the debugTag entry is currently enabled.
+    public static var isFloatingBallEnabled: Bool {
+        SparklingFloatingBallManager.shared.isEnabled
+    }
+
+    /// Override the default tap behaviour of the debugTag entry.
+    public static func setFloatingBallActionHandler(_ handler: SparklingFloatingBallActionHandler?) {
+        SparklingFloatingBallManager.shared.setActionHandler(handler)
+    }
+
+    /// Present the unified inspector panel (Console / GlobalProps / Method
+    /// invocations) as a half-sheet modal.
+    public static func presentInspectorPanel(
+        from presenter: UIViewController,
+        initialTab: SparklingInspectorViewController.Tab = .console
+    ) {
+        DispatchQueue.main.async {
+            let inspector = SparklingInspectorViewController(initialTab: initialTab)
+            Self.applyHalfSheetPresentation(to: inspector)
+            presenter.present(inspector, animated: true)
+        }
+    }
+
+    /// Present the inspector with the Console tab selected.
+    public static func presentConsolePanel(from presenter: UIViewController) {
+        presentInspectorPanel(from: presenter, initialTab: .console)
+    }
+
+    /// Present the inspector with the GlobalProps tab selected.
+    public static func presentGlobalPropsPanel(from presenter: UIViewController) {
+        presentInspectorPanel(from: presenter, initialTab: .globalProps)
+    }
+
+    /// Present the inspector with the Sparkling Method tab selected.
+    public static func presentMethodInvocationPanel(from presenter: UIViewController) {
+        presentInspectorPanel(from: presenter, initialTab: .methods)
+    }
+
+    /// Configure a navigation controller to be presented as a draggable
+    /// half-height sheet (medium detent by default, expandable to large).
+    /// Falls back to system page sheet on iOS 13/14.
+    public static func applyHalfSheetPresentation(to viewController: UIViewController) {
+        viewController.modalPresentationStyle = .pageSheet
+        if #available(iOS 15.0, *) {
+            if let sheet = viewController.sheetPresentationController {
+                sheet.detents = [.medium(), .large()]
+                sheet.prefersGrabberVisible = true
+                sheet.prefersScrollingExpandsWhenScrolledToEdge = false
+                sheet.prefersEdgeAttachedInCompactHeight = true
+                sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+                sheet.preferredCornerRadius = 0
+            }
+        }
+    }
+
+    /// Register a closure that returns one snapshot per live LynxView. The
+    /// inspector panel calls this on demand.
+    public static func setGlobalPropsProvider(_ provider: (() -> [SparklingGlobalPropsSnapshot])?) {
+        SparklingGlobalPropsRegistry.shared.setProvider(provider)
+    }
+
+    /// Append a method invocation record (or update an existing one with the
+    /// same id) into the in-memory store. The host normally registers a
+    /// `SparklingMethodInvocationObserver` that calls these helpers.
+    public static func recordMethodInvocation(_ invocation: SparklingMethodInvocation) {
+        SparklingMethodInvocationStore.shared.add(invocation)
+    }
+
+    public static func updateMethodInvocation(_ invocation: SparklingMethodInvocation) {
+        SparklingMethodInvocationStore.shared.update(invocation)
+    }
+
+    public static func clearMethodInvocations() {
+        SparklingMethodInvocationStore.shared.clear()
+    }
+
     public static func showDevURLDialog(
         from viewController: UIViewController,
         initialURL: String?,

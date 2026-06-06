@@ -56,14 +56,32 @@ require() {
   fi
 }
 
+resolve_swift_format() {
+  if command -v swift-format >/dev/null 2>&1; then
+    command -v swift-format
+    return 0
+  fi
+
+  if command -v xcrun >/dev/null 2>&1; then
+    xcrun --find swift-format 2>/dev/null && return 0
+  fi
+
+  return 1
+}
+
 run_swift() {
-  require swift-format "Install with 'brew install swift-format'."
+  local swift_format
+  if ! swift_format="$(resolve_swift_format)"; then
+    echo "error: 'swift-format' not found. Install Xcode with swift-format, or run 'brew install swift-format'." >&2
+    exit 1
+  fi
+
   if [[ $FIX -eq 1 ]]; then
     echo "==> swift-format format"
-    swift-format format --in-place --recursive "${SWIFT_DIRS[@]}"
+    "$swift_format" format --in-place --recursive "${SWIFT_DIRS[@]}"
   else
     echo "==> swift-format lint"
-    swift-format lint --recursive "${SWIFT_DIRS[@]}"
+    "$swift_format" lint --recursive "${SWIFT_DIRS[@]}"
   fi
 }
 

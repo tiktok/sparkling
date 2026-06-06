@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Text color flips with the chip background state for contrast. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true" android:color="#FFFFFFFF" />
+    <item android:color="@color/sparkling_panel_text_secondary" />
+</selector>

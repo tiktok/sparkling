@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sparkling Method invocation list body. Toolbar mirrors the Log panel: clear icon +
+     filter input, then scrollable rows. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@android:color/white">
+
+        <ImageButton
+            android:id="@+id/btn_method_clear"
+            android:layout_width="36dp"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:src="@android:drawable/ic_menu_delete"
+            android:tint="@color/sparkling_panel_text_primary"
+            android:background="@android:color/transparent"
+            android:contentDescription="Clear Sparkling Method calls" />
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="match_parent"
+            android:background="@color/sparkling_panel_toolbar_separator" />
+
+        <EditText
+            android:id="@+id/input_method_filter"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:hint="input to filter Sparkling Method"
+            android:textColorHint="@color/sparkling_panel_text_hint"
+            android:textColor="@color/sparkling_panel_text_primary"
+            android:textSize="14sp"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:singleLine="true"
+            android:paddingHorizontal="14dp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/sparkling_panel_toolbar_separator" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list_method_invocations"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical"
+        android:nestedScrollingEnabled="true"
+        android:background="@color/sparkling_panel_background" />
+
+    <TextView
+        android:id="@+id/txt_method_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp"
+        android:gravity="center"
+        android:textColor="@color/sparkling_panel_text_hint"
+        android:background="@color/sparkling_panel_background"
+        android:text="No Sparkling Method invocations captured yet."
+        android:visibility="gone" />
+</merge>

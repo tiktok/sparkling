@@ -32,6 +32,15 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    testOptions {
+        unitTests.all {
+            it.extensions.configure(org.gradle.testing.jacoco.plugins.JacocoTaskExtension::class.java) {
+                isIncludeNoLocationClasses = true
+                excludes = listOf("jdk.internal.*")
+            }
+        }
+    }
 }
 
 dependencies {
@@ -39,13 +48,20 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
+    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("org.robolectric:robolectric:4.11.1")
+    testImplementation("androidx.test:core:1.5.0")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     val sparklingVersion =
         (findProperty("SPARKLING_ANDROID_SDK_VERSION") as? String)
             ?: System.getenv("SPARKLING_ANDROID_SDK_VERSION")
             ?: "2.1.0-rc.12"
-    api("com.tiktok.sparkling:sparkling-method:$sparklingVersion")
+    if (rootProject.findProject(":sparkling-method") != null) {
+        api(project(":sparkling-method"))
+    } else {
+        api("com.tiktok.sparkling:sparkling-method:$sparklingVersion")
+    }
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {

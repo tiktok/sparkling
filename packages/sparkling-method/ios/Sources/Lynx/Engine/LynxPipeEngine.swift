@@ -31,6 +31,11 @@ class LynxPipeEngine: PipeEngine {
         guard let lynxView = self.lynxView else {
             return
         }
+        SparklingMethodInvocationCenter.shared.notifyNativeToJsEvent(
+            name: name,
+            params: params,
+            containerID: lynxView.containerID
+        )
         var sendMsg = LynxSendMessage(containerID: self.lynxView?.containerID)
         sendMsg.data = params
         sendMsg.code = .succeeded

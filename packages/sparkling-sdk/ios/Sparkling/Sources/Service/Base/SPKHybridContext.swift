@@ -54,6 +54,9 @@ open class SPKHybridContext: NSObject, NSCopying {
     /// Legacy field kept for API compatibility
     public var queryItems: [String: AnyHashable]?
 
+    /// Timestamp captured when the Sparkling container starts initializing.
+    public var containerInitTime: NSNumber?
+
     /// Namespace for pipe method communication.
     ///
     /// Defines the namespace used for JavaScript bridge communication.
@@ -246,7 +249,6 @@ open class SPKHybridContext: NSObject, NSCopying {
                 to: self.globalProps,
                 isOverride: isOverride)
         }
-
         self.engineType =
             Self.merge(
                 withProp: context.engineType,
@@ -282,6 +284,12 @@ open class SPKHybridContext: NSObject, NSCopying {
                 withProp: context.queryItems,
                 to: self.queryItems,
                 isOverride: isOverride) as? [String: AnyHashable]
+
+        self.containerInitTime =
+            Self.merge(
+                withProp: context.containerInitTime,
+                to: self.containerInitTime,
+                isOverride: isOverride) as? NSNumber
 
         self.pipeNameSpace =
             Self.merge(

@@ -41,11 +41,13 @@ Run `sparkling --help` to see all available commands and options.
 ## Dev Server Port And Host Behavior
 
 - `sparkling dev` resolves the port from (highest to lowest): `--port` -> `app.config.ts` `dev.server.port` -> `app.config.ts` `lynxConfig.server.port` -> `5969`.
+- `sparkling dev` resolves the host from (highest to lowest): `--host` -> `app.config.ts` `dev.server.host` -> Rspeedy's default host.
 - `sparkling dev --port <x>` persists the selected port back to `app.config.ts` as `dev.server.port`.
 - `sparkling run:ios` and `sparkling run:android` reuse the same resolved port and auto-start a dev server when needed.
 - For Android, `run:android` auto-detects connected targets:
   - emulator: app uses `127.0.0.1` and CLI applies `adb reverse tcp:<port> tcp:<port>`
-  - physical device: app uses your local LAN IPv4 and CLI starts the server on `0.0.0.0`
+  - physical device: app uses your local LAN IPv4 and CLI binds the server to that same LAN IPv4
+- Use `sparkling run:android --host <host>` or `app.config.ts` `dev.server.host` when your machine has multiple network interfaces.
 
 ## Template Debug/Release Loading
 

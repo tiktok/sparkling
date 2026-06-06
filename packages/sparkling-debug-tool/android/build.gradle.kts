@@ -37,10 +37,31 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.appcompat)
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.cardview:cardview:1.0.0")
     implementation(libs.lynx)
     implementation(libs.lynx.service.log)
     implementation(libs.lynx.service.devtool)
     implementation(libs.lynx.devtool)
+
+    val sparklingVersion =
+        (findProperty("SPARKLING_ANDROID_SDK_VERSION") as? String)
+            ?: System.getenv("SPARKLING_ANDROID_SDK_VERSION")
+            ?: "2.1.0-rc.12"
+    val localSparkling = rootProject.findProject(":sparkling")
+    if (localSparkling != null) {
+        compileOnly(localSparkling)
+    } else {
+        compileOnly("com.tiktok.sparkling:sparkling:$sparklingVersion")
+    }
+    val localSparklingMethod = rootProject.findProject(":sparkling-method")
+    if (localSparklingMethod != null) {
+        compileOnly(localSparklingMethod)
+    } else {
+        compileOnly("com.tiktok.sparkling:sparkling-method:$sparklingVersion")
+    }
 }
 
 val publishingGroupId =

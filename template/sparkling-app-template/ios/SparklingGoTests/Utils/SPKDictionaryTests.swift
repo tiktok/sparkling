@@ -98,7 +98,7 @@ struct SPKDictionaryTests {
             "no": "NO",
             "false_string": "false",
             "empty": "",
-            "number_bool": NSNumber(value: true),
+            "number_bool": NSNumber(value: true)
         ]
 
         #expect(dict.spk.bool(forKey: "zero") == false)
@@ -117,7 +117,7 @@ struct SPKDictionaryTests {
             "float_to_int": 3.14,
             "large_string": "999999999999999999999",
             "negative": "-42",
-            "hex": "0xFF",
+            "hex": "0xFF"
         ]
 
         #expect(dict.spk.int(forKey: "max_int") == Int.max)
@@ -132,11 +132,11 @@ struct SPKDictionaryTests {
             "pi": 3.141592653589793,
             "scientific": "1.23e-4",
             "infinity": Float.infinity,
-            "nan": Float.nan,
+            "nan": Float.nan
         ]
 
-        let pi_float = dict.spk.float(forKey: "pi")
-        #expect(abs(pi_float - 3.141593) < 0.000001)
+        let piFloat = dict.spk.float(forKey: "pi")
+        #expect(abs(piFloat - 3.141593) < 0.000001)
 
         let scientific = dict.spk.double(forKey: "scientific")
         #expect(abs(scientific - 0.000123) < 0.0000001)
@@ -155,7 +155,7 @@ struct SPKDictionaryTests {
             "int": 42,
             "float": 3.14,
             "array": [1, 2, 3],
-            "dict": ["key": "value"],
+            "dict": ["key": "value"]
         ]
 
         #expect(dict.spk.string(forKey: "bool_true") == "1")
@@ -170,7 +170,7 @@ struct SPKDictionaryTests {
             "string_array": ["a", "b", "c"],
             "mixed_array": [1, "two", 3.0],
             "empty_array": [],
-            "not_array": "string",
+            "not_array": "string"
         ]
 
         let stringArray: [String]? = dict.spk.array(forKey: "string_array")
@@ -194,7 +194,7 @@ struct SPKDictionaryTests {
                 ]
             ],
             "empty_dict": [:],
-            "not_dict": "string",
+            "not_dict": "string"
         ]
 
         let level1: [String: Any]? = nestedDict.spk.dictionary(forKey: "level1")
@@ -222,7 +222,7 @@ struct SPKDictionaryTests {
             "date": Date(),
             "url": URL(string: "https://example.com")!,
             "data": Data([1, 2, 3, 4]),
-            "custom_object": NSObject(),
+            "custom_object": NSObject()
         ]
 
         let date: Date? = dict.spk.object(forKey: "date")

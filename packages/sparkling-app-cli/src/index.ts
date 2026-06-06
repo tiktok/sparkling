@@ -109,10 +109,11 @@ program
   .description('Build Lynx bundle, copy assets, and install Android debug build')
   .option('--copy', 'Copy assets to native shells')
   .option('--skip-copy', 'Skip copying assets to native shells')
+  .option('--host <host>', 'Dev server host for Android devices (e.g. 192.168.1.100)')
   .action(async (opts) => {
     const cwd = process.cwd();
     const skipCopy = resolveSkipCopy(opts);
-    await runAndroid({ cwd, skipCopy });
+    await runAndroid({ cwd, skipCopy, host: opts.host });
   });
 
 program

@@ -6,6 +6,7 @@ package com.tiktok.sparkling.method.registry.api
 
 import com.tiktok.sparkling.method.registry.core.IBridgeContext
 import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
+import com.tiktok.sparkling.method.registry.core.IDLMethodProvider
 import com.tiktok.sparkling.method.registry.core.LocalBridge
 import com.tiktok.sparkling.method.registry.core.SparklingBridgeManager
 import com.tiktok.sparkling.method.registry.core.BridgePlatformType
@@ -32,6 +33,15 @@ class BridgeLocalPool : IReleasable {
         localBridge.registerIDLMethod(clazz, scope)
     }
 
+    fun registerLocalIDLMethod(
+        name: String,
+        scope: BridgePlatformType = BridgePlatformType.ALL,
+        clazz: Class<out IDLBridgeMethod>? = null,
+        factory: () -> IDLBridgeMethod,
+    ) {
+        localBridge.registerIDLMethod(name, IDLMethodProvider { factory() }, scope, clazz = clazz)
+    }
+
     fun getBridge(
         bridgeName: String,
         platformType: BridgePlatformType,
@@ -40,11 +50,11 @@ class BridgeLocalPool : IReleasable {
         if (method != null) {
             return method
         } else {
-            val clazz =
-                localBridge.findIDLMethodClass(platformType, bridgeName)
-                    ?: SparklingBridgeManager.findIDLMethodClass(platformType, bridgeName)
+            val provider =
+                localBridge.findIDLMethodProvider(platformType, bridgeName)
+                    ?: SparklingBridgeManager.findIDLMethodProvider(platformType, bridgeName)
                     ?: return null
-            val newInstance = clazz.newInstance()
+            val newInstance = provider.provideMethod()
             getPlatformTypeCache(platformType)[bridgeName] = newInstance
             return newInstance
         }

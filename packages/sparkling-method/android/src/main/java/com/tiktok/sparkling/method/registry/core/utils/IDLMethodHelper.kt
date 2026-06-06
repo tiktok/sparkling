@@ -14,7 +14,7 @@ import android.util.Log
  */
 object IDLMethodHelper {
     /**
-     * try get Activity by bubble up through base context.
+     * try to get Activity by bubble up through base context.
      *
      * @param c
      * @return

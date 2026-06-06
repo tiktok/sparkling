@@ -59,7 +59,13 @@ function buildGradleTemplate(existingBlock = ''): string {
 function createMethodModule(
   cwd: string,
   name: string,
-  opts: { iosModuleName?: string; iosClassName?: string; androidPackage?: string; androidClassName?: string } = {},
+  opts: {
+    iosModuleName?: string;
+    iosClassName?: string;
+    androidPackage?: string;
+    androidClassName?: string;
+    methods?: string[];
+  } = {},
 ): string {
   const moduleDir = path.join(cwd, 'node_modules', name);
   fs.mkdirpSync(path.join(moduleDir, 'ios'));
@@ -73,6 +79,9 @@ function createMethodModule(
   fs.writeFileSync(path.join(moduleDir, 'android', 'build.gradle.kts'), 'plugins {}');
 
   const config: Record<string, unknown> = { name };
+  if (opts.methods?.length) {
+    config.methods = Object.fromEntries(opts.methods.map(method => [method, {}]));
+  }
   if (opts.iosModuleName || opts.iosClassName) {
     config.ios = {
       moduleName: opts.iosModuleName ?? name,
@@ -226,6 +235,7 @@ describe('autolink', () => {
         '    val name: String,',
         '    val androidPackage: String?,',
         '    val className: String?,',
+        '    val methodClassNames: List<String> = emptyList(),',
         ')',
       ].join('\n'));
       expect(registry).toContain([
@@ -235,6 +245,24 @@ describe('autolink', () => {
         '                className = "NavigationModule",',
         '            ),',
       ].join('\n'));
+    });
+
+    it('writes inferred Android method class names for modules with multiple methods', async () => {
+      fs.removeSync(path.join(cwd, 'node_modules', 'sparkling-navigation'));
+      createMethodModule(cwd, 'sparkling-storage', {
+        androidPackage: 'com.tiktok.sparkling.method.storage',
+        androidClassName: 'StorageMethod',
+        methods: ['setItem', 'getItem', 'removeItem'],
+      });
+
+      await autolink({ cwd, platform: 'android' });
+
+      const registryPath = path.join(cwd, 'android', 'app', 'src', 'main', 'java', 'com', 'test', 'app', 'SparklingAutolink.kt');
+      const registry = fs.readFileSync(registryPath, 'utf8');
+      expect(registry).toContain('methodClassNames = listOf(');
+      expect(registry).toContain('"com.tiktok.sparkling.method.storage.setItem.StorageSetItemMethod"');
+      expect(registry).toContain('"com.tiktok.sparkling.method.storage.getItem.StorageGetItemMethod"');
+      expect(registry).toContain('"com.tiktok.sparkling.method.storage.removeItem.StorageRemoveItemMethod"');
     });
 
     it('returns the discovered module', async () => {

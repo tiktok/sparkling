@@ -1,0 +1,44 @@
+platform :ios, '13.0'
+
+require 'pathname'
+
+use_modular_headers!
+
+source 'https://cdn.cocoapods.org/'
+
+install! 'cocoapods',
+:generate_multiple_pod_projects => true,
+:incremental_installation => true,
+:deterministic_uuids => true,
+:integrate_targets => false
+
+inhibit_all_warnings!
+
+def pod_name_from_podspec(podspec_path)
+  content = File.read(podspec_path)
+  content[/\.name\s*=\s*['"]([^'"]+)['"]/, 1] || File.basename(podspec_path, '.podspec')
+end
+
+sparkling_method_path = '../../sparkling-method/ios'
+method_ios_dirs = Dir[File.expand_path('../*/ios', __dir__)]
+  .select { |ios_dir| Dir[File.join(ios_dir, '*.podspec')].any? }
+  .sort
+
+method_pods = method_ios_dirs.map do |ios_dir|
+  podspec_path = Dir[File.join(ios_dir, '*.podspec')].sort.first
+  relative_ios_dir = Pathname.new(ios_dir).relative_path_from(Pathname.new(__dir__)).to_s
+  [pod_name_from_podspec(podspec_path), relative_ios_dir]
+end
+
+use_frameworks!
+
+target 'SparklingMethodIndependentTests' do
+  pod 'SparklingMethod', :path => sparkling_method_path, :subspecs => [
+    'Core',
+    'DIProvider',
+  ]
+
+  method_pods.each do |pod_name, ios_dir|
+    pod pod_name, :path => ios_dir, :testspecs => ['Tests']
+  end
+end

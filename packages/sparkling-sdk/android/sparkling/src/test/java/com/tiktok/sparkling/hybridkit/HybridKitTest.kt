@@ -18,6 +18,7 @@ import com.tiktok.sparkling.hybridkit.KitViewManager
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
 import com.tiktok.sparkling.hybridkit.base.HybridLoadSession
 import com.tiktok.sparkling.hybridkit.base.Theme
+import com.tiktok.sparkling.hybridkit.config.BaseInfoConfig
 import com.tiktok.sparkling.hybridkit.config.SparklingHybridConfig
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
 import io.mockk.*
@@ -56,6 +57,10 @@ class HybridKitTest {
 
         // Initialize HybridEnvironment to prevent UninitializedPropertyAccessException
         HybridEnvironment.instance.context = mockApplication
+        HybridCommon.setHybridConfig(
+            SparklingHybridConfig.Builder(BaseInfoConfig(isDebug = false)).build(),
+            mockApplication,
+        )
     }
 
     @Test

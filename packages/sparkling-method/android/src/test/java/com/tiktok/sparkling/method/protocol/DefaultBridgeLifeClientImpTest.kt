@@ -93,4 +93,28 @@ class DefaultBridgeLifeClientImpTest {
         lifeClient.onBridgeCallbackInvokeStart(mockResult, mockBridgeCall)
         // No assertion, just ensuring no exception is thrown
     }
+
+    @Test
+    fun testDelegatesEventCallbacksToRegisteredLifeClient() {
+        val child = Mockito.mock(IBridgeLifeClient::class.java)
+        lifeClient.registerIBridgeLifeClient(child)
+
+        lifeClient.onBridgeEventStart("evt", mapOf("k" to "v"))
+        lifeClient.onBridgeEventEnd("evt", mapOf("k" to "v"))
+
+        Mockito.verify(child).onBridgeEventStart("evt", mapOf("k" to "v"))
+        Mockito.verify(child).onBridgeEventEnd("evt", mapOf("k" to "v"))
+    }
+
+    @Test
+    fun testOnBridgeCalledEndUpdatesMonitorAndDelegates() {
+        val child = Mockito.mock(IBridgeLifeClient::class.java)
+        lifeClient.registerIBridgeLifeClient(child)
+        Mockito.`when`(mockBridgeCall.platform).thenReturn(BridgeCall.PlatForm.Other)
+
+        lifeClient.onBridgeCalledEnd(mockBridgeCall, mockBridgeContext)
+
+        Mockito.verify(child).onBridgeCalledEnd(mockBridgeCall, mockBridgeContext)
+        Mockito.verify(mockFeCallMonitorModel).reportFeCallInfo()
+    }
 }

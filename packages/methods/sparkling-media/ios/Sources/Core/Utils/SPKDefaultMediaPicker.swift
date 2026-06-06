@@ -37,6 +37,15 @@ enum SPKChooseMediaPermissionDenyAction: Int {
     case noAlert = 1
 }
 
+enum SPKChooseMediaParamValue {
+    static let image = "image"
+    static let video = "video"
+    static let album = "album"
+    static let camera = "camera"
+    static let front = "front"
+    static let back = "back"
+}
+
 typealias SPKChooseMediaCompletionHandler = (SPKChooseMediaMethodResultModel?, SPKStatus?) -> Void
 
 protocol SPKChooseMediaPicker {
@@ -54,15 +63,56 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
         return true
     }
 
+    private func imagePickerSourceType(for sourceType: String) -> UIImagePickerController.SourceType? {
+        switch sourceType.lowercased() {
+        case SPKChooseMediaParamValue.album:
+            return .photoLibrary
+        case SPKChooseMediaParamValue.camera:
+            return .camera
+        default:
+            return nil
+        }
+    }
+
+    private func mappedMediaTypes(from mediaTypes: [String]?) -> [String] {
+        guard let mediaTypes = mediaTypes else {
+            return [kUTTypeImage as String]
+        }
+
+        var mappedMediaTypes: [String] = []
+        let normalizedMediaTypes = mediaTypes.map { $0.lowercased() }
+        if normalizedMediaTypes.contains(SPKChooseMediaParamValue.image) {
+            mappedMediaTypes.append(kUTTypeImage as String)
+        }
+        if normalizedMediaTypes.contains(SPKChooseMediaParamValue.video) {
+            mappedMediaTypes.append(kUTTypeMovie as String)
+        }
+        if mappedMediaTypes.isEmpty {
+            mappedMediaTypes.append(kUTTypeImage as String)
+        }
+        return mappedMediaTypes
+    }
+
+    private func cameraDevice(for cameraType: String) -> UIImagePickerController.CameraDevice? {
+        switch cameraType.lowercased() {
+        case SPKChooseMediaParamValue.front:
+            return .front
+        case SPKChooseMediaParamValue.back:
+            return .rear
+        default:
+            return nil
+        }
+    }
+
     func mediaPicker(with paramModel: SPKChooseMediaMethodParamModel, completionHandler: @escaping SPKChooseMediaCompletionHandler) -> UIViewController? {
         self.params = paramModel
         if params?.compressOption == nil {
             params?.compressOption = SPKChooseMediaCompressOption.default.rawValue
         }
 
-        var sourceType = UIImagePickerController.SourceType.camera
-        if paramModel.sourceType == SPKChooseMediaMediaSourceType.album.rawValue {
-            sourceType = .photoLibrary
+        guard let sourceType = imagePickerSourceType(for: paramModel.sourceType) else {
+            completionHandler(nil, SPKStatus(code: SPKStatusCode.invalidParameter, message: "Unknown source type: \(paramModel.sourceType)"))
+            return nil
         }
 
         if !UIImagePickerController.isSourceTypeAvailable(sourceType) {
@@ -86,20 +136,7 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
             UIApplication.shared.keyWindow?.topViewController()?.present(alertView, animated: true, completion: nil)
             return nil
         } else {
-            var mappedMediaTypes: [String] = []
-            if let mediaTypes = paramModel.mediaTypes {
-                if mediaTypes.contains(SPKChooseMediaMediaType.image.rawValue) {
-                    mappedMediaTypes.append(kUTTypeImage as String)
-                }
-                if mediaTypes.contains(SPKChooseMediaMediaType.video.rawValue) {
-                    mappedMediaTypes.append(kUTTypeMovie as String)
-                }
-                if mappedMediaTypes.isEmpty {
-                    mappedMediaTypes.append(kUTTypeImage as String)
-                }
-            } else {
-                mappedMediaTypes.append(kUTTypeImage as String)
-            }
+            let mappedMediaTypes = mappedMediaTypes(from: paramModel.mediaTypes)
 
             let imagePicker = UIImagePickerController()
             imagePicker.sourceType = sourceType
@@ -108,22 +145,14 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
 
             if sourceType == .camera {
                 let cameraType = paramModel.cameraType
-                let cameraDevice: UIImagePickerController.CameraDevice
-                if let cameraTypeEnum = SPKChooseMediaCameraType(rawValue: cameraType) {
-                    switch cameraTypeEnum {
-                    case .front:
-                        cameraDevice = .front
-                    case .back:
-                        cameraDevice = .rear
-                    }
-                } else {
-                    finish(with: nil, status: SPKStatus(code: SPKStatusCode.invalidParameter, message: "Unknown camera type: \(cameraType)"))
+                guard let cameraDevice = cameraDevice(for: cameraType) else {
+                    completionHandler(nil, SPKStatus(code: SPKStatusCode.invalidParameter, message: "Unknown camera type: \(cameraType)"))
                     return nil
                 }
                 imagePicker.cameraDevice = cameraDevice
             }
 
-            if let mediaTypes = paramModel.mediaTypes, mediaTypes.contains(SPKChooseMediaMediaType.video.rawValue) {
+            if paramModel.mediaTypes?.map({ $0.lowercased() }).contains(SPKChooseMediaParamValue.video) ?? false {
                 imagePicker.videoQuality = .typeHigh
             }
 

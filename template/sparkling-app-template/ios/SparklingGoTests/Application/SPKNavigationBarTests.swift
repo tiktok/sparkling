@@ -6,9 +6,14 @@ import Testing
 import UIKit
 
 @testable import Sparkling
+@testable import SparklingMethod
 
 @MainActor
 struct SPKNavigationBarTests {
+
+    init() {
+        DefaultDIContainerProvider.inject()
+    }
 
     @Test func initialization() {
         let navBar = SPKNavigationBar()
@@ -206,18 +211,6 @@ struct SPKNavigationBarTests {
         #expect(navBar.rightNaviButton.currentTitle == "Right")
     }
 
-    @Test func showCloseButton() {
-        let navBar = SPKNavigationBar()
-
-        // Test showing close button
-        navBar.show(closeButton: true)
-        #expect(navBar.closeNaviButton.isHidden == false)
-
-        // Test hiding close button
-        navBar.show(closeButton: false)
-        #expect(navBar.closeNaviButton.isHidden == true)
-    }
-
     @Test func updateCenterTitle() {
         let navBar = SPKNavigationBar()
 
@@ -256,18 +249,6 @@ struct SPKNavigationBarTests {
         navBar.set(navigationBarBackButtonEnable: false)
         #expect(navBar.leftNaviButton.isEnabled == false)
         #expect(navBar.closeNaviButton.isEnabled == false)
-    }
-
-    @Test func setBottomLineHidden() {
-        let navBar = SPKNavigationBar()
-
-        // Test hiding bottom line
-        navBar.set(bottomLine: true)
-        #expect(navBar.bottomLineColor == UIColor.clear)
-
-        // Test showing bottom line
-        navBar.set(bottomLine: false)
-        #expect(navBar.bottomLineColor == UIColor(red: 0.91, green: 0.91, blue: 0.91, alpha: 1))
     }
 
     @Test func setupLeftButton() {

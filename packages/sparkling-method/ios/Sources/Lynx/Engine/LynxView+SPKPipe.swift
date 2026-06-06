@@ -46,9 +46,13 @@ extension LynxView {
         }
     }
 
+    private func spk_getLynxContextIfAvailable() -> LynxContext? {
+        perform(#selector(getLynxContext))?.takeUnretainedValue() as? LynxContext
+    }
+
     func spk_clearModuleForDestroy() {
         if !spk_isLynxViewDestorying {
-            if let lynxContext = self.getLynxContext() as? LynxContext {
+            if let lynxContext = spk_getLynxContextIfAvailable() {
                 lynxContext.spk_containerID = self.containerID
                 if let pipeEngine = self.spk_pipeEngine, let namescope = self.namescope {
                     pipeEngine.namescope = namescope

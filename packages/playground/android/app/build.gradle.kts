@@ -78,6 +78,7 @@ dependencies {
     implementation(project(":sparkling"))
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
     implementation(libs.fresco)
@@ -105,7 +106,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
 
     reports {
         xml.required.set(true)
-        xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml"))
+        xml.outputLocation.set(layout.buildDirectory.file("reports/jacoco/jacocoTestReport/jacocoTestReport.xml"))
         html.required.set(true)
     }
 

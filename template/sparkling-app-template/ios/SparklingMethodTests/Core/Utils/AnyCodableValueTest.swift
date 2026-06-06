@@ -323,12 +323,12 @@ struct AnyCodableValueTest {
                 "name": "John",
                 "age": 30,
                 "active": true,
-                "scores": [85.5, 92.0, 78.5],
+                "scores": [85.5, 92.0, 78.5]
             ],
             "metadata": [
                 "version": "1.0",
-                "tags": ["important", "user-data"],
-            ],
+                "tags": ["important", "user-data"]
+            ]
         ]
 
         let value = AnyCodableValue(complexData)

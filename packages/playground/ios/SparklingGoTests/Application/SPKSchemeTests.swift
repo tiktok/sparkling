@@ -38,6 +38,28 @@ struct SPKSchemeTests {
         #expect(param?.engineType == .SPKHybridEngineTypeLynx)
     }
 
+    @Test func resolverWithLynxViewCardRemoteURLScheme() {
+        let url = URL(string: "hybrid://lynxview_card?url=https%3A%2F%2Fexample.com%2Fcard.lynx.bundle")
+        let context = SPKContext()
+
+        let param = SPKScheme.resolver(withScheme: url, context: context, paramClass: SPKSchemeParam.self)
+
+        #expect(param != nil)
+        #expect(param?.engineType == .SPKHybridEngineTypeLynx)
+        #expect(param?.containerType == .SPKHybridContainerTypeCard)
+    }
+
+    @Test func resolverWithLynxViewCardBundleScheme() {
+        let url = URL(string: "hybrid://lynxview_card?bundle=.%2Fcard.lynx.bundle")
+        let context = SPKContext()
+
+        let param = SPKScheme.resolver(withScheme: url, context: context, paramClass: SPKSchemeParam.self)
+
+        #expect(param != nil)
+        #expect(param?.engineType == .SPKHybridEngineTypeLynx)
+        #expect(param?.containerType == .SPKHybridContainerTypeCard)
+    }
+
     @Test func resolverWithNilURL() {
         let context = SPKContext()
 
@@ -107,6 +129,7 @@ struct SPKSchemeParamTests {
                 "title": "Test Title",
                 "hide_nav_bar": true,
                 "nav_bar_color": "#FF0000",
+                "disable_auto_remove_loading": "1",
             ] as [String: Any]
 
         param.update(withDictionary: dict)
@@ -114,6 +137,13 @@ struct SPKSchemeParamTests {
         #expect(param.title == "Test Title")
         #expect(param.hideNavBar == true)
         #expect(param.navBarColor != nil)
+        #expect(param.disableAutoRemoveLoading == true)
+    }
+
+    @Test func disableAutoRemoveLoadingDefaultsToFalse() {
+        let param = SPKSchemeParam()
+
+        #expect(param.disableAutoRemoveLoading == false)
     }
 
     @Test func updateWithContext() {

@@ -76,6 +76,12 @@ open class SPKSchemeParam: SPKHybridSchemeParam, SPKSchemeParamProtocol {
     /// Defaults to true.
     var showLoading: Bool = true
 
+    /// Controls whether loading views should remain after load finish.
+    ///
+    /// When true, lifecycle finish callbacks do not automatically remove the loading view.
+    /// Defaults to false.
+    var disableAutoRemoveLoading: Bool = false
+
     /// Controls whether error views should be displayed.
     ///
     /// When true, error views are shown when content loading fails.
@@ -169,6 +175,8 @@ open class SPKSchemeParam: SPKHybridSchemeParam, SPKSchemeParamProtocol {
         self.loadingBgColor = self.themedColor(withDict: dict, forKey: "loading_bg_color", context: context) ?? self.loadingBgColor
 
         self.showLoading = !dict.spk.bool(forKey: "hide_loading", default: false)
+
+        self.disableAutoRemoveLoading = dict.spk.bool(forKey: "disable_auto_remove_loading", default: false)
 
         self.showError = !dict.spk.bool(forKey: "hide_error", default: false)
 

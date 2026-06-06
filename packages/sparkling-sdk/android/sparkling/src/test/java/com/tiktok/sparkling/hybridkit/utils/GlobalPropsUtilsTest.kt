@@ -5,12 +5,14 @@ package com.tiktok.sparkling.hybridkit.utils
 
 import android.app.Application
 import android.content.Context
+import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.HybridEnvironment
 import com.tiktok.sparkling.hybridkit.config.BaseInfoConfig
 import com.tiktok.sparkling.hybridkit.config.RuntimeInfo
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -172,5 +174,49 @@ class GlobalPropsUtilsTest {
         val globalProps = GlobalPropsUtils.instance.getGlobalProps(containerId)
         // After flush, container-specific props should be cleared
         assertTrue(!globalProps.containsKey("key") || globalProps["key"] == null)
+    }
+
+    @Test
+    fun testRemoveGlobalPropsRemovesMarkedKeyFromMergedResult() {
+        val containerId = "test_container_remove"
+        GlobalPropsUtils.instance.setStableProps(mapOf("stable-keep" to "stable"))
+        GlobalPropsUtils.instance.setUnstableProps(
+            containerId,
+            mapOf(
+                "remove-me" to "value",
+                "keep-me" to "value-2",
+            ),
+        )
+
+        GlobalPropsUtils.instance.removeGlobalProps(containerId, listOf("remove-me"))
+        val globalProps = GlobalPropsUtils.instance.getGlobalProps(containerId)
+
+        assertNull(globalProps["remove-me"])
+        assertEquals("value-2", globalProps["keep-me"])
+        assertEquals("stable", globalProps["stable-keep"])
+    }
+
+    @Test
+    fun testContainerInitTimeUsesSingleSourceForGlobalPropsAndQueryItems() {
+        val hybridContext =
+            HybridContext().apply {
+                scheme = "sslocal://lynxview?url=https%3A%2F%2Fexample.com%2Ftemplate.js%3Ffoo%3Dbar"
+            }
+
+        GlobalPropsUtils.instance.init(hybridContext, context)
+
+        val globalProps = GlobalPropsUtils.instance.getGlobalProps(hybridContext.containerId)
+        val containerInitTime = globalProps["containerInitTime"] as String
+        val queryItems = globalProps[RuntimeInfo.QUERY_ITEMS] as Map<*, *>
+
+        assertEquals(containerInitTime, queryItems["containerInitTime"])
+        assertTrue(containerInitTime.toLong() > 0)
+        assertEquals("bar", queryItems["foo"])
+
+        val updatedProps = GlobalPropsUtils.instance.updateUnstablePropsSupplier(hybridContext, context)
+        val updatedQueryItems = updatedProps[RuntimeInfo.QUERY_ITEMS] as Map<*, *>
+
+        assertEquals(containerInitTime, updatedProps["containerInitTime"])
+        assertEquals(containerInitTime, updatedQueryItems["containerInitTime"])
     }
 }

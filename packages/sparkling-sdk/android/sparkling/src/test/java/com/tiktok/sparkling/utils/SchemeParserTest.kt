@@ -6,13 +6,21 @@ package com.tiktok.sparkling.utils
 import com.tiktok.sparkling.hybridkit.base.HybridContainerType
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
+import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class SchemeParserTest {
+    @Before
+    fun setUp() {
+        ColorUtil.appContext = RuntimeEnvironment.getApplication()
+    }
+
     @Test
     fun testParseSchemeWithLynxViewPage() {
         val scheme = "hybrid://lynxview_page?bundle=test_bundle&title=Test%20Title"
@@ -99,6 +107,7 @@ class SchemeParserTest {
                 "hide_status_bar=1&" +
                 "trans_status_bar=1&" +
                 "hide_loading=1&" +
+                "disable_auto_remove_loading=1&" +
                 "loading_bg_color=%23FFFFFF&" +
                 "container_bg_color=%23F0F0F0&" +
                 "hide_error=1&" +
@@ -119,6 +128,7 @@ class SchemeParserTest {
             assertTrue(hideStatusBar)
             assertTrue(transStatusBar)
             assertTrue(hideLoading)
+            assertTrue(disableAutoRemoveLoading)
             assertEquals("#FFFFFF", loadingBgColor)
             assertEquals("#F0F0F0", containerBgColor)
             assertTrue(hideError)
@@ -134,6 +144,7 @@ class SchemeParserTest {
                 "hide_status_bar=0&" +
                 "trans_status_bar=0&" +
                 "hide_loading=0&" +
+                "disable_auto_remove_loading=0&" +
                 "hide_error=0"
 
         val result = SchemeParser.parseScheme(scheme)
@@ -145,6 +156,7 @@ class SchemeParserTest {
             assertFalse(hideStatusBar)
             assertFalse(transStatusBar)
             assertFalse(hideLoading)
+            assertFalse(disableAutoRemoveLoading)
             assertFalse(hideError)
         }
     }
@@ -167,6 +179,7 @@ class SchemeParserTest {
             assertFalse(hideStatusBar)
             assertFalse(transStatusBar)
             assertFalse(hideLoading)
+            assertFalse(disableAutoRemoveLoading)
             assertNull(loadingBgColor)
             assertNull(containerBgColor)
             assertFalse(hideError)

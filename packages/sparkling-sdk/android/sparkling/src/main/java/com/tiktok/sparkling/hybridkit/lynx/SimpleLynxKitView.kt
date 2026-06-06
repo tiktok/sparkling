@@ -21,6 +21,7 @@ import com.tiktok.sparkling.hybridkit.utils.GlobalPropsUtils
 import com.tiktok.sparkling.hybridkit.utils.LogLevel
 import com.tiktok.sparkling.hybridkit.utils.LogUtils
 import com.tiktok.sparkling.hybridkit.utils.ViewEventUtils
+import com.tiktok.sparkling.method.registry.api.SparklingMethodInvocationCenter
 import org.json.JSONObject
 
 @SuppressLint("ViewConstructor")
@@ -82,14 +83,20 @@ class SimpleLynxKitView :
     }
 
     override fun reload() {
+        if (hasDestroyed) {
+            return
+        }
         hybridContext.tryResetTemplateResData(System.currentTimeMillis())
-        lynxKitLifeCycle?.onLoadStart(this, rawUrl ?: "")
+        lynxKitLifeCycle?.onReload(this)
         lynxKitInitParams?.obtainGlobalProps()?.let {
             updateData(it)
         }
-        rawUrl?.let {
-            load(it)
+        val target = rawUrl
+        if (target.isNullOrBlank()) {
+            lynxKitLifeCycle?.onLoadFailed(this, "", "bundle path is null")
+            return
         }
+        load(target)
     }
 
     override fun updateData(data: Map<String, Any>) {
@@ -213,7 +220,10 @@ class SimpleLynxKitView :
 
     override fun hasDestroyed(): Boolean = hasDestroyed
 
-    override fun getGlobalProps(): MutableMap<String, Any>? = hybridContext.globalProps
+    override fun getGlobalProps(): MutableMap<String, Any>? =
+        GlobalPropsUtils.instance.getGlobalProps(hybridContext.containerId).apply {
+            putAll(hybridContext.globalProps)
+        }
 
     override fun getScheme(): String? = hybridContext.resolveFullScheme()
 
@@ -241,10 +251,23 @@ class SimpleLynxKitView :
         hybridContext.bridge?.sendEvent(eventName, params)
     }
 
+    override fun sendEventByMap(
+        eventName: String,
+        params: Map<String, Any?>?,
+    ) {
+        super.sendEventByMap(eventName, params)
+        hybridContext.bridge?.sendEvent(eventName, params?.let { JSONObject(it) })
+    }
+
     private fun sendGlobalEventInternal(
         eventName: String,
         params: List<Any>?,
     ) {
+        SparklingMethodInvocationCenter.notifyNativeToJsEvent(
+            name = eventName,
+            params = params,
+            containerId = hybridContext.containerId,
+        )
         val data =
             if (params != null) {
                 JavaOnlyArray.from(params)

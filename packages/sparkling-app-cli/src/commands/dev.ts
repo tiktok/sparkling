@@ -8,11 +8,13 @@ import {
   createDevLynxConfig,
   getConfiguredDevServerPorts,
   loadAppConfig,
+  resolveDevServerHost,
   resolveDevServerPort,
   updateDevServerPortInAppConfig,
 } from '../config';
 import { ui } from '../utils/ui';
 import { isVerboseEnabled, verboseLog } from '../utils/verbose';
+import { warnIfWildcardDevServerHost } from '../utils/dev-server-host';
 
 export interface DevOptions {
   cwd: string;
@@ -52,6 +54,8 @@ export async function devProject(options: DevOptions): Promise<void> {
 
   const configuredPort = resolveDevServerPort(config);
   const port = options.port ?? configuredPort;
+  const host = resolveDevServerHost(config, options.host);
+  warnIfWildcardDevServerHost(host);
 
   if (options.port !== undefined && options.port !== configuredPort) {
     const updated = updateDevServerPortInAppConfig(configPath, options.port);
@@ -63,8 +67,8 @@ export async function devProject(options: DevOptions): Promise<void> {
   if (isVerboseEnabled()) {
     verboseLog(`App config path: ${configPath}`);
     verboseLog(`Dev server port: ${port}`);
-    if (options.host) {
-      verboseLog(`Dev server host: ${options.host}`);
+    if (host) {
+      verboseLog(`Dev server host: ${host}`);
     }
   }
 
@@ -116,7 +120,7 @@ export async function devProject(options: DevOptions): Promise<void> {
 
   try {
     while (true) {
-      const tempConfigPath = createDevLynxConfig(options.cwd, configPath, port, options.host);
+      const tempConfigPath = createDevLynxConfig(options.cwd, configPath, port, host);
       if (isVerboseEnabled()) {
         verboseLog(`Temp Lynx config: ${tempConfigPath}`);
       }

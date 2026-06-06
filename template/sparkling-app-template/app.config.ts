@@ -39,10 +39,10 @@ const config: AppConfig = {
   appName: '{{appName}}',
   platform: {
     android: {
-      packageName: 'com.example.sparkling.go',
+      packageName: '{{packageNamespace}}',
     },
     ios: {
-      bundleIdentifier: 'com.sparkling.app.SparklingGo',
+      bundleIdentifier: '{{packageNamespace}}',
     },
   },
   paths: {

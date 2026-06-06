@@ -20,7 +20,7 @@ class TestParamsModel: SPKMethodModel {
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
         return [
             "name": "name",
-            "age": "age",
+            "age": "age"
         ]
     }
 }
@@ -206,6 +206,16 @@ class MockPipeEngine: PipeEngine {
 @Suite(.serialized)
 struct MethodPipeTest {
 
+    private func clearGlobalTestMethods() {
+        [
+            "test.success",
+            "test.failure",
+            "test.async",
+            "test.invalidParams",
+            "test.global"
+        ].forEach { MethodRegistry.global.unregister(methodName: $0) }
+    }
+
     // MARK: - Basic Registration Tests
 
     @Test func testRegisterLocalMethod() throws {
@@ -225,7 +235,7 @@ struct MethodPipeTest {
         let pipe = MethodPipe()
         let methods: [PipeMethod] = [
             TestSuccessMethod(),
-            TestFailureMethod(),
+            TestFailureMethod()
         ]
 
         pipe.register(localMethods: methods)
@@ -241,6 +251,7 @@ struct MethodPipeTest {
     }
 
     @Test func testRegisterEmptyMethods() throws {
+        clearGlobalTestMethods()
         let pipe = MethodPipe()
 
         pipe.register(localMethods: [])
@@ -270,6 +281,7 @@ struct MethodPipeTest {
     // MARK: - Unregistration Tests
 
     @Test func testUnregisterLocalMethod() throws {
+        clearGlobalTestMethods()
         let pipe = MethodPipe()
         let method = TestSuccessMethod()
 
@@ -307,6 +319,7 @@ struct MethodPipeTest {
     // MARK: - Method Resolution Tests
 
     @Test func testRespondToLocalMethod() throws {
+        clearGlobalTestMethods()
         let pipe = MethodPipe()
         let method = TestSuccessMethod()
 
@@ -622,7 +635,7 @@ struct MethodPipeTest {
 
         if let method = pipe.method(forName: TestSuccessMethod().methodName) {
             // Call with nil params should fail
-            let params = [String: Any]()
+            let params: [String: Any] = [:]
             do {
                 let paramModel = try TestParamsModel.from(dict: params) as? TestParamsModel
                 if let paramModel = paramModel {
@@ -651,7 +664,7 @@ struct MethodPipeTest {
         pipe.register(localMethods: [
             TestSuccessMethod(),
             TestFailureMethod(),
-            TestAsyncMethod(),
+            TestAsyncMethod()
         ])
 
         #expect(pipe.respondTo(methodName: TestSuccessMethod().methodName))

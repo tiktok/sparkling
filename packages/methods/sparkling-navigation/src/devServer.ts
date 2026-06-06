@@ -22,7 +22,7 @@ export function getDevServerBaseURL(): string | undefined {
 
         // Prefer the actual URL the native side used to load this bundle.
         // lynx.__globalProps.queryItems.url is set by the SDK from the scheme's
-        // url= parameter (e.g. "http://192.168.1.100:5969/main.lynx.bundle").
+        // url= parameter (e.g. "http://127.0.0.1:5969/main.lynx.bundle").
         if (typeof lynx !== 'undefined' && lynx?.__globalProps?.queryItems?.url) {
             const pageUrl = lynx.__globalProps.queryItems.url;
             if (pageUrl.startsWith('http://') || pageUrl.startsWith('https://')) {

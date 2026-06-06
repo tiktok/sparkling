@@ -35,7 +35,7 @@ object Md5Utils {
                 charStr[k++] = hexDigits[b.toInt() ushr 4 and 15]
                 charStr[k++] = hexDigits[b.toInt() and 15]
             }
-            res = charStr.toString()
+            res = String(charStr)
         } catch (e: Exception) {
             e.printStackTrace()
         }

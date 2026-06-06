@@ -5,7 +5,11 @@
 package com.tiktok.sparkling.method.registry.api.util
 
 import com.tiktok.sparkling.method.registry.api.Utils
+import com.lynx.react.bridge.JavaOnlyArray
+import com.lynx.react.bridge.JavaOnlyMap
 import io.mockk.unmockkAll
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -19,12 +23,67 @@ import org.robolectric.annotation.Config
 class DataConvertUtilsTest {
     @Before
     fun setUp() {
-        // Setup if needed
+        DataConvertUtils.disableLongToDouble = false
+        DataConvertUtils.newInputTypeChange = false
     }
 
     @After
     fun tearDown() {
+        DataConvertUtils.disableLongToDouble = false
+        DataConvertUtils.newInputTypeChange = false
         unmockkAll()
+    }
+
+    @Test
+    fun testMapSupportPiperdataToJSONRespectsLongFlag() {
+        val source = mapOf("longValue" to 42L)
+
+        DataConvertUtils.disableLongToDouble = false
+        val asDouble = Utils.mapSupportPiperdataToJSON(source)
+        assertEquals(42.0, asDouble.getDouble("longValue"), 0.001)
+
+        DataConvertUtils.disableLongToDouble = true
+        val asLong = Utils.mapSupportPiperdataToJSON(source)
+        assertEquals(42L, asLong.getLong("longValue"))
+    }
+
+    @Test
+    fun testConvertMapToReadableMapSupportsNestedAndNull() {
+        val source =
+            mapOf<String, Any?>(
+                "nested" to mapOf("inner" to 1),
+                "list" to listOf("a", 2),
+                "nullValue" to null,
+                "bool" to true,
+            )
+
+        val writableMap = Utils.convertMapToReadableMap(source)
+
+        val nested = writableMap.getMap("nested")
+        assertNotNull(nested)
+        assertEquals(1, nested?.getInt("inner"))
+
+        val list = writableMap.getArray("list")
+        assertNotNull(list)
+        assertEquals("a", list?.getString(0))
+        assertEquals(2, list?.getInt(1))
+
+        assertTrue(writableMap.hasKey("nullValue"))
+        assertTrue(writableMap.isNull("nullValue"))
+        assertTrue(writableMap.getBoolean("bool"))
+    }
+
+    @Test
+    fun testGetValueLongBehaviorDependsOnInputFlag() {
+        DataConvertUtils.newInputTypeChange = false
+        val oldBehavior = Utils.getValue(7L)
+        assertTrue(oldBehavior is Int)
+        assertEquals(7, oldBehavior)
+
+        DataConvertUtils.newInputTypeChange = true
+        val newBehavior = Utils.getValue(7L)
+        assertTrue(newBehavior is Long)
+        assertEquals(7L, newBehavior)
     }
 
     @Test
@@ -240,5 +299,114 @@ class DataConvertUtilsTest {
         assertEquals("Object should have inner value", "value", obj.getString("inner"))
 
         assertTrue("Null value should be null", result.isNull("null_value"))
+    }
+
+    @Test
+    fun testToStringOrJsonForNullMapAndList() {
+        assertEquals("", Utils.toStringOrJson(null))
+        assertEquals("{\"k\":1}", Utils.toStringOrJson(mapOf("k" to 1)))
+        assertEquals("[1,2,3]", Utils.toStringOrJson(listOf(1, 2, 3)))
+    }
+
+    @Test
+    fun testJsonToMapAndJsonToListKeepNestedValues() {
+        val obj = JSONObject("{\"name\":\"sparkling\",\"meta\":{\"a\":1},\"arr\":[1,2]}")
+        val map = Utils.jsonToMap(obj)
+        assertEquals("sparkling", map["name"])
+        assertTrue(map["meta"] is Map<*, *>)
+        assertTrue(map["arr"] is List<*>)
+
+        val arr = JSONArray("[\"x\", {\"k\":true}, [1,2], null]")
+        val list = Utils.jsonToList(arr)
+        assertEquals("x", list[0])
+        assertTrue(list[1] is Map<*, *>)
+        assertTrue(list[2] is List<*>)
+        assertNull(list[3])
+    }
+
+    @Test
+    fun testConvertArrayToWritableArrayRespectsLongFlag() {
+        val source =
+            listOf(
+                1L,
+                mapOf("inner" to "v"),
+                listOf(2, 3),
+            )
+
+        DataConvertUtils.disableLongToDouble = false
+        val asDouble = Utils.convertArrayToWritableArray(source)
+        assertEquals(1.0, asDouble.getDouble(0), 0.001)
+
+        DataConvertUtils.disableLongToDouble = true
+        val asLong = Utils.convertArrayToWritableArray(source)
+        assertEquals(1L, asLong.getLong(0))
+        assertEquals("v", asLong.getMap(1)?.getString("inner"))
+        assertEquals(3, asLong.getArray(2)?.getInt(1))
+    }
+
+    @Test
+    fun testGetValueForReadableMapAndArray() {
+        val map =
+            JavaOnlyMap().apply {
+                putString("name", "sparkling")
+                putInt("count", 2)
+            }
+        val arr =
+            JavaOnlyArray().apply {
+                pushMap(map)
+                pushDouble(1.5)
+            }
+
+        val value = Utils.getValue(arr)
+        assertTrue(value is List<*>)
+        val list = value as List<*>
+        assertTrue(list[0] is Map<*, *>)
+        assertEquals(1.5, list[1] as Double, 0.001)
+
+        DataConvertUtils.newInputTypeChange = false
+        assertEquals(1, Utils.getValue(1L))
+        DataConvertUtils.newInputTypeChange = true
+        assertEquals(1L, Utils.getValue(1L))
+    }
+
+    @Test
+    fun testConvertMapToReadableMapSupportsArrayAndJsonNull() {
+        val source =
+            mapOf<String, Any?>(
+                "arrayValue" to arrayOf(1, "x", true),
+                "jsonNull" to JSONObject.NULL,
+            )
+
+        val writableMap = Utils.convertMapToReadableMap(source)
+
+        val array = writableMap.getArray("arrayValue")
+        assertNotNull(array)
+        assertEquals(1, array?.getInt(0))
+        assertEquals("x", array?.getString(1))
+        assertTrue(array?.getBoolean(2) == true)
+
+        assertTrue(writableMap.hasKey("jsonNull"))
+        assertTrue(writableMap.isNull("jsonNull"))
+    }
+
+    @Test
+    fun testConvertJsonToArrayHandlesNestedAndNull() {
+        val jsonArray = JSONArray("[1, {\"k\":\"v\"}, [2,3], null]")
+
+        val writable = Utils.convertJsonToArray(jsonArray)
+
+        assertEquals(1, writable.getInt(0))
+        assertEquals("v", writable.getMap(1)?.getString("k"))
+        assertEquals(3, writable.getArray(2)?.getInt(1))
+        assertTrue(writable.isNull(3))
+    }
+
+    @Test
+    fun testGetValueNumberPreservesDoubleWhenNeeded() {
+        DataConvertUtils.newInputTypeChange = false
+        assertEquals(1.25, Utils.getValue(1.25) as Double, 0.001)
+
+        DataConvertUtils.newInputTypeChange = true
+        assertEquals(2.5, Utils.getValue(2.5f) as Double, 0.001)
     }
 }

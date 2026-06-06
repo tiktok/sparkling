@@ -45,6 +45,13 @@ object SchemeParser {
         forceThemeStyle: String?,
     ): String? {
         val baseValue = uri.safeGetQueryParameter(key)
+        val lightValue = uri.safeGetQueryParameter("${key}_light")
+        val darkValue = uri.safeGetQueryParameter("${key}_dark")
+
+        if (lightValue == null && darkValue == null) {
+            return baseValue
+        }
+
         val isDark =
             when (forceThemeStyle?.lowercase()) {
                 "dark" -> {
@@ -57,13 +64,18 @@ object SchemeParser {
 
                 else -> {
                     val nightMode =
-                        ColorUtil.appContext.resources.configuration.uiMode and
-                            Configuration.UI_MODE_NIGHT_MASK
+                        runCatching {
+                            ColorUtil.appContext.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+                        }.getOrDefault(Configuration.UI_MODE_NIGHT_NO)
                     nightMode == Configuration.UI_MODE_NIGHT_YES
                 }
             }
-        val suffix = if (isDark) "_dark" else "_light"
-        return uri.safeGetQueryParameter("$key$suffix") ?: baseValue
+
+        return if (isDark) {
+            darkValue ?: lightValue ?: baseValue
+        } else {
+            lightValue ?: darkValue ?: baseValue
+        }
     }
 
     @JvmStatic
@@ -112,6 +124,8 @@ object SchemeParser {
         params.hideStatusBar = uri.safeGetQueryParameter(SchemeConstants.Param.HIDE_STATUS_BAR) == SchemeConstants.Value.ENABLED
         params.transStatusBar = uri.safeGetQueryParameter(SchemeConstants.Param.TRANS_STATUS_BAR) == SchemeConstants.Value.ENABLED
         params.hideLoading = uri.safeGetQueryParameter(SchemeConstants.Param.HIDE_LOADING) == SchemeConstants.Value.ENABLED
+        params.disableAutoRemoveLoading =
+            uri.safeGetQueryParameter(SchemeConstants.Param.DISABLE_AUTO_REMOVE_LOADING) == SchemeConstants.Value.ENABLED
         params.loadingBgColor = resolveThemedColor(uri, SchemeConstants.Param.LOADING_BG_COLOR, params.forceThemeStyle)
         params.containerBgColor = resolveThemedColor(uri, SchemeConstants.Param.CONTAINER_BG_COLOR, params.forceThemeStyle)
         params.showNavBarInTransStatusBar = uri.safeGetQueryParameter(SchemeConstants.Param.SHOW_NAV_BAR_IN_TRANS_STATUS_BAR) == SchemeConstants.Value.ENABLED

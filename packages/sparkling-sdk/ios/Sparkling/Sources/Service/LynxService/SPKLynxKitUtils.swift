@@ -81,10 +81,10 @@ open class SPKLynxKitUtils: SPKKitUtils {
     ///   - rawParamsBlock: Optional callback executed with raw dictionary parameters
     ///                     before final LynxTemplateData creation.
     /// - Returns: LynxTemplateData containing merged global properties.
-    static func globalProps(withParams params: SPKLynxKitParams, onDictionaryParamsCreated rawParamsBlock: (([AnyHashable: Any]?) -> Void)? = nil) -> LynxTemplateData? {
-        var globalProps = self.defaultGlobalProps(withParams: params)
+    static func globalProps(withParams params: SPKLynxKitParams, onDictionaryParamsCreated rawParamsBlock: ((inout [AnyHashable: Any]) -> Void)? = nil) -> LynxTemplateData? {
+        var globalProps = self.defaultGlobalProps(withParams: params) ?? [:]
         if let rawParamsBlock = rawParamsBlock {
-            rawParamsBlock(globalProps)
+            rawParamsBlock(&globalProps)
         }
         var _globalProps = LynxTemplateData.init(dictionary: globalProps)
         if let tempPropos = params.globalProps as? [AnyHashable: Any] {
@@ -107,7 +107,12 @@ open class SPKLynxKitUtils: SPKKitUtils {
     /// - Returns: Dictionary containing default global properties with Lynx-specific additions.
     private static func defaultGlobalProps(withParams params: SPKLynxKitParams) -> [AnyHashable: Any]? {
         var globalProps = SPKGlobalPropsUtils.defaultGlobalProps()
-        let queryItems = params.queryItems ?? [:]
+        var queryItems = params.queryItems ?? [:]
+        if let customQueryItems = params.context?.queryItems, !customQueryItems.isEmpty {
+            customQueryItems.forEach { key, value in
+                queryItems[key] = value
+            }
+        }
 
         globalProps.updateValue(LynxVersion.versionString() ?? "", forKey: "lynxSdkVersion")
         globalProps.updateValue(SPKVersion.SPKVersion(), forKey: "sparklingVersion")
@@ -117,8 +122,8 @@ open class SPKLynxKitUtils: SPKKitUtils {
 
         return globalProps
     }
-
-    /// Merge priority aligned with Android `parseQueryMap` (no iOS `Bundle` layer): `extra` then URL (`schemeParams.extra`). `context.queryItems` is ignored here.
+    /// Merge priority aligned with Android `parseQueryMap` (no iOS `Bundle` layer): `extra` then URL (`schemeParams.extra`).
+    /// Custom `context.queryItems` are appended when building GlobalProps, matching Spark iOS.
     private static func mergedLynxQueryStringMap(for context: SPKHybridContext?) -> [String: Any] {
         var merged = stringStringMap(fromAnyHashable: context?.extra)
         merged.merge(stringStringMap(fromSchemeExtra: context?.schemeParams?.extra)) { _, new in new }

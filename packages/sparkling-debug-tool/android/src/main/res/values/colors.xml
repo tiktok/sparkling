@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Light theme palette for Sparkling debug panels. Background is white,
+     base text is near-black; severity colors are dimmed slightly so they
+     stay legible on a white background while remaining recognizable. -->
+<resources>
+    <!-- Surfaces -->
+    <color name="sparkling_panel_background">#FFFFFFFF</color>
+    <color name="sparkling_panel_toolbar_bg">#FFF6F7F9</color>
+    <color name="sparkling_panel_toolbar_separator">#1A000000</color>
+    <color name="sparkling_panel_section_bg">#FFF2F4F7</color>
+
+    <!-- Text -->
+    <color name="sparkling_panel_text_primary">#FF111827</color>
+    <color name="sparkling_panel_text_secondary">#FF4B5563</color>
+    <color name="sparkling_panel_text_hint">#FF9CA3AF</color>
+
+    <!-- Console body -->
+    <color name="sparkling_console_background">#FFFFFFFF</color>
+    <color name="sparkling_console_toolbar_bg">@color/sparkling_panel_toolbar_bg</color>
+    <color name="sparkling_console_verbose">#FF6B7280</color>
+    <color name="sparkling_console_debug">#FF1D4ED8</color>
+    <color name="sparkling_console_info">#FF111827</color>
+    <color name="sparkling_console_warn">#FFB45309</color>
+    <color name="sparkling_console_error">#FFB91C1C</color>
+</resources>

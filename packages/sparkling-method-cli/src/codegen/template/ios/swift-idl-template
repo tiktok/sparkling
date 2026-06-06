@@ -9,19 +9,24 @@ import SparklingMethod
 {{#extraTypes}}
 @objc({{{objcName}}})
 public class {{structName}}: NSObject {
-{{#hasFields}}
+{{#fields}}
     @objc public var {{name}}: {{type}}{{#optional}}?{{/optional}}
-{{/hasFields}}
+{{/fields}}
 {{^hasFields}}
     // No fields defined.
 {{/hasFields}}
 
     @objc public class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
-        return {
-            {{#hasFields}}
+        {{#hasFields}}
+        return [
+            {{#fields}}
             "{{name}}": "{{name}}"{{^isLast}},{{/isLast}}
-            {{/hasFields}}
-        }()
+            {{/fields}}
+        ]
+        {{/hasFields}}
+        {{^hasFields}}
+        return [:]
+        {{/hasFields}}
     }
 }
 
@@ -29,36 +34,36 @@ public class {{structName}}: NSObject {
 // Parameter model
 @objc({{request.objcName}})
 public class {{request.structName}}: SPKMethodModel {
-    {{#request.hasFields}}
+    {{#request.fields}}
     @objc public var {{name}}: {{type}}{{#optional}}?{{/optional}}{{#defaultValue}} = {{.}}{{/defaultValue}}
-    {{/request.hasFields}}
+    {{/request.fields}}
 
     @objc public override class func requiredKeyPaths() -> Set<String>? {
         return nil
     }
 
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
-        return {
-            {{#request.hasFields}}
+        return [
+            {{#request.fields}}
             "{{name}}": "{{name}}"{{^isLast}},{{/isLast}}
-            {{/request.hasFields}}
-        }()
+            {{/request.fields}}
+        ]
     }
 }
 
 // Result model
 @objc({{response.objcName}})
 public class {{response.structName}}: SPKMethodModel {
-    {{#response.hasFields}}
+    {{#response.fields}}
     @objc public var {{name}}: {{type}}{{#optional}}?{{/optional}}{{#defaultValue}} = {{.}}{{/defaultValue}}
-    {{/response.hasFields}}
+    {{/response.fields}}
 
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {
-        return {
-            {{#response.hasFields}}
+        return [
+            {{#response.fields}}
             "{{name}}": "{{name}}"{{^isLast}},{{/isLast}}
-            {{/response.hasFields}}
-        }()
+            {{/response.fields}}
+        ]
     }
 }
 

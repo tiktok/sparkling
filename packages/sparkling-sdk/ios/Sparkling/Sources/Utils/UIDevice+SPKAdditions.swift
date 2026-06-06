@@ -24,7 +24,12 @@ extension SPKKitWrapper where Base: UIDevice {
     }
     public static var isIPhoneXSeries: Bool {
         if #available(iOS 11.0, *) {
-            if let window = UIApplication.shared.windows.first {
+            // `UIApplication.windows` is a main-thread-only API. Callers (e.g. Swift Testing
+            // cases) may invoke this getter off the main thread, so hop to main when needed.
+            let window: UIWindow? = Thread.isMainThread
+                ? UIApplication.shared.windows.first
+                : DispatchQueue.main.sync { UIApplication.shared.windows.first }
+            if let window = window {
                 return window.safeAreaInsets.bottom > 0
             }
         }
