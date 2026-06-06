@@ -45,6 +45,7 @@ runs:
       with:
         tag: ${{ inputs.version }}
         name: Release ${{ inputs.version }}
+        commit: ${{ github.sha }}
         token: ${{ inputs.github_token }}
         prerelease: ${{ inputs.is_rc == 'true' }}
         generateReleaseNotes: true
