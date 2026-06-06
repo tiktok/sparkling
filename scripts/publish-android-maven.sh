@@ -258,7 +258,14 @@ print_info "========================================"
 
 NAMESPACE=${SPARKLING_PUBLISHING_GROUP_ID:-"com.tiktok.sparkling"}
 # Build the Bearer token: base64(username:password)
-BEARER_TOKEN=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64)
+BEARER_TOKEN=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64 | tr -d '\n')
+if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+    echo "::add-mask::$BEARER_TOKEN"
+fi
+CURL_CONFIG=$(mktemp)
+trap 'rm -f "$CURL_CONFIG"' EXIT
+chmod 600 "$CURL_CONFIG"
+printf 'header = "Authorization: Bearer %s"\n' "$BEARER_TOKEN" > "$CURL_CONFIG"
 
 # publishing_type=automatic will auto-release to Maven Central if validation passes
 PUBLISHING_TYPE="automatic"
@@ -266,8 +273,8 @@ PUBLISHING_TYPE="automatic"
 print_info "Transferring deployment to Central Portal (namespace: $NAMESPACE, type: $PUBLISHING_TYPE)..."
 UPLOAD_RESPONSE=$(curl -s -w "\n%{http_code}" \
     -X POST \
-    "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/${NAMESPACE}?publishing_type=${PUBLISHING_TYPE}" \
-    -H "Authorization: Bearer ${BEARER_TOKEN}")
+    --config "$CURL_CONFIG" \
+    "https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/${NAMESPACE}?publishing_type=${PUBLISHING_TYPE}")
 
 HTTP_CODE=$(echo "$UPLOAD_RESPONSE" | tail -1)
 RESPONSE_BODY=$(echo "$UPLOAD_RESPONSE" | sed '$d')

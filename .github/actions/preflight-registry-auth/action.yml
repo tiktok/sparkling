@@ -72,10 +72,16 @@ runs:
         fi
 
         BEARER_TOKEN=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64 | tr -d '\n')
+        echo "::add-mask::$BEARER_TOKEN"
+        CURL_CONFIG=$(mktemp)
+        trap 'rm -f "$CURL_CONFIG"' EXIT
+        chmod 600 "$CURL_CONFIG"
+        printf 'header = "Authorization: Bearer %s"\n' "$BEARER_TOKEN" > "$CURL_CONFIG"
+
         HTTP_CODE=""
         for attempt in 1 2 3; do
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "Authorization: Bearer ${BEARER_TOKEN}" \
+            --config "$CURL_CONFIG" \
             "https://ossrh-staging-api.central.sonatype.com/manual/search/repositories?ip=any&profile_id=com.tiktok.sparkling")
           if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
             echo "✅ Maven Central auth looks valid"
