@@ -20,7 +20,7 @@ struct SPKGlobalPropsUtilsTests {
             "screenWidth", "screenHeight", "statusBarHeight", "os", "osVersion",
             "language", "isIPhoneX", "isIPhoneXMax", "safeAreaHeight", "contentHeight",
             "isPad", "topHeight", "bottomHeight", "accessibleMode", "isLowPowerMode",
-            "isAppBackground", "screenOrientation", "deviceModel",
+            "isAppBackground", "screenOrientation", "deviceModel"
         ]
 
         for key in requiredKeys {
