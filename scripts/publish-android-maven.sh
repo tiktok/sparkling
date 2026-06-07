@@ -258,6 +258,7 @@ print_info "========================================"
 
 NAMESPACE=${SPARKLING_PUBLISHING_GROUP_ID:-"com.tiktok.sparkling"}
 # Build the Bearer token: base64(username:password)
+set +x
 BEARER_TOKEN=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64 | tr -d '\n')
 if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
     echo "::add-mask::$BEARER_TOKEN"

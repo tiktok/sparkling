@@ -71,6 +71,7 @@ runs:
           exit 1
         fi
 
+        set +x
         BEARER_TOKEN=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64 | tr -d '\n')
         echo "::add-mask::$BEARER_TOKEN"
         CURL_CONFIG=$(mktemp)
