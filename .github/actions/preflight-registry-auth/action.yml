@@ -60,6 +60,18 @@ runs:
         SIGNING_PASSWORD: ${{ inputs.signing_password }}
         SIGNING_KEY: ${{ inputs.signing_key }}
       run: |
+        mask_github_value() {
+          local value="$1"
+          value="${value//'%'/'%25'}"
+          value="${value//$'\r'/'%0D'}"
+          value="${value//$'\n'/'%0A'}"
+          echo "::add-mask::$value"
+        }
+
+        set +x
+        [ -n "${MAVEN_CENTRAL_USERNAME:-}" ] && mask_github_value "$MAVEN_CENTRAL_USERNAME"
+        [ -n "${MAVEN_CENTRAL_PASSWORD:-}" ] && mask_github_value "$MAVEN_CENTRAL_PASSWORD"
+
         MISSING=""
         [ -z "$MAVEN_CENTRAL_USERNAME" ] && MISSING="$MISSING MAVEN_CENTRAL_USERNAME"
         [ -z "$MAVEN_CENTRAL_PASSWORD" ] && MISSING="$MISSING MAVEN_CENTRAL_PASSWORD"
@@ -71,9 +83,8 @@ runs:
           exit 1
         fi
 
-        set +x
         BEARER_TOKEN=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64 | tr -d '\n')
-        echo "::add-mask::$BEARER_TOKEN"
+        mask_github_value "$BEARER_TOKEN"
         CURL_CONFIG=$(mktemp)
         trap 'rm -f "$CURL_CONFIG"' EXIT
         chmod 600 "$CURL_CONFIG"

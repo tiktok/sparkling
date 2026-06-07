@@ -108,6 +108,22 @@ if [[ $VERSION =~ -rc\.[0-9]+$ ]]; then
     print_info "Detected RC version: $VERSION"
 fi
 
+mask_github_value() {
+    if [ "${GITHUB_ACTIONS:-}" != "true" ] || [ -z "${1:-}" ]; then
+        return 0
+    fi
+
+    local value="$1"
+    value="${value//'%'/'%25'}"
+    value="${value//$'\r'/'%0D'}"
+    value="${value//$'\n'/'%0A'}"
+    echo "::add-mask::$value"
+}
+
+set +x
+mask_github_value "${MAVEN_CENTRAL_USERNAME:-}"
+mask_github_value "${MAVEN_CENTRAL_PASSWORD:-}"
+
 # Validate environment variables
 print_info "Checking environment variables..."
 
@@ -258,11 +274,8 @@ print_info "========================================"
 
 NAMESPACE=${SPARKLING_PUBLISHING_GROUP_ID:-"com.tiktok.sparkling"}
 # Build the Bearer token: base64(username:password)
-set +x
 BEARER_TOKEN=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64 | tr -d '\n')
-if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
-    echo "::add-mask::$BEARER_TOKEN"
-fi
+mask_github_value "$BEARER_TOKEN"
 CURL_CONFIG=$(mktemp)
 trap 'rm -f "$CURL_CONFIG"' EXIT
 chmod 600 "$CURL_CONFIG"
