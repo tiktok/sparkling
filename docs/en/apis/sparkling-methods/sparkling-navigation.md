@@ -84,3 +84,4 @@ navigate(
 
 See also:
 - [sparkling-method](../sparkling-method-ts.md) – underlying pipe SDK
+- [Response codes](../response-codes.md) – shared success and error code convention

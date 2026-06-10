@@ -95,6 +95,7 @@ const sidebarEn = {
     { text: 'Android', link: '/apis/sparkling-method-android' },
     { text: 'iOS', link: '/apis/sparkling-method-ios' },
     { text: 'TypeScript', link: '/apis/sparkling-method-ts' },
+    { text: 'Response Codes', link: '/apis/response-codes' },
   ],
 };
 
@@ -164,6 +165,7 @@ const sidebarZhBase = {
     { text: 'Android', link: '/apis/sparkling-method-android' },
     { text: 'iOS', link: '/apis/sparkling-method-ios' },
     { text: 'TypeScript', link: '/apis/sparkling-method-ts' },
+    { text: '响应码', link: '/apis/response-codes' },
   ],
 };
 

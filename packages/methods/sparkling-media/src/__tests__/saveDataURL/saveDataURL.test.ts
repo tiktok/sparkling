@@ -175,7 +175,7 @@ describe('saveDataURL', () => {
       (passedCallback as Function)(mockResponse);
       
       expect(callback).toHaveBeenCalledWith({
-        code: 0, // mapPipeResponse converts code 1 to 0 for business layer
+        code: 1,
         msg: 'Success',
         data: mockResponse.data,
       });
@@ -215,7 +215,7 @@ describe('saveDataURL', () => {
       (passedCallback as Function)({ code: 0, msg: 'Write failed' });
 
       expect(callback).toHaveBeenCalledWith({
-        code: -1,
+        code: 0,
         msg: 'Write failed',
         data: undefined,
       });

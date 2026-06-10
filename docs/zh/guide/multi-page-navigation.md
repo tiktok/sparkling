@@ -57,7 +57,7 @@ navigate(
     },
   },
   (res) => {
-    if (res.code !== 0) {
+    if (res.code !== 1) {
       console.error('导航失败:', res.msg);
     }
   }
@@ -113,7 +113,7 @@ function goToDetail(id: string) {
       },
     },
     (res) => {
-      if (res.code !== 0) {
+      if (res.code !== 1) {
         console.error('导航失败:', res.msg);
       }
     }

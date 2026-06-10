@@ -161,7 +161,7 @@ describe('uploadFile', () => {
       (passedCallback as Function)(mockResponse);
       
       expect(callback).toHaveBeenCalledWith({
-        code: 0, // mapPipeResponse converts code 1 to 0 for business layer
+        code: 1,
         msg: 'Success',
         data: mockResponse.data,
       });
@@ -193,7 +193,7 @@ describe('uploadFile', () => {
       (passedCallback as Function)({ code: 0, msg: 'Server error' });
 
       expect(callback).toHaveBeenCalledWith({
-        code: -1,
+        code: 0,
         msg: 'Server error',
         data: undefined,
       });

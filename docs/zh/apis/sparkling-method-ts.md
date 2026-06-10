@@ -58,7 +58,7 @@ pipe.call('storage.setItem', { key: 'lang', data: 'en' }, (res) => {
 | `options` | `Record<string, unknown>` | `undefined` | 预留参数 |
 | `timeout` | `number` | `30000` | 超时时间（毫秒） |
 
-返回 `Promise<TResponse>` —— 当 `code === 0` 时 resolve `response.data`，否则 reject。
+返回 `Promise<TResponse>` —— 当 `code === 1` 时 resolve `response.data`，否则 reject。
 
 示例：
 
@@ -138,10 +138,8 @@ type EventCallback = (event: unknown) => void;
 
 ## 响应码
 
-| 状态码 | 含义 |
-| --- | --- |
-| `0` | 成功 |
-| 非零值 | 错误 —— 请查看 `msg` 获取详细信息 |
+Sparkling Method 响应码遵循 Android/iOS 原生桥接约定：`1` 表示成功，
+`0` 表示方法已执行但失败，负数表示桥接或方法错误。详见[响应码](./response-codes.md)。
 
 ## 与方法包的关系
 

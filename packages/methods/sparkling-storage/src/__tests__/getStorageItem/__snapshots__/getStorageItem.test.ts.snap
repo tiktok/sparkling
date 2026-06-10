@@ -16,7 +16,7 @@ exports[`getItem snapshot testing for error responses should return consistent e
 
 exports[`getItem snapshot testing for error responses should return consistent processed response for valid pipe response: valid-get-response 1`] = `
 {
-  "code": 0,
+  "code": 1,
   "data": {
     "data": "test-value",
   },

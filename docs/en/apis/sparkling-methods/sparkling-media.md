@@ -55,7 +55,7 @@ chooseMedia(
     maxCount: 3,
   },
   (res) => {
-    if (res.code === 0) {
+    if (res.code === 1) {
       console.log(res.data?.tempFiles);
     }
   }
@@ -156,7 +156,7 @@ downloadFile(
     saveToAlbum: 'image',
   },
   (res) => {
-    if (res.code === 0) {
+    if (res.code === 1) {
       console.log('Saved to:', res.data?.filePath);
     }
   }
@@ -191,7 +191,7 @@ saveDataURL(
     saveToAlbum: 'image',
   },
   (res) => {
-    if (res.code === 0) {
+    if (res.code === 1) {
       console.log('Saved to:', res.data?.filePath);
     }
   }
@@ -209,3 +209,5 @@ This package calls:
 
 Your host app must register native implementations for these methods. See
 [Sparkling Method SDK](../sparkling-method-android.md) / [iOS](../sparkling-method-ios.md).
+
+All methods use the shared [Sparkling Method response codes](../response-codes.md).

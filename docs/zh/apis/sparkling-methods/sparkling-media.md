@@ -55,7 +55,7 @@ chooseMedia(
     maxCount: 3,
   },
   (res) => {
-    if (res.code === 0) {
+    if (res.code === 1) {
       console.log(res.data?.tempFiles);
     }
   }
@@ -156,7 +156,7 @@ downloadFile(
     saveToAlbum: 'image',
   },
   (res) => {
-    if (res.code === 0) {
+    if (res.code === 1) {
       console.log('已保存到：', res.data?.filePath);
     }
   }
@@ -191,7 +191,7 @@ saveDataURL(
     saveToAlbum: 'image',
   },
   (res) => {
-    if (res.code === 0) {
+    if (res.code === 1) {
       console.log('已保存到：', res.data?.filePath);
     }
   }
@@ -209,3 +209,5 @@ saveDataURL(
 
 你的宿主应用必须注册这些方法的原生实现。参阅
 [Sparkling Method SDK](../sparkling-method-android.md) / [iOS](../sparkling-method-ios.md)。
+
+所有方法都使用统一的 [Sparkling Method 响应码](../response-codes.md)。

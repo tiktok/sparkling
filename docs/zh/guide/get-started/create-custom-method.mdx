@@ -216,7 +216,7 @@ npm run run:ios
 import { hello } from 'sparkling-my-greeting';
 
 hello({ name: 'Sparkling', style: 'casual' }, (res) => {
-  if (res.code === 0) {
+  if (res.code === 1) {
     console.log(res.data?.greeting); // "Hey Sparkling!"
   }
 });
@@ -265,6 +265,6 @@ npx sparkling autolink
 - **单一数据源**：始终编辑 `.d.ts` 声明文件并重新运行 codegen ——
   不要直接编辑生成的文件。
 - **平台一致性**：在 Android 和 iOS 上实现相同的行为。
-- **错误处理**：成功时返回 `code: 0`，错误时返回非零值，
-  并附带描述性的 `msg`。
+- **错误处理**：成功时返回 `code: 1`，失败时返回 `code: 0`，错误时返回负数，
+  并附带描述性的 `msg`。详见[响应码](/apis/response-codes)。
 - **测试**：发布前在两个平台上测试。

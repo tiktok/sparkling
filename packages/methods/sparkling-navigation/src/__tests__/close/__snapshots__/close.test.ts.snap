@@ -8,7 +8,7 @@ exports[`close snapshot testing for response processing should return consistent
 `;
 exports[`close snapshot testing for response processing should return consistent processed response for valid pipe response: valid-close-response 1`] = `
 {
-  "code": 0,
+  "code": 1,
   "msg": "Operation completed",
 }
 `;

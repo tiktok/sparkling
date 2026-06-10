@@ -157,11 +157,11 @@ export function logInvalidCallback(methodName: string): void {
 }
 
 /**
- * Map a raw pipe response to a business response.
+ * Map a raw pipe response to a method response.
  *
  * The native pipe layer uses `code: 1` for success and `code: 0` for failure,
- * while the business layer convention is `code: 0` for success and negative for failure.
- * This helper bridges the two conventions.
+ * with negative values for bridge and method errors. Sparkling Method packages
+ * expose those native codes unchanged.
  *
  * @param raw - The raw value returned from `pipe.call`
  * @returns A normalised response with `code`, `msg`, and optional `data`
@@ -171,7 +171,7 @@ export function mapPipeResponse<R extends BaseResponse>(raw: unknown): R {
     const pipeCode = obj?.code;
     // Pipe status codes: 1 = succeeded, 0 = failed, negative = various errors
     const isSuccess = pipeCode === 1;
-    const code = isSuccess ? 0 : (pipeCode === 0 ? -1 : (pipeCode ?? -1));
+    const code = pipeCode ?? -1;
     const msg = obj?.msg ?? obj?.data?.__status_message__ ?? (isSuccess ? 'ok' : 'Unknown error');
     const data = obj?.data;
     // Remove internal status message key from data if present

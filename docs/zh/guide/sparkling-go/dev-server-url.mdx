@@ -217,6 +217,8 @@ pipe.call('debugtool.setDevUrl', { url: 'http://192.168.1.100:5969/' }, (res) =>
 | `0` | 方法存在但操作失败 |
 | 负数 | 基础设施错误（方法未注册、模块缺失） |
 
+这些方法遵循统一的 [Sparkling Method 响应码](/apis/response-codes)。
+
 Native 侧存储位置：
 - **iOS**: `UserDefaults`，key 为 `sparkling.debug.dev_url`
 - **Android**: `SharedPreferences`，key 为 `dev_url`

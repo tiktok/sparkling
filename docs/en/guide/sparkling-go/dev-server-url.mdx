@@ -226,6 +226,8 @@ pipe.call('debugtool.setDevUrl', { url: 'http://192.168.1.100:5969/' }, (res) =>
 | `0` | Method exists but operation failed |
 | Negative | Infrastructure error (method not registered, module missing) |
 
+This follows the shared [Sparkling Method response codes](/apis/response-codes).
+
 The native side stores the URL in:
 - **iOS**: `UserDefaults` with key `sparkling.debug.dev_url`
 - **Android**: `SharedPreferences` with key `dev_url`

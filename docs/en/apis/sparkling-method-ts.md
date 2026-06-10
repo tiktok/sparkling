@@ -58,7 +58,7 @@ Call a native method and return a `Promise`.
 | `options` | `Record<string, unknown>` | `undefined` | Reserved for future use |
 | `timeout` | `number` | `30000` | Timeout in milliseconds |
 
-Returns `Promise<TResponse>` — resolves with `response.data` when `code === 0`, rejects otherwise.
+Returns `Promise<TResponse>` — resolves with `response.data` when `code === 1`, rejects otherwise.
 
 Example:
 
@@ -138,10 +138,9 @@ type EventCallback = (event: unknown) => void;
 
 ## Response codes
 
-| Code | Meaning |
-| --- | --- |
-| `0` | Success |
-| Non-zero | Error — check `msg` for details |
+Sparkling Method response codes follow the Android/iOS native bridge convention:
+`1` means success, `0` means the method ran but failed, and negative values are
+bridge or method errors. See [Response codes](./response-codes.md) for details.
 
 ## Relationship with method packages
 

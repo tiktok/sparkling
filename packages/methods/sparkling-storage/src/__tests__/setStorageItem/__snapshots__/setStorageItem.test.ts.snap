@@ -23,7 +23,7 @@ exports[`setItem snapshot testing for responses should return consistent error r
 
 exports[`setItem snapshot testing for responses should return consistent processed response for valid pipe response: valid-set-response 1`] = `
 {
-  "code": 0,
+  "code": 1,
   "data": {
     "success": true,
     "timestamp": 1234567890,

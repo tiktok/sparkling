@@ -210,7 +210,7 @@ const LynxPipe = {
 
                 const rawResponse = response as PipeRawResponse;
 
-                if (rawResponse.code === 0) {
+                if (rawResponse.code === 1) {
                     resolve(rawResponse.data as TResponse);
                 } else {
                     reject(new Error(`Pipe call failed: ${rawResponse.msg}`));

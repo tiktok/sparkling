@@ -216,7 +216,7 @@ Call the method from your Lynx/JS code:
 import { hello } from 'sparkling-my-greeting';
 
 hello({ name: 'Sparkling', style: 'casual' }, (res) => {
-  if (res.code === 0) {
+  if (res.code === 1) {
     console.log(res.data?.greeting); // "Hey Sparkling!"
   }
 });
@@ -265,6 +265,6 @@ npx sparkling autolink
 - **Single source of truth**: always edit `.d.ts` declarations and re-run codegen —
   never edit generated files directly.
 - **Platform parity**: implement the same behavior on both Android and iOS.
-- **Error handling**: return `code: 0` for success and non-zero codes for errors,
-  with a descriptive `msg`.
+- **Error handling**: return `code: 1` for success, `code: 0` for failure, and negative codes for errors,
+  with a descriptive `msg`. See [Response codes](/apis/response-codes).
 - **Testing**: test on both platforms before publishing.

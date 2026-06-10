@@ -136,9 +136,9 @@ describe('sparkling-storage module exports', () => {
 
       mockPipe.call.mockImplementation((method: string, params: any, callback: any) => {
         if (method === 'storage.setItem') {
-          callback({ code: 0, msg: 'Item stored', data: { success: true } });
+          callback({ code: 1, msg: 'Item stored', data: { success: true } });
         } else if (method === 'storage.getItem') {
-          callback({ code: 0, msg: 'Item retrieved', data: { data: params.key === 'test-key' ? 'test-value' : null } });
+          callback({ code: 1, msg: 'Item retrieved', data: { data: params.key === 'test-key' ? 'test-value' : null } });
         }
       });
 
@@ -147,7 +147,7 @@ describe('sparkling-storage module exports', () => {
         setResult = result;
       });
 
-      expect(setResult.code).toBe(0);
+      expect(setResult.code).toBe(1);
       expect(mockPipe.call).toHaveBeenCalledWith('storage.setItem', expect.anything(), expect.any(Function));
 
       let getResult: any;
@@ -155,7 +155,7 @@ describe('sparkling-storage module exports', () => {
         getResult = result;
       });
 
-      expect(getResult.code).toBe(0);
+      expect(getResult.code).toBe(1);
       expect(mockPipe.call).toHaveBeenCalledWith('storage.getItem', expect.anything(), expect.any(Function));
     });
 

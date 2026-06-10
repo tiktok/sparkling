@@ -55,3 +55,5 @@ This package calls:
 
 Your host app must register native implementations for these methods. See
 [Sparkling Method SDK](../sparkling-method-android.md) / [iOS](../sparkling-method-ios.md).
+
+All methods use the shared [Sparkling Method response codes](../response-codes.md).

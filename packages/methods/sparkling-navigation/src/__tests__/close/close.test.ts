@@ -152,7 +152,7 @@ expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] close: call
       const params: CloseRequest = { containerID: 'test' };
       const mockResponse = createSuccessResponse();
       const userCallback = jest.fn((result: CloseResponse) => {
-        expect(result.code).toBe(0);
+        expect(result.code).toBe(1);
         expect(result.msg).toBe('Success');
         done();
       });
@@ -328,7 +328,7 @@ expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] close: call
   describe('snapshot testing for response processing', () => {
     it('should return consistent processed response for valid pipe response', (done) => {
       const params: CloseRequest = { containerID: 'test' };
-      const mockResponse = { code: 0, msg: 'Operation completed' };
+      const mockResponse = { code: 1, msg: 'Operation completed' };
       const userCallback = (result: CloseResponse) => {
         expect(result).toMatchSnapshot('valid-close-response');
         done();

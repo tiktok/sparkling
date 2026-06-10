@@ -36,7 +36,7 @@ export interface UploadImageResponseData {
 }
 
 export interface UploadImageResponse {
-  /** Response code: 0 for success, negative for failure */
+  /** Response code: 1 for success, 0 for failure, negative for errors */
   code: number;
   /** Response message */
   msg: string;

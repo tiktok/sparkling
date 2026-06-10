@@ -3,7 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 
 export const createSuccessResponseBase = (extra?: any) => ({
-  code: 0,
+  code: 1,
   msg: 'Success',
   ...extra,
 });
@@ -13,4 +13,3 @@ export const createErrorResponseBase = (code: number = -1, msg: string = 'Error'
   msg,
   ...extra,
 });
-

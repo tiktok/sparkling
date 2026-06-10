@@ -264,7 +264,7 @@ expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-navigation] open: callb
       expect(passedCallback).not.toBe(originalCallback);
 
       (passedCallback as Function)(createSuccessResponse());
-      expect(originalCallback).toHaveBeenCalledWith({ code: 0, msg: 'Success' });
+      expect(originalCallback).toHaveBeenCalledWith({ code: 1, msg: 'Success' });
     });
   });
 

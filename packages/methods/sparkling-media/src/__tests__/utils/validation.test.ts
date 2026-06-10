@@ -329,18 +329,18 @@ interface SampleResponse extends BaseResponse {
 }
 
 describe('mapPipeResponse', () => {
-    it('maps pipe code 1 to business code 0 (success)', () => {
+    it('passes through pipe code 1 as success', () => {
         const raw = { code: 1, msg: 'ok', data: { filePath: '/tmp/file.jpg' } };
         const result = mapPipeResponse<SampleResponse>(raw);
-        expect(result.code).toBe(0);
+        expect(result.code).toBe(1);
         expect(result.msg).toBe('ok');
         expect(result.data).toEqual({ filePath: '/tmp/file.jpg' });
     });
 
-    it('maps pipe code 0 to business code -1 (failure)', () => {
+    it('passes through pipe code 0 as failure', () => {
         const raw = { code: 0, msg: 'failed' };
         const result = mapPipeResponse<SampleResponse>(raw);
-        expect(result.code).toBe(-1);
+        expect(result.code).toBe(0);
         expect(result.msg).toBe('failed');
     });
 
@@ -367,7 +367,7 @@ describe('mapPipeResponse', () => {
     it('falls back to "ok" message for success when msg is missing', () => {
         const raw = { code: 1, data: { url: 'https://cdn.example.com/img.png' } };
         const result = mapPipeResponse<SampleResponse>(raw);
-        expect(result.code).toBe(0);
+        expect(result.code).toBe(1);
         expect(result.msg).toBe('ok');
     });
 
@@ -391,7 +391,7 @@ describe('mapPipeResponse', () => {
     it('does not fail when data is absent on success', () => {
         const raw = { code: 1, msg: 'done' };
         const result = mapPipeResponse<SampleResponse>(raw);
-        expect(result.code).toBe(0);
+        expect(result.code).toBe(1);
         expect(result.data).toBeUndefined();
     });
 

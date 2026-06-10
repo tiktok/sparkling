@@ -196,7 +196,7 @@ describe('getItem', () => {
       const params: GetItemRequest = { key: TEST_CONSTANTS.VALID_KEY };
       const mockResponse = createSuccessResponse(MOCK_STORAGE_RESPONSES.getString);
       const userCallback = jest.fn((result: GetItemResponse) => {
-        expect(result.code).toBe(0);
+        expect(result.code).toBe(1);
         expect(result.msg).toBe('Success');
         expect(result.data).toEqual(MOCK_STORAGE_RESPONSES.getString);
         done();
@@ -214,7 +214,7 @@ describe('getItem', () => {
       const params: GetItemRequest = { key: TEST_CONSTANTS.VALID_KEY };
       const mockResponse = createSuccessResponse(MOCK_STORAGE_RESPONSES.getNumber);
       const userCallback = jest.fn((result: GetItemResponse) => {
-        expect(result.code).toBe(0);
+        expect(result.code).toBe(1);
         expect(result.msg).toBe('Success');
         expect(result.data).toEqual(MOCK_STORAGE_RESPONSES.getNumber);
         done();
@@ -231,7 +231,7 @@ describe('getItem', () => {
       const params: GetItemRequest = { key: TEST_CONSTANTS.VALID_KEY };
       const mockResponse = createSuccessResponse(MOCK_STORAGE_RESPONSES.getObject);
       const userCallback = jest.fn((result: GetItemResponse) => {
-        expect(result.code).toBe(0);
+        expect(result.code).toBe(1);
         expect(result.msg).toBe('Success');
         expect(result.data).toEqual(MOCK_STORAGE_RESPONSES.getObject);
         done();
@@ -248,7 +248,7 @@ describe('getItem', () => {
       const params: GetItemRequest = { key: TEST_CONSTANTS.VALID_KEY };
       const mockResponse = createSuccessResponse(MOCK_STORAGE_RESPONSES.getArray);
       const userCallback = jest.fn((result: GetItemResponse) => {
-        expect(result.code).toBe(0);
+        expect(result.code).toBe(1);
         expect(result.msg).toBe('Success');
         expect(result.data).toEqual(MOCK_STORAGE_RESPONSES.getArray);
         done();
@@ -265,7 +265,7 @@ describe('getItem', () => {
       const params: GetItemRequest = { key: TEST_CONSTANTS.VALID_KEY };
       const mockResponse = createSuccessResponse(MOCK_STORAGE_RESPONSES.getNull);
       const userCallback = jest.fn((result: GetItemResponse) => {
-        expect(result.code).toBe(0);
+        expect(result.code).toBe(1);
         expect(result.msg).toBe('Success');
         expect(result.data).toEqual(MOCK_STORAGE_RESPONSES.getNull);
         done();
@@ -464,7 +464,7 @@ describe('getItem', () => {
 
     it('should return consistent processed response for valid pipe response', (done) => {
       const params: GetItemRequest = { key: TEST_CONSTANTS.VALID_KEY };
-      const mockResponse = { code: 0, msg: 'Retrieved successfully', data: { data: 'test-value' } };
+      const mockResponse = { code: 1, msg: 'Retrieved successfully', data: { data: 'test-value' } };
       const userCallback = (result: GetItemResponse) => {
         expect(result).toMatchSnapshot('valid-get-response');
         done();

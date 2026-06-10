@@ -380,7 +380,7 @@ expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-storage] setItem: callb
       const params: SetItemRequest = { key: TEST_CONSTANTS.VALID_KEY, data: TEST_CONSTANTS.VALID_STRING_DATA };
       const mockResponse = createSuccessResponse({ success: true });
       const userCallback = jest.fn((result: SetItemResponse) => {
-        expect(result.code).toBe(0);
+        expect(result.code).toBe(1);
         expect(result.msg).toBe('Success');
         expect(result.data).toEqual({ success: true });
         done();
@@ -648,7 +648,7 @@ expect(consoleErrorSpy).toHaveBeenCalledWith('[sparkling-storage] setItem: callb
 
     it('should return consistent processed response for valid pipe response', (done) => {
       const params: SetItemRequest = { key: TEST_CONSTANTS.VALID_KEY, data: TEST_CONSTANTS.VALID_STRING_DATA };
-      const mockResponse = { code: 0, msg: 'Item stored successfully', data: { success: true, timestamp: 1234567890 } };
+      const mockResponse = { code: 1, msg: 'Item stored successfully', data: { success: true, timestamp: 1234567890 } };
       const userCallback = (result: SetItemResponse) => {
         expect(result).toMatchSnapshot('valid-set-response');
         done();
