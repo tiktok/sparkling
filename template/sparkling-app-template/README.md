@@ -63,8 +63,8 @@ This single command updates all native integration points:
 
 | Platform | Files updated |
 |----------|---------------|
-| Android  | `settings.gradle.kts` (project include), `build.gradle.kts` (dependency), `SparklingAutolink.kt` (module registry) |
-| iOS      | `Podfile` (pod entry), `SparklingAutolink.swift` (module registry) |
+| Android  | Sparkling method Gradle links; `SparklingAutolink.kt` method registry |
+| iOS      | Sparkling method pod links; `SparklingAutolink.swift` method registry |
 
 ### 3. Reinstall pods (iOS only)
 
@@ -84,6 +84,10 @@ Now you can import and use the newly added methods in your Lynx code:
 import { pickImage } from 'sparkling-media'
 import { setItem, getItem } from 'sparkling-storage'
 ```
+
+## Lynx libraries
+
+The native host also enables the Lynx library Autolink plugins. A non-method Lynx library that ships `lynx.lib.json` can be installed as an npm dependency and linked by the Lynx Android Gradle and iOS CocoaPods plugins. Sparkling method packages continue to use `sparkling autolink` and `module.config.json`.
 
 ## Release Behavior
 

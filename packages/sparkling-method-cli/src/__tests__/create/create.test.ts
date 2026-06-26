@@ -449,6 +449,8 @@ describe('Project Creation (runInit)', () => {
         // Verify package.json
         const pkgJson = await fs.readJson(path.join(projectDir, 'package.json'));
         expect(pkgJson.name).toBe('non-interactive-test');
+        expect(pkgJson.files).toContain('module.config.json');
+        expect(pkgJson.files).not.toContain('lynx.lib.json');
       });
     });
 

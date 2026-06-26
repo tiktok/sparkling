@@ -4,12 +4,40 @@ source 'https://cdn.cocoapods.org/'
 
 use_modular_headers!
 
+plugin 'cocoapods-lynx-library'
+
 install! 'cocoapods',
 :generate_multiple_pod_projects => true,
 :incremental_installation => true,
 :deterministic_uuids => true
 
 inhibit_all_warnings!
+
+def ensure_embed_pods_frameworks_phase(project, target_name, pods_target_name)
+  frameworks_script = File.join(
+    __dir__,
+    'Pods',
+    'Target Support Files',
+    pods_target_name,
+    "#{pods_target_name}-frameworks.sh"
+  )
+  return unless File.exist?(frameworks_script)
+
+  target = project.targets.find { |candidate| candidate.name == target_name }
+  return unless target
+
+  phase_name = '[CP] Embed Pods Frameworks'
+  phase = target.shell_script_build_phases.find { |candidate| candidate.name == phase_name }
+  phase ||= target.new_shell_script_build_phase(phase_name)
+  phase.input_file_list_paths = [
+    "${PODS_ROOT}/Target Support Files/#{pods_target_name}/#{pods_target_name}-frameworks-${CONFIGURATION}-input-files.xcfilelist"
+  ]
+  phase.output_file_list_paths = [
+    "${PODS_ROOT}/Target Support Files/#{pods_target_name}/#{pods_target_name}-frameworks-${CONFIGURATION}-output-files.xcfilelist"
+  ]
+  phase.shell_script = "\"${PODS_ROOT}/Target Support Files/#{pods_target_name}/#{pods_target_name}-frameworks.sh\"\n"
+  phase.show_env_vars_in_log = '0'
+end
 
 def sparkling_methods
   pod 'SparklingMethod', '2.1.0-rc.12', :subspecs => ['Lynx', 'DIProvider', 'Debug']
@@ -31,19 +59,21 @@ def sparkling_devtool
 end
 
 def sparkling_kit
+  use_lynx_library!
+
   pod 'Sparkling', '2.1.0-rc.12'
   pod 'SparklingMacro', '2.1.0-rc.12'
   sparkling_methods
   sparkling_methods_dep
 
-  pod 'Lynx', '3.7.0', :subspecs => [
+  pod 'Lynx', '3.9.0', :subspecs => [
     'Framework',
     'ReleaseResource'
   ]
 
-  pod 'PrimJS', '3.7.0', :subspecs => ['quickjs', 'napi']
+  pod 'PrimJS', '3.8.0-alpha.6', :subspecs => ['quickjs', 'napi']
 
-  pod 'LynxService', '3.7.0', :subspecs => [
+  pod 'LynxService', '3.9.0', :subspecs => [
     'Image',
     'Log',
     'Http',
@@ -56,7 +86,7 @@ def sparkling_kit
   pod 'SDWebImageWebPCoder', '0.11.0'
 end
 
-use_frameworks!
+use_frameworks! :linkage => :static
 
 # SparklingGo is the production-style target: no devtool dependencies are
 # linked, so DebugRouter / LynxDevtool symbols cannot leak into a Release
@@ -64,6 +94,18 @@ use_frameworks!
 # `pnpm run:ios` builds).
 target 'SparklingGo' do
   sparkling_kit
+
+  target 'SparklingGoTests' do
+    inherit! :search_paths
+  end
+
+  target 'SparklingMethodTests' do
+    inherit! :search_paths
+  end
+
+  target 'SparklingGoUITests' do
+    inherit! :search_paths
+  end
 end
 
 target 'SparklingGoInHouse' do
@@ -71,29 +113,9 @@ target 'SparklingGoInHouse' do
   sparkling_devtool
 end
 
-target 'SparklingGoTests' do
-  sparkling_kit
-end
-
-target 'SparklingMethodTests' do
-  sparkling_kit
-end
-
-target 'SparklingGoUITests' do
-  sparkling_kit
-end
-
 post_install do |installer|
-  # LynxServiceAPI 3.7.0 ships a podspec whose HEADER_SEARCH_PATHS only
-  # contains the CI builder's absolute path. service_api/service_api.cc
-  # does `#include "service_api/service_api.h"`, which needs the pod's
-  # own root in the search paths to resolve locally.
-  # This has been fixed upstream in Lynx 3.8.0 — remove this workaround
-  # once Lynx 3.8 stable is released.
-  Dir.glob(File.join(__dir__, 'Pods/Target Support Files/LynxServiceAPI/LynxServiceAPI.*.xcconfig')) do |path|
-    content = File.read(path)
-    next if content.include?('${PODS_TARGET_SRCROOT}')
-    patched = content.sub(/^(HEADER_SEARCH_PATHS\s*=\s*.*)$/) { "#{$1} \"${PODS_TARGET_SRCROOT}\"" }
-    File.write(path, patched) if patched != content
-  end
+  project = Xcodeproj::Project.open(File.join(__dir__, 'SparklingGo.xcodeproj'))
+  ensure_embed_pods_frameworks_phase(project, 'SparklingGo', 'Pods-SparklingGo')
+  ensure_embed_pods_frameworks_phase(project, 'SparklingGoInHouse', 'Pods-SparklingGoInHouse')
+  project.save
 end

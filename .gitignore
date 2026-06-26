@@ -30,6 +30,7 @@ template/sparkling-app-template/android/.gradle/
 template/sparkling-app-template/ios/build/
 template/sparkling-app-template/ios/DerivedData/
 template/sparkling-app-template/ios/Pods/
+template/sparkling-app-template/ios/generated/lynx-library/
 packages/methods/ios-unit-tests/Pods/
 packages/methods/ios-unit-tests/*.xcworkspace/
 packages/methods/ios-unit-tests/build/

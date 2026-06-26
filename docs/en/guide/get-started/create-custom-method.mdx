@@ -191,17 +191,15 @@ In your Sparkling app project, install the method package:
 npm install ../path/to/sparkling-my-greeting
 ```
 
-Then run autolink to wire up the native dependencies:
+Then run autolink to refresh the Sparkling method registry:
 
 ```bash
 npx sparkling autolink
 ```
 
 Autolink automatically:
-- **Android**: updates `settings.gradle.kts` and `app/build.gradle.kts` to include
-  the method module, and generates `SparklingAutolink.kt` registry
-- **iOS**: updates the `Podfile` with the pod dependency, and generates
-  `SparklingAutolink.swift` registry
+- **Android**: links the Sparkling method Gradle project and generates the `SparklingAutolink.kt` registry.
+- **iOS**: links the Sparkling method pod and generates the `SparklingAutolink.swift` registry.
 
 #### Run and test
 

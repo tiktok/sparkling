@@ -73,7 +73,7 @@ npx sparkling copy-assets
 
 ### `sparkling autolink`
 
-自动发现并链接 Sparkling 方法模块。CLI 会扫描工作区和 `node_modules` 中的 `module.config.json` 文件，然后更新 Gradle/Podfile 配置并生成注册文件。
+自动发现 Sparkling 方法模块。CLI 会扫描工作区和 `node_modules` 中的 `module.config.json` 文件，然后更新 Sparkling 方法模块的原生链接并生成 Sparkling 注册文件。宿主应用同时启用 Lynx library Autolink 插件，因此带有 `lynx.lib.json` 的非 Method Lynx library 可以由 Lynx 工具链链接。
 
 ```bash
 npx sparkling autolink
@@ -85,8 +85,8 @@ npx sparkling autolink
 
 **执行内容：**
 
-- **Android** — 更新 `settings.gradle(.kts)` 和 `app/build.gradle(.kts)` 的模块引入/依赖，并生成 `SparklingAutolink.kt`。
-- **iOS** — 更新 `Podfile` 的 pod 条目，并生成 `SparklingAutolink.swift`。
+- **Android** — 链接 Sparkling 方法模块的 Gradle project，并生成 `SparklingAutolink.kt`。Debug-tool 包仍以 `debugImplementation` 方式链接。
+- **iOS** — 链接 Sparkling 方法模块的 pod，并生成 `SparklingAutolink.swift`。Debug-tool 包仍链接到调试目标。
 
 ### `sparkling run:android`
 

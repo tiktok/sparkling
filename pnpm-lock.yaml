@@ -106,8 +106,8 @@ importers:
         specifier: ^0.116.2
         version: 0.116.5(@lynx-js/types@3.7.0)(@types/react@18.3.28)
       sparkling-app-cli:
-        specifier: 2.1.0-rc.12
-        version: 2.1.0-rc.12(@rspack/core@1.7.11(@swc/helpers@0.5.21))(@types/node@25.6.0)(typescript@5.9.3)(webpack@5.105.0)
+        specifier: workspace:*
+        version: link:../sparkling-app-cli
       sparkling-media:
         specifier: workspace:*
         version: link:../methods/sparkling-media

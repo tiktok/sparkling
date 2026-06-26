@@ -10,6 +10,11 @@ plugins {
 buildscript {
     repositories {
         mavenLocal()
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.lynxsdk.lynx:lynx-library-plugin:3.9.0")
     }
 }
 

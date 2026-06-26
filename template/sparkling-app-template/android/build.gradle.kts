@@ -3,6 +3,16 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.lynxsdk.lynx:lynx-library-plugin:3.9.0")
+    }
+}
+
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false

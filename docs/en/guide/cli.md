@@ -73,7 +73,7 @@ npx sparkling copy-assets
 
 ### `sparkling autolink`
 
-Discover and link Sparkling method modules for Android and iOS. The CLI scans for `module.config.json` files in the workspace and `node_modules`, then updates Gradle/Podfile config and generates registry files.
+Discover Sparkling method modules for Android and iOS. The CLI scans for `module.config.json` files in the workspace and `node_modules`, then updates the native Sparkling method links and generates Sparkling registry files. Host apps also enable the Lynx library Autolink plugins, so non-method Lynx libraries that ship `lynx.lib.json` can be linked by the Lynx toolchain.
 
 ```bash
 npx sparkling autolink
@@ -85,8 +85,8 @@ npx sparkling autolink
 
 **What it does:**
 
-- **Android** — Updates `settings.gradle(.kts)` and `app/build.gradle(.kts)` with module includes/dependencies, and generates `SparklingAutolink.kt`.
-- **iOS** — Updates the `Podfile` with pod entries and generates `SparklingAutolink.swift`.
+- **Android** — Links Sparkling method Gradle projects and generates `SparklingAutolink.kt`. Debug-tool packages are linked as `debugImplementation`.
+- **iOS** — Links Sparkling method pods and generates `SparklingAutolink.swift`. Debug-tool packages are linked in the debug target.
 
 ### `sparkling run:android`
 

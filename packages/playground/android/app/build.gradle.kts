@@ -5,6 +5,8 @@ plugins {
     jacoco
 }
 
+apply(plugin = "org.lynxsdk.library-build")
+
 tasks.matching { it.name.startsWith("kaptGenerateStubs") }.configureEach {
     if (this is org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
         kotlinOptions.jvmTarget = "11"

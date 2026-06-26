@@ -12,6 +12,20 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+buildscript {
+    repositories {
+        mavenLocal()
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.lynxsdk.lynx:lynx-library-plugin:3.9.0")
+    }
+}
+
+apply(plugin = "org.lynxsdk.library-settings")
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {

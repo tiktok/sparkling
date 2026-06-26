@@ -253,7 +253,9 @@ async function discoverModules(cwd: string): Promise<MethodModuleConfig[]> {
         : undefined;
       const androidPackageName = typeof androidConfig?.packageName === 'string' ? androidConfig.packageName : undefined;
       const androidClassName = typeof androidConfig?.className === 'string' ? androidConfig.className : undefined;
-      const androidMavenDependency = resolveMavenDependency(androidConfig?.mavenDependency, moduleRoot);
+      const androidMavenDependency = isNodeModule
+        ? resolveMavenDependency(androidConfig?.mavenDependency, moduleRoot)
+        : undefined;
 
       const androidBuild = (androidConfig?.buildGradle && typeof androidConfig.buildGradle === 'string')
         ? path.resolve(moduleRoot, androidConfig.buildGradle)
@@ -820,15 +822,6 @@ function buildPodLine(module: MethodModuleConfig, podfilePath: string): string {
   return `  pod '${podName}', :path => '${toPosixPath(rel)}'`;
 }
 
-function replaceDefBlock(content: string, defName: string, newBody: string): string {
-  const start = content.indexOf(`def ${defName}`);
-  if (start === -1) return content;
-  const end = content.indexOf('\nend', start);
-  if (end === -1) return content;
-  const existing = content.slice(start, end + '\nend'.length);
-  return content.replace(existing, newBody);
-}
-
 function replaceDefAutolinkRegion(content: string, defName: string, region: string, fallbackBody: string): string {
   const start = content.indexOf(`def ${defName}`);
   if (start === -1) return content;
@@ -849,7 +842,7 @@ function replaceDefAutolinkRegion(content: string, defName: string, region: stri
   return content.replace(existing, updated);
 }
 
-function injectPodfile(podfilePath: string, modules: MethodModuleConfig[], projectDir: string) {
+function injectPodfile(podfilePath: string, modules: MethodModuleConfig[]) {
   if (!fs.existsSync(podfilePath)) {
     console.warn(ui.warn(`Podfile not found at ${podfilePath}, skipping iOS autolink`));
     return;
@@ -896,7 +889,7 @@ function injectPodfile(podfilePath: string, modules: MethodModuleConfig[], proje
   if (content.includes('def sparkling_devtool')) {
     content = replaceDefAutolinkRegion(content, 'sparkling_devtool', devtoolRegion, devtoolBlock);
   } else {
-    // Insert sparkling_devtool block right after sparkling_methods_dep
+    // Insert sparkling_devtool block right after sparkling_methods_dep.
     const methodsEnd = content.indexOf('def sparkling_methods_dep');
     const methodsBlockEnd = content.indexOf('\nend', methodsEnd);
     if (methodsBlockEnd !== -1) {
@@ -918,9 +911,10 @@ function writeAndroidRegistry(modules: MethodModuleConfig[], appPackage: string,
     const methodClassNames = m.android?.methodClassNames ?? [];
     const methodClassNameLines = methodClassNames.length
       ? [
-        '                methodClassNames = listOf(',
-        ...methodClassNames.map(name => `                    "${name}",`),
-        '                ),',
+        '                methodClassNames =',
+        '                    listOf(',
+        ...methodClassNames.map(name => `                        "${name}",`),
+        '                    ),',
       ]
       : [];
     return [
@@ -1059,7 +1053,7 @@ export async function autolink(options: AutolinkOptions): Promise<MethodModuleCo
 
   if (doIos) {
     const podfile = path.resolve(options.cwd, 'ios/Podfile');
-    injectPodfile(podfile, modules, path.dirname(podfile));
+    injectPodfile(podfile, modules);
   }
 
   // Registry files only contain regular method modules — devtool modules

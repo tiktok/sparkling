@@ -271,7 +271,7 @@ describe('autolink', () => {
 
       const registryPath = path.join(cwd, 'android', 'app', 'src', 'main', 'java', 'com', 'test', 'app', 'SparklingAutolink.kt');
       const registry = fs.readFileSync(registryPath, 'utf8');
-      expect(registry).toContain('methodClassNames = listOf(');
+      expect(registry).toContain(['methodClassNames =', '                    listOf('].join('\n'));
       expect(registry).toContain('"com.tiktok.sparkling.method.storage.setItem.StorageSetItemMethod"');
       expect(registry).toContain('"com.tiktok.sparkling.method.storage.getItem.StorageGetItemMethod"');
       expect(registry).toContain('"com.tiktok.sparkling.method.storage.removeItem.StorageRemoveItemMethod"');
@@ -301,7 +301,7 @@ describe('autolink', () => {
       expect(registry).not.toContain('sparkling-debug-tool');
     });
 
-    it('preserves fixed remote Android debug-tool deps when the npm package is not installed', async () => {
+    it('preserves fixed remote Android debug-tool deps and restores method links', async () => {
       const staleSettingsBlock = [
         '// BEGIN SPARKLING AUTOLINK',
         'val sparklingAutolinkProjects =',
@@ -601,9 +601,12 @@ describe('autolink', () => {
       });
       await autolink({ cwd, platform: 'all' });
 
-      // Verify it was linked
-      const podfileWithModule = fs.readFileSync(path.join(cwd, 'ios', 'Podfile'), 'utf8');
-      expect(podfileWithModule).toContain('sparkling-navigation');
+      // Verify it was registered for Sparkling runtime metadata.
+      const registryWithModule = fs.readFileSync(
+        path.join(cwd, 'ios', 'SparklingGo', 'SparklingGo', 'SparklingAutolink.swift'),
+        'utf8',
+      );
+      expect(registryWithModule).toContain('sparkling-navigation');
 
       // Second: remove the module and re-autolink
       fs.removeSync(path.join(cwd, 'node_modules', 'sparkling-navigation'));
@@ -612,6 +615,7 @@ describe('autolink', () => {
       // Verify stale entries are cleaned
       const podfileClean = fs.readFileSync(path.join(cwd, 'ios', 'Podfile'), 'utf8');
       expect(podfileClean).not.toContain('sparkling-navigation');
+      expect(podfileClean).toContain('# BEGIN SPARKLING AUTOLINK');
       expect(podfileClean).toContain('# No Sparkling methods found');
 
       const settings = fs.readFileSync(path.join(cwd, 'android', 'settings.gradle.kts'), 'utf8');
@@ -619,6 +623,113 @@ describe('autolink', () => {
 
       const gradle = fs.readFileSync(path.join(cwd, 'android', 'app', 'build.gradle.kts'), 'utf8');
       expect(gradle).not.toContain('sparkling-navigation');
+    });
+  });
+
+  // ── Debug tool ────────────────────────────────────────────────────────
+
+  describe('debug tool module', () => {
+    beforeEach(() => {
+      scaffoldProject(cwd);
+      createMethodModule(cwd, 'sparkling-debug-tool', {
+        iosModuleName: 'DebugTool',
+        iosClassName: 'SparklingDebugTool',
+        androidPackage: 'com.sparkling.debugtool',
+        androidClassName: 'SparklingDebugTool',
+        devtool: true,
+      });
+    });
+
+    it('injects debug-only Android linking for devtool modules', async () => {
+      await autolink({ cwd, platform: 'android' });
+
+      const settings = fs.readFileSync(path.join(cwd, 'android', 'settings.gradle.kts'), 'utf8');
+      const gradle = fs.readFileSync(path.join(cwd, 'android', 'app', 'build.gradle.kts'), 'utf8');
+      expect(settings).toContain('"sparkling-debug-tool"');
+      expect(gradle).toContain('debugImplementation(project(":sparkling-debug-tool"))');
+    });
+
+    it('prefers local Android project linking for workspace devtool modules', async () => {
+      const workspace = makeTmpDir();
+      try {
+        const appDir = path.join(workspace, 'apps', 'playground');
+        const moduleDir = path.join(workspace, 'packages', 'sparkling-debug-tool');
+        fs.mkdirpSync(path.join(moduleDir, 'android'));
+        fs.writeFileSync(
+          path.join(workspace, 'pnpm-workspace.yaml'),
+          ['packages:', '  - "apps/*"', '  - "packages/*"', ''].join('\n'),
+        );
+        fs.writeFileSync(path.join(moduleDir, 'android', 'build.gradle.kts'), 'plugins {}');
+        fs.writeFileSync(path.join(moduleDir, 'package.json'), JSON.stringify({
+          name: 'sparkling-debug-tool',
+          version: '9.9.9-rc.1',
+        }, null, 2));
+        fs.writeFileSync(path.join(moduleDir, 'module.config.json'), JSON.stringify({
+          name: 'sparkling-debug-tool',
+          devtool: true,
+          android: {
+            packageName: 'com.sparkling.debugtool',
+            className: 'SparklingDebugTool',
+            mavenDependency: 'com.tiktok.sparkling:sparkling-debug-tool',
+            buildGradle: 'android/build.gradle.kts',
+          },
+        }, null, 2));
+        scaffoldProject(appDir);
+
+        await autolink({ cwd: appDir, platform: 'android' });
+
+        const settings = fs.readFileSync(path.join(appDir, 'android', 'settings.gradle.kts'), 'utf8');
+        const gradle = fs.readFileSync(path.join(appDir, 'android', 'app', 'build.gradle.kts'), 'utf8');
+        expect(settings).toContain('"sparkling-debug-tool"');
+        expect(gradle).toContain('debugImplementation(project(":sparkling-debug-tool"))');
+        expect(gradle).not.toContain('com.tiktok.sparkling:sparkling-debug-tool');
+      } finally {
+        fs.removeSync(workspace);
+      }
+    });
+
+    it('injects debug-only iOS pods for devtool modules', async () => {
+      await autolink({ cwd, platform: 'ios' });
+
+      const podfile = fs.readFileSync(path.join(cwd, 'ios', 'Podfile'), 'utf8');
+      expect(podfile).toContain("pod 'sparkling-debug-tool'");
+    });
+
+    it('skips iOS autolink without the methods block', async () => {
+      scaffoldProject(cwd, {
+        podfileContent: [
+          "platform :ios, '12.0'",
+          '',
+          "target 'SparklingGo' do",
+          'end',
+        ].join('\n'),
+      });
+      createMethodModule(cwd, 'sparkling-debug-tool', {
+        iosModuleName: 'DebugTool',
+        iosClassName: 'SparklingDebugTool',
+        devtool: true,
+      });
+
+      await autolink({ cwd, platform: 'ios' });
+
+      const podfile = fs.readFileSync(path.join(cwd, 'ios', 'Podfile'), 'utf8');
+      expect(podfile).not.toContain('def sparkling_devtool');
+      expect(podfile).not.toContain("pod 'sparkling-debug-tool'");
+    });
+
+    it('does not include devtool modules in Sparkling registries', async () => {
+      await autolink({ cwd, platform: 'all' });
+
+      const androidRegistry = fs.readFileSync(
+        path.join(cwd, 'android', 'app', 'src', 'main', 'java', 'com', 'test', 'app', 'SparklingAutolink.kt'),
+        'utf8',
+      );
+      const iosRegistry = fs.readFileSync(
+        path.join(cwd, 'ios', 'SparklingGo', 'SparklingGo', 'SparklingAutolink.swift'),
+        'utf8',
+      );
+      expect(androidRegistry).not.toContain('sparkling-debug-tool');
+      expect(iosRegistry).not.toContain('sparkling-debug-tool');
     });
   });
 });

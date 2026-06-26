@@ -191,17 +191,15 @@ npm run build
 npm install ../path/to/sparkling-my-greeting
 ```
 
-然后运行 autolink 来自动配置原生依赖：
+然后运行 autolink 来刷新 Sparkling Method 注册文件：
 
 ```bash
 npx sparkling autolink
 ```
 
 autolink 会自动完成：
-- **Android**：更新 `settings.gradle.kts` 和 `app/build.gradle.kts` 以引入
-  Method 模块，并生成 `SparklingAutolink.kt` 注册文件
-- **iOS**：更新 `Podfile` 添加 Pod 依赖，并生成
-  `SparklingAutolink.swift` 注册文件
+- **Android**：链接 Sparkling 方法模块的 Gradle project，并生成 `SparklingAutolink.kt` 注册文件。
+- **iOS**：链接 Sparkling 方法模块的 pod，并生成 `SparklingAutolink.swift` 注册文件。
 
 #### 运行并测试
 

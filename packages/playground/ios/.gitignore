@@ -46,6 +46,7 @@ Packages/
 # CocoaPods
 Pods/
 Podfile.lock
+generated/lynx-library/
 
 # Carthage
 Carthage/Build/

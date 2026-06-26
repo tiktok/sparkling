@@ -56,7 +56,7 @@ export async function createPackageJson(projectName: string, targetDir: string):
       codegen: 'npx sparkling-method-cli codegen',
       test: 'echo "Add your tests"',
     },
-    files: ['dist', 'android', 'ios', 'generated'],
+    files: ['dist', 'android', 'ios', 'generated', 'module.config.json'],
     devDependencies: {},
     dependencies: {},
   };

@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@lynx-js/react": "^0.116.2",
-    "sparkling-app-cli": "2.1.0-rc.12",
+    "sparkling-app-cli": "workspace:*",
     "sparkling-media": "workspace:*",
     "sparkling-navigation": "workspace:*",
     "sparkling-storage": "workspace:*",

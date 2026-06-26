@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.kapt)
 }
 
+apply(plugin = "org.lynxsdk.library-build")
+
 android {
     namespace = "com.example.sparkling.go"
     compileSdk = 34

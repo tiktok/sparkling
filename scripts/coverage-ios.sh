@@ -171,10 +171,19 @@ run_pod_install() {
 
   echo "[coverage:ios] Running pod install in $ios_dir"
 
-  if [[ -f "$BUNDLE_GEMFILE" && -x "$(command -v bundle)" ]]; then
+  local gemfile="$BUNDLE_GEMFILE"
+  if [[ -f "$ios_dir/Gemfile" ]]; then
+    gemfile="$ios_dir/Gemfile"
+  fi
+
+  if [[ -f "$gemfile" && -x "$(command -v bundle)" ]]; then
+    (
+      cd "$(dirname "$gemfile")"
+      BUNDLE_GEMFILE="$gemfile" bundle check || BUNDLE_GEMFILE="$gemfile" bundle install
+    )
     (
       cd "$ios_dir"
-      BUNDLE_GEMFILE="$BUNDLE_GEMFILE" bundle exec pod install
+      BUNDLE_GEMFILE="$gemfile" bundle exec pod install
     )
   else
     (
