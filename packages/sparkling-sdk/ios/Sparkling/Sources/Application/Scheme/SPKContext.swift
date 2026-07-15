@@ -22,6 +22,12 @@ public typealias SPKFailedViewBuilder = (UIViewController?) -> (UIView & SPKLoad
 
 public typealias SPKNavigationBarButtonItemBuilder = ((UIViewController & SPKContainerProtocol)?) -> SPKNavigationBarButtonItem?
 
+/// Handles a navigation-bar back action before Sparkling performs its default pop or dismissal.
+/// Return `true` when the host application completed the navigation mutation.
+/// Sparkling invokes the handler on the main thread. Hosts should weakly capture
+/// navigation coordinators that retain the container stack.
+public typealias SPKNavigationBarBackHandler = (UIViewController & SPKContainerProtocol) -> Bool
+
 /// Enumeration defining the available app theme modes.
 ///
 /// This enum provides theme options for customizing the visual appearance
@@ -110,6 +116,10 @@ open class SPKContext: SPKHybridContext {
 
     public var rightNavigationBarButtonItemBuilder: SPKNavigationBarButtonItemBuilder?
 
+    /// Lets an embedding application own its navigation stack without replacing
+    /// Sparkling's navigation UI. Returning false preserves the SDK default.
+    public var navigationBarBackHandler: SPKNavigationBarBackHandler?
+
     /// Creates a copy of the current SPKContext instance.
     ///
     /// This method implements NSCopying protocol to create a deep copy of the context.
@@ -197,6 +207,12 @@ open class SPKContext: SPKHybridContext {
         self.rightNavigationBarButtonItemBuilder =
             SPKHybridContext.merge(withProp: context.rightNavigationBarButtonItemBuilder, to: self.rightNavigationBarButtonItemBuilder, isOverride: isOverride)
             as? SPKNavigationBarButtonItemBuilder
+
+        self.navigationBarBackHandler =
+            SPKHybridContext.merge(
+                withProp: context.navigationBarBackHandler,
+                to: self.navigationBarBackHandler,
+                isOverride: isOverride) as? SPKNavigationBarBackHandler
 
         self.isRTL = isOverride ? context.isRTL : self.isRTL
     }

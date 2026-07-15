@@ -228,4 +228,66 @@ struct SPKRouterTests {
 
         #expect(context.originURL != nil)
     }
+
+    @Test func failedViewBuilderReturnsRegisteredLoadErrorView() {
+        let failedView = TestLoadErrorView()
+        let context = SPKContext()
+        context.failedViewBuilder = { _ in failedView }
+        let config = SPKSchemeParam()
+        let viewController = SPKViewController(
+            withURL: nil,
+            config: config,
+            context: context,
+            frame: .zero)
+
+        let builtView = viewController.buildLoadErrorView()
+
+        #expect(builtView === failedView)
+        #expect(failedView.didRegisterRefresh)
+    }
+
+    @Test func hostNavigationBarBackHandlerCanOwnStackMutation() {
+        let context = SPKContext()
+        var receivedContainer: SPKContainerProtocol?
+        context.navigationBarBackHandler = { container in
+            receivedContainer = container
+            return true
+        }
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+
+        (viewController as? SPKViewController)?.didTapLeftButton()
+
+        #expect(receivedContainer === viewController)
+        #expect(navigationController.topViewController === viewController)
+    }
+
+    @Test func navigationBarBackHandlerCanPreserveDefaultPop() {
+        let context = SPKContext()
+        context.navigationBarBackHandler = { _ in false }
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+
+        (viewController as? SPKViewController)?.didTapLeftButton()
+
+        #expect(navigationController.topViewController === rootViewController)
+    }
+}
+
+private final class TestLoadErrorView: UIView, SPKLoadErrorViewProtocol {
+    var didRegisterRefresh = false
+
+    func register(refreshBlock: SPKLoadErrorRefreshBlock) {
+        didRegisterRefresh = true
+    }
 }

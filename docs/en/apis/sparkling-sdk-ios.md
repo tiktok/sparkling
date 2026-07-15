@@ -36,6 +36,25 @@ Opens full-page Sparkling containers. See [Containers — Full-page](../guide/co
 | `SPKRouter.close(container:)` | Pops or dismisses the given container. |
 | `SPKRouter.openInSystemBrowser(withURL:)` | Opens an HTTP/HTTPS URL in Safari. |
 
+## SPKHybridSchemeParam
+
+Build canonical full-page Lynx schemes with the SDK instead of assembling or
+percent-encoding the URL by hand.
+
+```swift
+let scheme = try SPKHybridSchemeParam.buildLynxPageScheme(
+    resource: .bundle("detail.lynx.bundle"),
+    queryItems: [URLQueryItem(name: "title", value: "Detail & preview")]
+)
+SPKRouter.open(withURL: scheme.absoluteString, context: nil)
+```
+
+Use `.url("https://example.com/detail.lynx.bundle")` for an absolute remote
+resource URL. The builder rejects empty resources, relative URL resources, and
+additional `bundle` or `url` query items. It preserves the order and duplicates
+of all other query items in the encoded URL and applies one layer of percent
+encoding. Resolver dictionary views remain last-value-wins for duplicate names.
+
 ## SPKContainerView
 
 Embeds Sparkling content as a subview. See [Containers — Embedded](../guide/containers.md#embedded-containers) for usage guide.
@@ -66,6 +85,7 @@ Configuration object passed to both container types.
 | `loadingViewBuilder` | Closure that returns a custom loading view. |
 | `failedViewBuilder` | Closure that returns a custom error view. |
 | `naviBar` | Custom navigation bar (full-page containers only). |
+| `navigationBarBackHandler` | Called on the main thread for a navigation-bar back action before the SDK pops or dismisses. Return `true` after the host performs the navigation mutation; return `false` to keep the SDK default. Weakly capture coordinators that retain the container stack. |
 | `appTheme` | Theme configuration. |
 | `customUIElements` | Custom Lynx UI elements to register. |
 | `extra` | Dictionary of additional data passed to the container. |

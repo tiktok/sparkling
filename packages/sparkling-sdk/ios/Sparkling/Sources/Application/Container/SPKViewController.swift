@@ -598,6 +598,12 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
                 SPKEvent.Back.actionFromKey: SPKEvent.Back.actionTypeNavBarBackPress,
             ])
 
+        if let navigationBarBackHandler = (self.context as? SPKContext)?.navigationBarBackHandler,
+            navigationBarBackHandler(self)
+        {
+            return
+        }
+
         if self.navigationController?.viewControllers.count ?? 0 > 1 {
             //MARK: currently only support lynx
             self.navigationController?.popViewController(animated: true)
@@ -952,7 +958,7 @@ extension SPKViewController: SPKContainerLifecycleProtocol {
             self?.handleErrorViewReload()
         })
 
-        return nil
+        return loadFailedView
     }
 
     func handleErrorViewReload() {

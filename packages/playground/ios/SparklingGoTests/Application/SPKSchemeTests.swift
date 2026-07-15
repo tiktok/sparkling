@@ -287,12 +287,14 @@ struct SPKContextTests {
         let originalContext = SPKContext()
         // SPKContext doesn't have title property
         originalContext.originURL = "hybrid://lynxview_page?bundle=.%2Fmain.lynx.bundle"
+        originalContext.navigationBarBackHandler = { _ in true }
 
         let copiedContext = originalContext.copy() as? SPKContext
 
         #expect(copiedContext != nil)
         // SPKContext doesn't have title property
         #expect(copiedContext?.originURL == "hybrid://lynxview_page?bundle=.%2Fmain.lynx.bundle")
+        #expect(copiedContext?.navigationBarBackHandler != nil)
         #expect(copiedContext !== originalContext)
     }
 

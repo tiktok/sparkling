@@ -36,6 +36,23 @@ SPKExecuteAllPrepareBootTask()
 | `SPKRouter.close(container:)` | Pop 或 dismiss 指定容器。 |
 | `SPKRouter.openInSystemBrowser(withURL:)` | 在 Safari 中打开 HTTP/HTTPS URL。 |
 
+## SPKHybridSchemeParam
+
+使用 SDK 构建规范的 Lynx 全页 scheme，无需手动拼接 URL 或处理百分号编码。
+
+```swift
+let scheme = try SPKHybridSchemeParam.buildLynxPageScheme(
+    resource: .bundle("detail.lynx.bundle"),
+    queryItems: [URLQueryItem(name: "title", value: "Detail & preview")]
+)
+SPKRouter.open(withURL: scheme.absoluteString, context: nil)
+```
+
+绝对远程资源 URL 使用 `.url("https://example.com/detail.lynx.bundle")`。构建器会拒绝
+空资源、相对 URL 资源以及额外的 `bundle` 或 `url` 查询项；其余查询项的顺序与重复项
+会保留在编码后的 URL 中，并且只进行一层百分号编码。解析器的字典视图对同名项仍采用
+最后一个值优先的语义。
+
 ## SPKContainerView
 
 以子视图形式嵌入 Sparkling 内容。使用指南请参阅[容器 — 嵌入式容器](../guide/containers.md#嵌入式容器)。
@@ -66,6 +83,7 @@ SPKExecuteAllPrepareBootTask()
 | `loadingViewBuilder` | 返回自定义加载视图的闭包。 |
 | `failedViewBuilder` | 返回自定义错误视图的闭包。 |
 | `naviBar` | 自定义导航栏（仅全页容器）。 |
+| `navigationBarBackHandler` | 在主线程收到导航栏返回动作，发生于 SDK 执行 pop 或 dismiss 之前。宿主完成导航变更后返回 `true`；返回 `false` 则保留 SDK 默认行为。若 coordinator 持有容器栈，请使用弱引用捕获。 |
 | `appTheme` | 主题配置。 |
 | `customUIElements` | 需要注册的自定义 Lynx UI 元素。 |
 | `extra` | 传递给容器的额外数据字典。 |
