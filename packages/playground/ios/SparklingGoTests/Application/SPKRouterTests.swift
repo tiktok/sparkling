@@ -243,7 +243,7 @@ struct SPKRouterTests {
         let builtView = viewController.buildLoadErrorView()
 
         #expect(builtView === failedView)
-        #expect(failedView.didRegisterRefresh)
+        #expect(failedView.refreshBlock != nil)
     }
 
     @Test func hostNavigationBarBackHandlerCanOwnStackMutation() {
@@ -285,9 +285,9 @@ struct SPKRouterTests {
 }
 
 private final class TestLoadErrorView: UIView, SPKLoadErrorViewProtocol {
-    var didRegisterRefresh = false
+    var refreshBlock: SPKLoadErrorRefreshBlock?
 
-    func register(refreshBlock: SPKLoadErrorRefreshBlock) {
-        didRegisterRefresh = true
+    func register(refreshBlock: @escaping SPKLoadErrorRefreshBlock) {
+        self.refreshBlock = refreshBlock
     }
 }
