@@ -83,7 +83,7 @@ Configuration object passed to both container types.
 |----------|-------------|
 | `containerLifecycleDelegate` | Delegate conforming to `SPKContainerLifecycleProtocol` for loading callbacks. |
 | `loadingViewBuilder` | Closure that returns a custom loading view. |
-| `failedViewBuilder` | Closure that returns a custom error view. |
+| `failedViewBuilder` | Main-actor closure that returns a custom error view conforming to `SPKLoadErrorViewProtocol`. The protocol and its refresh callback are main-actor isolated. |
 | `naviBar` | Custom navigation bar (full-page containers only). |
 | `navigationBarBackHandler` | Called on the main thread for a navigation-bar back action before the SDK pops or dismisses. Return `true` after the host performs the navigation mutation; return `false` to keep the SDK default. Weakly capture coordinators that retain the container stack. |
 | `appTheme` | Theme configuration. |

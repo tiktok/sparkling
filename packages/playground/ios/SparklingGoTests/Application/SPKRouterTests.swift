@@ -244,6 +244,7 @@ struct SPKRouterTests {
 
         #expect(builtView === failedView)
         #expect(failedView.refreshBlock != nil)
+        #expect(failedView.registeredOnMainThread)
     }
 
     @Test func hostNavigationBarBackHandlerCanOwnStackMutation() {
@@ -286,8 +287,10 @@ struct SPKRouterTests {
 
 private final class TestLoadErrorView: UIView, SPKLoadErrorViewProtocol {
     var refreshBlock: SPKLoadErrorRefreshBlock?
+    var registeredOnMainThread = false
 
     func register(refreshBlock: @escaping SPKLoadErrorRefreshBlock) {
         self.refreshBlock = refreshBlock
+        self.registeredOnMainThread = Thread.isMainThread
     }
 }

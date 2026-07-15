@@ -12,13 +12,12 @@ public typealias SPKLoadingViewBuilder = () -> (UIView & SPKLoadingViewProtocol)
 
 /// Type alias for a closure that creates error view instances.
 ///
-/// This closure takes a view controller and error style, then returns a view that conforms
+/// This main-actor-isolated closure takes a view controller, then returns a view that conforms
 /// to both UIView and SPKLoadErrorViewProtocol for displaying load failures.
 ///
 /// - Parameters:
 ///   - UIViewController: The container view controller where the error view will be displayed
-///   - SPKLoadErrorViewStyle: The style configuration for the error view
-public typealias SPKFailedViewBuilder = (UIViewController?) -> (UIView & SPKLoadErrorViewProtocol)
+public typealias SPKFailedViewBuilder = @MainActor (UIViewController?) -> (UIView & SPKLoadErrorViewProtocol)
 
 public typealias SPKNavigationBarButtonItemBuilder = ((UIViewController & SPKContainerProtocol)?) -> SPKNavigationBarButtonItem?
 
