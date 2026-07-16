@@ -27,6 +27,22 @@ public typealias SPKNavigationBarButtonItemBuilder = ((UIViewController & SPKCon
 /// navigation coordinators that retain the container stack.
 public typealias SPKNavigationBarBackHandler = (UIViewController & SPKContainerProtocol) -> Bool
 
+/// Lets a host serialize Sparkling's system interactive-pop gesture with its
+/// own navigation coordinator while preserving UIKit's cancellable transition.
+@objc
+public protocol SPKInteractivePopGestureDelegate: AnyObject {
+    /// Return false to prevent the gesture from beginning.
+    @objc optional func containerShouldBeginInteractivePop(
+        _ container: SPKContainerProtocol
+    ) -> Bool
+
+    /// Called exactly once after an authorized gesture completes or is cancelled.
+    @objc optional func container(
+        _ container: SPKContainerProtocol,
+        didEndInteractivePopCompleted completed: Bool
+    )
+}
+
 /// Enumeration defining the available app theme modes.
 ///
 /// This enum provides theme options for customizing the visual appearance
@@ -118,6 +134,9 @@ open class SPKContext: SPKHybridContext {
     /// Lets an embedding application own its navigation stack without replacing
     /// Sparkling's navigation UI. Returning false preserves the SDK default.
     public var navigationBarBackHandler: SPKNavigationBarBackHandler?
+
+    /// Coordinates the system interactive-pop lifecycle with the embedding host.
+    public weak var interactivePopGestureDelegate: SPKInteractivePopGestureDelegate?
 
     /// Creates a copy of the current SPKContext instance.
     ///
@@ -212,6 +231,12 @@ open class SPKContext: SPKHybridContext {
                 withProp: context.navigationBarBackHandler,
                 to: self.navigationBarBackHandler,
                 isOverride: isOverride) as? SPKNavigationBarBackHandler
+
+        self.interactivePopGestureDelegate =
+            SPKHybridContext.merge(
+                withProp: context.interactivePopGestureDelegate,
+                to: self.interactivePopGestureDelegate,
+                isOverride: isOverride) as? SPKInteractivePopGestureDelegate
 
         self.isRTL = isOverride ? context.isRTL : self.isRTL
     }

@@ -283,6 +283,132 @@ struct SPKRouterTests {
 
         #expect(navigationController.topViewController === rootViewController)
     }
+
+    @Test func hostInteractivePopGestureDelegateCanAuthorizeGesture() {
+        let context = SPKContext()
+        let delegate = TestInteractivePopGestureDelegate(shouldBegin: true)
+        context.interactivePopGestureDelegate = delegate
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+        let gesture = navigationController.interactivePopGestureRecognizer!
+
+        let shouldBegin = (viewController as? SPKViewController)?
+            .gestureRecognizerShouldBegin(gesture)
+
+        #expect(delegate.receivedContainer === viewController)
+        #expect(shouldBegin == true)
+    }
+
+    @Test func hostInteractivePopGestureDelegateCanDenyGesture() {
+        let context = SPKContext()
+        let delegate = TestInteractivePopGestureDelegate(shouldBegin: false)
+        context.interactivePopGestureDelegate = delegate
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+        let gesture = navigationController.interactivePopGestureRecognizer!
+
+        let shouldBegin = (viewController as? SPKViewController)?
+            .gestureRecognizerShouldBegin(gesture)
+
+        #expect(delegate.receivedContainer === viewController)
+        #expect(shouldBegin == false)
+    }
+
+    @Test func hostInteractivePopGestureDelegateReceivesOneCompletion() {
+        let context = SPKContext()
+        let delegate = TestInteractivePopGestureDelegate(shouldBegin: true)
+        context.interactivePopGestureDelegate = delegate
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+        let sparklingViewController = viewController as? SPKViewController
+        let gesture = navigationController.interactivePopGestureRecognizer!
+        _ = sparklingViewController?.gestureRecognizerShouldBegin(gesture)
+
+        sparklingViewController?.notifyHostInteractivePopDidEnd(completed: true)
+        sparklingViewController?.notifyHostInteractivePopDidEnd(completed: false)
+
+        #expect(delegate.completions == [true])
+    }
+
+    @Test func hostInteractivePopGestureDelegateReceivesCancellation() {
+        let context = SPKContext()
+        let delegate = TestInteractivePopGestureDelegate(shouldBegin: true)
+        context.interactivePopGestureDelegate = delegate
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+        let sparklingViewController = viewController as? SPKViewController
+        _ = sparklingViewController?.gestureRecognizerShouldBegin(
+            navigationController.interactivePopGestureRecognizer!)
+
+        sparklingViewController?.notifyHostInteractivePopDidEnd(completed: false)
+
+        #expect(delegate.completions == [false])
+    }
+
+    @Test func managedInteractivePopTemporarilyEnablesSystemGesture() {
+        let context = SPKContext()
+        let delegate = TestInteractivePopGestureDelegate(shouldBegin: true)
+        context.interactivePopGestureDelegate = delegate
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+        let gesture = navigationController.interactivePopGestureRecognizer!
+        gesture.isEnabled = false
+        let sparklingViewController = viewController as? SPKViewController
+
+        sparklingViewController?.viewDidAppear(false)
+
+        #expect(gesture.isEnabled)
+        sparklingViewController?.viewWillDisappear(false)
+        #expect(!gesture.isEnabled)
+    }
+}
+
+private final class TestInteractivePopGestureDelegate: NSObject, SPKInteractivePopGestureDelegate {
+    let shouldBegin: Bool
+    var receivedContainer: SPKContainerProtocol?
+    var completions: [Bool] = []
+
+    init(shouldBegin: Bool) {
+        self.shouldBegin = shouldBegin
+    }
+
+    func containerShouldBeginInteractivePop(_ container: SPKContainerProtocol) -> Bool {
+        receivedContainer = container
+        return shouldBegin
+    }
+
+    func container(
+        _ container: SPKContainerProtocol,
+        didEndInteractivePopCompleted completed: Bool
+    ) {
+        receivedContainer = container
+        completions.append(completed)
+    }
 }
 
 private final class TestLoadErrorView: UIView, SPKLoadErrorViewProtocol {

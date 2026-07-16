@@ -288,6 +288,8 @@ struct SPKContextTests {
         // SPKContext doesn't have title property
         originalContext.originURL = "hybrid://lynxview_page?bundle=.%2Fmain.lynx.bundle"
         originalContext.navigationBarBackHandler = { _ in true }
+        let interactivePopGestureDelegate = TestSchemeInteractivePopGestureDelegate()
+        originalContext.interactivePopGestureDelegate = interactivePopGestureDelegate
 
         let copiedContext = originalContext.copy() as? SPKContext
 
@@ -295,6 +297,7 @@ struct SPKContextTests {
         // SPKContext doesn't have title property
         #expect(copiedContext?.originURL == "hybrid://lynxview_page?bundle=.%2Fmain.lynx.bundle")
         #expect(copiedContext?.navigationBarBackHandler != nil)
+        #expect(copiedContext?.interactivePopGestureDelegate === interactivePopGestureDelegate)
         #expect(copiedContext !== originalContext)
     }
 
@@ -321,4 +324,9 @@ struct SPKContextTests {
 
         #expect(weakContext == nil)
     }
+}
+
+private final class TestSchemeInteractivePopGestureDelegate: NSObject,
+    SPKInteractivePopGestureDelegate
+{
 }
