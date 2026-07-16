@@ -29,6 +29,17 @@ struct SPKKitUtilsTests {
         return context
     }
 
+    @Test func testLynxKitParamsKeepsOuterURLResourceWhenInnerQueryContainsBundle() throws {
+        let resource = "https://example.com/main.lynx.bundle?bundle=shadow.lynx.bundle"
+        let scheme = try SPKHybridSchemeParam.buildLynxPageScheme(resource: .url(resource))
+        let context = SPKHybridContext()
+        context.schemeParams = SPKHybridSchemeParam.resolver(withScheme: scheme)
+
+        let params = SPKLynxKitUtils.lynxKitParams(withContext: context)
+
+        #expect(params.sourceUrl == resource)
+    }
+
     // MARK: - updateGlobalProps Tests
 
     @Test func testUpdateGlobalPropsWithNilContext() {

@@ -301,6 +301,18 @@ struct SPKContextTests {
         #expect(copiedContext !== originalContext)
     }
 
+    @Test func copyPreservesLynxModuleAndCustomUIElements() {
+        let originalContext = SPKContext()
+        let customElement = NSObject()
+        originalContext.lynxModule = ["module": "host-owned-module"]
+        originalContext.customUIElements = [customElement]
+
+        let copiedContext = originalContext.copy() as? SPKContext
+
+        #expect(copiedContext?.lynxModule?["module"] as? String == "host-owned-module")
+        #expect(copiedContext?.customUIElements?.first as? NSObject === customElement)
+    }
+
     @Test func propertyUpdates() {
         let context = SPKContext()
 

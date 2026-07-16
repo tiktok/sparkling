@@ -48,9 +48,9 @@ struct SPKHybridContextTests {
         let merged2 = SPKHybridContext.merge(withDict: nil, to: dict1, isOverride: true)
         let merged3 = SPKHybridContext.merge(withDict: nil, to: nil, isOverride: true)
 
-        #expect(merged1 == nil)
-        #expect(merged2 == nil)
-        #expect(merged3 == nil)
+        #expect(merged1?["a"] as? Int == 1)
+        #expect(merged2?["a"] as? Int == 1)
+        #expect(merged3?.isEmpty == true)
     }
 
     @Test func testMergeWithEmptyDictionaries() {
@@ -103,8 +103,8 @@ struct SPKHybridContextTests {
         let merged3 = SPKHybridContext.merge(withArray: nil, to: [])
 
         #expect(merged1 == source)
-        #expect(merged2 == nil)
-        #expect(merged3 == nil)
+        #expect(merged2 == source)
+        #expect(merged3?.isEmpty == true)
     }
 
     // MARK: - Context Merge Tests

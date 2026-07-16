@@ -143,21 +143,18 @@ open class SPKHybridContext: NSObject, NSCopying {
     /// Merges two dictionaries with optional override behavior.
     ///
     /// - Parameters:
-    ///   - sourDict: The source dictionary to merge from. If nil, returns nil.
-    ///   - targetDict: The target dictionary to merge into. If nil, returns nil.
+    ///   - sourDict: The source dictionary to merge from. Nil is treated as empty.
+    ///   - targetDict: The target dictionary to merge into. Nil is treated as empty.
     ///   - isOverride: If true, existing keys in target will be overwritten.
     ///                 If false, existing keys in target will be preserved.
-    /// - Returns: A new merged dictionary, or nil if either input is nil.
+    /// - Returns: A new merged dictionary. Two nil inputs produce an empty dictionary.
     public static func merge(
         withDict sourDict: [String: Any]?,
         to targetDict: [String: Any]?,
         isOverride: Bool = false
     ) -> [String: Any]? {
-        guard let sourDict = sourDict,
-            let targetDict = targetDict
-        else {
-            return nil
-        }
+        let sourDict = sourDict ?? [:]
+        let targetDict = targetDict ?? [:]
 
         if isEmptyDictionary(targetDict) {
             return sourDict
@@ -203,16 +200,13 @@ open class SPKHybridContext: NSObject, NSCopying {
     /// Merges two arrays by concatenating them.
     ///
     /// - Parameters:
-    ///   - sourceArray: The source array to merge from. If nil, returns nil.
-    ///   - targetArray: The target array to merge into. If nil, returns nil.
-    /// - Returns: A new array containing elements from both arrays, or nil if either input is nil.
+    ///   - sourceArray: The source array to merge from. Nil is treated as empty.
+    ///   - targetArray: The target array to merge into. Nil is treated as empty.
+    /// - Returns: A new array containing elements from both arrays.
     ///            Source array elements are placed before target array elements.
     public static func merge(withArray sourceArray: [Any]?, to targetArray: [Any]?) -> [Any]? {
-        guard let sourceArray = sourceArray,
-            let targetArray = targetArray
-        else {
-            return nil
-        }
+        let sourceArray = sourceArray ?? []
+        let targetArray = targetArray ?? []
         if isEmptyArray(sourceArray) {
             return targetArray
         }
@@ -322,7 +316,8 @@ open class SPKHybridContext: NSObject, NSCopying {
 
         self.lynxModule = Self.merge(
             withDict: context.lynxModule,
-            to: self.lynxModule)
+            to: self.lynxModule,
+            isOverride: isOverride)
 
         self.customUIElements = Self.merge(
             withArray: context.customUIElements,
