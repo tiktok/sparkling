@@ -22,9 +22,11 @@ public typealias SPKFailedViewBuilder = @MainActor (UIViewController?) -> (UIVie
 public typealias SPKNavigationBarButtonItemBuilder = ((UIViewController & SPKContainerProtocol)?) -> SPKNavigationBarButtonItem?
 
 /// Handles a navigation-bar back action before Sparkling performs its default pop or dismissal.
-/// Return `true` when the host application completed the navigation mutation.
-/// Sparkling invokes the handler on the main thread. Hosts should weakly capture
-/// navigation coordinators that retain the container stack.
+/// Return `true` when the host application consumed the back action, including
+/// when it intentionally rejects the navigation mutation. Return `false` only
+/// to let Sparkling perform its default container pop behavior. Sparkling invokes
+/// the handler on the main thread. Hosts should weakly capture navigation
+/// coordinators that retain the container stack.
 public typealias SPKNavigationBarBackHandler = (UIViewController & SPKContainerProtocol) -> Bool
 
 /// Lets a host serialize Sparkling's system interactive-pop gesture with its
