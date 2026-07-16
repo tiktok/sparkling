@@ -85,7 +85,7 @@ Configuration object passed to both container types.
 | `loadingViewBuilder` | Closure that returns a custom loading view. |
 | `failedViewBuilder` | Main-actor closure that returns a custom error view conforming to `SPKLoadErrorViewProtocol`. The protocol and its refresh callback are main-actor isolated. |
 | `naviBar` | Custom navigation bar (full-page containers only). |
-| `navigationBarBackHandler` | Called on the main thread for a navigation-bar back action before the SDK pops or dismisses. Return `true` after the host performs the navigation mutation; return `false` to keep the SDK default. Weakly capture coordinators that retain the container stack. |
+| `navigationBarBackHandler` | Called on the main thread for a navigation-bar back action before the SDK pops or dismisses. Return `true` when the host consumes the action, including an intentional rejection; return `false` only to keep the SDK default. Weakly capture coordinators that retain the container stack. |
 | `appTheme` | Theme configuration. |
 | `customUIElements` | Custom Lynx UI elements to register. |
 | `extra` | Dictionary of additional data passed to the container. |

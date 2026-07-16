@@ -83,7 +83,7 @@ SPKRouter.open(withURL: scheme.absoluteString, context: nil)
 | `loadingViewBuilder` | 返回自定义加载视图的闭包。 |
 | `failedViewBuilder` | 在主 actor 上返回遵循 `SPKLoadErrorViewProtocol` 的自定义错误视图。该协议及其刷新回调均隔离于主 actor。 |
 | `naviBar` | 自定义导航栏（仅全页容器）。 |
-| `navigationBarBackHandler` | 在主线程收到导航栏返回动作，发生于 SDK 执行 pop 或 dismiss 之前。宿主完成导航变更后返回 `true`；返回 `false` 则保留 SDK 默认行为。若 coordinator 持有容器栈，请使用弱引用捕获。 |
+| `navigationBarBackHandler` | 在主线程收到导航栏返回动作，发生于 SDK 执行 pop 或 dismiss 之前。宿主消费该动作（包括明确拒绝导航）时返回 `true`；仅在需要保留 SDK 默认行为时返回 `false`。若 coordinator 持有容器栈，请使用弱引用捕获。 |
 | `appTheme` | 主题配置。 |
 | `customUIElements` | 需要注册的自定义 Lynx UI 元素。 |
 | `extra` | 传递给容器的额外数据字典。 |
