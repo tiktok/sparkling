@@ -147,12 +147,15 @@ open class SPKHybridContext: NSObject, NSCopying {
     ///   - targetDict: The target dictionary to merge into. Nil is treated as empty.
     ///   - isOverride: If true, existing keys in target will be overwritten.
     ///                 If false, existing keys in target will be preserved.
-    /// - Returns: A new merged dictionary. Two nil inputs produce an empty dictionary.
+    /// - Returns: A new merged dictionary, or nil when both inputs are nil.
     public static func merge(
         withDict sourDict: [String: Any]?,
         to targetDict: [String: Any]?,
         isOverride: Bool = false
     ) -> [String: Any]? {
+        guard sourDict != nil || targetDict != nil else {
+            return nil
+        }
         let sourDict = sourDict ?? [:]
         let targetDict = targetDict ?? [:]
 
@@ -202,9 +205,12 @@ open class SPKHybridContext: NSObject, NSCopying {
     /// - Parameters:
     ///   - sourceArray: The source array to merge from. Nil is treated as empty.
     ///   - targetArray: The target array to merge into. Nil is treated as empty.
-    /// - Returns: A new array containing elements from both arrays.
+    /// - Returns: A new array containing elements from both arrays, or nil when both inputs are nil.
     ///            Source array elements are placed before target array elements.
     public static func merge(withArray sourceArray: [Any]?, to targetArray: [Any]?) -> [Any]? {
+        guard sourceArray != nil || targetArray != nil else {
+            return nil
+        }
         let sourceArray = sourceArray ?? []
         let targetArray = targetArray ?? []
         if isEmptyArray(sourceArray) {
