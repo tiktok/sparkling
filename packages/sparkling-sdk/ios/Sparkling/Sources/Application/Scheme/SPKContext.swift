@@ -29,6 +29,7 @@ public typealias SPKNavigationBarBackHandler = (UIViewController & SPKContainerP
 
 /// Lets a host serialize Sparkling's system interactive-pop gesture with its
 /// own navigation coordinator while preserving UIKit's cancellable transition.
+@MainActor
 @objc
 public protocol SPKInteractivePopGestureDelegate: AnyObject {
     /// Return false to prevent the gesture from beginning.

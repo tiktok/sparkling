@@ -283,7 +283,7 @@ struct SPKContextTests {
         #expect(context.naviBar === naviBar)
     }
 
-    @Test func copyMethod() {
+    @Test @MainActor func copyMethod() {
         let originalContext = SPKContext()
         // SPKContext doesn't have title property
         originalContext.originURL = "hybrid://lynxview_page?bundle=.%2Fmain.lynx.bundle"
