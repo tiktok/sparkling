@@ -35,7 +35,7 @@ open class SPKVersion: NSObject {
     ///
     /// - Note: This method returns a static string that should be updated during the build process
     ///   or release workflow to reflect the actual framework version.
-    static func SPKVersion() -> String {
-        return "1.0.0"
+    public static func SPKVersion() -> String {
+        return "2.1.0-rc.12"
     }
 }
