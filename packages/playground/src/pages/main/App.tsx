@@ -66,6 +66,23 @@ const CATEGORIES: Category[] = [
   },
 ]
 
+function availableCategories(): Category[] {
+  const rawCapabilities = ((lynx.__globalProps || {}) as any)
+    ?.sparklingHostCapabilities
+  if (typeof rawCapabilities !== 'string' || rawCapabilities.length === 0) {
+    // Sparkling Go owns all demos when it runs in its standalone host.
+    return CATEGORIES
+  }
+  const capabilities = new Set(
+    rawCapabilities.split(',').map((item: string) => item.trim().toLowerCase()),
+  )
+  return CATEGORIES.filter((category) => {
+    if (category.name === 'Storage') return capabilities.has('storage')
+    if (category.name === 'Media') return capabilities.has('media')
+    return true
+  })
+}
+
 function HomePage(props: { showPage: boolean; topInset: number }) {
   const { resolved } = useTheme()
   const [source, setSource] = useState('')
@@ -73,6 +90,7 @@ function HomePage(props: { showPage: boolean; topInset: number }) {
   const [openResult, setOpenResult] = useState('')
   const [recentUrls, setRecentUrls] = useState<string[]>([])
   const isDark = resolved === 'dark'
+  const categories = availableCategories()
 
   useEffect(() => {
     if (props.showPage) {
@@ -281,7 +299,7 @@ function HomePage(props: { showPage: boolean; topInset: number }) {
         </view>
 
         {/* Demo Categories (merged from Showcase) */}
-        {CATEGORIES.map((category) => (
+        {categories.map((category) => (
           <view key={category.name} className="category-section">
             <view className="category-header">
               <view className="category-icon-circle" style={{ backgroundColor: `${category.color}18` }}>
