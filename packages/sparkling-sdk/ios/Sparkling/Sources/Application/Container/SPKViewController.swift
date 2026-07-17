@@ -402,10 +402,23 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
                     ], callback: nil)
             }
             self.notifyHostInteractivePopDidEnd(completed: !context.isCancelled)
+            if context.isCancelled {
+                // The container remains visible after a cancelled pop, so it
+                // must continue owning the gesture that UIKit just finished.
+                self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+                self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+            } else {
+                self.restoreInteractivePopGestureOwnership()
+            }
         }
 
-        self.navigationController?.interactivePopGestureRecognizer?.delegate = self.oldDelegate
-        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = self.originControllerPopGestureRecongnizerEnabled
+        // Disabling UIKit's active recognizer here leaves its interactive
+        // transition permanently in flight when the host originally kept the
+        // system gesture disabled. Defer restoration until UIKit reports that
+        // the authorized interaction completed or was cancelled.
+        if !self.hostInteractivePopInFlight {
+            self.restoreInteractivePopGestureOwnership()
+        }
         self.navigationController?.delegate = self.originalNavigationControllerDelegate
         super.viewWillDisappear(animated)
 
@@ -414,6 +427,12 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
             self.handleViewDidDisappear()
         }
         self.containerLifecycleDelegate?.containerViewWillDisappear?(self)
+    }
+
+    private func restoreInteractivePopGestureOwnership() {
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self.oldDelegate
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled =
+            self.originControllerPopGestureRecongnizerEnabled
     }
 
     /// Called when the view has disappeared.
