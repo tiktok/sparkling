@@ -17,8 +17,12 @@ permissions:
   id-token: write
 
 env:
-  NODE_VERSION: '22.21.1'
+  NODE_VERSION: '22.22.2'
   PNPM_VERSION: '10.26.0'
+  # pnpm 10 delegates the Trusted Publishing OIDC exchange to the npm CLI, which
+  # needs npm >= 11.5.1. Pinned to the 11.x line on purpose: npm 12 requires an
+  # exact Node patch floor, so tracking npm@latest would force Node bumps on us.
+  NPM_VERSION: '11.19.0'
   NPM_REGISTRY_URL: 'https://registry.npmjs.org'
 
 concurrency:
@@ -148,10 +152,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: ${{ env.NPM_REGISTRY_URL }}
 
-      - name: Ensure latest npm (>= 11.5.1 required for Trusted Publishing)
+      - name: Pin npm (>= 11.5.1 required for Trusted Publishing)
         run: |
-          echo "📦 Upgrading npm for Trusted Publishing support..."
-          npm install -g npm@latest
+          echo "📦 Installing npm@${NPM_VERSION} for Trusted Publishing support..."
+          npm install -g "npm@${NPM_VERSION}"
           echo "✅ npm version: $(npm --version)"
 
       - name: Setup pnpm
@@ -407,10 +411,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: ${{ env.NPM_REGISTRY_URL }}
 
-      - name: Ensure latest npm (>= 11.5.1 required for Trusted Publishing)
+      - name: Pin npm (>= 11.5.1 required for Trusted Publishing)
         run: |
-          echo "📦 Upgrading npm for Trusted Publishing support..."
-          npm install -g npm@latest
+          echo "📦 Installing npm@${NPM_VERSION} for Trusted Publishing support..."
+          npm install -g "npm@${NPM_VERSION}"
           echo "✅ npm version: $(npm --version)"
 
       - name: Setup pnpm

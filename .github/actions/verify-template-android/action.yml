@@ -11,7 +11,7 @@ inputs:
   node_version:
     description: Node.js version
     required: false
-    default: '22.21.1'
+    default: '22.22.2'
   pnpm_version:
     description: pnpm version
     required: false
