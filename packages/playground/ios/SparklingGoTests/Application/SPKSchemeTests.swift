@@ -266,6 +266,7 @@ struct SPKContextTests {
         #expect(context.loadingViewBuilder == nil)
         #expect(context.failedViewBuilder == nil)
         #expect(context.naviBar == nil)
+        #expect(context.interfaceOrientationPolicy == .system)
     }
 
     @Test @MainActor func initializationWithBuilders() {
@@ -290,6 +291,7 @@ struct SPKContextTests {
         originalContext.navigationBarBackHandler = { _ in true }
         let interactivePopGestureDelegate = TestSchemeInteractivePopGestureDelegate()
         originalContext.interactivePopGestureDelegate = interactivePopGestureDelegate
+        originalContext.interfaceOrientationPolicy = .landscape
 
         let copiedContext = originalContext.copy() as? SPKContext
 
@@ -298,7 +300,30 @@ struct SPKContextTests {
         #expect(copiedContext?.originURL == "hybrid://lynxview_page?bundle=.%2Fmain.lynx.bundle")
         #expect(copiedContext?.navigationBarBackHandler != nil)
         #expect(copiedContext?.interactivePopGestureDelegate === interactivePopGestureDelegate)
+        #expect(copiedContext?.interfaceOrientationPolicy == .landscape)
         #expect(copiedContext !== originalContext)
+    }
+
+    @Test func mergePreservesExistingOrientationPolicyWithoutOverride() {
+        let target = SPKContext()
+        target.interfaceOrientationPolicy = .portrait
+        let source = SPKContext()
+        source.interfaceOrientationPolicy = .landscape
+
+        target.merge(withContext: source, isOverride: false)
+
+        #expect(target.interfaceOrientationPolicy == .portrait)
+    }
+
+    @Test func mergeOverridesOrientationPolicyWhenRequested() {
+        let target = SPKContext()
+        target.interfaceOrientationPolicy = .portrait
+        let source = SPKContext()
+        source.interfaceOrientationPolicy = .landscape
+
+        target.merge(withContext: source, isOverride: true)
+
+        #expect(target.interfaceOrientationPolicy == .landscape)
     }
 
     @Test func copyPreservesLynxModuleAndCustomUIElements() {

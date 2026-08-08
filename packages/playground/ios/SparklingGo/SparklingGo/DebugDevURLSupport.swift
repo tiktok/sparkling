@@ -57,7 +57,22 @@ enum DebugDevURLSupport {
     static func makeContext(delegate: SPKContainerLifecycleProtocol? = nil) -> SPKContext {
         let context = SPKContext()
         context.containerLifecycleDelegate = delegate
+        #if DEBUG
+            context.interfaceOrientationPolicy = interfaceOrientationPolicy(
+                from: ProcessInfo.processInfo.environment["SPARKLING_INTERFACE_ORIENTATION"])
+        #endif
         return context
+    }
+
+    static func interfaceOrientationPolicy(from value: String?) -> SPKInterfaceOrientationPolicy {
+        switch value?.lowercased() {
+        case "portrait":
+            return .portrait
+        case "landscape":
+            return .landscape
+        default:
+            return .system
+        }
     }
 
     static func storedDevURL(fallback: String) -> String {

@@ -60,6 +60,17 @@ public enum SPKAppTheme: Int {
     case SPKAppThemeDark
 }
 
+/// Defines the interface orientation policy for a full-page Sparkling container.
+@objc
+public enum SPKInterfaceOrientationPolicy: Int {
+    /// Uses the host application's default orientation behavior.
+    case system
+    /// Restricts the container to portrait orientation.
+    case portrait
+    /// Restricts the container to landscape orientations.
+    case landscape
+}
+
 /// A context class that provides configuration and customization options for SPK containers.
 ///
 /// SPKContext extends SPKHybridContext to provide additional container-specific
@@ -117,6 +128,11 @@ open class SPKContext: SPKHybridContext {
     /// Determines the visual theme (default, light, or dark) applied to the container
     /// and its content. Defaults to SPKAppThemeDefault.
     public var appTheme: SPKAppTheme = .SPKAppThemeDefault
+
+    /// The interface orientation policy for a full-page container.
+    ///
+    /// The system policy preserves the host application's default behavior.
+    public var interfaceOrientationPolicy: SPKInterfaceOrientationPolicy = .system
 
     /// Indicates whether the container should use right-to-left layout.
     ///
@@ -214,6 +230,9 @@ open class SPKContext: SPKHybridContext {
                 isOverride: isOverride) as? NSNumber
 
         self.appTheme = isOverride ? context.appTheme : self.appTheme
+
+        self.interfaceOrientationPolicy =
+            isOverride ? context.interfaceOrientationPolicy : self.interfaceOrientationPolicy
 
         self.containerLifecycleDelegate =
             SPKHybridContext.merge(

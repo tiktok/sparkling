@@ -130,6 +130,34 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
         return true
     }
 
+    /// Returns the orientation mask configured for this container.
+    public override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        switch (self.context as? SPKContext)?.interfaceOrientationPolicy {
+        case .portrait:
+            return .portrait
+        case .landscape:
+            return .landscape
+        case .system, .none:
+            return super.supportedInterfaceOrientations
+        }
+    }
+
+    /// Returns the preferred initial orientation for modal presentation.
+    public override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
+        switch (self.context as? SPKContext)?.interfaceOrientationPolicy {
+        case .portrait:
+            return .portrait
+        case .landscape:
+            return .landscapeRight
+        case .system, .none:
+            return super.preferredInterfaceOrientationForPresentation
+        }
+    }
+
+    /// Test seam for observing orientation update scheduling without mutating a scene.
+    @nonobjc
+    var interfaceOrientationUpdateHandler: ((UIInterfaceOrientationMask) -> Void)?
+
     /// The original URL that was used to load the content.
     ///
     /// This property stores the initial URL for reference and potential reloading scenarios.
@@ -364,6 +392,7 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     /// - Parameter animated: Whether the appearance was animated
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        self.applyInterfaceOrientationPolicy()
         self.oldDelegate = self.navigationController?.interactivePopGestureRecognizer?.delegate
         self.originControllerPopGestureRecongnizerEnabled =
             self.navigationController?.interactivePopGestureRecognizer?.isEnabled ?? self.originControllerPopGestureRecongnizerEnabled
@@ -379,6 +408,45 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
         self.handleViewDidAppear()
         self.hasExecuteDidAppearedOnce = true
         self.containerLifecycleDelegate?.containerViewDidAppear?(self)
+    }
+
+    /// Applies an explicit per-container orientation policy to the active window scene.
+    @nonobjc
+    func applyInterfaceOrientationPolicy() {
+        guard let interfaceOrientations = self.explicitInterfaceOrientationMask else {
+            return
+        }
+
+        if #available(iOS 16.0, *) {
+            self.setNeedsUpdateOfSupportedInterfaceOrientations()
+            self.navigationController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+            if let interfaceOrientationUpdateHandler = self.interfaceOrientationUpdateHandler {
+                interfaceOrientationUpdateHandler(interfaceOrientations)
+                return
+            }
+            guard let windowScene = self.viewIfLoaded?.window?.windowScene else {
+                return
+            }
+            windowScene.requestGeometryUpdate(
+                .iOS(interfaceOrientations: interfaceOrientations))
+        } else {
+            if let interfaceOrientationUpdateHandler = self.interfaceOrientationUpdateHandler {
+                interfaceOrientationUpdateHandler(interfaceOrientations)
+            } else {
+                UIViewController.attemptRotationToDeviceOrientation()
+            }
+        }
+    }
+
+    private var explicitInterfaceOrientationMask: UIInterfaceOrientationMask? {
+        switch (self.context as? SPKContext)?.interfaceOrientationPolicy {
+        case .portrait:
+            return .portrait
+        case .landscape:
+            return .landscape
+        case .system, .none:
+            return nil
+        }
     }
 
     /// Called when the view is about to disappear.
@@ -1050,7 +1118,20 @@ extension SPKViewController: SPKContainerLifecycleProtocol {
 }
 
 extension SPKViewController: UINavigationControllerDelegate {
+    public func navigationControllerSupportedInterfaceOrientations(
+        _ navigationController: UINavigationController
+    ) -> UIInterfaceOrientationMask {
+        return (navigationController.topViewController as? SPKViewController)?
+            .supportedInterfaceOrientations ?? navigationController.supportedInterfaceOrientations
+    }
 
+    public func navigationControllerPreferredInterfaceOrientationForPresentation(
+        _ navigationController: UINavigationController
+    ) -> UIInterfaceOrientation {
+        return (navigationController.topViewController as? SPKViewController)?
+            .preferredInterfaceOrientationForPresentation
+            ?? navigationController.preferredInterfaceOrientationForPresentation
+    }
 }
 
 extension SPKViewController: UIGestureRecognizerDelegate {
