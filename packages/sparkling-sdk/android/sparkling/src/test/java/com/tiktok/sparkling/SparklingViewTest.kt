@@ -116,6 +116,33 @@ class SparklingViewTest {
     }
 
     @Test
+    fun prepareUsesFixedViewportForHostedLynxViewLayout() {
+        val kitView = RecordingKitView(context)
+        every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+        baseContext.lynxViewport = SparklingLynxViewport(320, 480)
+        val sparklingView = SparklingView(context)
+
+        sparklingView.prepare(baseContext)
+
+        val layoutParams = kitView.realView().layoutParams
+        assertEquals(320, layoutParams.width)
+        assertEquals(480, layoutParams.height)
+    }
+
+    @Test
+    fun preparePreservesDefaultFullSizeHostedLynxViewLayout() {
+        val kitView = RecordingKitView(context)
+        every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+        val sparklingView = SparklingView(context)
+
+        sparklingView.prepare(baseContext)
+
+        val layoutParams = kitView.realView().layoutParams
+        assertEquals(FrameLayout.LayoutParams.MATCH_PARENT, layoutParams.width)
+        assertEquals(FrameLayout.LayoutParams.MATCH_PARENT, layoutParams.height)
+    }
+
+    @Test
     fun loadUrlDelegatesToKitView() {
         val kitView = RecordingKitView(context)
         every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView

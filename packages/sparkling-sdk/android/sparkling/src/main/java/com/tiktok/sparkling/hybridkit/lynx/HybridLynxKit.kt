@@ -15,6 +15,8 @@ import com.lynx.tasm.behavior.Behavior
 import com.lynx.tasm.behavior.BehaviorBundle
 import com.lynx.tasm.service.LynxServiceCenter
 import com.tiktok.sparkling.SparklingContext
+import com.tiktok.sparkling.applyLynxViewport
+import com.tiktok.sparkling.resolveLynxViewport
 import com.tiktok.sparkling.hybridkit.HybridCommon
 import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.base.IHybridKitLifeCycle
@@ -97,6 +99,9 @@ object HybridLynxKit {
         }
 
         val viewBuilder = LynxViewBuilder()
+        (hybridContext as? SparklingContext)?.resolveLynxViewport()?.let { viewport ->
+            viewBuilder.applyLynxViewport(viewport)
+        }
         var lynxViewRef: SimpleLynxKitView? = null
         (lynxConfig?.templateProvider ?: LynxEnv.inst().templateProvider)?.let { templateProvider ->
             viewBuilder.setTemplateProvider(

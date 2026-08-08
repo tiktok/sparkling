@@ -65,7 +65,12 @@ Configuration object passed to both container types.
 | `scheme` | The `hybrid://...` URL to load. |
 | `sparklingUIProvider` | Implements `SparklingUIProvider` for custom loading/error/toolbar views. |
 | `hybridSchemeParam` | Parsed scheme parameters (auto-populated from `scheme`). |
+| `lynxViewport` | Optional `SparklingLynxViewport(widthPx, heightPx)` fixed viewport in physical pixels. Programmatic configuration overrides parsed scheme dimensions. |
 | `containerId` | Unique container identifier (auto-generated). |
+
+For advanced hosts that already provide `LynxKitInitParams`, set its `lynxViewport` property. Init
+params take precedence over `SparklingContext.lynxViewport`, which takes precedence over canonical
+scheme `width` and `height`. All three paths require a complete positive width/height pair.
 
 ## SparklingUIProvider
 

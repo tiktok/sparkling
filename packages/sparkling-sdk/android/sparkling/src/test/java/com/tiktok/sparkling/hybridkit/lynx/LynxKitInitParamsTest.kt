@@ -150,5 +150,6 @@ class LynxKitInitParamsTest {
         assertNull(params.extraInfoCallback)
         assertNull(params.kitBridgeService)
         assertNull(params.lynxBackgroundRuntime)
+        assertNull(params.lynxViewport)
     }
 }

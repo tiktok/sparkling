@@ -9,6 +9,7 @@ import com.lynx.tasm.LynxViewClient
 import com.lynx.tasm.TemplateBundle
 import com.lynx.tasm.TemplateData
 import com.lynx.tasm.behavior.Behavior
+import com.tiktok.sparkling.SparklingLynxViewport
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
 import com.tiktok.sparkling.hybridkit.base.IKitInitParam
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
@@ -47,6 +48,7 @@ open class LynxKitInitParams(
     var kitBridgeService: IKitBridgeService? = null
     var hybridSchemaParams: HybridSchemeParam? = null
     var lynxBackgroundRuntime: LynxBackgroundRuntime? = null
+    var lynxViewport: SparklingLynxViewport? = null
     private val globalProps = ConcurrentHashMap<String, Any>()
     private var lynxClientDelegate: CopyOnWriteArrayList<LynxViewClient> = CopyOnWriteArrayList()
 
