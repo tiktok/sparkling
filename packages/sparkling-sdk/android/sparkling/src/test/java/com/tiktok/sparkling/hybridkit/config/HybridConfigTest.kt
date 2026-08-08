@@ -107,6 +107,7 @@ class HybridConfigTest {
         assertTrue(empty.globalBehaviors.isEmpty())
         assertTrue(empty.globalModules.isEmpty())
         assertNotNull(empty.additionInit)
+        assertNull(empty.sharedProcessDensityOverride)
 
         val moduleWrapper = mockk<SparklingLynxModuleWrapper>(relaxed = true)
         var initCalled = false
@@ -125,5 +126,42 @@ class HybridConfigTest {
         // exercise additionInit lambda
         cfg.additionInit.invoke(mockk<LynxEnv>(relaxed = true))
         assertTrue(initCalled)
+    }
+
+    @Test
+    fun sparklingLynxConfigBuilderPropagatesSharedProcessDensityOverride() {
+        val app = mockk<Application>(relaxed = true)
+
+        val cfg =
+            SparklingLynxConfig.build(app) {
+                setSharedProcessDensityOverride(2.75f)
+            }
+
+        assertEquals(2.75f, cfg.sharedProcessDensityOverride)
+    }
+
+    @Test
+    fun sparklingLynxConfigBuilderRejectsInvalidSharedProcessDensityOverride() {
+        val app = mockk<Application>(relaxed = true)
+        val invalidDensities =
+            listOf(
+                0f,
+                -1f,
+                Float.NaN,
+                Float.POSITIVE_INFINITY,
+                Float.NEGATIVE_INFINITY,
+            )
+
+        invalidDensities.forEach { density ->
+            val error =
+                runCatching {
+                    SparklingLynxConfig.Builder(app).setSharedProcessDensityOverride(density)
+                }.exceptionOrNull()
+
+            assertTrue(
+                "Expected density $density to be rejected",
+                error is IllegalArgumentException,
+            )
+        }
     }
 }

@@ -98,7 +98,7 @@ object HybridLynxKit {
             kitInitParams.loadUri = hybridContext.resolveFullScheme()?.toUri()
         }
 
-        val viewBuilder = LynxViewBuilder()
+        val viewBuilder = createLynxViewBuilder(lynxConfig)
         (hybridContext as? SparklingContext)?.resolveLynxViewport()?.let { viewport ->
             viewBuilder.applyLynxViewport(viewport)
         }
@@ -127,4 +127,9 @@ object HybridLynxKit {
         lifeCycle?.onPostKitCreated(lynxView)
         return lynxView
     }
+
+    internal fun createLynxViewBuilder(lynxConfig: SparklingLynxConfig?): LynxViewBuilder =
+        LynxViewBuilder().apply {
+            lynxConfig?.sharedProcessDensityOverride?.let(::setDensity)
+        }
 }
