@@ -10,11 +10,15 @@ import android.content.res.Resources
 import android.view.WindowManager
 import android.view.Display
 import android.view.accessibility.AccessibilityManager
+import com.lynx.tasm.LynxView
+import com.tiktok.sparkling.SparklingContext
+import com.tiktok.sparkling.SparklingLynxViewCreatedListener
 import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.HybridKit
 import com.tiktok.sparkling.hybridkit.HybridCommon
 import com.tiktok.sparkling.hybridkit.HybridEnvironment
 import com.tiktok.sparkling.hybridkit.KitViewManager
+import com.tiktok.sparkling.hybridkit.base.IHybridKitLifeCycle
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
 import com.tiktok.sparkling.hybridkit.base.HybridLoadSession
 import com.tiktok.sparkling.hybridkit.base.Theme
@@ -117,6 +121,62 @@ class HybridKitTest {
         val result = HybridKit.createKitView(scheme, param, mockContext)
 
         assertNull(result)
+    }
+
+    @Test
+    fun testLynxViewCreatedListenerRunsAfterBridgeBeforePostCreate() {
+        val events = mutableListOf<String>()
+        var bridgeAvailable = false
+        var createdView: LynxView? = null
+        val scheme =
+            HybridSchemeParam(
+                engineType = HybridKitType.LYNX,
+                bundle = "https://example.com/main.lynx.bundle",
+            )
+        val sparklingContext =
+            SparklingContext().apply {
+                hybridSchemeParam = scheme
+                lynxViewCreatedListener =
+                    SparklingLynxViewCreatedListener { lynxView ->
+                        events += "VIEW_CREATED"
+                        createdView = lynxView
+                        bridgeAvailable = bridge != null
+                    }
+            }
+        val lifeCycle =
+            object : IHybridKitLifeCycle() {
+                override fun onPostKitCreated(view: com.tiktok.sparkling.hybridkit.base.IKitView) {
+                    events += "POST_KIT_CREATED"
+                }
+            }
+
+        val result = HybridKit.createKitView(scheme, sparklingContext, mockContext, lifeCycle)
+
+        assertEquals(
+            listOf(
+                "VIEW_CREATED",
+                "POST_KIT_CREATED",
+            ),
+            events,
+        )
+        assertTrue(bridgeAvailable)
+        assertSame(result, createdView)
+    }
+
+    @Test
+    fun testLynxViewCreatedListenerIsDisabledByDefault() {
+        val scheme =
+            HybridSchemeParam(
+                engineType = HybridKitType.LYNX,
+                bundle = "https://example.com/main.lynx.bundle",
+            )
+        val sparklingContext =
+            SparklingContext().apply {
+                hybridSchemeParam = scheme
+            }
+
+        assertNull(sparklingContext.lynxViewCreatedListener)
+        assertNotNull(HybridKit.createKitView(scheme, sparklingContext, mockContext))
     }
 }
 

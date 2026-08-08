@@ -14,6 +14,7 @@ import com.lynx.tasm.LynxViewBuilder
 import com.lynx.tasm.behavior.Behavior
 import com.lynx.tasm.behavior.BehaviorBundle
 import com.lynx.tasm.service.LynxServiceCenter
+import com.tiktok.sparkling.SparklingContext
 import com.tiktok.sparkling.hybridkit.HybridCommon
 import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.base.IHybridKitLifeCycle
@@ -106,6 +107,7 @@ object HybridLynxKit {
         }
         val bridge = SparklingBridge()
         bridge.registerLynxModule(viewBuilder, hybridContext.containerId)
+        val sparklingContext = hybridContext as? SparklingContext
         val lynxView =
             SimpleLynxKitView(context, hybridContext, viewBuilder, kitInitParams, lifeCycle)
         lynxViewRef = lynxView
@@ -115,6 +117,7 @@ object HybridLynxKit {
             BridgeProtocolConstants.BRIDGE_LYNX_PROTOCOL,
         )
         hybridContext.bridge = bridge
+        sparklingContext?.lynxViewCreatedListener?.onCreated(lynxView)
 
         lifeCycle?.onPostKitCreated(lynxView)
         return lynxView

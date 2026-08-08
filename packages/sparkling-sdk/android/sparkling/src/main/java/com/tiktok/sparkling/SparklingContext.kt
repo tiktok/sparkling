@@ -7,10 +7,18 @@ import android.content.Context
 import android.util.Size
 import android.view.View
 import androidx.appcompat.widget.Toolbar
+import com.lynx.tasm.LynxView
 import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.base.HybridKitError
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
 import com.tiktok.sparkling.hybridkit.base.IKitView
+
+/**
+ * Observes a created Lynx view after Sparkling initializes its bridge and before template loading.
+ */
+fun interface SparklingLynxViewCreatedListener {
+    fun onCreated(lynxView: LynxView)
+}
 
 interface SparklingUIProvider {
     fun getLoadingView(context: Context): View
@@ -94,4 +102,5 @@ interface SparklingLifecycleDelegate {
 class SparklingContext : HybridContext() {
     var sparklingUIProvider: SparklingUIProvider? = null
     var lifecycleDelegate: SparklingLifecycleDelegate? = null
+    var lynxViewCreatedListener: SparklingLynxViewCreatedListener? = null
 }
