@@ -5,6 +5,7 @@ import com.lynx.tasm.LynxEnv
 import com.tiktok.sparkling.SparklingContext
 import com.tiktok.sparkling.SparklingResourceFetcherConfig
 import com.tiktok.sparkling.SparklingResourceFetcherFactory
+import com.tiktok.sparkling.SparklingScreenOrientationPolicy
 import com.tiktok.sparkling.SparklingThreadStrategy
 import com.tiktok.sparkling.hybridkit.lynx.SparklingLynxModuleWrapper
 import io.mockk.mockk
@@ -32,6 +33,7 @@ class HybridConfigTest {
         assertNull(cfg.bridgeConfig)
         assertNull(cfg.logConfig)
         assertNull(cfg.debugConfig)
+        assertNull(cfg.defaultScreenOrientationPolicy)
     }
 
     @Test
@@ -50,6 +52,7 @@ class HybridConfigTest {
                 setBridgeConfig(bridgeCfg)
                 setLogConfig(logCfg)
                 setDebugConfig(debugCfg)
+                setDefaultScreenOrientationPolicy(SparklingScreenOrientationPolicy.LANDSCAPE)
             }
 
         assertSame(baseInfo, cfg.baseInfoConfig)
@@ -58,6 +61,10 @@ class HybridConfigTest {
         assertSame(bridgeCfg, cfg.bridgeConfig)
         assertSame(logCfg, cfg.logConfig)
         assertSame(debugCfg, cfg.debugConfig)
+        assertEquals(
+            SparklingScreenOrientationPolicy.LANDSCAPE,
+            cfg.defaultScreenOrientationPolicy,
+        )
     }
 
     @Test

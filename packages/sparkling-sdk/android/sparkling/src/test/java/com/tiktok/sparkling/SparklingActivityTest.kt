@@ -4,9 +4,15 @@
 package com.tiktok.sparkling
 
 import android.app.Application
+import android.content.Intent
+import android.content.pm.ActivityInfo
+import com.tiktok.sparkling.hybridkit.HybridCommon
+import com.tiktok.sparkling.hybridkit.config.BaseInfoConfig
+import com.tiktok.sparkling.hybridkit.config.SparklingHybridConfig
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
@@ -32,11 +38,13 @@ class SparklingActivityTest {
         application.setTheme(R.style.AppTheme_NoActionBar)
         ColorUtil.appContext = application
         SparklingContextTransferStation.clearAllContexts()
+        setGlobalOrientationPolicy(null)
     }
 
     @After
     fun tearDown() {
         SparklingContextTransferStation.clearAllContexts()
+        setGlobalOrientationPolicy(null)
     }
 
     @Test
@@ -44,6 +52,10 @@ class SparklingActivityTest {
         val activity = Robolectric.buildActivity(SparklingActivity::class.java).create().get()
         assertNotNull(activity)
         assertNotNull(activity.findViewById<android.view.View>(R.id.toolbar))
+        assertEquals(
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED,
+            activity.requestedOrientation,
+        )
     }
 
     @Test
@@ -108,17 +120,17 @@ class SparklingActivityTest {
 
     @Test
     fun onCreateAppliesPortraitOrientation() {
+        setGlobalOrientationPolicy(SparklingScreenOrientationPolicy.LANDSCAPE)
         val ctx =
             SparklingContext().apply {
                 containerId = "container-portrait"
-                hybridSchemeParam = HybridSchemeParam(screenOrientation = "portrait")
+                scheme = "hybrid://lynxview_page?screen_orientation=portrait"
             }
-        SparklingContextTransferStation.saveSparklingContext(ctx)
+        Sparkling.build(application, ctx).processSparklingContext(ctx)
 
-        val intent = android.content.Intent(application, SparklingActivity::class.java)
-        intent.putExtra(Sparkling.SPARKLING_CONTEXT_CONTAINER_ID, ctx.containerId)
-        val activity = Robolectric.buildActivity(SparklingActivity::class.java, intent).create().get()
-        assertNotNull(activity)
+        val activity = launch(ctx)
+
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, activity.requestedOrientation)
     }
 
     @Test
@@ -133,7 +145,64 @@ class SparklingActivityTest {
         val intent = android.content.Intent(application, SparklingActivity::class.java)
         intent.putExtra(Sparkling.SPARKLING_CONTEXT_CONTAINER_ID, ctx.containerId)
         val activity = Robolectric.buildActivity(SparklingActivity::class.java, intent).create().get()
-        assertNotNull(activity)
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, activity.requestedOrientation)
+    }
+
+    @Test
+    fun onCreateUsesGlobalOrientationDefault() {
+        setGlobalOrientationPolicy(SparklingScreenOrientationPolicy.LANDSCAPE)
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-global-landscape"
+            }
+
+        val activity = launch(ctx)
+
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, activity.requestedOrientation)
+    }
+
+    @Test
+    fun onCreateUsesPagePolicyBeforeSchemeAndGlobalDefault() {
+        setGlobalOrientationPolicy(SparklingScreenOrientationPolicy.PORTRAIT)
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-page-landscape"
+                screenOrientationPolicy = SparklingScreenOrientationPolicy.LANDSCAPE
+                hybridSchemeParam = HybridSchemeParam(screenOrientation = "portrait")
+            }
+
+        val activity = launch(ctx)
+
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, activity.requestedOrientation)
+    }
+
+    @Test
+    fun onCreateLetsExplicitSystemPolicyOverrideGlobalDefault() {
+        setGlobalOrientationPolicy(SparklingScreenOrientationPolicy.LANDSCAPE)
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-page-system"
+                screenOrientationPolicy = SparklingScreenOrientationPolicy.SYSTEM
+            }
+
+        val activity = launch(ctx)
+
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, activity.requestedOrientation)
+    }
+
+    @Test
+    fun onCreatePreservesSystemBehaviorForUnknownCanonicalValue() {
+        setGlobalOrientationPolicy(SparklingScreenOrientationPolicy.LANDSCAPE)
+        val ctx =
+            SparklingContext().apply {
+                containerId = "container-canonical-auto"
+                scheme = "hybrid://lynxview_page?screen_orientation=auto"
+            }
+        Sparkling.build(application, ctx).processSparklingContext(ctx)
+
+        val activity = launch(ctx)
+
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, activity.requestedOrientation)
     }
 
     @Test
@@ -214,5 +283,22 @@ class SparklingActivityTest {
                 hybridSchemeParam = HybridSchemeParam(transStatusBar = true, showNavBarInTransStatusBar = false)
             },
         )
+    }
+
+    private fun launch(context: SparklingContext): SparklingActivity {
+        SparklingContextTransferStation.saveSparklingContext(context)
+        val intent =
+            Intent(application, SparklingActivity::class.java).apply {
+                putExtra(Sparkling.SPARKLING_CONTEXT_CONTAINER_ID, context.containerId)
+            }
+        return Robolectric.buildActivity(SparklingActivity::class.java, intent).create().get()
+    }
+
+    private fun setGlobalOrientationPolicy(policy: SparklingScreenOrientationPolicy?) {
+        val config =
+            SparklingHybridConfig.build(BaseInfoConfig(isDebug = false)) {
+                setDefaultScreenOrientationPolicy(policy)
+            }
+        HybridCommon.setHybridConfig(config, application)
     }
 }
