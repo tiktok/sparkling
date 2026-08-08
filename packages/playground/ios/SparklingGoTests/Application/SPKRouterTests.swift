@@ -43,6 +43,130 @@ struct SPKRouterTests {
         #expect(viewController != nil)
     }
 
+    @Test func systemOrientationPolicyUsesUIKitDefaults() {
+        let context = SPKContext()
+        let viewController = SPKViewController(
+            withURL: nil,
+            config: SPKSchemeParam(),
+            context: context,
+            frame: .zero)
+        let defaultViewController = UIViewController()
+
+        #expect(viewController.supportedInterfaceOrientations == defaultViewController.supportedInterfaceOrientations)
+        #expect(
+            viewController.preferredInterfaceOrientationForPresentation
+                == defaultViewController.preferredInterfaceOrientationForPresentation)
+    }
+
+    @Test func portraitOrientationPolicyRestrictsContainer() {
+        let context = SPKContext()
+        context.interfaceOrientationPolicy = .portrait
+        let viewController = SPKViewController(
+            withURL: nil,
+            config: SPKSchemeParam(),
+            context: context,
+            frame: .zero)
+
+        #expect(viewController.supportedInterfaceOrientations == .portrait)
+        #expect(viewController.preferredInterfaceOrientationForPresentation == .portrait)
+    }
+
+    @Test func landscapeOrientationPolicyRestrictsContainer() {
+        let context = SPKContext()
+        context.interfaceOrientationPolicy = .landscape
+        let viewController = SPKViewController(
+            withURL: nil,
+            config: SPKSchemeParam(),
+            context: context,
+            frame: .zero)
+
+        #expect(viewController.supportedInterfaceOrientations == .landscape)
+        #expect(viewController.preferredInterfaceOrientationForPresentation == .landscapeRight)
+    }
+
+    @Test func navigationControllerUsesTopSparklingOrientationPolicy() {
+        for (policy, expectedMask, expectedPreferred) in [
+            (
+                SPKInterfaceOrientationPolicy.portrait,
+                UIInterfaceOrientationMask.portrait,
+                UIInterfaceOrientation.portrait
+            ),
+            (
+                SPKInterfaceOrientationPolicy.landscape,
+                UIInterfaceOrientationMask.landscape,
+                UIInterfaceOrientation.landscapeRight
+            )
+        ] {
+            let context = SPKContext()
+            context.interfaceOrientationPolicy = policy
+            let viewController = SPKViewController(
+                withURL: nil,
+                config: SPKSchemeParam(),
+                context: context,
+                frame: .zero)
+            let navigationController = UINavigationController(rootViewController: viewController)
+
+            #expect(
+                viewController.navigationControllerSupportedInterfaceOrientations(
+                    navigationController) == expectedMask)
+            #expect(
+                viewController.navigationControllerPreferredInterfaceOrientationForPresentation(
+                    navigationController) == expectedPreferred)
+        }
+    }
+
+    @Test func viewAppearanceSchedulesPortraitGeometryUpdate() {
+        let context = SPKContext()
+        context.interfaceOrientationPolicy = .portrait
+        let viewController = SPKViewController(
+            withURL: nil,
+            config: SPKSchemeParam(),
+            context: context,
+            frame: .zero)
+        var requestedOrientations: [UIInterfaceOrientationMask] = []
+        viewController.interfaceOrientationUpdateHandler = {
+            requestedOrientations.append($0)
+        }
+
+        viewController.viewDidAppear(false)
+
+        #expect(requestedOrientations == [.portrait])
+    }
+
+    @Test func viewAppearanceSchedulesLandscapeGeometryUpdate() {
+        let context = SPKContext()
+        context.interfaceOrientationPolicy = .landscape
+        let viewController = SPKViewController(
+            withURL: nil,
+            config: SPKSchemeParam(),
+            context: context,
+            frame: .zero)
+        var requestedOrientations: [UIInterfaceOrientationMask] = []
+        viewController.interfaceOrientationUpdateHandler = {
+            requestedOrientations.append($0)
+        }
+
+        viewController.viewDidAppear(false)
+
+        #expect(requestedOrientations == [.landscape])
+    }
+
+    @Test func viewAppearanceDoesNotRequestSystemGeometryUpdate() {
+        let viewController = SPKViewController(
+            withURL: nil,
+            config: SPKSchemeParam(),
+            context: SPKContext(),
+            frame: .zero)
+        var requestedOrientations: [UIInterfaceOrientationMask] = []
+        viewController.interfaceOrientationUpdateHandler = {
+            requestedOrientations.append($0)
+        }
+
+        viewController.viewDidAppear(false)
+
+        #expect(requestedOrientations.isEmpty)
+    }
+
     @Test func createWithDifferentSchemes() {
         let hybridURL = "hybrid://example.com/path"
         let httpURL = "http://example.com/path"

@@ -85,6 +85,7 @@ SPKRouter.open(withURL: scheme.absoluteString, context: nil)
 | `naviBar` | 自定义导航栏（仅全页容器）。 |
 | `navigationBarBackHandler` | 在主线程收到导航栏返回动作，发生于 SDK 执行 pop 或 dismiss 之前。宿主消费该动作（包括明确拒绝导航）时返回 `true`；仅在需要保留 SDK 默认行为时返回 `false`。若 coordinator 持有容器栈，请使用弱引用捕获。 |
 | `interactivePopGestureDelegate` | 弱引用、主 actor 隔离的系统侧滑返回代理，适用于由宿主管理导航栈的场景。它可在 UIKit 开始手势前拒绝操作，并在每次已授权手势结束后恰好收到一次完成或取消回调。容器不再活跃时，Sparkling 会恢复系统手势识别器原有的启用状态。 |
+| `interfaceOrientationPolicy` | 全页容器的单容器方向策略：跟随系统/默认、竖屏或横屏。横屏允许左右两个方向，模态展示时优先右横屏；跟随系统时保留宿主应用原有的 UIKit 行为。 |
 | `appTheme` | 主题配置。 |
 | `customUIElements` | 需要注册的自定义 Lynx UI 元素。 |
 | `extra` | 传递给容器的额外数据字典。 |
