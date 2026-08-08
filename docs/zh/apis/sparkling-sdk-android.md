@@ -21,7 +21,7 @@ val baseInfoConfig = BaseInfoConfig(isDebug = BuildConfig.DEBUG)
 val lynxConfig = SparklingLynxConfig.build(this) {
   // 可选：添加全局 Lynx 行为/模块、模板提供者等
   // setSharedProcessDensityOverride(2.0f)
-  setDefaultThreadStrategy(SparklingThreadStrategy.MULTI_THREADS)
+  setDefaultThreadStrategy(SparklingThreadStrategy.PART_ON_LAYOUT)
 }
 val hybridConfig = SparklingHybridConfig.build(baseInfoConfig) {
   setLynxConfig(lynxConfig)
@@ -51,8 +51,8 @@ Sparkling 创建的 `LynxView` 也必须使用完全相同的 density 构造**�
 | 方法 | 说明 |
 |------|------|
 | `Sparkling.build(context, sparklingContext)` | 通过 Android `Context` 和 `SparklingContext` 创建 `Sparkling` 实例。 |
-| `navigate()` | 启动 `SparklingActivity`（全页容器）。成功返回 `true`。 |
-| `createView(withoutPrepare)` | 创建 `SparklingView`（嵌入式容器）。失败返回 `null`。 |
+| `navigate()` | 启动 `SparklingActivity`（全页容器）。成功返回 `true`；Lynx 配置不兼容时抛出类型安全异常。 |
+| `createView(withoutPrepare)` | 创建 `SparklingView`（嵌入式容器）。其他创建失败返回 `null`；启用 prepare 时遇到不兼容 Lynx 配置会抛出类型安全异常。 |
 
 ## SparklingView
 
@@ -125,6 +125,41 @@ init params、`SparklingContext.lynxViewport`、canonical scheme 的 `width` 和
 设置可选的全局默认值，也可以通过 `SparklingContext.threadStrategy`
 为单个容器覆盖。容器级配置优先；两者都未设置时，Sparkling 不改变
 Lynx SDK 的默认策略。
+
+### 固定 viewport 兼容性
+
+不要同时使用最终生效的固定 viewport 和
+`SparklingThreadStrategy.MULTI_THREADS`。这个组合可能在 Lynx SDK
+native 内部触发崩溃。Sparkling 会在构造 `LynxView` 前拒绝该组合，并抛出
+`SparklingLynxConfigurationException`；其 `error` 为
+`SparklingLynxConfigurationError.FIXED_VIEWPORT_WITH_MULTI_THREADS`。
+`navigate()` 和会执行 prepare 的 `createView(false)` 都会在启动或构造容器前同步失败。
+
+Sparkling 会先解析所有类型安全配置，再执行校验：
+
+1. viewport：`LynxKitInitParams.lynxViewport`、其次
+   `SparklingContext.lynxViewport`、最后 canonical scheme 的
+   `width`/`height`；
+2. 线程策略：`SparklingContext.threadStrategy`、其次
+   `SparklingLynxConfig.defaultThreadStrategy`、最后保持 Lynx 默认值不变。
+
+因此，无论先设置 viewport 还是线程策略，校验结果都相同。安全的页面级策略
+可以覆盖全局 `MULTI_THREADS` 默认值。未使用固定 viewport 的
+`MULTI_THREADS`，以及搭配 `ALL_ON_UI`、`MOST_ON_TASM`、
+`PART_ON_LAYOUT` 或未显式设置线程策略的固定 viewport，均保持原有行为。
+
+Java 调用方可以捕获并检查类型安全异常：
+
+```java
+try {
+  SparklingView view = Sparkling.build(context, sparklingContext).createView(false);
+} catch (SparklingLynxConfigurationException exception) {
+  if (exception.getError()
+      == SparklingLynxConfigurationError.FIXED_VIEWPORT_WITH_MULTI_THREADS) {
+    // 改用安全的线程策略，或移除固定 viewport。
+  }
+}
+```
 
 ## SparklingUIProvider
 

@@ -6,6 +6,8 @@ package com.tiktok.sparkling
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.tiktok.sparkling.hybridkit.HybridCommon
+import com.tiktok.sparkling.hybridkit.config.SparklingLynxConfig
 import com.tiktok.sparkling.utils.SchemeParser
 
 class Sparkling private constructor(
@@ -42,16 +44,22 @@ class Sparkling private constructor(
     /**
      * Navigate to a Sparkling activity.
      * @return true if navigation was successful, false otherwise
+     * @throws SparklingLynxConfigurationException if the resolved Lynx options are incompatible
      */
     fun navigate(): Boolean =
         try {
             processSparklingContext(sparklingContext)
+            sparklingContext.validateLynxConfiguration(
+                (HybridCommon.hybridConfig?.lynxConfig as? SparklingLynxConfig)?.defaultThreadStrategy,
+            )
             val intent = Intent(context, SparklingActivity::class.java)
             intent.putExtra(SPARKLING_CONTEXT_CONTAINER_ID, sparklingContext.containerId)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             SparklingContextTransferStation.saveSparklingContext(sparklingContext)
             context.startActivity(intent)
             true
+        } catch (e: SparklingLynxConfigurationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to navigate: ${e.message}")
             false
@@ -75,7 +83,8 @@ class Sparkling private constructor(
     /**
      * Create a SparklingView.
      * @param withoutPrepare If true, skip the prepare step
-     * @return SparklingView instance, or null if creation fails
+     * @return SparklingView instance, or null for non-configuration creation failures
+     * @throws SparklingLynxConfigurationException if the resolved Lynx options are incompatible
      */
     fun createView(withoutPrepare: Boolean = false): SparklingView? =
         try {
@@ -84,6 +93,8 @@ class Sparkling private constructor(
                 view.prepare(sparklingContext)
             }
             view
+        } catch (e: SparklingLynxConfigurationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Failed to create view: ${e.message}")
             null

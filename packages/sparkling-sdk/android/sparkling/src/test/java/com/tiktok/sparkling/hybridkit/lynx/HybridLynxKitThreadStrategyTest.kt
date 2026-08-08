@@ -19,7 +19,6 @@ class HybridLynxKitThreadStrategyTest {
         HybridLynxKit.applyThreadStrategy(
             builder,
             SparklingThreadStrategy.MULTI_THREADS,
-            SparklingThreadStrategy.PART_ON_LAYOUT,
         )
 
         assertEquals(ThreadStrategyForRendering.MULTI_THREADS, builder.threadStrategy)
@@ -31,7 +30,6 @@ class HybridLynxKitThreadStrategyTest {
 
         HybridLynxKit.applyThreadStrategy(
             builder,
-            null,
             SparklingThreadStrategy.MOST_ON_TASM,
         )
 
@@ -42,10 +40,21 @@ class HybridLynxKitThreadStrategyTest {
     fun lynxDefaultRemainsUntouchedWhenBothStrategiesAreUnset() {
         val builder = mockk<LynxViewBuilder>(relaxed = true)
 
-        HybridLynxKit.applyThreadStrategy(builder, null, null)
+        HybridLynxKit.applyThreadStrategy(builder, null)
 
         verify(exactly = 0) {
             builder.setThreadStrategyForRendering(any())
         }
+    }
+
+    @Test
+    fun pageStrategyOverridesGlobalDefaultDuringResolution() {
+        assertEquals(
+            SparklingThreadStrategy.PART_ON_LAYOUT,
+            HybridLynxKit.resolveThreadStrategy(
+                SparklingThreadStrategy.PART_ON_LAYOUT,
+                SparklingThreadStrategy.MULTI_THREADS,
+            ),
+        )
     }
 }

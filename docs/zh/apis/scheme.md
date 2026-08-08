@@ -69,6 +69,11 @@ Sparkling 会使用精确的 preset measure spec 创建 LynxView，并以完全�
 这两个参数是原子配置。如果任意一个缺失、不是整数、为零、为负数，或超出 Android
 measure spec 的安全范围，Sparkling 会同时忽略二者并保留默认的全尺寸行为。
 
+有效的固定 viewport 不能与 Android 最终生效的
+`SparklingThreadStrategy.MULTI_THREADS` 渲染策略同时使用。Sparkling 会先按
+页面级配置优先于全局默认值的规则解析线程策略，再在构造 LynxView 前通过类型安全的
+`SparklingLynxConfigurationException` 拒绝该危险组合。
+
 ```
 hybrid://lynxview_page?bundle=main.lynx.bundle&width=720&height=1280
 ```
