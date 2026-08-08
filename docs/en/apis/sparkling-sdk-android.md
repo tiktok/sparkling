@@ -20,6 +20,7 @@ HybridKit.init(this)
 val baseInfoConfig = BaseInfoConfig(isDebug = BuildConfig.DEBUG)
 val lynxConfig = SparklingLynxConfig.build(this) {
   // optional: add global Lynx behaviors/modules, template provider, etc.
+  // setSharedProcessDensityOverride(2.0f)
 }
 val hybridConfig = SparklingHybridConfig.build(baseInfoConfig) {
   setLynxConfig(lynxConfig)
@@ -28,6 +29,19 @@ val hybridConfig = SparklingHybridConfig.build(baseInfoConfig) {
 HybridKit.setHybridConfig(hybridConfig, this)
 HybridKit.initLynxKit()
 ```
+
+### Shared-process Lynx density
+
+`setSharedProcessDensityOverride(density)` sets one logical density for every Sparkling
+`LynxView` created in the host process. The value must be finite and greater than zero. When it is
+unset, Sparkling leaves Lynx density unset and Lynx uses its default screen-density behavior.
+
+Lynx currently treats a density override as process-wide state. If the host enables this option,
+**every non-Sparkling `LynxView` in the same process must also be constructed with the same
+density**. Do not derive or change this value per container or per URL.
+
+This API provides a host-wide density policy; it does not claim arbitrary legacy URL density
+compatibility.
 
 ## Sparkling
 

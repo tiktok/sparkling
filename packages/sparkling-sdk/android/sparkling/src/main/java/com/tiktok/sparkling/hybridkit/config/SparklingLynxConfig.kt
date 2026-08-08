@@ -19,6 +19,7 @@ class SparklingLynxConfig private constructor(
     val globalBehaviors: MutableList<Behavior>,
     val globalModules: MutableMap<String, SparklingLynxModuleWrapper>,
     val additionInit: LynxEnv.() -> Unit,
+    val sharedProcessDensityOverride: Float?,
     val logLevel: Int = LLog.INFO,
 ) : ILynxConfig {
     companion object {
@@ -37,6 +38,7 @@ class SparklingLynxConfig private constructor(
         private val globalBehaviors = mutableListOf<Behavior>()
         private val globalModules = mutableMapOf<String, SparklingLynxModuleWrapper>()
         private var additionInit: LynxEnv.() -> Unit = {}
+        private var sharedProcessDensityOverride: Float? = null
 
         fun setCheckPropsSetter(checkPropsSetter: Boolean) {
             isCheckPropsSetter = checkPropsSetter
@@ -62,6 +64,19 @@ class SparklingLynxConfig private constructor(
             this.additionInit = additionInit
         }
 
+        /**
+         * Overrides Lynx density for the entire host process.
+         *
+         * Lynx requires every LynxView in a process to use the same override. Hosts that enable
+         * this must configure non-Sparkling LynxViews with the same density.
+         */
+        fun setSharedProcessDensityOverride(density: Float) {
+            require(density.isFinite() && density > 0f) {
+                "Shared-process Lynx density must be finite and greater than 0."
+            }
+            sharedProcessDensityOverride = density
+        }
+
         fun build() =
             SparklingLynxConfig(
                 context,
@@ -71,6 +86,7 @@ class SparklingLynxConfig private constructor(
                 globalBehaviors,
                 globalModules,
                 additionInit,
+                sharedProcessDensityOverride,
             )
     }
 }
