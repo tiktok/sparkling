@@ -37,6 +37,7 @@ class SimpleLynxKitView :
     var rawUrl: String? = null
     var lynxKitInitParams: LynxKitInitParams? = null
     private var hasDestroyed = false
+    private val simpleLynxViewClient: SimpleLynxViewClient
 
     constructor(
         context: Context,
@@ -47,7 +48,8 @@ class SimpleLynxKitView :
     ) : super(context, builder) {
         this.hybridContext = hybridContext
         this.lynxKitLifeCycle = lifeCycle
-        addLynxViewClient(SimpleLynxViewClient(this, this.lynxKitLifeCycle))
+        simpleLynxViewClient = SimpleLynxViewClient(this, this.lynxKitLifeCycle)
+        addLynxViewClient(simpleLynxViewClient)
         KitViewManager.addKitView(this)
         rawUrl = hybridContext.hybridSchemeParam?.bundle
     }
@@ -71,6 +73,7 @@ class SimpleLynxKitView :
         }
         rawUrl = uri
         runCatching {
+            simpleLynxViewClient.beginLoad(uri)
             this.renderTemplateUrl(uri, hybridContext.initData())
             updateGlobalProps(GlobalPropsUtils.instance.getGlobalProps(hybridContext.containerId))
         }.onFailure {

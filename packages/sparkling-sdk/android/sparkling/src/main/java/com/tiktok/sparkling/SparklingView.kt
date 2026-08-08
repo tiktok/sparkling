@@ -29,6 +29,7 @@ import com.tiktok.sparkling.hybridkit.base.IHybridView
 import com.tiktok.sparkling.hybridkit.base.IKitView
 import com.tiktok.sparkling.hybridkit.base.IPerformanceView
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
+import java.lang.ref.WeakReference
 import org.json.JSONObject
 
 class SparklingView(
@@ -77,6 +78,9 @@ class SparklingView(
 
     private var loadStatus = IPerformanceView.LoadStatus.INIT
     private var isReleased = false
+    private val retryStateLock = Any()
+    private var retryGeneration = 0L
+    private var activeRetryGeneration: Long? = null
     private val defaultErrorText = "Oops, something went wrong!"
     private val kitLayoutChangeListener =
         View.OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
@@ -144,6 +148,7 @@ class SparklingView(
                         if (isReleased) {
                             return
                         }
+                        invalidateFailedViewRetry()
                         loadStatus = IPerformanceView.LoadStatus.LOADING
                         runOnMain {
                             errorView?.visibility = GONE
@@ -249,6 +254,7 @@ class SparklingView(
                             return
                         }
                         loadStatus = IPerformanceView.LoadStatus.SUCCESS
+                        invalidateFailedViewRetry()
                         runOnMain {
                             removeLoadingView()
                             errorView?.visibility = GONE
@@ -261,6 +267,7 @@ class SparklingView(
                         if (isReleased) {
                             return
                         }
+                        invalidateFailedViewRetry()
                         loadStatus = IPerformanceView.LoadStatus.LOADING
                         runOnMain {
                             errorView?.visibility = GONE
@@ -401,7 +408,13 @@ class SparklingView(
 
     override fun release() {
         if (isReleased) return
-        isReleased = true
+        synchronized(retryStateLock) {
+            if (isReleased) return
+            isReleased = true
+            retryGeneration++
+            activeRetryGeneration = null
+        }
+        clearFailedViewRetry()
         observedKitRealView?.removeOnLayoutChangeListener(kitLayoutChangeListener)
         observedKitRealView = null
         kitViewDelegate?.destroy(true)
@@ -506,13 +519,79 @@ class SparklingView(
         if (isReleased) {
             return
         }
+        if (view !== kitViewDelegate) {
+            return
+        }
         loadStatus = IPerformanceView.LoadStatus.FAIL
+        registerFailedViewRetry(view)
         updateErrorMessage(url, hybridKitError.errorReason)
         runOnMain {
             removeLoadingView()
             showErrorView()
         }
         sparklingContext?.lifecycleDelegate?.onLoadFailed(view, url, hybridKitError)
+    }
+
+    private fun registerFailedViewRetry(view: IKitView) {
+        val generation =
+            synchronized(retryStateLock) {
+                retryGeneration++
+                activeRetryGeneration = retryGeneration
+                retryGeneration
+            }
+        val owner = WeakReference(this)
+        val retry = SparklingFailedViewRetry { owner.get()?.retryFailedLoad(generation) ?: false }
+        runOnMain {
+            val isCurrent =
+                synchronized(retryStateLock) {
+                    !isReleased &&
+                        activeRetryGeneration == generation &&
+                        loadStatus == IPerformanceView.LoadStatus.FAIL &&
+                        kitViewDelegate === view
+                }
+            if (isCurrent) {
+                (errorView as? SparklingRetryableErrorView)?.setSparklingRetry(retry)
+            }
+        }
+    }
+
+    private fun retryFailedLoad(generation: Long): Boolean {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            return false
+        }
+        val kitView =
+            synchronized(retryStateLock) {
+                if (
+                    isReleased ||
+                    activeRetryGeneration != generation ||
+                    loadStatus != IPerformanceView.LoadStatus.FAIL
+                ) {
+                    return false
+                }
+                val currentKitView = kitViewDelegate ?: return false
+                activeRetryGeneration = null
+                currentKitView
+            }
+        loadStatus = IPerformanceView.LoadStatus.LOADING
+        (errorView as? SparklingRetryableErrorView)?.setSparklingRetry(null)
+        errorView?.visibility = GONE
+        showLoadingView()
+        kitView.reload()
+        return true
+    }
+
+    private fun invalidateFailedViewRetry() {
+        synchronized(retryStateLock) {
+            retryGeneration++
+            activeRetryGeneration = null
+        }
+        clearFailedViewRetry()
+    }
+
+    private fun clearFailedViewRetry() {
+        runOnMain {
+            (errorView as? SparklingRetryableErrorView)?.setSparklingRetry(null)
+        }
     }
 
     private fun removeLoadingView() {

@@ -24,6 +24,10 @@ class SimpleLynxViewClient(
 
     override fun onPageStart(url: String?) {
         super.onPageStart(url)
+        beginLoad(url)
+    }
+
+    internal fun beginLoad(url: String?) {
         uri = url?.toUri()
         loadFinished = false
         loadFailed = false
