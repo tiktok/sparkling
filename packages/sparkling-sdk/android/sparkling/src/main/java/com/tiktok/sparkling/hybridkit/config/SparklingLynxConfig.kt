@@ -9,6 +9,7 @@ import com.lynx.tasm.LynxEnv
 import com.lynx.tasm.base.LLog
 import com.lynx.tasm.behavior.Behavior
 import com.lynx.tasm.provider.AbsTemplateProvider
+import com.tiktok.sparkling.SparklingResourceFetcherFactory
 import com.tiktok.sparkling.SparklingThreadStrategy
 import com.tiktok.sparkling.hybridkit.lynx.SparklingLynxModuleWrapper
 
@@ -17,6 +18,7 @@ class SparklingLynxConfig private constructor(
     val isCheckPropsSetter: Boolean,
     val libraryLoader: INativeLibraryLoader?,
     val templateProvider: AbsTemplateProvider?,
+    val resourceFetcherFactory: SparklingResourceFetcherFactory?,
     val globalBehaviors: MutableList<Behavior>,
     val globalModules: MutableMap<String, SparklingLynxModuleWrapper>,
     val additionInit: LynxEnv.() -> Unit,
@@ -37,6 +39,7 @@ class SparklingLynxConfig private constructor(
         private var isCheckPropsSetter = true
         private var libraryLoader: INativeLibraryLoader? = null
         private var templateProvider: AbsTemplateProvider? = null
+        private var resourceFetcherFactory: SparklingResourceFetcherFactory? = null
         private val globalBehaviors = mutableListOf<Behavior>()
         private val globalModules = mutableMapOf<String, SparklingLynxModuleWrapper>()
         private var additionInit: LynxEnv.() -> Unit = {}
@@ -53,6 +56,10 @@ class SparklingLynxConfig private constructor(
 
         fun setTemplateProvider(templateProvider: AbsTemplateProvider?) {
             this.templateProvider = templateProvider
+        }
+
+        fun setResourceFetcherFactory(factory: SparklingResourceFetcherFactory?) {
+            resourceFetcherFactory = factory
         }
 
         fun addBehaviors(behaviors: List<Behavior>) {
@@ -90,6 +97,7 @@ class SparklingLynxConfig private constructor(
                 isCheckPropsSetter,
                 libraryLoader,
                 templateProvider,
+                resourceFetcherFactory,
                 globalBehaviors,
                 globalModules,
                 additionInit,

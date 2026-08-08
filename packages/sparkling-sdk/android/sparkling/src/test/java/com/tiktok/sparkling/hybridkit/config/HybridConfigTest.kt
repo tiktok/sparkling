@@ -2,6 +2,9 @@ package com.tiktok.sparkling.hybridkit.config
 
 import android.app.Application
 import com.lynx.tasm.LynxEnv
+import com.tiktok.sparkling.SparklingContext
+import com.tiktok.sparkling.SparklingResourceFetcherConfig
+import com.tiktok.sparkling.SparklingResourceFetcherFactory
 import com.tiktok.sparkling.SparklingThreadStrategy
 import com.tiktok.sparkling.hybridkit.lynx.SparklingLynxModuleWrapper
 import io.mockk.mockk
@@ -105,6 +108,7 @@ class HybridConfigTest {
         assertTrue(empty.isCheckPropsSetter)
         assertNull(empty.libraryLoader)
         assertNull(empty.templateProvider)
+        assertNull(empty.resourceFetcherFactory)
         assertTrue(empty.globalBehaviors.isEmpty())
         assertTrue(empty.globalModules.isEmpty())
         assertNotNull(empty.additionInit)
@@ -112,18 +116,29 @@ class HybridConfigTest {
         assertNull(empty.defaultThreadStrategy)
 
         val moduleWrapper = mockk<SparklingLynxModuleWrapper>(relaxed = true)
+        val resourceFetcherConfig = SparklingResourceFetcherConfig.builder().build()
+        val resourceFetcherFactory =
+            SparklingResourceFetcherFactory {
+                resourceFetcherConfig
+            }
         var initCalled = false
         val cfg =
             SparklingLynxConfig.build(app) {
                 setCheckPropsSetter(false)
                 setLibraryLoader(null)
                 setTemplateProvider(null)
+                setResourceFetcherFactory(resourceFetcherFactory)
                 addLynxModules(mapOf("foo" to moduleWrapper))
                 setAdditionInit { initCalled = true }
                 setDefaultThreadStrategy(SparklingThreadStrategy.MULTI_THREADS)
             }
 
         assertFalse(cfg.isCheckPropsSetter)
+        assertSame(resourceFetcherFactory, cfg.resourceFetcherFactory)
+        assertSame(
+            resourceFetcherConfig,
+            cfg.resourceFetcherFactory?.create(SparklingContext()),
+        )
         assertEquals(1, cfg.globalModules.size)
         assertSame(moduleWrapper, cfg.globalModules["foo"])
         assertEquals(SparklingThreadStrategy.MULTI_THREADS, cfg.defaultThreadStrategy)

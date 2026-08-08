@@ -106,12 +106,15 @@ object HybridLynxKit {
         }
         applyThreadStrategy(viewBuilder, sparklingContext?.threadStrategy, lynxConfig?.defaultThreadStrategy)
         var lynxViewRef: SimpleLynxKitView? = null
-        (lynxConfig?.templateProvider ?: LynxEnv.inst().templateProvider)?.let { templateProvider ->
-            viewBuilder.setTemplateProvider(
-                SimpleLynxTemplateProvider(templateProvider, lifeCycle) {
-                    lynxViewRef
-                },
-            )
+        val resourceFetcherConfig =
+            SparklingResourceFetcherConfigurator.resolve(sparklingContext, lynxConfig)
+        SparklingResourceFetcherConfigurator.apply(
+            viewBuilder,
+            resourceFetcherConfig,
+            lynxConfig?.templateProvider ?: LynxEnv.inst().templateProvider,
+            lifeCycle,
+        ) {
+            lynxViewRef
         }
         val bridge = SparklingBridge()
         bridge.registerLynxModule(viewBuilder, hybridContext.containerId)
