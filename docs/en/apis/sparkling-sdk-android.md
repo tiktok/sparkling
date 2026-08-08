@@ -86,11 +86,42 @@ Configuration object passed to both container types.
 |----------|-------------|
 | `scheme` | The `hybrid://...` URL to load. |
 | `sparklingUIProvider` | Implements `SparklingUIProvider` for custom loading/error/toolbar views. |
+| `screenOrientationPolicy` | Optional typed orientation policy for a full-page `SparklingActivity`. |
 | `threadStrategy` | Optional per-container `SparklingThreadStrategy`. Overrides the global default. |
 | `hybridSchemeParam` | Parsed scheme parameters (auto-populated from `scheme`). |
 | `lynxViewport` | Optional `SparklingLynxViewport(widthPx, heightPx)` fixed viewport in physical pixels. Programmatic configuration overrides parsed scheme dimensions. |
 | `containerId` | Unique container identifier (auto-generated). |
 | `resourceFetcherConfig` | Optional per-page typed resource fetchers. Overrides the global factory. |
+
+## Screen orientation
+
+`SparklingScreenOrientationPolicy` provides the Java-friendly `SYSTEM`,
+`PORTRAIT`, and `LANDSCAPE` values for full-page containers:
+
+```java
+SparklingContext sparklingContext = new SparklingContext();
+sparklingContext.setScreenOrientationPolicy(
+    SparklingScreenOrientationPolicy.LANDSCAPE);
+```
+
+An optional application-wide default can be set with
+`SparklingHybridConfig.Builder.setDefaultScreenOrientationPolicy(...)`.
+Resolution order is:
+
+1. `SparklingContext.screenOrientationPolicy`, including an explicit `SYSTEM`;
+2. the canonical scheme `screen_orientation` value;
+3. the global default;
+4. Android's existing system/default behavior when all values are unset.
+
+The canonical `portrait` and `landscape` values map to the corresponding typed
+policies. Unknown canonical values preserve the existing `SYSTEM` behavior
+instead of falling through to the global default. `SparklingActivity` applies
+the resolved policy through Android's public `requestedOrientation` API before
+creating its content.
+
+The policy intentionally does not rotate an Activity that hosts an embedded
+`SparklingView`. An embedded view does not own its host Activity; the host must
+apply any desired orientation policy itself.
 
 ## Typed resource fetchers
 

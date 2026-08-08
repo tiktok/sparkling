@@ -79,10 +79,39 @@ Sparkling 创建的 `LynxView` 也必须使用完全相同的 density 构造**�
 |------|------|
 | `scheme` | 要加载的 `hybrid://...` URL。 |
 | `sparklingUIProvider` | 实现 `SparklingUIProvider` 以自定义加载/错误/工具栏视图。 |
+| `screenOrientationPolicy` | 全页 `SparklingActivity` 可选的类型安全方向策略。 |
 | `threadStrategy` | 可选的容器级 `SparklingThreadStrategy`，优先于全局默认值。 |
 | `hybridSchemeParam` | 解析后的 scheme 参数（从 `scheme` 自动填充）。 |
 | `lynxViewport` | 可选的 `SparklingLynxViewport(widthPx, heightPx)`，以物理像素指定固定 viewport。程序化配置会覆盖 scheme 中解析的尺寸。 |
 | `containerId` | 唯一的容器标识符（自动生成）。 |
+
+## 屏幕方向
+
+`SparklingScreenOrientationPolicy` 为全页容器提供 Java 友好的 `SYSTEM`、
+`PORTRAIT` 和 `LANDSCAPE`：
+
+```java
+SparklingContext sparklingContext = new SparklingContext();
+sparklingContext.setScreenOrientationPolicy(
+    SparklingScreenOrientationPolicy.LANDSCAPE);
+```
+
+宿主也可以通过
+`SparklingHybridConfig.Builder.setDefaultScreenOrientationPolicy(...)`
+设置可选的应用级默认值。解析优先级为：
+
+1. `SparklingContext.screenOrientationPolicy`，包括显式设置的 `SYSTEM`；
+2. canonical scheme 的 `screen_orientation`；
+3. 全局默认值；
+4. 全部未设置时沿用 Android 当前的系统/默认行为。
+
+canonical scheme 中的 `portrait` 和 `landscape` 会映射到对应的类型安全策略。
+未知 canonical 值继续保持现有的 `SYSTEM` 行为，不会回退到全局默认值。
+`SparklingActivity` 在创建内容前通过 Android 公开的 `requestedOrientation`
+API 应用最终策略。
+
+该策略不会旋转承载嵌入式 `SparklingView` 的 Activity。嵌入式 View
+不拥有宿主 Activity；需要固定方向时，应由宿主自行应用方向策略。
 
 高级宿主如果已经使用 `LynxKitInitParams`，也可以设置其 `lynxViewport` 属性。优先级依次为：
 init params、`SparklingContext.lynxViewport`、canonical scheme 的 `width` 和 `height`。

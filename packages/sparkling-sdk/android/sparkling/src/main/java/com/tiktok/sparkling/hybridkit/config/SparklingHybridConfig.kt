@@ -6,6 +6,7 @@ package com.tiktok.sparkling.hybridkit.config
 import android.content.Context
 import android.webkit.WebSettings
 import android.webkit.WebView
+import com.tiktok.sparkling.SparklingScreenOrientationPolicy
 import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.service.IKitBridgeService
 import com.tiktok.sparkling.hybridkit.utils.HybridLogger
@@ -17,6 +18,7 @@ open class SparklingHybridConfig private constructor(
     val bridgeConfig: IBridgeConfig?,
     val logConfig: LogConfig?,
     val debugConfig: DebugConfig?,
+    val defaultScreenOrientationPolicy: SparklingScreenOrientationPolicy?,
 ) {
     companion object {
         inline fun build(
@@ -33,6 +35,7 @@ open class SparklingHybridConfig private constructor(
         private var bridgeConfig: IBridgeConfig? = null
         private var logConfig: LogConfig? = null
         private var debugConfig: DebugConfig? = null
+        private var defaultScreenOrientationPolicy: SparklingScreenOrientationPolicy? = null
 
         fun setDebugConfig(debugConfig: DebugConfig) {
             this.debugConfig = debugConfig
@@ -54,7 +57,20 @@ open class SparklingHybridConfig private constructor(
             this.logConfig = logConfig
         }
 
-        fun build() = SparklingHybridConfig(baseInfoConfig, lynxConfig, webConfig, bridgeConfig, logConfig, debugConfig)
+        fun setDefaultScreenOrientationPolicy(policy: SparklingScreenOrientationPolicy?) {
+            defaultScreenOrientationPolicy = policy
+        }
+
+        fun build() =
+            SparklingHybridConfig(
+                baseInfoConfig,
+                lynxConfig,
+                webConfig,
+                bridgeConfig,
+                logConfig,
+                debugConfig,
+                defaultScreenOrientationPolicy,
+            )
     }
 }
 

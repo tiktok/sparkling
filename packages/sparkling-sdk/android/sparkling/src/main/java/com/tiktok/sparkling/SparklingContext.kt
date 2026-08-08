@@ -106,4 +106,11 @@ class SparklingContext : HybridContext() {
     var lynxViewport: SparklingLynxViewport? = null
     var threadStrategy: SparklingThreadStrategy? = null
     var resourceFetcherConfig: SparklingResourceFetcherConfig? = null
+
+    /**
+     * Optional orientation policy for a full-page Sparkling container.
+     *
+     * Embedded SparklingViews do not change their host Activity orientation.
+     */
+    var screenOrientationPolicy: SparklingScreenOrientationPolicy? = null
 }

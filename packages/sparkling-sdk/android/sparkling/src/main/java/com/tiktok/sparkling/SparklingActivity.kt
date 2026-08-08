@@ -13,17 +13,27 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.tiktok.sparkling.Sparkling.Companion.SPARKLING_CONTEXT_CONTAINER_ID
+import com.tiktok.sparkling.hybridkit.HybridCommon
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 
 class SparklingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         val containerId = intent.getStringExtra(SPARKLING_CONTEXT_CONTAINER_ID)
         val sparklingContext = SparklingContextTransferStation.getSparklingContext(containerId)
+        applyScreenOrientationPolicy(sparklingContext)
+        super.onCreate(savedInstanceState)
         initStatusBar(sparklingContext)
         setContentView(R.layout.activity_sparkling)
         initToolBar(sparklingContext)
         initSparklingFragment(sparklingContext)
+    }
+
+    private fun applyScreenOrientationPolicy(sparklingContext: SparklingContext?) {
+        val policy =
+            sparklingContext?.resolveScreenOrientationPolicy(
+                HybridCommon.hybridConfig?.defaultScreenOrientationPolicy,
+            ) ?: return
+        requestedOrientation = policy.toRequestedOrientation()
     }
 
     private fun initStatusBar(sparklingContext: SparklingContext?) {
@@ -91,12 +101,6 @@ class SparklingActivity : AppCompatActivity() {
             if (it.hideNavBar || (it.transStatusBar && !it.showNavBarInTransStatusBar)) {
                 supportActionBar?.hide()
             }
-            requestedOrientation =
-                when (it.screenOrientation) {
-                    "portrait" -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-                    "landscape" -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-                    else -> android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-                }
         }
 
         val fragment = SparklingFragment.newInstance()
