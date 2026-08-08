@@ -9,6 +9,7 @@ import com.lynx.tasm.LynxEnv
 import com.lynx.tasm.base.LLog
 import com.lynx.tasm.behavior.Behavior
 import com.lynx.tasm.provider.AbsTemplateProvider
+import com.tiktok.sparkling.SparklingThreadStrategy
 import com.tiktok.sparkling.hybridkit.lynx.SparklingLynxModuleWrapper
 
 class SparklingLynxConfig private constructor(
@@ -20,6 +21,7 @@ class SparklingLynxConfig private constructor(
     val globalModules: MutableMap<String, SparklingLynxModuleWrapper>,
     val additionInit: LynxEnv.() -> Unit,
     val sharedProcessDensityOverride: Float?,
+    val defaultThreadStrategy: SparklingThreadStrategy?,
     val logLevel: Int = LLog.INFO,
 ) : ILynxConfig {
     companion object {
@@ -39,6 +41,7 @@ class SparklingLynxConfig private constructor(
         private val globalModules = mutableMapOf<String, SparklingLynxModuleWrapper>()
         private var additionInit: LynxEnv.() -> Unit = {}
         private var sharedProcessDensityOverride: Float? = null
+        private var defaultThreadStrategy: SparklingThreadStrategy? = null
 
         fun setCheckPropsSetter(checkPropsSetter: Boolean) {
             isCheckPropsSetter = checkPropsSetter
@@ -77,6 +80,10 @@ class SparklingLynxConfig private constructor(
             sharedProcessDensityOverride = density
         }
 
+        fun setDefaultThreadStrategy(threadStrategy: SparklingThreadStrategy?) {
+            defaultThreadStrategy = threadStrategy
+        }
+
         fun build() =
             SparklingLynxConfig(
                 context,
@@ -87,6 +94,7 @@ class SparklingLynxConfig private constructor(
                 globalModules,
                 additionInit,
                 sharedProcessDensityOverride,
+                defaultThreadStrategy,
             )
     }
 }

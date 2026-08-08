@@ -2,6 +2,7 @@ package com.tiktok.sparkling.hybridkit.config
 
 import android.app.Application
 import com.lynx.tasm.LynxEnv
+import com.tiktok.sparkling.SparklingThreadStrategy
 import com.tiktok.sparkling.hybridkit.lynx.SparklingLynxModuleWrapper
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -108,6 +109,7 @@ class HybridConfigTest {
         assertTrue(empty.globalModules.isEmpty())
         assertNotNull(empty.additionInit)
         assertNull(empty.sharedProcessDensityOverride)
+        assertNull(empty.defaultThreadStrategy)
 
         val moduleWrapper = mockk<SparklingLynxModuleWrapper>(relaxed = true)
         var initCalled = false
@@ -118,11 +120,13 @@ class HybridConfigTest {
                 setTemplateProvider(null)
                 addLynxModules(mapOf("foo" to moduleWrapper))
                 setAdditionInit { initCalled = true }
+                setDefaultThreadStrategy(SparklingThreadStrategy.MULTI_THREADS)
             }
 
         assertFalse(cfg.isCheckPropsSetter)
         assertEquals(1, cfg.globalModules.size)
         assertSame(moduleWrapper, cfg.globalModules["foo"])
+        assertEquals(SparklingThreadStrategy.MULTI_THREADS, cfg.defaultThreadStrategy)
         // exercise additionInit lambda
         cfg.additionInit.invoke(mockk<LynxEnv>(relaxed = true))
         assertTrue(initCalled)

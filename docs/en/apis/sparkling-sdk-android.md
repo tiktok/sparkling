@@ -21,6 +21,7 @@ val baseInfoConfig = BaseInfoConfig(isDebug = BuildConfig.DEBUG)
 val lynxConfig = SparklingLynxConfig.build(this) {
   // optional: add global Lynx behaviors/modules, template provider, etc.
   // setSharedProcessDensityOverride(2.0f)
+  setDefaultThreadStrategy(SparklingThreadStrategy.MULTI_THREADS)
 }
 val hybridConfig = SparklingHybridConfig.build(baseInfoConfig) {
   setLynxConfig(lynxConfig)
@@ -78,6 +79,7 @@ Configuration object passed to both container types.
 |----------|-------------|
 | `scheme` | The `hybrid://...` URL to load. |
 | `sparklingUIProvider` | Implements `SparklingUIProvider` for custom loading/error/toolbar views. |
+| `threadStrategy` | Optional per-container `SparklingThreadStrategy`. Overrides the global default. |
 | `hybridSchemeParam` | Parsed scheme parameters (auto-populated from `scheme`). |
 | `lynxViewport` | Optional `SparklingLynxViewport(widthPx, heightPx)` fixed viewport in physical pixels. Programmatic configuration overrides parsed scheme dimensions. |
 | `containerId` | Unique container identifier (auto-generated). |
@@ -85,6 +87,16 @@ Configuration object passed to both container types.
 For advanced hosts that already provide `LynxKitInitParams`, set its `lynxViewport` property. Init
 params take precedence over `SparklingContext.lynxViewport`, which takes precedence over canonical
 scheme `width` and `height`. All three paths require a complete positive width/height pair.
+
+## Thread strategy
+
+`SparklingThreadStrategy` provides typed mappings for the Lynx rendering
+strategies `ALL_ON_UI`, `MOST_ON_TASM`, `PART_ON_LAYOUT`, and `MULTI_THREADS`.
+Set an optional global default with
+`SparklingLynxConfig.Builder.setDefaultThreadStrategy(...)`, or override it for
+one container with `SparklingContext.threadStrategy`. The per-container value
+takes precedence. If neither value is set, Sparkling leaves the Lynx SDK
+default unchanged.
 
 ## SparklingUIProvider
 
