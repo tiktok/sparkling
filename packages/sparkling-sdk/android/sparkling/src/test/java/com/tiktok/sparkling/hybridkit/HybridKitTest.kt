@@ -11,8 +11,10 @@ import android.view.WindowManager
 import android.view.Display
 import android.view.accessibility.AccessibilityManager
 import com.lynx.tasm.LynxView
+import com.lynx.tasm.ThreadStrategyForRendering
 import com.tiktok.sparkling.SparklingContext
 import com.tiktok.sparkling.SparklingLynxViewCreatedListener
+import com.tiktok.sparkling.SparklingThreadStrategy
 import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.HybridKit
 import com.tiktok.sparkling.hybridkit.HybridCommon
@@ -24,6 +26,7 @@ import com.tiktok.sparkling.hybridkit.base.HybridLoadSession
 import com.tiktok.sparkling.hybridkit.base.Theme
 import com.tiktok.sparkling.hybridkit.config.BaseInfoConfig
 import com.tiktok.sparkling.hybridkit.config.SparklingHybridConfig
+import com.tiktok.sparkling.hybridkit.config.SparklingLynxConfig
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
 import io.mockk.*
 import org.json.JSONObject
@@ -177,6 +180,43 @@ class HybridKitTest {
 
         assertNull(sparklingContext.lynxViewCreatedListener)
         assertNotNull(HybridKit.createKitView(scheme, sparklingContext, mockContext))
+    }
+
+    @Test
+    fun testPageThreadStrategyIsAppliedDuringLynxViewCreation() {
+        val lynxConfig =
+            SparklingLynxConfig.build(mockApplication) {
+                setDefaultThreadStrategy(SparklingThreadStrategy.PART_ON_LAYOUT)
+            }
+        HybridCommon.setHybridConfig(
+            SparklingHybridConfig.build(BaseInfoConfig(isDebug = false)) {
+                setLynxConfig(lynxConfig)
+            },
+            mockApplication,
+        )
+        val scheme =
+            HybridSchemeParam(
+                engineType = HybridKitType.LYNX,
+                bundle = "https://example.com/main.lynx.bundle",
+            )
+        var strategyAtCreation: ThreadStrategyForRendering? = null
+        val sparklingContext =
+            SparklingContext().apply {
+                hybridSchemeParam = scheme
+                threadStrategy = SparklingThreadStrategy.MULTI_THREADS
+                lynxViewCreatedListener =
+                    SparklingLynxViewCreatedListener { lynxView ->
+                        strategyAtCreation = lynxView.threadStrategyForRendering
+                    }
+            }
+
+        val result = HybridKit.createKitView(scheme, sparklingContext, mockContext)
+
+        assertEquals(ThreadStrategyForRendering.MULTI_THREADS, strategyAtCreation)
+        assertEquals(
+            ThreadStrategyForRendering.MULTI_THREADS,
+            (result as LynxView).threadStrategyForRendering,
+        )
     }
 }
 

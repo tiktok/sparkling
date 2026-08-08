@@ -15,6 +15,7 @@ import com.lynx.tasm.behavior.Behavior
 import com.lynx.tasm.behavior.BehaviorBundle
 import com.lynx.tasm.service.LynxServiceCenter
 import com.tiktok.sparkling.SparklingContext
+import com.tiktok.sparkling.SparklingThreadStrategy
 import com.tiktok.sparkling.applyLynxViewport
 import com.tiktok.sparkling.resolveLynxViewport
 import com.tiktok.sparkling.hybridkit.HybridCommon
@@ -99,9 +100,11 @@ object HybridLynxKit {
         }
 
         val viewBuilder = createLynxViewBuilder(lynxConfig)
-        (hybridContext as? SparklingContext)?.resolveLynxViewport()?.let { viewport ->
+        val sparklingContext = hybridContext as? SparklingContext
+        sparklingContext?.resolveLynxViewport()?.let { viewport ->
             viewBuilder.applyLynxViewport(viewport)
         }
+        applyThreadStrategy(viewBuilder, sparklingContext?.threadStrategy, lynxConfig?.defaultThreadStrategy)
         var lynxViewRef: SimpleLynxKitView? = null
         (lynxConfig?.templateProvider ?: LynxEnv.inst().templateProvider)?.let { templateProvider ->
             viewBuilder.setTemplateProvider(
@@ -112,7 +115,6 @@ object HybridLynxKit {
         }
         val bridge = SparklingBridge()
         bridge.registerLynxModule(viewBuilder, hybridContext.containerId)
-        val sparklingContext = hybridContext as? SparklingContext
         val lynxView =
             SimpleLynxKitView(context, hybridContext, viewBuilder, kitInitParams, lifeCycle)
         lynxViewRef = lynxView
@@ -132,4 +134,14 @@ object HybridLynxKit {
         LynxViewBuilder().apply {
             lynxConfig?.sharedProcessDensityOverride?.let(::setDensity)
         }
+
+    internal fun applyThreadStrategy(
+        viewBuilder: LynxViewBuilder,
+        pageThreadStrategy: SparklingThreadStrategy?,
+        defaultThreadStrategy: SparklingThreadStrategy?,
+    ) {
+        (pageThreadStrategy ?: defaultThreadStrategy)?.let {
+            viewBuilder.setThreadStrategyForRendering(it.toLynxThreadStrategy())
+        }
+    }
 }

@@ -21,6 +21,7 @@ val baseInfoConfig = BaseInfoConfig(isDebug = BuildConfig.DEBUG)
 val lynxConfig = SparklingLynxConfig.build(this) {
   // 可选：添加全局 Lynx 行为/模块、模板提供者等
   // setSharedProcessDensityOverride(2.0f)
+  setDefaultThreadStrategy(SparklingThreadStrategy.MULTI_THREADS)
 }
 val hybridConfig = SparklingHybridConfig.build(baseInfoConfig) {
   setLynxConfig(lynxConfig)
@@ -78,6 +79,7 @@ Sparkling 创建的 `LynxView` 也必须使用完全相同的 density 构造**�
 |------|------|
 | `scheme` | 要加载的 `hybrid://...` URL。 |
 | `sparklingUIProvider` | 实现 `SparklingUIProvider` 以自定义加载/错误/工具栏视图。 |
+| `threadStrategy` | 可选的容器级 `SparklingThreadStrategy`，优先于全局默认值。 |
 | `hybridSchemeParam` | 解析后的 scheme 参数（从 `scheme` 自动填充）。 |
 | `lynxViewport` | 可选的 `SparklingLynxViewport(widthPx, heightPx)`，以物理像素指定固定 viewport。程序化配置会覆盖 scheme 中解析的尺寸。 |
 | `containerId` | 唯一的容器标识符（自动生成）。 |
@@ -85,6 +87,15 @@ Sparkling 创建的 `LynxView` 也必须使用完全相同的 density 构造**�
 高级宿主如果已经使用 `LynxKitInitParams`，也可以设置其 `lynxViewport` 属性。优先级依次为：
 init params、`SparklingContext.lynxViewport`、canonical scheme 的 `width` 和 `height`。
 三种入口都只接受完整的正数宽高组合。
+
+## 线程策略
+
+`SparklingThreadStrategy` 为 Lynx 的 `ALL_ON_UI`、`MOST_ON_TASM`、
+`PART_ON_LAYOUT` 和 `MULTI_THREADS` 渲染线程策略提供类型安全的映射。
+可以通过 `SparklingLynxConfig.Builder.setDefaultThreadStrategy(...)`
+设置可选的全局默认值，也可以通过 `SparklingContext.threadStrategy`
+为单个容器覆盖。容器级配置优先；两者都未设置时，Sparkling 不改变
+Lynx SDK 的默认策略。
 
 ## SparklingUIProvider
 
