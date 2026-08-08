@@ -171,3 +171,44 @@ Interface for customizing container UI. Applies to both full-page and embedded c
 | `getLoadingView(context)` | Returns a custom loading view, or `null` for the default. |
 | `getErrorView(context)` | Returns a custom error view, or `null` for the default. |
 | `getToolBar(context)` | Returns a custom `Toolbar` for `SparklingActivity` (full-page only). |
+
+### Failed-view retry
+
+To let a custom error view retry through Sparkling's SDK-owned load path, make
+the view returned by `getErrorView(context)` implement
+`SparklingRetryableErrorView`. This is an optional capability; existing
+`SparklingUIProvider` implementations and plain error views remain compatible.
+
+```java
+public final class AppErrorView extends FrameLayout
+    implements SparklingRetryableErrorView {
+  private SparklingFailedViewRetry retry;
+
+  @Override
+  public void setSparklingRetry(SparklingFailedViewRetry retry) {
+    this.retry = retry;
+    retryButton.setOnClickListener(
+        ignored -> {
+          SparklingFailedViewRetry current = this.retry;
+          if (current != null && current.retry()) {
+            this.retry = null;
+          }
+        });
+  }
+}
+```
+
+Sparkling registers a new single-use `SparklingFailedViewRetry` for each
+current load failure. `retry()` must be called on the Android main thread and
+returns `true` only when that exact current failure is atomically accepted.
+Double taps, stale requests, off-main calls, and calls after container release
+return `false`. An accepted retry clears the error UI and invokes Sparkling's
+owned reload path without reopening the route.
+
+If the retry fails, Sparkling returns the container to `FAIL` and registers a
+new retry request. If it succeeds, the container reaches `SUCCESS`. Sparkling
+also calls `setSparklingRetry(null)` when a request becomes invalid, including
+on a new load, success, accepted retry, or release. Implementations must replace
+their previous listener/request and must not retain the supplied `Context`.
+The same contract is used by full-page `SparklingActivity` containers and
+embedded `SparklingView` containers.

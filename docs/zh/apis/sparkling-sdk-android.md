@@ -135,3 +135,40 @@ Lynx SDK 的默认策略。
 | `getLoadingView(context)` | 返回自定义加载视图，返回 `null` 使用默认。 |
 | `getErrorView(context)` | 返回自定义错误视图，返回 `null` 使用默认。 |
 | `getToolBar(context)` | 返回 `SparklingActivity` 使用的自定义 `Toolbar`（仅全页容器）。 |
+
+### 失败页重试
+
+如果自定义错误页需要通过 Sparkling SDK 自己的加载链路重试，让
+`getErrorView(context)` 返回的 View 实现 `SparklingRetryableErrorView`。
+这是可选能力；已有 `SparklingUIProvider` 和普通错误 View 无需修改。
+
+```java
+public final class AppErrorView extends FrameLayout
+    implements SparklingRetryableErrorView {
+  private SparklingFailedViewRetry retry;
+
+  @Override
+  public void setSparklingRetry(SparklingFailedViewRetry retry) {
+    this.retry = retry;
+    retryButton.setOnClickListener(
+        ignored -> {
+          SparklingFailedViewRetry current = this.retry;
+          if (current != null && current.retry()) {
+            this.retry = null;
+          }
+        });
+  }
+}
+```
+
+每次当前加载失败时，Sparkling 都会注册一个新的、只能成功使用一次的
+`SparklingFailedViewRetry`。`retry()` 必须在 Android 主线程调用；只有
+该请求仍对应当前失败且被原子接受时才返回 `true`。双击、过期请求、
+非主线程调用以及容器释放后的调用都会返回 `false`。接受后 Sparkling
+会清除错误 UI，并通过 SDK 自己的 reload 链路重试，不重新打开路由。
+
+如果重试仍失败，容器会重新进入 `FAIL` 并注册新的 retry；如果成功，
+容器会进入 `SUCCESS`。在新加载、成功、接受重试或释放等请求失效时，
+Sparkling 也会调用 `setSparklingRetry(null)`。实现方必须替换之前的
+监听器或请求，并且不能持有传入的 `Context`。全页
+`SparklingActivity` 和嵌入式 `SparklingView` 使用相同契约。

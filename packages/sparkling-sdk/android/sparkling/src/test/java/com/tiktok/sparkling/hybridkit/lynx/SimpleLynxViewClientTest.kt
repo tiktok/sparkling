@@ -69,6 +69,31 @@ class SimpleLynxViewClientTest {
     }
 
     @Test
+    fun beginLoadAllowsFailureAgainWhenReloadHasNoPageStart() {
+        val firstUrl = "https://example.com/first.lynx.bundle"
+        val retryUrl = "https://example.com/retry.lynx.bundle"
+        client.beginLoad(firstUrl)
+        client.onReceivedError(fatalLynxError())
+
+        client.beginLoad(retryUrl)
+        client.onReceivedError(fatalLynxError())
+
+        verify(exactly = 1) { lifeCycle.onLoadFailed(kitView, firstUrl, any<HybridKitError>()) }
+        verify(exactly = 1) { lifeCycle.onLoadFailed(kitView, retryUrl, any<HybridKitError>()) }
+    }
+
+    @Test
+    fun beginLoadAllowsSuccessAfterPreviousFailureWithoutPageStart() {
+        client.beginLoad("https://example.com/missing.lynx.bundle")
+        client.onReceivedError(fatalLynxError())
+
+        client.beginLoad("https://example.com/available.lynx.bundle")
+        client.onLoadSuccess()
+
+        verify(exactly = 1) { kitView.onLoadSuccess() }
+    }
+
+    @Test
     fun onReceivedErrorKeepsFatalErrorOnFailedPath() {
         val errorSlot = slot<HybridKitError>()
 
