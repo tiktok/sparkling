@@ -21,7 +21,7 @@ val baseInfoConfig = BaseInfoConfig(isDebug = BuildConfig.DEBUG)
 val lynxConfig = SparklingLynxConfig.build(this) {
   // optional: add global Lynx behaviors/modules, template provider, etc.
   // setSharedProcessDensityOverride(2.0f)
-  setDefaultThreadStrategy(SparklingThreadStrategy.MULTI_THREADS)
+  setDefaultThreadStrategy(SparklingThreadStrategy.PART_ON_LAYOUT)
   setResourceFetcherFactory { sparklingContext ->
     SparklingResourceFetcherConfig.builder()
       .setGenericResourceFetcher(createGenericFetcher(sparklingContext))
@@ -58,8 +58,8 @@ Entry point for creating containers. See [Containers](../guide/containers.md) fo
 | Method | Description |
 |--------|-------------|
 | `Sparkling.build(context, sparklingContext)` | Creates a `Sparkling` instance from an Android `Context` and a `SparklingContext`. |
-| `navigate()` | Starts `SparklingActivity` (full-page container). Returns `true` on success. |
-| `createView(withoutPrepare)` | Creates a `SparklingView` (embedded container). Returns `null` on failure. |
+| `navigate()` | Starts `SparklingActivity` (full-page container). Returns `true` on success and throws a typed exception for incompatible Lynx configuration. |
+| `createView(withoutPrepare)` | Creates a `SparklingView` (embedded container). Returns `null` for other creation failures and throws a typed exception for incompatible Lynx configuration when prepare is enabled. |
 
 ## SparklingView
 
@@ -161,6 +161,43 @@ Set an optional global default with
 one container with `SparklingContext.threadStrategy`. The per-container value
 takes precedence. If neither value is set, Sparkling leaves the Lynx SDK
 default unchanged.
+
+### Fixed viewport compatibility
+
+Do not combine an effective fixed viewport with the effective
+`SparklingThreadStrategy.MULTI_THREADS` strategy. This combination can crash
+inside the native Lynx SDK. Sparkling rejects it before constructing the
+`LynxView` and throws `SparklingLynxConfigurationException` with
+`SparklingLynxConfigurationError.FIXED_VIEWPORT_WITH_MULTI_THREADS`.
+Both `navigate()` and prepared `createView(false)` calls fail synchronously
+before starting or constructing a container.
+
+Sparkling resolves all typed configuration before validating it:
+
+1. viewport: `LynxKitInitParams.lynxViewport`, then
+   `SparklingContext.lynxViewport`, then canonical scheme `width`/`height`;
+2. thread strategy: `SparklingContext.threadStrategy`, then
+   `SparklingLynxConfig.defaultThreadStrategy`, then the unchanged Lynx
+   default.
+
+Validation therefore does not depend on whether the viewport or strategy
+setter ran first. A safe page strategy can override a global
+`MULTI_THREADS` default. `MULTI_THREADS` without a fixed viewport and fixed
+viewports with `ALL_ON_UI`, `MOST_ON_TASM`, `PART_ON_LAYOUT`, or no explicit
+strategy keep their existing behavior.
+
+Java callers can catch and inspect the typed failure:
+
+```java
+try {
+  SparklingView view = Sparkling.build(context, sparklingContext).createView(false);
+} catch (SparklingLynxConfigurationException exception) {
+  if (exception.getError()
+      == SparklingLynxConfigurationError.FIXED_VIEWPORT_WITH_MULTI_THREADS) {
+    // Select a safe strategy or remove the fixed viewport.
+  }
+}
+```
 
 ## SparklingUIProvider
 

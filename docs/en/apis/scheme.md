@@ -72,6 +72,12 @@ screen size or density.
 The pair is atomic. If either parameter is missing, non-integer, zero, negative, or too large for an
 Android measure spec, Sparkling ignores both and keeps the default full-size behavior.
 
+A valid fixed viewport cannot be used with the effective Android
+`SparklingThreadStrategy.MULTI_THREADS` rendering strategy. Sparkling resolves
+the page strategy before the global default and rejects that unsafe
+combination with a typed `SparklingLynxConfigurationException` before Lynx
+view construction.
+
 ```
 hybrid://lynxview_page?bundle=main.lynx.bundle&width=720&height=1280
 ```

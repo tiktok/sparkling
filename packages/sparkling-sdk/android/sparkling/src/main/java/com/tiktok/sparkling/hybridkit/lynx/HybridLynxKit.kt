@@ -18,6 +18,7 @@ import com.tiktok.sparkling.SparklingContext
 import com.tiktok.sparkling.SparklingThreadStrategy
 import com.tiktok.sparkling.applyLynxViewport
 import com.tiktok.sparkling.resolveLynxViewport
+import com.tiktok.sparkling.validateLynxConfiguration
 import com.tiktok.sparkling.hybridkit.HybridCommon
 import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.base.IHybridKitLifeCycle
@@ -99,12 +100,16 @@ object HybridLynxKit {
             kitInitParams.loadUri = hybridContext.resolveFullScheme()?.toUri()
         }
 
-        val viewBuilder = createLynxViewBuilder(lynxConfig)
         val sparklingContext = hybridContext as? SparklingContext
-        sparklingContext?.resolveLynxViewport()?.let { viewport ->
+        val lynxViewport = sparklingContext?.resolveLynxViewport()
+        val threadStrategy = resolveThreadStrategy(sparklingContext?.threadStrategy, lynxConfig?.defaultThreadStrategy)
+        sparklingContext?.validateLynxConfiguration(lynxConfig?.defaultThreadStrategy)
+
+        val viewBuilder = createLynxViewBuilder(lynxConfig)
+        lynxViewport?.let { viewport ->
             viewBuilder.applyLynxViewport(viewport)
         }
-        applyThreadStrategy(viewBuilder, sparklingContext?.threadStrategy, lynxConfig?.defaultThreadStrategy)
+        applyThreadStrategy(viewBuilder, threadStrategy)
         var lynxViewRef: SimpleLynxKitView? = null
         val resourceFetcherConfig =
             SparklingResourceFetcherConfigurator.resolve(sparklingContext, lynxConfig)
@@ -140,11 +145,15 @@ object HybridLynxKit {
 
     internal fun applyThreadStrategy(
         viewBuilder: LynxViewBuilder,
-        pageThreadStrategy: SparklingThreadStrategy?,
-        defaultThreadStrategy: SparklingThreadStrategy?,
+        threadStrategy: SparklingThreadStrategy?,
     ) {
-        (pageThreadStrategy ?: defaultThreadStrategy)?.let {
+        threadStrategy?.let {
             viewBuilder.setThreadStrategyForRendering(it.toLynxThreadStrategy())
         }
     }
+
+    internal fun resolveThreadStrategy(
+        pageThreadStrategy: SparklingThreadStrategy?,
+        defaultThreadStrategy: SparklingThreadStrategy?,
+    ): SparklingThreadStrategy? = pageThreadStrategy ?: defaultThreadStrategy
 }
