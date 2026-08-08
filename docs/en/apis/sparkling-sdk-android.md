@@ -22,6 +22,13 @@ val lynxConfig = SparklingLynxConfig.build(this) {
   // optional: add global Lynx behaviors/modules, template provider, etc.
   // setSharedProcessDensityOverride(2.0f)
   setDefaultThreadStrategy(SparklingThreadStrategy.MULTI_THREADS)
+  setResourceFetcherFactory { sparklingContext ->
+    SparklingResourceFetcherConfig.builder()
+      .setGenericResourceFetcher(createGenericFetcher(sparklingContext))
+      .setMediaResourceFetcher(createMediaFetcher(sparklingContext))
+      .setTemplateResourceFetcher(createTemplateFetcher(sparklingContext))
+      .build()
+  }
 }
 val hybridConfig = SparklingHybridConfig.build(baseInfoConfig) {
   setLynxConfig(lynxConfig)
@@ -83,6 +90,32 @@ Configuration object passed to both container types.
 | `hybridSchemeParam` | Parsed scheme parameters (auto-populated from `scheme`). |
 | `lynxViewport` | Optional `SparklingLynxViewport(widthPx, heightPx)` fixed viewport in physical pixels. Programmatic configuration overrides parsed scheme dimensions. |
 | `containerId` | Unique container identifier (auto-generated). |
+| `resourceFetcherConfig` | Optional per-page typed resource fetchers. Overrides the global factory. |
+
+## Typed resource fetchers
+
+Use `SparklingResourceFetcherConfig` to provide Lynx generic, media, and
+template resource fetchers without accessing Sparkling's internal
+`LynxViewBuilder`. Set it on `SparklingContext` for one page, or configure a
+`SparklingResourceFetcherFactory` on `SparklingLynxConfig` to create fetchers
+for every page.
+
+```java
+SparklingResourceFetcherConfig fetchers =
+    SparklingResourceFetcherConfig.builder()
+        .setGenericResourceFetcher(genericFetcher)
+        .setMediaResourceFetcher(mediaFetcher)
+        .setTemplateResourceFetcher(templateFetcher)
+        .build();
+sparklingContext.setResourceFetcherConfig(fetchers);
+```
+
+The per-page config takes precedence over the global factory. Sparkling
+automatically enables Lynx generic resource fetching when a generic fetcher is
+configured. A typed template fetcher is wrapped so Sparkling's resource
+lifecycle receives one start and at most one finish event for both template
+and SSR requests. If no typed template fetcher is configured, Sparkling keeps
+using the existing `SimpleLynxTemplateProvider` path.
 
 For advanced hosts that already provide `LynxKitInitParams`, set its `lynxViewport` property. Init
 params take precedence over `SparklingContext.lynxViewport`, which takes precedence over canonical

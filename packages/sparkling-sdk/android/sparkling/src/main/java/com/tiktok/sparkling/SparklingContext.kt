@@ -105,4 +105,5 @@ class SparklingContext : HybridContext() {
     var lynxViewCreatedListener: SparklingLynxViewCreatedListener? = null
     var lynxViewport: SparklingLynxViewport? = null
     var threadStrategy: SparklingThreadStrategy? = null
+    var resourceFetcherConfig: SparklingResourceFetcherConfig? = null
 }
