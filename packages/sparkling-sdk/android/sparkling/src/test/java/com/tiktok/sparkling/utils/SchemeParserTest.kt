@@ -3,6 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.utils
 
+import com.tiktok.sparkling.SparklingLynxViewport
 import com.tiktok.sparkling.hybridkit.base.HybridContainerType
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
@@ -65,6 +66,66 @@ class SchemeParserTest {
         assertEquals(HybridKitType.LYNX, result!!.engineType)
         assertEquals(HybridContainerType.PAGE, result.containerType)
         assertEquals("http://10.0.2.2:5969/main.lynx.bundle", result.bundle)
+    }
+
+    @Test
+    fun testParseSchemeWithFixedLynxViewport() {
+        val result =
+            SchemeParser.parseScheme(
+                "hybrid://lynxview_page?bundle=test_bundle&width=720&height=1280",
+            )
+
+        assertEquals(SparklingLynxViewport(720, 1280), result?.lynxViewport)
+    }
+
+    @Test
+    fun testParseSchemeUsesLastValuedDuplicateViewportDimensions() {
+        val result =
+            SchemeParser.parseScheme(
+                "hybrid://lynxview_page?bundle=test_bundle&" +
+                    "width=320&height=480&width=720&height=1280",
+            )
+
+        assertEquals(SparklingLynxViewport(720, 1280), result?.lynxViewport)
+    }
+
+    @Test
+    fun testParseSchemeIgnoresTrailingValuelessDuplicateViewportDimensions() {
+        val result =
+            SchemeParser.parseScheme(
+                "hybrid://lynxview_page?bundle=test_bundle&" +
+                    "width=720&height=1280&width&height",
+            )
+
+        assertEquals(SparklingLynxViewport(720, 1280), result?.lynxViewport)
+    }
+
+    @Test
+    fun testParseSchemeLetsTrailingEmptyDuplicateInvalidateViewport() {
+        val result =
+            SchemeParser.parseScheme(
+                "hybrid://lynxview_page?bundle=test_bundle&" +
+                    "width=720&height=1280&width=",
+            )
+
+        assertNull(result?.lynxViewport)
+    }
+
+    @Test
+    fun testParseSchemeIgnoresIncompleteOrInvalidViewport() {
+        val schemes =
+            listOf(
+                "hybrid://lynxview_page?bundle=test_bundle&width=720",
+                "hybrid://lynxview_page?bundle=test_bundle&height=1280",
+                "hybrid://lynxview_page?bundle=test_bundle&width=0&height=1280",
+                "hybrid://lynxview_page?bundle=test_bundle&width=-1&height=1280",
+                "hybrid://lynxview_page?bundle=test_bundle&width=wide&height=1280",
+                "hybrid://lynxview_page?bundle=test_bundle&width=2147483647&height=1280",
+            )
+
+        schemes.forEach { scheme ->
+            assertNull("Unexpected viewport for $scheme", SchemeParser.parseScheme(scheme)?.lynxViewport)
+        }
     }
 
     @Test

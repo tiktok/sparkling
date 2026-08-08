@@ -5,6 +5,7 @@ package com.tiktok.sparkling.hybridkit.scheme
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.tiktok.sparkling.SparklingLynxViewport
 import com.tiktok.sparkling.hybridkit.base.HybridContainerType
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
 import java.io.Serializable
@@ -31,6 +32,8 @@ open class HybridSchemeParam(
 ) : BaseSchemeParam(engineType),
     Serializable,
     Parcelable {
+    var lynxViewport: SparklingLynxViewport? = null
+
     constructor(parcel: Parcel) : this(
         HybridKitType.values()[parcel.readInt()],
         HybridContainerType.values()[parcel.readInt()],
@@ -49,7 +52,14 @@ open class HybridSchemeParam(
         parcel.readByte() != 0.toByte(),
         parcel.readString(),
         if (parcel.dataAvail() > 0) parcel.readByte() != 0.toByte() else false,
-    )
+    ) {
+        lynxViewport =
+            if (parcel.dataAvail() > 0) {
+                parcel.readParcelable(SparklingLynxViewport::class.java.classLoader)
+            } else {
+                null
+            }
+    }
 
     override fun writeToParcel(
         parcel: Parcel,
@@ -73,6 +83,7 @@ open class HybridSchemeParam(
 //        parcel.writeString(fallbackUrl)
         parcel.writeString(forceThemeStyle)
         parcel.writeByte(if (disableAutoRemoveLoading) 1 else 0)
+        parcel.writeParcelable(lynxViewport, flags)
     }
 
     override fun describeContents(): Int = 0

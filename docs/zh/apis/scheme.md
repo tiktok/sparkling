@@ -55,6 +55,24 @@ hybrid://lynxview_page?bundle=main.lynx.bundle&title=Home&title_color=%23000000&
 | `loading_bg_color` | `#RRGGBB`（编码后） | 平台默认值 | 加载视图背景颜色。仅使用 6 位 RGB。 |
 | `hide_error` | `0`/`1` | `0` | 设为 `1` 时隐藏错误视图。 |
 
+## Android 固定 Lynx viewport
+
+Android 将 `width` 和 `height` 作为一组成对的正物理像素整数处理。两者均有效时，
+Sparkling 会使用精确的 preset measure spec 创建 LynxView，并以完全相同的尺寸将其挂载到
+容器中。这与历史 Lynx Explorer 的 viewport 语义一致，不会修改设备屏幕尺寸或 density。
+
+| 参数 | 类型 | 默认值 | 含义 |
+| --- | --- | --- | --- |
+| `width` | 正整数 | 容器宽度 | 固定 Lynx viewport 宽度，单位为物理像素。 |
+| `height` | 正整数 | 容器高度 | 固定 Lynx viewport 高度，单位为物理像素。 |
+
+这两个参数是原子配置。如果任意一个缺失、不是整数、为零、为负数，或超出 Android
+measure spec 的安全范围，Sparkling 会同时忽略二者并保留默认的全尺寸行为。
+
+```
+hybrid://lynxview_page?bundle=main.lynx.bundle&width=720&height=1280
+```
+
 ### 颜色格式（跨平台）
 
 使用 **6 位 RGB** 十六进制颜色：`#RRGGBB`（在 URL 中将 `#` 编码为 `%23`）。

@@ -39,6 +39,8 @@ object SchemeConstants {
         const val SHOW_NAV_BAR_IN_TRANS_STATUS_BAR = "show_nav_bar_in_trans_status_bar"
         const val HIDE_ERROR = "hide_error"
         const val FORCE_THEME_STYLE = "force_theme_style"
+        const val WIDTH = "width"
+        const val HEIGHT = "height"
     }
 
     object Value {

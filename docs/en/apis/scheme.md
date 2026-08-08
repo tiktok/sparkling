@@ -57,6 +57,25 @@ Only the following parameters are guaranteed to have an effect on **both Android
 | `loading_bg_color` | `#RRGGBB` (encoded) | platform default | Loading view background color. Use 6-digit RGB only. |
 | `hide_error` | `0`/`1` | `0` | Hide the error view when set to `1`. |
 
+## Android fixed Lynx viewport
+
+Android accepts `width` and `height` as a pair of positive physical-pixel integers. When both are
+valid, Sparkling creates the Lynx view with exact preset measure specs and hosts it at exactly that
+size. This preserves the historical Lynx Explorer viewport semantic; it does not change the device
+screen size or density.
+
+| Param | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `width` | positive integer | container width | Fixed Lynx viewport width in physical pixels. |
+| `height` | positive integer | container height | Fixed Lynx viewport height in physical pixels. |
+
+The pair is atomic. If either parameter is missing, non-integer, zero, negative, or too large for an
+Android measure spec, Sparkling ignores both and keeps the default full-size behavior.
+
+```
+hybrid://lynxview_page?bundle=main.lynx.bundle&width=720&height=1280
+```
+
 ### Color format (cross-platform)
 
 Use **6-digit RGB** hex colors: `#RRGGBB` (encode `#` as `%23` in a URL).

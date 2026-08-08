@@ -313,7 +313,10 @@ class SparklingView(
                 },
             )
         kitViewDelegate = kitView
-        addView(kitView?.realView())
+        val kitRealView = kitView?.realView()
+        kitRealView?.let {
+            addView(it, it.resolveLynxLayoutParams(sparklingContext))
+        }
         observeKitViewLayout(kitView)
 
         handleUI()
@@ -609,6 +612,15 @@ class SparklingView(
             return null
         }
         return Size(resolvedWidth, resolvedHeight)
+    }
+
+    private fun View.resolveLynxLayoutParams(sparklingContext: SparklingContext): LayoutParams {
+        val viewport = sparklingContext.resolveLynxViewport()
+        return if (viewport == null) {
+            LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+        } else {
+            LayoutParams(viewport.widthPx, viewport.heightPx)
+        }
     }
 
     private fun runOnMain(action: () -> Unit) {

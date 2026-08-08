@@ -103,4 +103,5 @@ class SparklingContext : HybridContext() {
     var sparklingUIProvider: SparklingUIProvider? = null
     var lifecycleDelegate: SparklingLifecycleDelegate? = null
     var lynxViewCreatedListener: SparklingLynxViewCreatedListener? = null
+    var lynxViewport: SparklingLynxViewport? = null
 }

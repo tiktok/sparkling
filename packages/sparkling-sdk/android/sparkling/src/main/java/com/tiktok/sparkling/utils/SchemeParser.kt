@@ -6,6 +6,7 @@ package com.tiktok.sparkling.utils
 import android.content.res.Configuration
 import android.net.Uri
 import androidx.core.net.toUri
+import com.tiktok.sparkling.SparklingLynxViewport
 import com.tiktok.sparkling.hybridkit.base.HybridContainerType
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
@@ -130,7 +131,24 @@ object SchemeParser {
         params.containerBgColor = resolveThemedColor(uri, SchemeConstants.Param.CONTAINER_BG_COLOR, params.forceThemeStyle)
         params.showNavBarInTransStatusBar = uri.safeGetQueryParameter(SchemeConstants.Param.SHOW_NAV_BAR_IN_TRANS_STATUS_BAR) == SchemeConstants.Value.ENABLED
         params.hideError = uri.safeGetQueryParameter(SchemeConstants.Param.HIDE_ERROR) == SchemeConstants.Value.ENABLED
+        params.lynxViewport =
+            SparklingLynxViewport.fromRawDimensions(
+                uri.lastValuedQueryParameter(SchemeConstants.Param.WIDTH),
+                uri.lastValuedQueryParameter(SchemeConstants.Param.HEIGHT),
+            )
 
         return params
+    }
+
+    private fun Uri.lastValuedQueryParameter(key: String): String? {
+        val components = encodedQuery?.split('&') ?: return null
+        for (component in components.asReversed()) {
+            val separator = component.indexOf('=')
+            if (separator < 0 || Uri.decode(component.substring(0, separator)) != key) {
+                continue
+            }
+            return Uri.decode(component.substring(separator + 1))
+        }
+        return null
     }
 }
