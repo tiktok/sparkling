@@ -6,6 +6,7 @@ dist/
 coverage/
 *.tsbuildinfo
 **/*.lynx.bundle
+!android/app/src/main/assets/device-acceptance.lynx.bundle
 .sparkling/
 
 # Android SDK artifacts
