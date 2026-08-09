@@ -33,6 +33,7 @@ open class SPKLynxKitUtils: SPKKitUtils {
         lynxKitParams.context = context
         lynxKitParams.widthMode = context?.widthMode != nil ? context?.widthMode?.intValue as? LynxViewSizeMode : LynxViewSizeMode.exact
         lynxKitParams.heightMode = context?.heightMode != nil ? context?.heightMode?.intValue as? LynxViewSizeMode : LynxViewSizeMode.exact
+        lynxKitParams.viewport = (context as? SPKContext)?.lynxViewport
         lynxKitParams.imageFetcher = context?.imageFetcher
         lynxKitParams.loadMeta = context?.loadData
         lynxKitParams.templateProvider = context?.templateProvider

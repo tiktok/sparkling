@@ -95,6 +95,15 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
     /// global properties that are passed to the Lynx template.
     private var globalProps: LynxTemplateData?
 
+    /// Keeps exact Lynx layout metrics independent from outer UIKit constraints.
+    private var fixedViewportSize: CGSize?
+
+    open override var frame: CGRect {
+        didSet {
+            self.applyFixedViewportIfNeeded()
+        }
+    }
+
     /// Read-only snapshot of the current global properties as a plain Swift
     /// dictionary. Debug tools (for example the GlobalProps inspector panel)
     /// use this to display the props passed to the underlying Lynx template
@@ -152,6 +161,10 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
         var lynxConfig: LynxConfig? = nil
         let containerID = UUID().uuidString
         let namescope = params?.context?.pipeNameSpace ?? "host"
+        let viewportSize = params?.viewport.map {
+            CGSize(width: $0.width, height: $0.height)
+        }
+        let lynxFrame = viewportSize.map { CGRect(origin: .zero, size: $0) } ?? frame
         super.init { builder in
             lynxConfig = LynxConfig(provider: params?.context?.templateProvider ?? Self.globalResourceProvider)
             builder.config = lynxConfig
@@ -180,6 +193,10 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
             builder.addLynxResourceProvider(LYNX_PROVIDER_TYPE_EXTERNAL_JS, provider: Self.globalResourceProvider)
 
             builder.setThreadStrategyForRender(.allOnUI)
+            if viewportSize != nil {
+                builder.frame = lynxFrame
+                builder.screenSize = lynxFrame.size
+            }
 
             var URL = params?.sourceUrl ?? ""
             builder.lynxModuleExtraData = ["URL": URL]
@@ -188,11 +205,12 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
         self.containerID = containerID
         self.lynxConfig = lynxConfig
         self.params = params
-        self.frame = frame
         self.layoutWidthMode = params?.widthMode as? LynxViewSizeMode ?? .undefined
         self.layoutHeightMode = params?.heightMode as? LynxViewSizeMode ?? .undefined
-        self.preferredLayoutWidth = frame.size.width
-        self.preferredLayoutHeight = frame.size.height
+        self.fixedViewportSize = viewportSize
+        self.preferredLayoutWidth = lynxFrame.size.width
+        self.preferredLayoutHeight = lynxFrame.size.height
+        self.frame = frame
         self.setupGlobalProps()
         self.globalProps?.update(self.containerID, forKey: "containerID")
 
@@ -448,29 +466,43 @@ extension SPKWrapperLynxView: SPKLynxResourceProviderDelegate {
 protocol SPKUIKit {}
 
 extension SPKWrapperLynxView: SPKUIKit {
+    private func applyFixedViewportIfNeeded() {
+        guard let fixedViewportSize else {
+            return
+        }
+        self.updateScreenMetrics(
+            withWidth: fixedViewportSize.width,
+            height: fixedViewportSize.height)
+        self.updateViewport(
+            withPreferredLayoutWidth: fixedViewportSize.width,
+            preferredLayoutHeight: fixedViewportSize.height)
+    }
+
     open override func triggerLayout() {
+        let layoutSize = self.fixedViewportSize ?? self.frame.size
         switch self.layoutWidthMode {
         case .undefined, .max:
-            self.preferredMaxLayoutWidth = self.frame.size.width
+            self.preferredMaxLayoutWidth = layoutSize.width
         case .exact:
-            self.preferredLayoutWidth = self.frame.size.width
+            self.preferredLayoutWidth = layoutSize.width
         default:
-            self.preferredMaxLayoutWidth = self.frame.size.width
+            self.preferredMaxLayoutWidth = layoutSize.width
         }
 
         switch self.layoutHeightMode {
         case .undefined, .max:
-            self.preferredMaxLayoutHeight = self.frame.size.height
+            self.preferredMaxLayoutHeight = layoutSize.height
         case .exact:
-            self.preferredLayoutHeight = self.frame.size.height
+            self.preferredLayoutHeight = layoutSize.height
         default:
-            self.preferredMaxLayoutHeight = self.frame.size.height
+            self.preferredMaxLayoutHeight = layoutSize.height
         }
         super.triggerLayout()
     }
 
     open override func layoutSubviews() {
         super.layoutSubviews()
+        self.applyFixedViewportIfNeeded()
         self.triggerLayout()
     }
 }

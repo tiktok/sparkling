@@ -88,6 +88,7 @@ Configuration object passed to both container types.
 | `navigationBarBackHandler` | Called on the main thread for a navigation-bar back action before the SDK pops or dismisses. Return `true` when the host consumes the action, including an intentional rejection; return `false` only to keep the SDK default. Weakly capture coordinators that retain the container stack. |
 | `interactivePopGestureDelegate` | Weak, main-actor delegate for host-owned system interactive pop. It can reject the gesture before UIKit starts and receives exactly one completion or cancellation callback after every authorized gesture. Sparkling temporarily enables the system recognizer and restores its previous state when the container is no longer active. |
 | `interfaceOrientationPolicy` | Per-container orientation policy for full-page containers: system/default, portrait, or landscape. Landscape supports both landscape orientations and prefers landscape-right for modal presentation. The system policy preserves the host application's UIKit behavior. |
+| `lynxViewport` | Optional fixed logical-pixel viewport for Lynx screen metrics and exact layout bounds. The outer UIKit container keeps its host-assigned frame. |
 | `appTheme` | Theme configuration. |
 | `customUIElements` | Custom Lynx UI elements to register. |
 | `extra` | Dictionary of additional data passed to the container. |
