@@ -115,6 +115,33 @@ struct SPKRouterTests {
         }
     }
 
+    @Test func navigationControllerUsesNonSparklingTopControllerPolicy() {
+        final class HostViewController: UIViewController {
+            override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+                .portraitUpsideDown
+            }
+
+            override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
+                .portraitUpsideDown
+            }
+        }
+
+        let delegate = SPKViewController(
+            withURL: nil,
+            config: SPKSchemeParam(),
+            context: SPKContext(),
+            frame: .zero)
+        let host = HostViewController()
+        let navigationController = UINavigationController(rootViewController: host)
+
+        #expect(
+            delegate.navigationControllerSupportedInterfaceOrientations(
+                navigationController) == .portraitUpsideDown)
+        #expect(
+            delegate.navigationControllerPreferredInterfaceOrientationForPresentation(
+                navigationController) == .portraitUpsideDown)
+    }
+
     @Test func viewAppearanceSchedulesPortraitGeometryUpdate() {
         let context = SPKContext()
         context.interfaceOrientationPolicy = .portrait
