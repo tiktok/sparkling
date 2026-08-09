@@ -1121,16 +1121,16 @@ extension SPKViewController: UINavigationControllerDelegate {
     public func navigationControllerSupportedInterfaceOrientations(
         _ navigationController: UINavigationController
     ) -> UIInterfaceOrientationMask {
-        return (navigationController.topViewController as? SPKViewController)?
-            .supportedInterfaceOrientations ?? navigationController.supportedInterfaceOrientations
+        return navigationController.topViewController?.supportedInterfaceOrientations
+            ?? super.supportedInterfaceOrientations
     }
 
     public func navigationControllerPreferredInterfaceOrientationForPresentation(
         _ navigationController: UINavigationController
     ) -> UIInterfaceOrientation {
-        return (navigationController.topViewController as? SPKViewController)?
+        return navigationController.topViewController?
             .preferredInterfaceOrientationForPresentation
-            ?? navigationController.preferredInterfaceOrientationForPresentation
+            ?? super.preferredInterfaceOrientationForPresentation
     }
 }
 
