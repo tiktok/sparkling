@@ -3,8 +3,9 @@
 // LICENSE file in the root directory of this source tree.
 
 import Lynx
-import Sparkling
 import Testing
+
+@testable import Sparkling
 
 struct SPKHybridContextTests {
 
@@ -240,6 +241,18 @@ struct SPKHybridContextTests {
         #expect(context.widthMode?.intValue == 100)
         #expect(context.heightMode?.intValue == 200)
         #expect((context.initialData as? [String: String])?["lynx"] == "data")
+    }
+
+    @Test func testLynxViewportMapsIntoKitParams() {
+        let context = SPKContext()
+        context.lynxViewport = SPKLynxViewport(width: 200, height: 300)
+
+        let params = SPKLynxKitUtils.lynxKitParams(withContext: context)
+
+        #expect(params.viewport?.width == 200)
+        #expect(params.viewport?.height == 300)
+        #expect(params.widthMode == .exact)
+        #expect(params.heightMode == .exact)
     }
 
     // MARK: - Edge Cases

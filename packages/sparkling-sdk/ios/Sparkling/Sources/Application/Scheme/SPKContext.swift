@@ -71,6 +71,26 @@ public enum SPKInterfaceOrientationPolicy: Int {
     case landscape
 }
 
+/// A fixed logical-pixel viewport for the Lynx content inside a Sparkling container.
+///
+/// The outer container remains owned by its host layout. This value controls
+/// Lynx screen metrics and exact layout bounds without exposing LynxViewBuilder.
+@objcMembers
+public final class SPKLynxViewport: NSObject {
+    public let width: CGFloat
+    public let height: CGFloat
+
+    @objc(initWithWidth:height:)
+    public init?(width: CGFloat, height: CGFloat) {
+        guard width.isFinite, height.isFinite, width > 0, height > 0 else {
+            return nil
+        }
+        self.width = width
+        self.height = height
+        super.init()
+    }
+}
+
 /// A context class that provides configuration and customization options for SPK containers.
 ///
 /// SPKContext extends SPKHybridContext to provide additional container-specific
@@ -133,6 +153,9 @@ open class SPKContext: SPKHybridContext {
     ///
     /// The system policy preserves the host application's default behavior.
     public var interfaceOrientationPolicy: SPKInterfaceOrientationPolicy = .system
+
+    /// An optional fixed logical-pixel viewport for Lynx screen metrics and layout.
+    public var lynxViewport: SPKLynxViewport?
 
     /// Indicates whether the container should use right-to-left layout.
     ///
@@ -233,6 +256,12 @@ open class SPKContext: SPKHybridContext {
 
         self.interfaceOrientationPolicy =
             isOverride ? context.interfaceOrientationPolicy : self.interfaceOrientationPolicy
+
+        self.lynxViewport =
+            SPKHybridContext.merge(
+                withProp: context.lynxViewport,
+                to: self.lynxViewport,
+                isOverride: isOverride) as? SPKLynxViewport
 
         self.containerLifecycleDelegate =
             SPKHybridContext.merge(

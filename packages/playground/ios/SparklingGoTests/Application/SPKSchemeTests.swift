@@ -267,6 +267,7 @@ struct SPKContextTests {
         #expect(context.failedViewBuilder == nil)
         #expect(context.naviBar == nil)
         #expect(context.interfaceOrientationPolicy == .system)
+        #expect(context.lynxViewport == nil)
     }
 
     @Test @MainActor func initializationWithBuilders() {
@@ -284,6 +285,13 @@ struct SPKContextTests {
         #expect(context.naviBar === naviBar)
     }
 
+    @Test func lynxViewportRejectsInvalidDimensions() {
+        #expect(SPKLynxViewport(width: 0, height: 100) == nil)
+        #expect(SPKLynxViewport(width: 100, height: -1) == nil)
+        #expect(SPKLynxViewport(width: .infinity, height: 100) == nil)
+        #expect(SPKLynxViewport(width: 100, height: .nan) == nil)
+    }
+
     @Test @MainActor func copyMethod() {
         let originalContext = SPKContext()
         // SPKContext doesn't have title property
@@ -292,6 +300,7 @@ struct SPKContextTests {
         let interactivePopGestureDelegate = TestSchemeInteractivePopGestureDelegate()
         originalContext.interactivePopGestureDelegate = interactivePopGestureDelegate
         originalContext.interfaceOrientationPolicy = .landscape
+        originalContext.lynxViewport = SPKLynxViewport(width: 200, height: 300)
 
         let copiedContext = originalContext.copy() as? SPKContext
 
@@ -301,6 +310,8 @@ struct SPKContextTests {
         #expect(copiedContext?.navigationBarBackHandler != nil)
         #expect(copiedContext?.interactivePopGestureDelegate === interactivePopGestureDelegate)
         #expect(copiedContext?.interfaceOrientationPolicy == .landscape)
+        #expect(copiedContext?.lynxViewport?.width == 200)
+        #expect(copiedContext?.lynxViewport?.height == 300)
         #expect(copiedContext !== originalContext)
     }
 
@@ -324,6 +335,30 @@ struct SPKContextTests {
         target.merge(withContext: source, isOverride: true)
 
         #expect(target.interfaceOrientationPolicy == .landscape)
+    }
+
+    @Test func mergePreservesExistingLynxViewportWithoutOverride() {
+        let target = SPKContext()
+        target.lynxViewport = SPKLynxViewport(width: 100, height: 200)
+        let source = SPKContext()
+        source.lynxViewport = SPKLynxViewport(width: 300, height: 400)
+
+        target.merge(withContext: source, isOverride: false)
+
+        #expect(target.lynxViewport?.width == 100)
+        #expect(target.lynxViewport?.height == 200)
+    }
+
+    @Test func mergeOverridesLynxViewportWhenRequested() {
+        let target = SPKContext()
+        target.lynxViewport = SPKLynxViewport(width: 100, height: 200)
+        let source = SPKContext()
+        source.lynxViewport = SPKLynxViewport(width: 300, height: 400)
+
+        target.merge(withContext: source, isOverride: true)
+
+        #expect(target.lynxViewport?.width == 300)
+        #expect(target.lynxViewport?.height == 400)
     }
 
     @Test func copyPreservesLynxModuleAndCustomUIElements() {

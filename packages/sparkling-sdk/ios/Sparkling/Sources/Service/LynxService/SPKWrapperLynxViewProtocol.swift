@@ -35,6 +35,9 @@ public protocol SPKLynxElement {
     /// The height sizing mode for the Lynx view layout.
     public var heightMode: LynxViewSizeMode?
 
+    /// Optional fixed logical-pixel viewport for Lynx screen metrics and layout.
+    public var viewport: SPKLynxViewport?
+
     /// Query parameters to be passed along with requests.
     public var queryItems: [String: Any]?
 

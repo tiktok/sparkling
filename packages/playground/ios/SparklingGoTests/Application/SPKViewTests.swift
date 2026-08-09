@@ -165,6 +165,28 @@ struct SPKViewTests {
         #expect(view.frame.height == 100)
     }
 
+    @Test func lynxViewportSurvivesOuterFrameChanges() {
+        let params = SPKLynxKitParams()
+        params.context = SPKContext()
+        params.widthMode = .exact
+        params.heightMode = .exact
+        params.viewport = SPKLynxViewport(width: 200, height: 300)
+
+        let view = SPKWrapperLynxView(
+            withFrame: CGRect(x: 0, y: 0, width: 390, height: 844),
+            params: params)
+
+        #expect(view.frame.size == CGSize(width: 390, height: 844))
+        #expect(view.preferredLayoutWidth == 200)
+        #expect(view.preferredLayoutHeight == 300)
+
+        view.frame = CGRect(x: 0, y: 0, width: 844, height: 390)
+        view.layoutSubviews()
+
+        #expect(view.preferredLayoutWidth == 200)
+        #expect(view.preferredLayoutHeight == 300)
+    }
+
     @Test func nilURLHandling() {
         let view = SPKContainerView()
 
