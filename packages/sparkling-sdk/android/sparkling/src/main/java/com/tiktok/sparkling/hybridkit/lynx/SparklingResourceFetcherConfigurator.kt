@@ -26,9 +26,15 @@ internal object SparklingResourceFetcherConfigurator {
         lifeCycle: IHybridKitLifeCycle?,
         kitViewProvider: () -> SimpleLynxKitView?,
     ) {
+        val hasTypedFetcher =
+            config?.genericResourceFetcher != null ||
+                config?.mediaResourceFetcher != null ||
+                config?.templateResourceFetcher != null
+        if (hasTypedFetcher) {
+            viewBuilder.setEnableGenericResourceFetcher(LynxBooleanOption.TRUE)
+        }
         config?.genericResourceFetcher?.let {
             viewBuilder.setGenericResourceFetcher(it)
-            viewBuilder.setEnableGenericResourceFetcher(LynxBooleanOption.TRUE)
         }
         config?.mediaResourceFetcher?.let {
             viewBuilder.setMediaResourceFetcher(it)

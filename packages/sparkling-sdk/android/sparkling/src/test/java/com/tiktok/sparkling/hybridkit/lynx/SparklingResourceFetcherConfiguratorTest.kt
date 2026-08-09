@@ -106,6 +106,60 @@ class SparklingResourceFetcherConfiguratorTest {
     }
 
     @Test
+    fun applyEnablesResourcePipelineForTemplateOnlyFetcher() {
+        val viewBuilder = mockk<LynxViewBuilder>(relaxed = true)
+        val templateFetcher = mockk<LynxTemplateResourceFetcher>()
+        val config =
+            SparklingResourceFetcherConfig
+                .builder()
+                .setTemplateResourceFetcher(templateFetcher)
+                .build()
+
+        SparklingResourceFetcherConfigurator.apply(
+            viewBuilder,
+            config,
+            mockk<AbsTemplateProvider>(),
+            null,
+        ) { null }
+
+        verify(exactly = 1) {
+            viewBuilder.setEnableGenericResourceFetcher(LynxBooleanOption.TRUE)
+        }
+        verify(exactly = 1) {
+            viewBuilder.setTemplateResourceFetcher(any<SparklingTemplateResourceFetcher>())
+        }
+        verify(exactly = 0) { viewBuilder.setGenericResourceFetcher(any()) }
+        verify(exactly = 0) { viewBuilder.setMediaResourceFetcher(any()) }
+    }
+
+    @Test
+    fun applyEnablesResourcePipelineForMediaOnlyFetcher() {
+        val viewBuilder = mockk<LynxViewBuilder>(relaxed = true)
+        val mediaFetcher = mockk<LynxMediaResourceFetcher>()
+        val config =
+            SparklingResourceFetcherConfig
+                .builder()
+                .setMediaResourceFetcher(mediaFetcher)
+                .build()
+
+        SparklingResourceFetcherConfigurator.apply(
+            viewBuilder,
+            config,
+            mockk<AbsTemplateProvider>(),
+            null,
+        ) { null }
+
+        verify(exactly = 1) {
+            viewBuilder.setEnableGenericResourceFetcher(LynxBooleanOption.TRUE)
+        }
+        verify(exactly = 1) { viewBuilder.setMediaResourceFetcher(mediaFetcher) }
+        verify(exactly = 0) { viewBuilder.setGenericResourceFetcher(any()) }
+        verify(exactly = 1) {
+            viewBuilder.setTemplateProvider(any<SimpleLynxTemplateProvider>())
+        }
+    }
+
+    @Test
     fun applyKeepsDefaultTemplateProviderPathWhenTypedTemplateIsUnset() {
         val viewBuilder = mockk<LynxViewBuilder>(relaxed = true)
         val defaultTemplateProvider = mockk<AbsTemplateProvider>()
