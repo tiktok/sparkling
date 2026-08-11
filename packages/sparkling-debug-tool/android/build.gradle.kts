@@ -34,6 +34,11 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -45,6 +50,8 @@ dependencies {
     implementation(libs.lynx.service.log)
     implementation(libs.lynx.service.devtool)
     implementation(libs.lynx.devtool)
+    testImplementation(libs.junit)
+    testImplementation("org.robolectric:robolectric:4.11.1")
 
     val sparklingVersion =
         (findProperty("SPARKLING_ANDROID_SDK_VERSION") as? String)
@@ -58,9 +65,9 @@ dependencies {
     }
     val localSparklingMethod = rootProject.findProject(":sparkling-method")
     if (localSparklingMethod != null) {
-        compileOnly(localSparklingMethod)
+        implementation(localSparklingMethod)
     } else {
-        compileOnly("com.tiktok.sparkling:sparkling-method:$sparklingVersion")
+        implementation("com.tiktok.sparkling:sparkling-method:$sparklingVersion")
     }
 }
 
