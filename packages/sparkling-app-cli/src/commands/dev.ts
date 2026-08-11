@@ -12,6 +12,7 @@ import {
   resolveDevServerPort,
   updateDevServerPortInAppConfig,
 } from '../config';
+import { resolveRspeedyCommand } from '../utils/rspeedy';
 import { ui } from '../utils/ui';
 import { isVerboseEnabled, verboseLog } from '../utils/verbose';
 import { warnIfWildcardDevServerHost } from '../utils/dev-server-host';
@@ -64,9 +65,12 @@ export async function devProject(options: DevOptions): Promise<void> {
     }
   }
 
+  const rspeedy = resolveRspeedyCommand();
+
   if (isVerboseEnabled()) {
     verboseLog(`App config path: ${configPath}`);
     verboseLog(`Dev server port: ${port}`);
+    verboseLog(`Rspeedy binary: ${rspeedy.args[0]}`);
     if (host) {
       verboseLog(`Dev server host: ${host}`);
     }
@@ -124,7 +128,7 @@ export async function devProject(options: DevOptions): Promise<void> {
       if (isVerboseEnabled()) {
         verboseLog(`Temp Lynx config: ${tempConfigPath}`);
       }
-      child = spawn('rspeedy', ['dev', '--config', tempConfigPath], {
+      child = spawn(rspeedy.command, [...rspeedy.args, 'dev', '--config', tempConfigPath], {
         cwd: options.cwd,
         env: process.env,
         stdio: 'inherit',
