@@ -2,12 +2,22 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import semver from 'semver';
 import { verboseLog } from '../../utils/verbose';
 import type { CheckResult } from './types';
+
+function normalizeProcessOutput(output: unknown): string | null {
+  if (typeof output === 'string') {
+    return output.trim() || null;
+  }
+  if (Buffer.isBuffer(output)) {
+    return output.toString('utf8').trim() || null;
+  }
+  return null;
+}
 
 /**
  * Run a command and return its stdout (trimmed).
@@ -27,54 +37,23 @@ function exec(cmd: string, args: string[]): string | null {
 }
 
 /**
- * Some tools (e.g. `java -version`) print to stderr instead of stdout.
- * This helper captures stderr.
- */
-function execStderr(cmd: string, args: string[]): string | null {
-  try {
-    execFileSync(cmd, args, {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-      timeout: 15_000,
-    });
-    return null; // if it wrote to stdout we won't get stderr this way
-  } catch (err: unknown) {
-    // execFileSync throws when the process writes to stderr even with exit 0
-    // on some Node versions, or when exit code != 0. The stderr is on the error.
-    if (err && typeof err === 'object' && 'stderr' in err) {
-      const stderr = (err as { stderr: Buffer | string }).stderr;
-      return typeof stderr === 'string' ? stderr.trim() : stderr.toString('utf8').trim();
-    }
-    return null;
-  }
-}
-
-/**
- * A more robust way to get java -version output.
- * `java -version` prints to stderr; we try to capture it both ways.
+ * Get `java -version` output, which normally prints to stderr.
  */
 function getJavaVersionOutput(): string | null {
   try {
-    const child = execFileSync('java', ['-version'], {
+    const child = spawnSync('java', ['-version'], {
       encoding: 'utf8',
+      shell: false,
       stdio: ['ignore', 'pipe', 'pipe'],
       timeout: 15_000,
     });
-    // Some environments return the output on stdout
-    if (child && child.trim()) return child.trim();
-  } catch (err: unknown) {
-    if (err && typeof err === 'object' && 'stderr' in err) {
-      const stderr = (err as { stderr: Buffer | string }).stderr;
-      const text = typeof stderr === 'string' ? stderr.trim() : stderr.toString('utf8').trim();
-      if (text) return text;
+    if (child.error) {
+      return null;
     }
-    if (err && typeof err === 'object' && 'stdout' in err) {
-      const stdout = (err as { stdout: Buffer | string }).stdout;
-      const text = typeof stdout === 'string' ? stdout.trim() : stdout.toString('utf8').trim();
-      if (text) return text;
-    }
+    return normalizeProcessOutput(child.stderr) ?? normalizeProcessOutput(child.stdout);
+  } catch {
+    return null;
   }
-  return null;
 }
 
 const NODE_REQUIRED = '^22 || ^24';
