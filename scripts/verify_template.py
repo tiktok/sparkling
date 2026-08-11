@@ -22,20 +22,33 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import time
+import tomllib
 import urllib.request
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE_DIR = REPO_ROOT / "template" / "sparkling-app-template"
+TEMPLATE_ANDROID_DIR = TEMPLATE_DIR / "android"
+TEMPLATE_ANDROID_VERSION_CATALOG = TEMPLATE_ANDROID_DIR / "gradle" / "libs.versions.toml"
+PLAYGROUND_ANDROID_DIR = REPO_ROOT / "packages" / "playground" / "android"
+PLAYGROUND_ANDROID_VERSION_CATALOG = PLAYGROUND_ANDROID_DIR / "gradle" / "libs.versions.toml"
 CLI_DIR = REPO_ROOT / "packages" / "create-sparkling-app"
 CLI_ENTRY = CLI_DIR / "dist" / "index.js"
 IOS_PODS_CONFIG = REPO_ROOT / "scripts" / "ios_pods.json"
 COCOAPODS_USER_AGENT = "CocoaPods/1.16.2"
 COCOAPODS_CDN_ROOT = "https://cdn.cocoapods.org"
 COCOAPODS_CDN_BASE = f"{COCOAPODS_CDN_ROOT}/Specs"
+MAVEN_CENTRAL_ROOT = "https://repo1.maven.org/maven2"
+LYNX_GROUP = "org.lynxsdk.lynx"
+LYNX_PLUGIN_COORDINATE_PATTERN = re.compile(
+    r'org\.lynxsdk\.lynx:lynx-library-plugin:([^"]+)'
+)
+INDEPENDENT_LYNX_MODULES = {"debug-router", "v8so"}
+PRIMJS_MODULES = {"primjs", "primjsWasm"}
 
 # npm packages the scaffolded project installs at the release version.
 NPM_PACKAGES = [
@@ -116,6 +129,117 @@ def read_url(url):
 
 def read_json_url(url):
     return json.loads(read_url(url))
+
+
+def read_maven_json_url(url):
+    with urllib.request.urlopen(url, timeout=30) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def android_lynx_versions(path):
+    catalog = tomllib.loads(path.read_text())
+    versions = catalog["versions"]
+    return versions["lynxSdk"], versions["primjs"]
+
+
+def template_android_lynx_versions():
+    return android_lynx_versions(TEMPLATE_ANDROID_VERSION_CATALOG)
+
+
+def validate_template_android_lynx_versions():
+    lynx_version, primjs_version = template_android_lynx_versions()
+    mismatches = []
+    published_lynx_version, published_primjs_version = android_lynx_versions(
+        PLAYGROUND_ANDROID_VERSION_CATALOG
+    )
+    if (published_lynx_version, published_primjs_version) != (lynx_version, primjs_version):
+        mismatches.append(
+            f"{PLAYGROUND_ANDROID_VERSION_CATALOG.relative_to(REPO_ROOT)}: "
+            f"expected Lynx {lynx_version} / PrimJS {primjs_version}, "
+            f"got Lynx {published_lynx_version} / PrimJS {published_primjs_version}"
+        )
+    for path in [
+        TEMPLATE_ANDROID_DIR / "build.gradle.kts",
+        TEMPLATE_ANDROID_DIR / "settings.gradle.kts",
+        PLAYGROUND_ANDROID_DIR / "build.gradle.kts",
+        PLAYGROUND_ANDROID_DIR / "settings.gradle.kts",
+    ]:
+        matches = LYNX_PLUGIN_COORDINATE_PATTERN.findall(path.read_text())
+        if matches != [lynx_version]:
+            actual = ", ".join(matches) if matches else "<missing>"
+            mismatches.append(f"{path.relative_to(REPO_ROOT)}: expected {lynx_version}, got {actual}")
+    if mismatches:
+        return False, "Lynx library plugin/catalog mismatch: " + "; ".join(mismatches)
+    return True, f"Android publication, template, and Lynx library plugin use {lynx_version}"
+
+
+def maven_module_metadata_url(artifact, version):
+    name = artifact.rsplit("/", 1)[1]
+    return f"{MAVEN_CENTRAL_ROOT}/{artifact}/{version}/{name}-{version}.module"
+
+
+def dependency_version(dependency):
+    version = dependency.get("version", {})
+    for key in ("strictly", "requires", "prefers"):
+        if version.get(key):
+            return version[key]
+    return None
+
+
+def validate_maven_lynx_versions(module_metadata, lynx_version, primjs_version):
+    mismatches = []
+    for artifact, metadata in module_metadata.items():
+        seen = set()
+        for variant in metadata.get("variants", []):
+            dependencies = variant.get("dependencies", []) + variant.get("dependencyConstraints", [])
+            for dependency in dependencies:
+                if dependency.get("group") != LYNX_GROUP:
+                    continue
+                module = dependency.get("module")
+                actual = dependency_version(dependency)
+                entry = module, actual
+                if entry in seen:
+                    continue
+                seen.add(entry)
+                if module in INDEPENDENT_LYNX_MODULES:
+                    continue
+                expected = primjs_version if module in PRIMJS_MODULES else lynx_version
+                if actual != expected:
+                    mismatches.append(
+                        f"{artifact} publishes {LYNX_GROUP}:{module}:{actual or '<missing>'}; "
+                        f"template expects {expected}"
+                    )
+        if not seen:
+            mismatches.append(f"{artifact} publishes no Lynx dependency metadata")
+    if mismatches:
+        return False, "; ".join(mismatches)
+    return True, f"published Sparkling metadata matches Lynx {lynx_version} / PrimJS {primjs_version}"
+
+
+def verify_android_lynx_alignment(version, fetch_json=read_maven_json_url):
+    section("Verifying Android Lynx dependency alignment")
+    template_ready, template_reason = validate_template_android_lynx_versions()
+    if not template_ready:
+        raise SystemExit(f"::error::{template_reason}")
+    log(f"  template ok: {template_reason}")
+
+    lynx_version, primjs_version = template_android_lynx_versions()
+    module_metadata = {}
+    for artifact in MAVEN_ARTIFACTS:
+        url = maven_module_metadata_url(artifact, version)
+        try:
+            module_metadata[artifact] = fetch_json(url)
+        except Exception as err:
+            raise SystemExit(f"::error::Maven module metadata unavailable at {url}: {err}") from err
+
+    metadata_ready, metadata_reason = validate_maven_lynx_versions(
+        module_metadata,
+        lynx_version,
+        primjs_version,
+    )
+    if not metadata_ready:
+        raise SystemExit(f"::error::Android Lynx dependency mismatch: {metadata_reason}")
+    log(f"  maven ok: {metadata_reason}")
 
 
 def cocoapods_cdn_shard(pod):
@@ -207,10 +331,11 @@ def wait_for_maven(version, attempts=90, delay=20):
     missing = []
     for artifact in MAVEN_ARTIFACTS:
         base = artifact.rsplit("/", 1)[1]
-        url = f"https://repo1.maven.org/maven2/{artifact}/{version}/{base}-{version}.pom"
+        pom_url = f"{MAVEN_CENTRAL_ROOT}/{artifact}/{version}/{base}-{version}.pom"
+        module_url = maven_module_metadata_url(artifact, version)
         found = False
         for i in range(1, attempts + 1):
-            if http_ok(url):
+            if http_ok(pom_url) and http_ok(module_url):
                 log(f"  maven ok: {artifact.replace('/', '.')}:{version} (after {i} check(s))")
                 found = True
                 break
@@ -375,6 +500,7 @@ def verify_ios(version, workspace_dir, podfile_lock_out):
 def verify_android(version, workspace_dir):
     wait_for_npm(version)
     wait_for_maven(version)
+    verify_android_lynx_alignment(version)
     project = scaffold(workspace_dir)
 
     def attempt():
