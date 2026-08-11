@@ -13,6 +13,9 @@ import com.tiktok.sparkling.hybridkit.config.SparklingHybridConfig
 import com.tiktok.sparkling.hybridkit.lynx.HybridLynxKit
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
 import com.tiktok.sparkling.hybridkit.service.HybridActivityStackManager
+import com.tiktok.sparkling.hybridkit.theme.AbsSetThemePreferenceMethod
+import com.tiktok.sparkling.hybridkit.theme.SetThemePreferenceMethod
+import com.tiktok.sparkling.method.registry.core.SparklingBridgeManager
 import com.tiktok.sparkling.method.runtime.depend.BridgeBaseRuntime
 
 object HybridKit {
@@ -24,6 +27,12 @@ object HybridKit {
         HybridActivityStackManager.init(application)
         this.application = application
         BridgeBaseRuntime.applicationContext = application.applicationContext
+        SparklingBridgeManager.registerIDLMethod(
+            AbsSetThemePreferenceMethod.METHOD_NAME,
+            clazz = SetThemePreferenceMethod::class.java,
+        ) {
+            SetThemePreferenceMethod()
+        }
     }
 
     /**

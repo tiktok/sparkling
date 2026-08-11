@@ -29,10 +29,6 @@ function NavChainContent() {
         params: {
           title: `Stack Level ${depth + 1}`,
           hide_nav_bar: 0,
-          container_bg_color: isDark ? '#000000' : '#f0f2f5',
-          nav_bar_color: isDark ? '#000000' : '#ffffff',
-          title_color: isDark ? '#FFFFFF' : '#000000',
-          force_theme_style: resolved,
           depth: String(depth + 1),
           from_depth: String(depth),
         },

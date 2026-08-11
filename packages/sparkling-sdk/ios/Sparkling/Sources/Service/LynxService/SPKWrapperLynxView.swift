@@ -204,9 +204,11 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
         self.triggerLayout()
 
         NotificationCenter.default.post(name: SPKWrapperLynxView.didCreateNotification, object: self)
+        SPKThemePreferenceManager.shared.register(self)
     }
 
     deinit {
+        SPKThemePreferenceManager.shared.unregister(self)
         NotificationCenter.default.post(name: SPKWrapperLynxView.willDestroyNotification, object: self)
     }
 
