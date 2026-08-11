@@ -36,6 +36,25 @@ Opens full-page Sparkling containers. See [Containers — Full-page](../guide/co
 | `SPKRouter.close(container:)` | Pops or dismisses the given container. |
 | `SPKRouter.openInSystemBrowser(withURL:)` | Opens an HTTP/HTTPS URL in Safari. |
 
+## SPKHybridSchemeParam
+
+Build canonical full-page Lynx schemes with the SDK instead of assembling or
+percent-encoding the URL by hand.
+
+```swift
+let scheme = try SPKHybridSchemeParam.buildLynxPageScheme(
+    resource: .bundle("detail.lynx.bundle"),
+    queryItems: [URLQueryItem(name: "title", value: "Detail & preview")]
+)
+SPKRouter.open(withURL: scheme.absoluteString, context: nil)
+```
+
+Use `.url("https://example.com/detail.lynx.bundle")` for an absolute remote
+resource URL. The builder rejects empty resources, relative URL resources, and
+additional `bundle` or `url` query items. It preserves the order and duplicates
+of all other query items in the encoded URL and applies one layer of percent
+encoding. Resolver dictionary views remain last-value-wins for duplicate names.
+
 ## SPKContainerView
 
 Embeds Sparkling content as a subview. See [Containers — Embedded](../guide/containers.md#embedded-containers) for usage guide.
@@ -64,11 +83,26 @@ Configuration object passed to both container types.
 |----------|-------------|
 | `containerLifecycleDelegate` | Delegate conforming to `SPKContainerLifecycleProtocol` for loading callbacks. |
 | `loadingViewBuilder` | Closure that returns a custom loading view. |
-| `failedViewBuilder` | Closure that returns a custom error view. |
+| `failedViewBuilder` | Main-actor closure that returns a custom error view conforming to `SPKLoadErrorViewProtocol`. The protocol and its refresh callback are main-actor isolated. |
 | `naviBar` | Custom navigation bar (full-page containers only). |
+| `navigationBarBackHandler` | Called on the main thread for a navigation-bar back action before the SDK pops or dismisses. Return `true` when the host consumes the action, including an intentional rejection; return `false` only to keep the SDK default. Weakly capture coordinators that retain the container stack. |
+| `interactivePopGestureDelegate` | Weak, main-actor delegate for host-owned system interactive pop. It can reject the gesture before UIKit starts and receives exactly one completion or cancellation callback after every authorized gesture. Sparkling temporarily enables the system recognizer and restores its previous state when the container is no longer active. |
 | `appTheme` | Theme configuration. |
 | `customUIElements` | Custom Lynx UI elements to register. |
 | `extra` | Dictionary of additional data passed to the container. |
+
+## SPKInteractivePopGestureDelegate
+
+Use this delegate only when the host application owns navigation mutations and
+must reserve its stack before UIKit starts a cancellable interactive pop.
+
+| Callback | Description |
+|----------|-------------|
+| `containerShouldBeginInteractivePop(_:)` | Return `false` to reject the gesture before it begins. The default is `true`. |
+| `container(_:didEndInteractivePopCompleted:)` | Called exactly once after an authorized gesture ends. `completed` is `true` for a committed pop and `false` for cancellation. |
+
+Keep the delegate alive for as long as the context is in use; the context holds
+it weakly to avoid a navigation ownership cycle.
 
 ## SPKContainerLifecycleProtocol
 

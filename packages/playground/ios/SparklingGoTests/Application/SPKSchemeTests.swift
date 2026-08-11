@@ -283,17 +283,34 @@ struct SPKContextTests {
         #expect(context.naviBar === naviBar)
     }
 
-    @Test func copyMethod() {
+    @Test @MainActor func copyMethod() {
         let originalContext = SPKContext()
         // SPKContext doesn't have title property
         originalContext.originURL = "hybrid://lynxview_page?bundle=.%2Fmain.lynx.bundle"
+        originalContext.navigationBarBackHandler = { _ in true }
+        let interactivePopGestureDelegate = TestSchemeInteractivePopGestureDelegate()
+        originalContext.interactivePopGestureDelegate = interactivePopGestureDelegate
 
         let copiedContext = originalContext.copy() as? SPKContext
 
         #expect(copiedContext != nil)
         // SPKContext doesn't have title property
         #expect(copiedContext?.originURL == "hybrid://lynxview_page?bundle=.%2Fmain.lynx.bundle")
+        #expect(copiedContext?.navigationBarBackHandler != nil)
+        #expect(copiedContext?.interactivePopGestureDelegate === interactivePopGestureDelegate)
         #expect(copiedContext !== originalContext)
+    }
+
+    @Test func copyPreservesLynxModuleAndCustomUIElements() {
+        let originalContext = SPKContext()
+        let customElement = NSObject()
+        originalContext.lynxModule = ["module": "host-owned-module"]
+        originalContext.customUIElements = [customElement]
+
+        let copiedContext = originalContext.copy() as? SPKContext
+
+        #expect(copiedContext?.lynxModule?["module"] as? String == "host-owned-module")
+        #expect(copiedContext?.customUIElements?.first as? NSObject === customElement)
     }
 
     @Test func propertyUpdates() {
@@ -319,4 +336,9 @@ struct SPKContextTests {
 
         #expect(weakContext == nil)
     }
+}
+
+private final class TestSchemeInteractivePopGestureDelegate: NSObject,
+    SPKInteractivePopGestureDelegate
+{
 }

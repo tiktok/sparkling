@@ -12,15 +12,39 @@ public typealias SPKLoadingViewBuilder = () -> (UIView & SPKLoadingViewProtocol)
 
 /// Type alias for a closure that creates error view instances.
 ///
-/// This closure takes a view controller and error style, then returns a view that conforms
+/// This main-actor-isolated closure takes a view controller, then returns a view that conforms
 /// to both UIView and SPKLoadErrorViewProtocol for displaying load failures.
 ///
 /// - Parameters:
 ///   - UIViewController: The container view controller where the error view will be displayed
-///   - SPKLoadErrorViewStyle: The style configuration for the error view
-public typealias SPKFailedViewBuilder = (UIViewController?) -> (UIView & SPKLoadErrorViewProtocol)
+public typealias SPKFailedViewBuilder = @MainActor (UIViewController?) -> (UIView & SPKLoadErrorViewProtocol)
 
 public typealias SPKNavigationBarButtonItemBuilder = ((UIViewController & SPKContainerProtocol)?) -> SPKNavigationBarButtonItem?
+
+/// Handles a navigation-bar back action before Sparkling performs its default pop or dismissal.
+/// Return `true` when the host application consumed the back action, including
+/// when it intentionally rejects the navigation mutation. Return `false` only
+/// to let Sparkling perform its default container pop behavior. Sparkling invokes
+/// the handler on the main thread. Hosts should weakly capture navigation
+/// coordinators that retain the container stack.
+public typealias SPKNavigationBarBackHandler = (UIViewController & SPKContainerProtocol) -> Bool
+
+/// Lets a host serialize Sparkling's system interactive-pop gesture with its
+/// own navigation coordinator while preserving UIKit's cancellable transition.
+@MainActor
+@objc
+public protocol SPKInteractivePopGestureDelegate: AnyObject {
+    /// Return false to prevent the gesture from beginning.
+    @objc optional func containerShouldBeginInteractivePop(
+        _ container: SPKContainerProtocol
+    ) -> Bool
+
+    /// Called exactly once after an authorized gesture completes or is cancelled.
+    @objc optional func container(
+        _ container: SPKContainerProtocol,
+        didEndInteractivePopCompleted completed: Bool
+    )
+}
 
 /// Enumeration defining the available app theme modes.
 ///
@@ -110,6 +134,13 @@ open class SPKContext: SPKHybridContext {
 
     public var rightNavigationBarButtonItemBuilder: SPKNavigationBarButtonItemBuilder?
 
+    /// Lets an embedding application own its navigation stack without replacing
+    /// Sparkling's navigation UI. Returning false preserves the SDK default.
+    public var navigationBarBackHandler: SPKNavigationBarBackHandler?
+
+    /// Coordinates the system interactive-pop lifecycle with the embedding host.
+    public weak var interactivePopGestureDelegate: SPKInteractivePopGestureDelegate?
+
     /// Creates a copy of the current SPKContext instance.
     ///
     /// This method implements NSCopying protocol to create a deep copy of the context.
@@ -197,6 +228,18 @@ open class SPKContext: SPKHybridContext {
         self.rightNavigationBarButtonItemBuilder =
             SPKHybridContext.merge(withProp: context.rightNavigationBarButtonItemBuilder, to: self.rightNavigationBarButtonItemBuilder, isOverride: isOverride)
             as? SPKNavigationBarButtonItemBuilder
+
+        self.navigationBarBackHandler =
+            SPKHybridContext.merge(
+                withProp: context.navigationBarBackHandler,
+                to: self.navigationBarBackHandler,
+                isOverride: isOverride) as? SPKNavigationBarBackHandler
+
+        self.interactivePopGestureDelegate =
+            SPKHybridContext.merge(
+                withProp: context.interactivePopGestureDelegate,
+                to: self.interactivePopGestureDelegate,
+                isOverride: isOverride) as? SPKInteractivePopGestureDelegate
 
         self.isRTL = isOverride ? context.isRTL : self.isRTL
     }

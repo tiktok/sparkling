@@ -48,8 +48,8 @@ struct SPKHybridContextTests {
         let merged2 = SPKHybridContext.merge(withDict: nil, to: dict1, isOverride: true)
         let merged3 = SPKHybridContext.merge(withDict: nil, to: nil, isOverride: true)
 
-        #expect(merged1 == nil)
-        #expect(merged2 == nil)
+        #expect(merged1?["a"] as? Int == 1)
+        #expect(merged2?["a"] as? Int == 1)
         #expect(merged3 == nil)
     }
 
@@ -101,10 +101,12 @@ struct SPKHybridContextTests {
         let merged1 = SPKHybridContext.merge(withArray: source, to: []) as? [Int]
         let merged2 = SPKHybridContext.merge(withArray: nil, to: source) as? [Int]
         let merged3 = SPKHybridContext.merge(withArray: nil, to: [])
+        let merged4 = SPKHybridContext.merge(withArray: nil, to: nil)
 
         #expect(merged1 == source)
-        #expect(merged2 == nil)
-        #expect(merged3 == nil)
+        #expect(merged2 == source)
+        #expect(merged3?.isEmpty == true)
+        #expect(merged4 == nil)
     }
 
     // MARK: - Context Merge Tests

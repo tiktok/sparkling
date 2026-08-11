@@ -36,6 +36,23 @@ SPKExecuteAllPrepareBootTask()
 | `SPKRouter.close(container:)` | Pop 或 dismiss 指定容器。 |
 | `SPKRouter.openInSystemBrowser(withURL:)` | 在 Safari 中打开 HTTP/HTTPS URL。 |
 
+## SPKHybridSchemeParam
+
+使用 SDK 构建规范的 Lynx 全页 scheme，无需手动拼接 URL 或处理百分号编码。
+
+```swift
+let scheme = try SPKHybridSchemeParam.buildLynxPageScheme(
+    resource: .bundle("detail.lynx.bundle"),
+    queryItems: [URLQueryItem(name: "title", value: "Detail & preview")]
+)
+SPKRouter.open(withURL: scheme.absoluteString, context: nil)
+```
+
+绝对远程资源 URL 使用 `.url("https://example.com/detail.lynx.bundle")`。构建器会拒绝
+空资源、相对 URL 资源以及额外的 `bundle` 或 `url` 查询项；其余查询项的顺序与重复项
+会保留在编码后的 URL 中，并且只进行一层百分号编码。解析器的字典视图对同名项仍采用
+最后一个值优先的语义。
+
 ## SPKContainerView
 
 以子视图形式嵌入 Sparkling 内容。使用指南请参阅[容器 — 嵌入式容器](../guide/containers.md#嵌入式容器)。
@@ -64,11 +81,25 @@ SPKExecuteAllPrepareBootTask()
 |------|------|
 | `containerLifecycleDelegate` | 遵循 `SPKContainerLifecycleProtocol` 的回调代理。 |
 | `loadingViewBuilder` | 返回自定义加载视图的闭包。 |
-| `failedViewBuilder` | 返回自定义错误视图的闭包。 |
+| `failedViewBuilder` | 在主 actor 上返回遵循 `SPKLoadErrorViewProtocol` 的自定义错误视图。该协议及其刷新回调均隔离于主 actor。 |
 | `naviBar` | 自定义导航栏（仅全页容器）。 |
+| `navigationBarBackHandler` | 在主线程收到导航栏返回动作，发生于 SDK 执行 pop 或 dismiss 之前。宿主消费该动作（包括明确拒绝导航）时返回 `true`；仅在需要保留 SDK 默认行为时返回 `false`。若 coordinator 持有容器栈，请使用弱引用捕获。 |
+| `interactivePopGestureDelegate` | 弱引用、主 actor 隔离的系统侧滑返回代理，适用于由宿主管理导航栈的场景。它可在 UIKit 开始手势前拒绝操作，并在每次已授权手势结束后恰好收到一次完成或取消回调。容器不再活跃时，Sparkling 会恢复系统手势识别器原有的启用状态。 |
 | `appTheme` | 主题配置。 |
 | `customUIElements` | 需要注册的自定义 Lynx UI 元素。 |
 | `extra` | 传递给容器的额外数据字典。 |
+
+## SPKInteractivePopGestureDelegate
+
+当导航变更由宿主统一管理，并且需要在 UIKit 开始可取消的侧滑返回前预占导航栈时，
+使用该代理。
+
+| 回调 | 说明 |
+|------|------|
+| `containerShouldBeginInteractivePop(_:)` | 在手势开始前返回 `false` 可拒绝操作；默认值为 `true`。 |
+| `container(_:didEndInteractivePopCompleted:)` | 每次已授权手势结束后恰好调用一次。`completed` 为 `true` 表示 pop 已提交，为 `false` 表示已取消。 |
+
+请在 context 使用期间保持代理存活；context 对其使用弱引用，以避免形成导航所有权循环。
 
 ## SPKContainerLifecycleProtocol
 

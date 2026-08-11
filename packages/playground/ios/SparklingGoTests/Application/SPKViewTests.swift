@@ -2,6 +2,7 @@
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
+import Lynx
 import Testing
 import UIKit
 
@@ -22,6 +23,44 @@ struct SPKViewTests {
         #expect(view.sparkContentMode == .SPKContainerViewContentModeFixedSize)
         #expect(view.hybridInBackground == false)
         #expect(view.viewType == .SPKHybridEngineTypeUnknown)
+    }
+
+    @Test func containerDefaultGlobalPropsPreservePageVersion() {
+        let context = SPKContext()
+        context.globalProps = ["SPK_version": "page-owned-version"]
+        let view = SPKContainerView()
+        view.context = context
+
+        view.addContainerDefaultGlobalProps()
+
+        let globalProps = context.globalProps as? [String: Any]
+        #expect(globalProps?["SPK_version"] as? String == "page-owned-version")
+    }
+
+    @Test func containerDefaultGlobalPropsPreserveTemplateDataPageVersion() throws {
+        let context = SPKContext()
+        context.globalProps = try #require(
+            LynxTemplateData(dictionary: ["SPK_version": "page-template-version"]))
+        let view = SPKContainerView()
+        view.context = context
+
+        view.addContainerDefaultGlobalProps()
+
+        let globalProps = (context.globalProps as? LynxTemplateData)?.dictionary()
+        #expect(globalProps?["SPK_version"] as? String == "page-template-version")
+    }
+
+    @Test func containerDefaultGlobalPropsFillMissingVersion() {
+        let context = SPKContext()
+        context.globalProps = ["page": "value"]
+        let view = SPKContainerView()
+        view.context = context
+
+        view.addContainerDefaultGlobalProps()
+
+        let globalProps = context.globalProps as? [String: Any]
+        #expect((globalProps?["SPK_version"] as? String)?.isEmpty == false)
+        #expect(globalProps?["page"] as? String == "value")
     }
 
     @Test func loadWithURL() {

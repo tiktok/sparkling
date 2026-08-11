@@ -228,4 +228,195 @@ struct SPKRouterTests {
 
         #expect(context.originURL != nil)
     }
+
+    @Test func failedViewBuilderReturnsRegisteredLoadErrorView() {
+        let failedView = TestLoadErrorView()
+        let context = SPKContext()
+        context.failedViewBuilder = { _ in failedView }
+        let config = SPKSchemeParam()
+        let viewController = SPKViewController(
+            withURL: nil,
+            config: config,
+            context: context,
+            frame: .zero)
+
+        let builtView = viewController.buildLoadErrorView()
+
+        #expect(builtView === failedView)
+        #expect(failedView.refreshBlock != nil)
+        #expect(failedView.registeredOnMainThread)
+    }
+
+    @Test func hostNavigationBarBackHandlerCanOwnStackMutation() {
+        let context = SPKContext()
+        var receivedContainer: SPKContainerProtocol?
+        context.navigationBarBackHandler = { container in
+            receivedContainer = container
+            return true
+        }
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+
+        (viewController as? SPKViewController)?.didTapLeftButton()
+
+        #expect(receivedContainer === viewController)
+        #expect(navigationController.topViewController === viewController)
+    }
+
+    @Test func navigationBarBackHandlerCanPreserveDefaultPop() {
+        let context = SPKContext()
+        context.navigationBarBackHandler = { _ in false }
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+
+        (viewController as? SPKViewController)?.didTapLeftButton()
+
+        #expect(navigationController.topViewController === rootViewController)
+    }
+
+    @Test func hostInteractivePopGestureDelegateCanAuthorizeGesture() {
+        let context = SPKContext()
+        let delegate = TestInteractivePopGestureDelegate(shouldBegin: true)
+        context.interactivePopGestureDelegate = delegate
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+        let gesture = navigationController.interactivePopGestureRecognizer!
+
+        let shouldBegin = (viewController as? SPKViewController)?
+            .gestureRecognizerShouldBegin(gesture)
+
+        #expect(delegate.receivedContainer === viewController)
+        #expect(shouldBegin == true)
+    }
+
+    @Test func hostInteractivePopGestureDelegateCanDenyGesture() {
+        let context = SPKContext()
+        let delegate = TestInteractivePopGestureDelegate(shouldBegin: false)
+        context.interactivePopGestureDelegate = delegate
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+        let gesture = navigationController.interactivePopGestureRecognizer!
+
+        let shouldBegin = (viewController as? SPKViewController)?
+            .gestureRecognizerShouldBegin(gesture)
+
+        #expect(delegate.receivedContainer === viewController)
+        #expect(shouldBegin == false)
+    }
+
+    @Test func hostInteractivePopGestureDelegateReceivesOneCompletion() {
+        let context = SPKContext()
+        let delegate = TestInteractivePopGestureDelegate(shouldBegin: true)
+        context.interactivePopGestureDelegate = delegate
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+        let sparklingViewController = viewController as? SPKViewController
+        let gesture = navigationController.interactivePopGestureRecognizer!
+        _ = sparklingViewController?.gestureRecognizerShouldBegin(gesture)
+
+        sparklingViewController?.notifyHostInteractivePopDidEnd(completed: true)
+        sparklingViewController?.notifyHostInteractivePopDidEnd(completed: false)
+
+        #expect(delegate.completions == [true])
+    }
+
+    @Test func hostInteractivePopGestureDelegateReceivesCancellation() {
+        let context = SPKContext()
+        let delegate = TestInteractivePopGestureDelegate(shouldBegin: true)
+        context.interactivePopGestureDelegate = delegate
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+        let sparklingViewController = viewController as? SPKViewController
+        _ = sparklingViewController?.gestureRecognizerShouldBegin(
+            navigationController.interactivePopGestureRecognizer!)
+
+        sparklingViewController?.notifyHostInteractivePopDidEnd(completed: false)
+
+        #expect(delegate.completions == [false])
+    }
+
+    @Test func managedInteractivePopTemporarilyEnablesSystemGesture() {
+        let context = SPKContext()
+        let delegate = TestInteractivePopGestureDelegate(shouldBegin: true)
+        context.interactivePopGestureDelegate = delegate
+        let viewController = SPKRouter.create(
+            withURL: "hybrid://lynxview_page?bundle=main.lynx.bundle",
+            context: context,
+            frame: .zero)
+        let rootViewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: rootViewController)
+        navigationController.pushViewController(viewController, animated: false)
+        let gesture = navigationController.interactivePopGestureRecognizer!
+        gesture.isEnabled = false
+        let sparklingViewController = viewController as? SPKViewController
+
+        sparklingViewController?.viewDidAppear(false)
+
+        #expect(gesture.isEnabled)
+        sparklingViewController?.viewWillDisappear(false)
+        #expect(!gesture.isEnabled)
+    }
+}
+
+private final class TestInteractivePopGestureDelegate: NSObject, SPKInteractivePopGestureDelegate {
+    let shouldBegin: Bool
+    var receivedContainer: SPKContainerProtocol?
+    var completions: [Bool] = []
+
+    init(shouldBegin: Bool) {
+        self.shouldBegin = shouldBegin
+    }
+
+    func containerShouldBeginInteractivePop(_ container: SPKContainerProtocol) -> Bool {
+        receivedContainer = container
+        return shouldBegin
+    }
+
+    func container(
+        _ container: SPKContainerProtocol,
+        didEndInteractivePopCompleted completed: Bool
+    ) {
+        receivedContainer = container
+        completions.append(completed)
+    }
+}
+
+private final class TestLoadErrorView: UIView, SPKLoadErrorViewProtocol {
+    var refreshBlock: SPKLoadErrorRefreshBlock?
+    var registeredOnMainThread = false
+
+    func register(refreshBlock: @escaping SPKLoadErrorRefreshBlock) {
+        self.refreshBlock = refreshBlock
+        self.registeredOnMainThread = Thread.isMainThread
+    }
 }

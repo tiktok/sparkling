@@ -38,8 +38,18 @@ open class SPKLynxKitUtils: SPKKitUtils {
         lynxKitParams.templateProvider = context?.templateProvider
         lynxKitParams.dynamicComponentFetcher = context?.dynamicComponentFetcher
 
-        // for LynxView, we default use bundle as the resource to load, and use url as fallback.
-        lynxKitParams.sourceUrl = extraParams?.spk.string(forKey: "bundle") ?? extraParams?.spk.string(forKey: "url")
+        // Prefer the resolver-owned URL target before consulting flattened
+        // query items. A remote resource may legitimately contain `?bundle=...`;
+        // that nested value must never replace the resolved outer `url` target.
+        let resolvedURL = context?.schemeParams?.url
+        let bundle = extraParams?.spk.string(forKey: "bundle")
+        if !isEmptyString(resolvedURL) {
+            lynxKitParams.sourceUrl = resolvedURL
+        } else if !isEmptyString(bundle) {
+            lynxKitParams.sourceUrl = bundle
+        } else {
+            lynxKitParams.sourceUrl = extraParams?.spk.string(forKey: "url")
+        }
 
         var initialProps = context?.initialData ?? [:]
 
