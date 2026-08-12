@@ -1,6 +1,15 @@
-import { createContext, useContext, useState, useCallback } from '@lynx-js/react'
+// Copyright 2025 The Sparkling Authors. All rights reserved.
+// Licensed under the Apache License Version 2.0 that can be found in the
+// LICENSE file in the root directory of this source tree.
 
-export type ThemePreference = 'Auto' | 'Light' | 'Dark'
+import { createContext, useContext, useState, useCallback, useEffect } from '@lynx-js/react'
+import _pipe, { type EventCallback, type PipeResponse } from 'sparkling-method'
+import { parseThemePreference, type ThemePreference } from './themePreference.js'
+
+type SparklingPipe = typeof import('sparkling-method').default
+const pipe = _pipe as unknown as SparklingPipe
+
+export type { ThemePreference } from './themePreference.js'
 export type ResolvedTheme = 'light' | 'dark'
 
 interface ThemeContextValue {
@@ -26,23 +35,32 @@ function resolveTheme(preference: ThemePreference): ResolvedTheme {
 }
 
 function getInitialPreference(): ThemePreference {
-  const gp = (lynx.__globalProps || {}) as Record<string, any>
-  // The SDK puts force_theme_style in queryItems (nested), not as top-level preferredTheme.
-  // Check both locations for robustness.
-  const raw = gp.preferredTheme
-    || (gp.queryItems as Record<string, any>)?.force_theme_style
-    || 'Auto'
-  const lower = String(raw).toLowerCase()
-  if (lower === 'light') return 'Light'
-  if (lower === 'dark') return 'Dark'
-  return 'Auto'
+  return parseThemePreference(lynx.__globalProps)
 }
 
 export function ThemeProvider(props: { children: any }) {
   const [preference, setPreferenceState] = useState<ThemePreference>(getInitialPreference)
 
+  useEffect(() => {
+    const handleGlobalPropsUpdated: EventCallback = () => {
+      setPreferenceState(getInitialPreference())
+    }
+    const listener = pipe.on('globalPropsUpdated', handleGlobalPropsUpdated)
+    return () => pipe.off('globalPropsUpdated', listener)
+  }, [])
+
   const setPreference = useCallback((pref: ThemePreference) => {
-    setPreferenceState(pref)
+    pipe.call('sparkling.setThemePreference', {
+      preference: pref === 'Auto' ? 'follow-system' : pref.toLowerCase(),
+    }, (response: unknown) => {
+      const result = response as PipeResponse<{ preference?: string }>
+      if (result.code === 1) {
+        setPreferenceState(parseThemePreference({
+          ...lynx.__globalProps,
+          preferredTheme: result.data?.preference,
+        }))
+      }
+    })
   }, [])
 
   const resolved = resolveTheme(preference)
