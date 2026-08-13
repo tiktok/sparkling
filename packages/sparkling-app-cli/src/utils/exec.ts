@@ -29,7 +29,7 @@ export async function runCommand(
     cwd: options.cwd,
     env: { ...process.env, ...options.env },
     stdio: 'inherit',
-    shell: false,
+    shell: process.platform === 'win32' ? true : false,
   });
 
   await new Promise<void>((resolve, reject) => {
