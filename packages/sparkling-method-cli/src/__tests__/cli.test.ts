@@ -131,6 +131,17 @@ describe('sparkling-method cli', () => {
 
       const swiftContent = await fs.readFile(swiftPath, 'utf8');
       expect(swiftContent).toContain('class SPKShowToastMethodResultModel');
+
+      // The models are @objc classes, so every property has to be representable
+      // in Objective-C and the class has to have an initializer. An optional
+      // number is NSNumber? rather than Double? - Objective-C has no optional
+      // value types - and a required field carries the empty value for its type
+      // so the class is not left without initializers.
+      expect(swiftContent).toContain('@objc public var duration: NSNumber? = 2000');
+      expect(swiftContent).toContain('@objc public var message: String = ""');
+      expect(swiftContent).toContain('@objc public var success: Bool = false');
+      expect(swiftContent).toContain('@objc public var count: Double = 0');
+      expect(swiftContent).not.toMatch(/@objc public var \w+: (Double|Bool)\?/);
     });
   });
 });

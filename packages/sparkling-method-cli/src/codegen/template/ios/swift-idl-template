@@ -10,7 +10,7 @@ import SparklingMethod
 @objc({{{objcName}}})
 public class {{structName}}: NSObject {
 {{#fields}}
-    @objc public var {{name}}: {{type}}{{#optional}}?{{/optional}}
+    @objc public var {{name}}: {{type}}{{#optional}}?{{/optional}}{{#defaultValue}} = {{{.}}}{{/defaultValue}}
 {{/fields}}
 {{^hasFields}}
     // No fields defined.
@@ -35,7 +35,7 @@ public class {{structName}}: NSObject {
 @objc({{request.objcName}})
 public class {{request.structName}}: SPKMethodModel {
     {{#request.fields}}
-    @objc public var {{name}}: {{type}}{{#optional}}?{{/optional}}{{#defaultValue}} = {{.}}{{/defaultValue}}
+    @objc public var {{name}}: {{type}}{{#optional}}?{{/optional}}{{#defaultValue}} = {{{.}}}{{/defaultValue}}
     {{/request.fields}}
 
     @objc public override class func requiredKeyPaths() -> Set<String>? {
@@ -55,7 +55,7 @@ public class {{request.structName}}: SPKMethodModel {
 @objc({{response.objcName}})
 public class {{response.structName}}: SPKMethodModel {
     {{#response.fields}}
-    @objc public var {{name}}: {{type}}{{#optional}}?{{/optional}}{{#defaultValue}} = {{.}}{{/defaultValue}}
+    @objc public var {{name}}: {{type}}{{#optional}}?{{/optional}}{{#defaultValue}} = {{{.}}}{{/defaultValue}}
     {{/response.fields}}
 
     @objc public override class func jsonKeyPathsByPropertyKey() -> [AnyHashable: Any] {

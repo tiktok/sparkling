@@ -54,20 +54,83 @@ function toSwiftStructView(
   context: SwiftBuildContext,
   path: string[]
 ): SwiftStructView {
-  const fields = definition.fields.map((field, index, arr) => ({
-    name: field.name,
-    type: resolveSwiftType(field.type, context, [...path, field.name]),
-    optional: field.optional,
-    comment: field.description,
-    defaultValue: formatSwiftDefaultValue(field.defaultValue),
-    isLast: index === arr.length - 1
-  }));
+  const fields = definition.fields.map((field, index, arr) =>
+    buildSwiftField(field, context, path, index === arr.length - 1)
+  );
   return {
     structName: className,
     objcName: className,
     hasFields: fields.length > 0,
     fields
   };
+}
+
+/**
+ * One field of a generated model, in a shape Objective-C can represent.
+ *
+ * Two rules decide the output, and both exist because the models are `@objc`
+ * classes bridged to Objective-C:
+ *
+ * - An optional `number` or `boolean` cannot be `Double?` / `Bool?`: Objective-C
+ *   has no optional value types, so `@objc` rejects the property outright. They
+ *   bridge through `NSNumber?`, which is what an absent key on the wire actually
+ *   looks like.
+ * - A non-optional stored property with no initial value leaves the class with
+ *   no initializers, which is a compile error rather than a runtime surprise.
+ *   Fields the author did not give a default get the empty value for their type.
+ */
+function buildSwiftField(
+  field: ObjectDefinition['fields'][number],
+  context: SwiftBuildContext,
+  path: string[],
+  isLast: boolean
+) {
+  const optionalValueType =
+    field.optional &&
+    field.type.kind === 'primitive' &&
+    (field.type.name === 'number' || field.type.name === 'boolean');
+
+  const type = optionalValueType
+    ? 'NSNumber'
+    : resolveSwiftType(field.type, context, [...path, field.name]);
+
+  const declared = formatSwiftDefaultValue(field.defaultValue);
+  const defaultValue = field.optional
+    ? declared
+    : declared ?? emptySwiftValue(type, field.type);
+
+  return {
+    name: field.name,
+    type,
+    optional: field.optional,
+    comment: field.description,
+    defaultValue,
+    isLast
+  };
+}
+
+/** The value a required field starts at, so the class has an initializer. */
+function emptySwiftValue(swiftType: string, type: TypeSummary): string | undefined {
+  if (swiftType.startsWith('[') && swiftType.endsWith(']')) {
+    return swiftType.includes(':') ? '[:]' : '[]';
+  }
+  if (type.kind === 'primitive') {
+    switch (type.name) {
+      case 'string':
+        return '""';
+      case 'number':
+        return '0';
+      case 'boolean':
+        return 'false';
+      case 'void':
+        return undefined;
+      default:
+        // `any` bridges to `id`, which has no empty literal of its own.
+        return 'NSNull()';
+    }
+  }
+  // A model type: its own generated class is always default-constructible.
+  return `${swiftType}()`;
 }
 
 function resolveSwiftType(type: TypeSummary, context: SwiftBuildContext, path: string[]): string {
@@ -106,14 +169,9 @@ function ensureSwiftHelper(definition: ObjectDefinition, context: SwiftBuildCont
   const base = definition.name ? toPascalCase(definition.name) : path.map((segment) => toPascalCase(segment)).join('');
   const suffix = base || 'Anonymous';
   const className = `SPK${context.methodPascal}Method${suffix}Model`;
-  const fields = definition.fields.map((field, index, arr) => ({
-    name: field.name,
-    type: resolveSwiftType(field.type, context, [...path, field.name]),
-    optional: field.optional,
-    comment: field.description,
-    defaultValue: formatSwiftDefaultValue(field.defaultValue),
-    isLast: index === arr.length - 1
-  }));
+  const fields = definition.fields.map((field, index, arr) =>
+    buildSwiftField(field, context, path, index === arr.length - 1)
+  );
   const view: SwiftStructView = {
     structName: className,
     objcName: className,
