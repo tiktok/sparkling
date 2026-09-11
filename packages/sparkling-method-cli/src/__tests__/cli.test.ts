@@ -82,6 +82,29 @@ describe('sparkling-method cli', () => {
     });
   });
 
+  it('writes a module.config.json that sparkling autolink can read', async () => {
+    await withTempDir(async (cwd) => {
+      await fs.writeJson(path.join(cwd, 'module.config.json'), {
+        packageName: 'com.example.toast',
+        moduleName: 'demo'
+      });
+
+      const srcDir = path.join(cwd, 'src');
+      await fs.ensureDir(srcDir);
+      await fs.writeFile(
+        path.join(srcDir, 'method.d.ts'),
+        `interface ShowToastRequest {\n  message: string;\n}\n\ninterface ShowToastResponse {\n  success: boolean;\n}\n\ndeclare function showToast(params: ShowToastRequest, callback: (res: ShowToastResponse) => void): void;`
+      );
+
+      await runCodegen({ src: 'src' });
+
+      // autolink builds the Android registration from this map, and it is the
+      // only place the method names survive to build time.
+      const config = await fs.readJson(path.join(cwd, 'module.config.json'));
+      expect(Object.keys(config.methods)).toEqual(['showToast']);
+    });
+  });
+
   it('generates metadata and native stubs from definitions', async () => {
     await withTempDir(async (cwd) => {
       await fs.writeJson(path.join(cwd, 'module.config.json'), {
@@ -113,7 +136,7 @@ describe('sparkling-method cli', () => {
         'example',
         'toast',
         'demo',
-        'showtoast',
+        'showToast',
         'AbsShowToastMethodIDL.kt'
       );
       const swiftPath = path.join(cwd, 'ios', 'Source', 'Core', 'Demo', 'ShowToast', 'ShowToastIDL.swift');
@@ -122,7 +145,7 @@ describe('sparkling-method cli', () => {
       await expect(fs.pathExists(swiftPath)).resolves.toBe(true);
 
       const kotlinContent = await fs.readFile(kotlinPath, 'utf8');
-      expect(kotlinContent.split('\n')[0]).toBe('package com.example.toast.demo.showtoast');
+      expect(kotlinContent.split('\n')[0]).toBe('package com.example.toast.demo.showToast');
       expect(kotlinContent).toContain('AbsShowToastMethodIDL');
       expect(kotlinContent).toContain('duration');
       expect(kotlinContent).toContain('interface IDLMethodShowToastResultModel : IDLMethodBaseResultModel');

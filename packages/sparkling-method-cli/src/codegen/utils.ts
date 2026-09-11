@@ -3,15 +3,30 @@
 // LICENSE file in the root directory of this source tree.
 import { ModuleConfig } from './types';
 
+/**
+ * Where a generated method's Kotlin lands.
+ *
+ * The method segment keeps the method's own spelling rather than being
+ * lowercased, because that is the package the built-in method packages use and
+ * the one `sparkling autolink` builds its registration from:
+ * `com.tiktok.sparkling.method.storage.getItem.StorageGetItemMethod`. Folding
+ * it to `getitem` put the generated abstract class in a package the concrete
+ * implementation could not sit in.
+ */
 export function buildPackageSegments(config: ModuleConfig, methodName: string): string[] {
   const base = config.packageName.split('.').filter(Boolean);
   const moduleSegment = sanitizePackageSegment(config.moduleName);
-  const methodSegment = sanitizePackageSegment(methodName);
+  const methodSegment = sanitizeMethodSegment(methodName);
   return [...base, moduleSegment, methodSegment];
 }
 
 export function sanitizePackageSegment(value: string): string {
   return value.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'method';
+}
+
+/** Like {@link sanitizePackageSegment}, but keeps the method's own casing. */
+export function sanitizeMethodSegment(value: string): string {
+  return value.replace(/[^a-zA-Z0-9]/g, '') || 'method';
 }
 
 export function toPascalCase(value: string): string {

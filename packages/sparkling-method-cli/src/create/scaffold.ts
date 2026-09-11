@@ -110,6 +110,45 @@ export async function writeAndroidConfigs(config: ModuleConfig, projectDir: stri
   }
 }
 
+/**
+ * The module.config.json a scaffolded module needs, in both dialects.
+ *
+ * `sparkling-method-cli` reads `packageName` and `moduleName`; `sparkling
+ * autolink` reads `name`, `methods`, `android.*` and `ios.*` and shares no key
+ * with the first set. A module scaffolded here therefore used to autolink with
+ * an empty Android package and class and an empty method list, which means
+ * `registerAutolinkMethods()` found nothing and the module was linked but never
+ * registered - the methods simply did not exist at runtime.
+ *
+ * The values line up with what codegen emits: the Kotlin for a method lands in
+ * `<packageName>.<module>.<method>`, so `android.packageName` is
+ * `<packageName>.<module>` and `android.className` is `<Module>Method`, which is
+ * the prefix autolink builds `<Module><Method>Method` from. `methods` starts
+ * empty and is refreshed by `codegen` from the definitions themselves.
+ */
+export function autolinkableConfig(projectName: string, config: ModuleConfig): Record<string, unknown> {
+  const moduleId = toPascalCase(config.moduleName);
+  const moduleSegment = config.moduleName.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'method';
+  const buildGradle = config.androidDsl === 'groovy' ? 'android/build.gradle' : 'android/build.gradle.kts';
+
+  return {
+    name: projectName,
+    ...config,
+    methods: {},
+    android: {
+      packageName: `${config.packageName}.${moduleSegment}`,
+      className: `${moduleId}Method`,
+      buildGradle,
+    },
+    ios: {
+      moduleName: moduleId,
+      className: `${moduleId}Method`,
+      podspecPath: `ios/Sparkling-${moduleId}.podspec`,
+      swiftVersion: '5.0',
+    },
+  };
+}
+
 export async function writeIosConfigs(config: ModuleConfig, projectDir: string): Promise<void> {
   const iosDir = path.join(projectDir, 'ios');
   await fs.ensureDir(iosDir);
@@ -136,7 +175,7 @@ export async function writeModuleConfig(projectName: string, config: Omit<Module
     projectName,
   };
 
-  await fs.writeJson(path.join(dir, 'module.config.json'), resolved, { spaces: 2 });
+  await fs.writeJson(path.join(dir, 'module.config.json'), autolinkableConfig(projectName, resolved), { spaces: 2 });
   if (isVerboseEnabled()) {
     verboseLog(`module.config.json written with project ${projectName} at ${dir}`);
   }

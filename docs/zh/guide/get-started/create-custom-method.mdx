@@ -38,9 +38,28 @@ sparkling-my-greeting/
   "name": "sparkling-my-greeting",
   "packageName": "com.tiktok.sparkling.methods.mygreeting",
   "moduleName": "MyGreeting",
-  "androidDsl": "kts"
+  "androidDsl": "kts",
+  "methods": {},
+  "android": {
+    "packageName": "com.tiktok.sparkling.methods.mygreeting.mygreeting",
+    "className": "MyGreetingMethod",
+    "buildGradle": "android/build.gradle.kts"
+  },
+  "ios": {
+    "moduleName": "MyGreeting",
+    "className": "MyGreetingMethod",
+    "podspecPath": "ios/Sparkling-MyGreeting.podspec",
+    "swiftVersion": "5.0"
+  }
 }
 ```
+
+`packageName` and `moduleName` are what codegen reads; `name`, `methods` and the
+two platform blocks are what `sparkling autolink` reads when the app is built.
+Both sets have to be there - a config with only the first set links the module
+and registers none of its methods. `sparkling-method-cli init` writes all of it
+for you, and `codegen` keeps `methods` in step with your declarations.
+
 
 ### 编写 TypeScript 函数声明
 

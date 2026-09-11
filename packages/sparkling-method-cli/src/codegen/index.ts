@@ -69,6 +69,48 @@ export async function runCodegen(options: CodegenOptions = {}): Promise<void> {
 
     console.log(ui.success(`Generated metadata, Kotlin, Swift, and TypeScript IDL for ${method.name}`));
   }
+
+  await refreshDeclaredMethods(projectRoot, methods);
+}
+
+/**
+ * Write the method names back into module.config.json.
+ *
+ * `sparkling autolink` builds the Android registration from the `methods` map -
+ * it is the only place the method names exist by the time the app is built - so
+ * a map that is not kept in step with the definitions means a method that was
+ * generated, compiled and linked but never registered. Codegen has just parsed
+ * the definitive list, so it writes it.
+ *
+ * Anything already described for a method is preserved; only the set of names
+ * is authoritative here.
+ */
+async function refreshDeclaredMethods(root: string, methods: MethodDefinition[]): Promise<void> {
+  const configPath = path.join(root, 'module.config.json');
+  if (!await fs.pathExists(configPath)) {
+    return;
+  }
+  const raw = await fs.readJson(configPath);
+  const existing = (raw.methods && typeof raw.methods === 'object' && !Array.isArray(raw.methods))
+    ? raw.methods as Record<string, unknown>
+    : {};
+
+  const declared: Record<string, unknown> = {};
+  for (const method of methods) {
+    declared[method.name] = existing[method.name] ?? { description: method.description ?? '' };
+  }
+
+  const unchanged = Object.keys(declared).length === Object.keys(existing).length
+    && Object.keys(declared).every((name) => name in existing);
+  if (unchanged) {
+    return;
+  }
+
+  raw.methods = declared;
+  await fs.writeJson(configPath, raw, { spaces: 2 });
+  if (isVerboseEnabled()) {
+    verboseLog(`module.config.json methods updated: ${Object.keys(declared).join(', ') || '(none)'}`);
+  }
 }
 
 async function readModuleConfig(root: string): Promise<ModuleConfig> {

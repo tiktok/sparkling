@@ -214,6 +214,48 @@ describe('Project Creation (runInit)', () => {
       });
     });
 
+    it('should write the keys sparkling autolink reads', async () => {
+      await withTempDir(async (tmpDir) => {
+        const templateDir = await createMockTemplate(tmpDir);
+        const options: InitOptions = { template: templateDir };
+
+        mockModuleInfoPrompts('com.example.toast', 'Toast', 'kts');
+
+        await runInit('toast-module', options);
+
+        const config = await fs.readJson(path.join(tmpDir, 'toast-module', 'module.config.json'));
+
+        // Without these the module links but registers nothing: autolink reads
+        // `name`, `methods` and the platform blocks, none of which it shares
+        // with the keys codegen reads.
+        expect(config.name).toBe('toast-module');
+        expect(config.methods).toEqual({});
+        // Lines up with where codegen puts the Kotlin: the abstract class for
+        // `showToast` lands in com.example.toast.toast.showToast, and autolink
+        // registers com.example.toast.toast.showToast.ToastShowToastMethod.
+        expect(config.android.packageName).toBe('com.example.toast.toast');
+        expect(config.android.className).toBe('ToastMethod');
+        expect(config.android.buildGradle).toBe('android/build.gradle.kts');
+        expect(config.ios.moduleName).toBe('Toast');
+        expect(config.ios.className).toBe('ToastMethod');
+        expect(config.ios.podspecPath).toBe('ios/Sparkling-Toast.podspec');
+      });
+    });
+
+    it('should name the groovy build file when that dsl is chosen', async () => {
+      await withTempDir(async (tmpDir) => {
+        const templateDir = await createMockTemplate(tmpDir);
+        const options: InitOptions = { template: templateDir };
+
+        mockModuleInfoPrompts('com.example.toast', 'Toast', 'groovy');
+
+        await runInit('toast-module', options);
+
+        const config = await fs.readJson(path.join(tmpDir, 'toast-module', 'module.config.json'));
+        expect(config.android.buildGradle).toBe('android/build.gradle');
+      });
+    });
+
     it('should generate default module name from project name', async () => {
       await withTempDir(async (tmpDir) => {
         const templateDir = await createMockTemplate(tmpDir);
