@@ -140,6 +140,19 @@ open class SPKHybridContext: NSObject, NSCopying {
     /// integrated into the hybrid view hierarchy.
     public var rawViewBuilderBlock: ((Any?) -> Void)?
 
+    /// How Lynx splits rendering across threads for this container.
+    ///
+    /// Defaults to `.allOnUI`, which is what every container used before this
+    /// existed. Changing it is a real decision with real trade-offs, which is
+    /// why it is a per-container property rather than a global: moving layout
+    /// off the UI thread can smooth a heavy page and can also change the order
+    /// in which a page observes its own size.
+    ///
+    /// It was previously reachable only through `rawViewBuilderBlock`, by
+    /// calling `setThreadStrategyForRender` on the builder after the SDK had
+    /// already set it - which works, and which nobody finds.
+    public var threadStrategyForRender: LynxThreadStrategyForRender = .allOnUI
+
     /// Merges two dictionaries with optional override behavior.
     ///
     /// - Parameters:

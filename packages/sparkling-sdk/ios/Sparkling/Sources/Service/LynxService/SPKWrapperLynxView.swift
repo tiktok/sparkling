@@ -179,7 +179,9 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
             builder.fetcher = params?.dynamicComponentFetcher ?? Self.globalResourceProvider
             builder.addLynxResourceProvider(LYNX_PROVIDER_TYPE_EXTERNAL_JS, provider: Self.globalResourceProvider)
 
-            builder.setThreadStrategyForRender(.allOnUI)
+            // Defaults to .allOnUI; a host that needs another split sets it on the
+            // context rather than reaching for rawViewBuilderBlock below.
+            builder.setThreadStrategyForRender(params?.context?.threadStrategyForRender ?? .allOnUI)
 
             var URL = params?.sourceUrl ?? ""
             builder.lynxModuleExtraData = ["URL": URL]

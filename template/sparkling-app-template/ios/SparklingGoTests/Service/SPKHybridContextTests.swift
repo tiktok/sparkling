@@ -22,6 +22,19 @@ struct SPKHybridContextTests {
         return SPKHybridContext()
     }
 
+    // MARK: - Render Thread Strategy
+
+    @Test func testThreadStrategyDefaultsToAllOnUI() {
+        // What every container did before the property existed.
+        #expect(createEmptyContext().threadStrategyForRender == .allOnUI)
+    }
+
+    @Test func testThreadStrategyIsSettable() {
+        let context = createEmptyContext()
+        context.threadStrategyForRender = .multiThreads
+        #expect(context.threadStrategyForRender == .multiThreads)
+    }
+
     // MARK: - Dictionary Merge Tests
 
     @Test func testMergeWithDictOverride() {
