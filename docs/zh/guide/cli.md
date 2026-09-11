@@ -88,6 +88,34 @@ npx sparkling autolink
 - **Android** — 链接 Sparkling 方法模块的 Gradle project，并生成 `SparklingAutolink.kt`。Debug-tool 包仍以 `debugImplementation` 方式链接。
 - **iOS** — 链接 Sparkling 方法模块的 pod，并生成 `SparklingAutolink.swift`。Debug-tool 包仍链接到调试目标。
 
+#### Node-API addons
+
+A module that ships a Lynx Node-API addon names it in `module.config.json`:
+
+```json
+{
+  "name": "sparkling-engine",
+  "nodeApiAddons": ["SparklingEngine"]
+}
+```
+
+Autolink then generates the load sequence, which has an order that is not
+guessable and which nothing performs on its own: an addon's shared library is
+built and packaged, and unless something opens it its `napi_module_register`
+constructor never runs and `getNapiLoader().load(name)` finds nothing.
+
+- **Android** — `SparklingAutolink.loadNodeApiAddons()` loads PrimJS's Node-API
+  implementation and its Lynx adapter first, then each addon. Call it from
+  `Application.onCreate`, after Lynx is initialised and before any `LynxView` is
+  created: Lynx decides whether to attach a Node-API environment while it starts
+  up and only does so if the runtime libraries are already in the process.
+- **iOS** — `sparklingAutolinkNodeApiAddons` lists the addons. Registration
+  itself is the `NAPI_USE(<Addon>)` macro from the addon's own `addon_use.h`, in
+  a compiled translation unit, and needs the `LynxWeakNodeAPI` pod in the
+  Podfile.
+
+Node-API is only available on the background JS thread.
+
 ### `sparkling run:android`
 
 一键完成构建、自动链接和启动 Android 调试版本。

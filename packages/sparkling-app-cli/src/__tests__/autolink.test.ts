@@ -68,6 +68,7 @@ function createMethodModule(
     devtool?: boolean;
     packageVersion?: string;
     methods?: string[];
+    nodeApiAddons?: string[];
   } = {},
 ): string {
   const moduleDir = path.join(cwd, 'node_modules', name);
@@ -92,6 +93,9 @@ function createMethodModule(
   }
   if (opts.methods?.length) {
     config.methods = Object.fromEntries(opts.methods.map(method => [method, {}]));
+  }
+  if (opts.nodeApiAddons?.length) {
+    config.nodeApiAddons = opts.nodeApiAddons;
   }
   if (opts.iosModuleName || opts.iosClassName || opts.devtool) {
     config.ios = {
@@ -159,6 +163,68 @@ describe('autolink', () => {
   });
 
   // ── One module ──────────────────────────────────────────────────────────
+
+  describe('a module that ships a Node-API addon', () => {
+    beforeEach(() => {
+      scaffoldProject(cwd);
+      createMethodModule(cwd, 'sparkling-engine', {
+        androidPackage: 'com.sparkling.engine',
+        androidClassName: 'EngineModule',
+        iosModuleName: 'Engine',
+        nodeApiAddons: ['SparklingEngine'],
+      });
+    });
+
+    it('generates the load sequence, runtime libraries first', async () => {
+      await autolink({ cwd, platform: 'android' });
+      const registry = fs.readFileSync(
+        path.join(cwd, 'android/app/src/main/java/com/test/app/SparklingAutolink.kt'),
+        'utf8',
+      );
+
+      // Lynx only attaches a Node-API environment if PrimJS's implementation and
+      // the adapter are already in the process, so the order is load-bearing.
+      const order = ['"napi"', '"napi_adapter"', '"SparklingEngine"'].map(lib => registry.indexOf(lib));
+      expect(order.every(index => index >= 0)).toBe(true);
+      expect(order).toEqual([...order].sort((a, b) => a - b));
+      expect(registry).toContain('fun loadNodeApiAddons()');
+      expect(registry).toContain('System.loadLibrary(library)');
+    });
+
+    it('names the addons for the iOS side to register', async () => {
+      await autolink({ cwd, platform: 'ios' });
+      const registry = fs.readFileSync(
+        path.join(cwd, 'ios/SparklingGo/SparklingGo/SparklingAutolink.swift'),
+        'utf8',
+      );
+      expect(registry).toContain('let sparklingAutolinkNodeApiAddons: [String] = ["SparklingEngine"]');
+    });
+
+    it('reports the addons on the discovered module', async () => {
+      const modules = await autolink({ cwd, platform: 'all' });
+      expect(modules[0].nodeApiAddons).toEqual(['SparklingEngine']);
+    });
+  });
+
+  describe('a module with no Node-API addon', () => {
+    beforeEach(() => {
+      scaffoldProject(cwd);
+      createMethodModule(cwd, 'sparkling-navigation', {
+        androidPackage: 'com.sparkling.navigation',
+        androidClassName: 'NavigationModule',
+      });
+    });
+
+    it('emits no loader at all', async () => {
+      await autolink({ cwd, platform: 'android' });
+      const registry = fs.readFileSync(
+        path.join(cwd, 'android/app/src/main/java/com/test/app/SparklingAutolink.kt'),
+        'utf8',
+      );
+      expect(registry).not.toContain('nodeApiLibraries');
+      expect(registry).not.toContain('loadNodeApiAddons');
+    });
+  });
 
   describe('one sparkling method module', () => {
     beforeEach(() => {

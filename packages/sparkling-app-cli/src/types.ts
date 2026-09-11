@@ -68,6 +68,18 @@ export interface MethodModuleConfig {
   root: string;
   /** When true, the module is a devtool module: linked with debugImplementation on Android and excluded from release on iOS. */
   devtool?: boolean;
+  /**
+   * Node-API addon libraries this module ships, as basenames without the `lib`
+   * prefix or the file extension.
+   *
+   * Lynx hosts a Node-API environment on the background JS thread and PrimJS
+   * implements it, but nothing loads an addon's shared library: it is built and
+   * packaged and then never opened, so `getNapiLoader().load(name)` finds
+   * nothing. Naming the addons here lets autolink generate the load sequence,
+   * which has an order that is not guessable - see `nodeApiLibraries` in the
+   * generated registry.
+   */
+  nodeApiAddons?: string[];
   android?: {
     packageName?: string;
     className?: string;
