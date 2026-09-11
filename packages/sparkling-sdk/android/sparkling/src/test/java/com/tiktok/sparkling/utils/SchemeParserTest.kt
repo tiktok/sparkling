@@ -79,6 +79,24 @@ class SchemeParserTest {
     }
 
     @Test
+    fun testParseSchemeAcceptsTheUsualBooleanSpellings() {
+        for (value in listOf("1", "true", "TRUE", "yes", "on")) {
+            val result = SchemeParser.parseScheme("hybrid://lynxview_page?bundle=b&hide_nav_bar=$value")
+            assertNotNull(result)
+            assertTrue("hide_nav_bar=$value should be on", result!!.hideNavBar)
+        }
+    }
+
+    @Test
+    fun testParseSchemeTreatsAnythingElseAsOff() {
+        for (value in listOf("0", "false", "no", "off", "", "maybe")) {
+            val result = SchemeParser.parseScheme("hybrid://lynxview_page?bundle=b&hide_nav_bar=$value")
+            assertNotNull(result)
+            assertFalse("hide_nav_bar=$value should be off", result!!.hideNavBar)
+        }
+    }
+
+    @Test
     fun testParseSchemeWithUnknownHost() {
         val scheme = "hybrid://unknown?bundle=test_bundle"
         val result = SchemeParser.parseScheme(scheme)
@@ -217,6 +235,10 @@ class SchemeParserTest {
 
     @Test
     fun testParseSchemeWithInvalidBooleanValues() {
+        // `true` used to be listed here as invalid, which is what made this
+        // divergent: iOS reads these through NSString.boolValue and has always
+        // accepted it, so the same URL hid the status bar on one platform and
+        // not the other. A value that spells nothing - `invalid` - is still off.
         val scheme = "hybrid://lynxview_page?hide_nav_bar=invalid&hide_status_bar=true"
         val result = SchemeParser.parseScheme(scheme)
 
@@ -224,7 +246,7 @@ class SchemeParserTest {
         with(result!!) {
             assertEquals(HybridContainerType.PAGE, containerType)
             assertFalse(hideNavBar)
-            assertFalse(hideStatusBar)
+            assertTrue(hideStatusBar)
         }
     }
 
