@@ -542,6 +542,31 @@ class SparklingViewTest {
     }
 
     @Test
+    fun handleUISkipsDebugTagWhenDisabledEvenWithDebugToolProvider() {
+        context.applicationInfo.flags = context.applicationInfo.flags or ApplicationInfo.FLAG_DEBUGGABLE
+        SparklingDebugToolRegistry.setProvidersForTest(listOf(FakeDebugToolProvider()))
+        SparklingDebugToolRegistry.setDebugTagEnabled(false)
+        try {
+            val kitView = RecordingKitView(context)
+            every { HybridKit.createKitView(any(), any(), any(), any()) } returns kitView
+            val sparklingView = SparklingView(context)
+
+            sparklingView.prepare(baseContext)
+
+            // The inspector is still reachable; only the badge is gone.
+            assertNull(sparklingView.findDebugTag())
+            assertTrue(SparklingDebugToolRegistry.hasDebugToolProvider())
+        } finally {
+            SparklingDebugToolRegistry.setDebugTagEnabled(true)
+        }
+    }
+
+    @Test
+    fun debugTagIsEnabledByDefault() {
+        assertTrue(SparklingDebugToolRegistry.isDebugTagEnabled())
+    }
+
+    @Test
     fun handleUISkipsDebugTagWhenDebugToolProviderMissing() {
         context.applicationInfo.flags = context.applicationInfo.flags or ApplicationInfo.FLAG_DEBUGGABLE
         SparklingDebugToolRegistry.setProvidersForTest(emptyList())

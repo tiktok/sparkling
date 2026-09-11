@@ -451,6 +451,7 @@ class SparklingView(
     }
 
     private fun shouldShowDebugTag(): Boolean {
+        if (!SparklingDebugToolRegistry.isDebugTagEnabled()) return false
         val appDebug = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         if (!appDebug) return false
         return SparklingDebugToolRegistry.hasDebugToolProvider()

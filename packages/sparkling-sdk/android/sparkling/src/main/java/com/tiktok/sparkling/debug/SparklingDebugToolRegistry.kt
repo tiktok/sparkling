@@ -18,6 +18,29 @@ object SparklingDebugToolRegistry {
     private var serviceProviders: List<SparklingDebugToolProvider>? = null
     private val methodObserverInstalled = AtomicBoolean(false)
 
+    @Volatile
+    private var debugTagEnabled: Boolean = true
+
+    /**
+     * Whether a container draws the debug tag in its bottom-left corner.
+     *
+     * The tag is only ever drawn in a debuggable build that has a debug tool on
+     * the classpath, but those two conditions are not a preference: an app can
+     * want the inspector and not want a badge sitting on top of its own UI - in
+     * a screenshot test, a design review, or a demo. Without this the only way
+     * to remove it was to drop the debug tool dependency, which takes the
+     * inspector with it.
+     *
+     * Defaults to true, so behaviour is unchanged until an app asks otherwise.
+     */
+    @JvmStatic
+    fun setDebugTagEnabled(enabled: Boolean) {
+        debugTagEnabled = enabled
+    }
+
+    @JvmStatic
+    fun isDebugTagEnabled(): Boolean = debugTagEnabled
+
     fun hasDebugToolProvider(): Boolean = providers().isNotEmpty()
 
     fun openInspectorPanel(activity: FragmentActivity): Boolean {
