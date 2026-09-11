@@ -13,6 +13,7 @@ import {
   checkXcode,
   checkCocoaPods,
   checkSimulator,
+  checkAppConfigAssets,
 } from './checks';
 import type { CheckResult } from './types';
 
@@ -71,6 +72,8 @@ export async function doctor(opts: DoctorOptions): Promise<void> {
 
   const generalResults: CheckResult[] = [];
   generalResults.push(checkNodeVersion());
+  // Skips itself when the working directory is not a Sparkling app.
+  generalResults.push(await checkAppConfigAssets());
 
   console.log('');
   console.log(ui.info('General:'));

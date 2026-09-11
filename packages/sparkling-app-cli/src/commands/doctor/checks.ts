@@ -7,6 +7,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import semver from 'semver';
 import { verboseLog } from '../../utils/verbose';
+import { loadAppConfig } from '../../config';
+import type { AppConfig, SplashScreenPluginConfig } from '../../types';
 import type { CheckResult } from './types';
 
 /**
@@ -394,5 +396,95 @@ export function checkSimulator(): CheckResult {
     ...base,
     status: 'pass',
     message: `${deviceLines.length} simulator(s) available`,
+  };
+}
+
+/** The PNG signature. A file that does not start with it is not a PNG. */
+const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+/**
+ * Check the image assets app.config.ts points at.
+ *
+ * Nothing else validates them, and a broken one is invisible until a store
+ * rejects the build: the template shipped an `app_icon.png` that began with
+ * EF BF BD 50 4E 47 - the UTF-8 replacement character followed by "PNG" -
+ * because the file had been read as text and re-encoded, and every non-ASCII
+ * byte in it was destroyed.
+ *
+ * Only run when the working directory is a Sparkling app; skipped otherwise.
+ */
+export async function checkAppConfigAssets(cwd: string = process.cwd()): Promise<CheckResult> {
+  const base = { name: 'app.config.ts assets', category: 'general' as const };
+
+  if (!fs.existsSync(path.join(cwd, 'app.config.ts'))) {
+    return { ...base, status: 'skip', message: 'Not a Sparkling app directory' };
+  }
+
+  let config: AppConfig;
+  try {
+    ({ config } = await loadAppConfig(cwd));
+  } catch (error) {
+    return {
+      ...base,
+      status: 'warn',
+      message: `Could not read app.config.ts (${(error as Error).message})`,
+    };
+  }
+
+  const referenced: string[] = [];
+  if (typeof config.appIcon === 'string') {
+    referenced.push(config.appIcon);
+  }
+  for (const entry of config.plugin ?? []) {
+    if (!Array.isArray(entry) || entry[0] !== 'splash-screen') {
+      continue;
+    }
+    const options = entry[1] as SplashScreenPluginConfig | undefined;
+    if (typeof options?.image === 'string') {
+      referenced.push(options.image);
+    }
+    if (typeof options?.dark?.image === 'string') {
+      referenced.push(options.dark.image);
+    }
+  }
+
+  if (referenced.length === 0) {
+    return { ...base, status: 'skip', message: 'No image assets declared' };
+  }
+
+  const problems: string[] = [];
+  for (const relative of Array.from(new Set(referenced))) {
+    const file = path.resolve(cwd, relative);
+    if (!fs.existsSync(file)) {
+      problems.push(`${relative} is missing`);
+      continue;
+    }
+    const handle = fs.openSync(file, 'r');
+    const head = Buffer.alloc(PNG_MAGIC.length);
+    try {
+      fs.readSync(handle, head, 0, head.length, 0);
+    } finally {
+      fs.closeSync(handle);
+    }
+    if (!head.equals(PNG_MAGIC)) {
+      problems.push(`${relative} is not a PNG`);
+    }
+  }
+
+  if (problems.length > 0) {
+    return {
+      ...base,
+      status: 'fail',
+      message: problems.join('; '),
+      fixHint:
+        `Fix the image assets referenced by app.config.ts: ${problems.join('; ')}. ` +
+        'Each must exist and be a real PNG.',
+    };
+  }
+
+  return {
+    ...base,
+    status: 'pass',
+    message: `${referenced.length} asset(s) present`,
   };
 }

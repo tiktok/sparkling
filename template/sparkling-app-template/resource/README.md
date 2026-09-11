@@ -24,3 +24,13 @@ export default {
 ```
 
 Place your images here and adjust paths in `app.config.ts`.
+
+The files checked in are placeholders, rendered by `make-assets.py` (standard
+library only, no dependencies):
+
+```
+python3 resource/make-assets.py
+```
+
+`sparkling doctor` verifies that every image `app.config.ts` points at exists and
+is a real PNG.

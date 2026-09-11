@@ -63,9 +63,9 @@ const config: AppConfig = {
       'splash-screen',
       {
         backgroundColor: '#232323',
-        image: './resource/app_icon.png',
+        image: './resource/splash_icon.png',
         dark: {
-          image: './resource/app_icon.png',
+          image: './resource/splash_icon_dark.png',
           backgroundColor: '#000000',
         },
         imageWidth: 200,
