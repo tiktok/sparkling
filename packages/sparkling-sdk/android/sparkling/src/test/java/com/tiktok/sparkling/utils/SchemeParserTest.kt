@@ -87,6 +87,25 @@ class SchemeParserTest {
     }
 
     @Test
+    fun testParseSchemeAcceptsAnAppsOwnScheme() {
+        // A deep link arrives under the app's own scheme, never the generic
+        // `hybrid://`, and has to reach the router without a custom parser.
+        val scheme = "myapp://lynxview_page?bundle=deep_link_bundle&title=Deep"
+        val result = SchemeParser.parseScheme(scheme)
+
+        assertNotNull(result)
+        assertEquals(HybridKitType.LYNX, result!!.engineType)
+        assertEquals(HybridContainerType.PAGE, result.containerType)
+        assertEquals("deep_link_bundle", result.bundle)
+        assertEquals("Deep", result.title)
+    }
+
+    @Test
+    fun testParseSchemeWithAppSchemeStillRejectsUnknownHost() {
+        assertNull(SchemeParser.parseScheme("myapp://settings?bundle=test_bundle"))
+    }
+
+    @Test
     fun testParseSchemeWithInvalidProtocol() {
         val scheme = "https://lynxview?bundle=test_bundle"
         val result = SchemeParser.parseScheme(scheme)

@@ -14,6 +14,12 @@ import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 import com.tiktok.sparkling.hybridkit.utils.safeGetQueryParameter
 
 object SchemeParser {
+    /**
+     * Schemes that name a web address rather than a container. A URL on one of
+     * these is never a container scheme, however its host reads.
+     */
+    private val WEB_SCHEMES = setOf("http", "https")
+
     fun interface CustomSchemeParser {
         fun parseScheme(scheme: String): HybridSchemeParam?
     }
@@ -78,13 +84,30 @@ object SchemeParser {
         }
     }
 
+    /**
+     * Parse a container scheme.
+     *
+     * What this is, is decided by the host - `lynxview_page`, `lynxview_card`,
+     * `lynxview`, `webview` - and an unrecognised host is rejected below. The
+     * scheme therefore only has to say that this is a container URL and not a
+     * web address, so any scheme but http(s) is accepted rather than `hybrid://`
+     * alone.
+     *
+     * That is what makes deep links work without a custom parser. An app's
+     * public scheme is its own - `myapp://` - because `hybrid://` is generic and
+     * every Sparkling app on the device would claim it; requiring `hybrid://`
+     * here meant a URL arriving from outside the app could never reach the
+     * router as it stood. iOS has always decided on host and query alone
+     * (SPKHybridSchemeParam.canResolve), so this also removes a case where the
+     * same URL behaved differently on the two platforms.
+     */
     @JvmStatic
     fun parseDefaultScheme(scheme: String): HybridSchemeParam? {
-        if (!scheme.startsWith(SchemeConstants.Scheme.PREFIX)) {
+        val uri = scheme.toUri()
+        val uriScheme = uri.scheme?.lowercase()
+        if (uriScheme == null || uriScheme in WEB_SCHEMES) {
             return null
         }
-
-        val uri = scheme.toUri()
         val viewTypeString = uri.host?.lowercase()
         val engineType =
             when {
