@@ -112,15 +112,38 @@ function collectInterfacesForMethod(
   typeNodes: Map<string, ts.InterfaceDeclaration | ts.TypeAliasDeclaration>,
   cache: Map<string, ObjectDefinition>
 ): Record<string, ObjectDefinition> {
+  const pending: string[] = [];
   const names = new Set<string>();
   summaries.forEach((summary) => gatherInterfaceNames(summary, names));
+  names.forEach((name) => pending.push(name));
+
+  // An interface can reference further interfaces through its own fields, so
+  // the walk continues until the set stops growing. Collecting only the names
+  // the request and response mention directly left anything one level deeper
+  // undeclared: the generated code still named the type and annotated it with
+  // `nestedClassType = X::class`, but no `interface X` was ever emitted, so it
+  // did not compile.
   const interfaces: Record<string, ObjectDefinition> = {};
-  names.forEach((name) => {
-    const definition = resolveInterface(name, typeNodes, cache);
-    if (definition) {
-      interfaces[name] = definition;
+  const visited = new Set<string>();
+  while (pending.length > 0) {
+    const name = pending.shift() as string;
+    if (visited.has(name)) {
+      continue;
     }
-  });
+    visited.add(name);
+    const definition = resolveInterface(name, typeNodes, cache);
+    if (!definition) {
+      continue;
+    }
+    interfaces[name] = definition;
+    const nested = new Set<string>();
+    definition.fields.forEach((field) => gatherInterfaceNames(field.type, nested));
+    nested.forEach((nestedName) => {
+      if (!visited.has(nestedName)) {
+        pending.push(nestedName);
+      }
+    });
+  }
   return interfaces;
 }
 

@@ -82,6 +82,41 @@ describe('sparkling-method cli', () => {
     });
   });
 
+  it('declares a type shared by the request and the response exactly once', async () => {
+    await withTempDir(async (cwd) => {
+      await fs.writeJson(path.join(cwd, 'module.config.json'), {
+        packageName: 'com.example.geo',
+        moduleName: 'geo'
+      });
+
+      const srcDir = path.join(cwd, 'src');
+      await fs.ensureDir(srcDir);
+      await fs.writeFile(
+        path.join(srcDir, 'method.d.ts'),
+        `interface Point {\n  x: number;\n  y: number;\n}\n\ninterface MoveRequest {\n  from: Point;\n}\n\ninterface MoveResponse {\n  to: Point;\n}\n\ndeclare function move(params: MoveRequest, callback: (res: MoveResponse) => void): void;`
+      );
+
+      await runCodegen({ src: 'src' });
+
+      const kotlinPath = path.join(
+        cwd, 'android', 'src', 'main', 'java', 'com', 'example', 'geo', 'geo', 'move', 'AbsMoveMethodIDL.kt'
+      );
+      const kotlinContent = await fs.readFile(kotlinPath, 'utf8');
+
+      // Both nested class lists render into the same class body, so a type the
+      // request and the response both reference must be declared once.
+      const declarations = kotlinContent.match(/interface Point : IDLMethodBaseModel/g) ?? [];
+      expect(declarations).toHaveLength(1);
+
+      // Swift resolves the same interfaces, so it must declare the model it
+      // names rather than referring to a class that was never emitted.
+      const swiftPath = path.join(cwd, 'ios', 'Source', 'Core', 'Geo', 'Move', 'MoveIDL.swift');
+      const swiftContent = await fs.readFile(swiftPath, 'utf8');
+      expect(swiftContent).toContain('class SPKMoveMethodPointModel');
+      expect(swiftContent).toContain('SPKMoveMethodPointModel');
+    });
+  });
+
   it('generates metadata and native stubs from definitions', async () => {
     await withTempDir(async (cwd) => {
       await fs.writeJson(path.join(cwd, 'module.config.json'), {

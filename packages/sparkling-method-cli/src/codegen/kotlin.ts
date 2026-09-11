@@ -27,8 +27,13 @@ export function buildKotlinView(method: MethodDefinition, config: ModuleConfig):
   const methodPascal = toPascalCase(method.name);
   const packageSegments = buildPackageSegments(config, method.name);
   const className = `Abs${methodPascal}MethodIDL`;
-  const requestModel = buildKotlinModel(method.request, `${methodPascal}Request`, method, 'request');
-  const responseModel = buildKotlinModel(method.response, `${methodPascal}Response`, method, 'response');
+  // One map across both models. The template renders `request.clazz` and
+  // `response.clazz` into the same class body, so a type both of them reference
+  // would otherwise be declared twice and the generated Kotlin would not
+  // compile.
+  const classMap = new Map<string, KotlinInnerClass>();
+  const requestModel = buildKotlinModel(method.request, `${methodPascal}Request`, method, 'request', classMap);
+  const responseModel = buildKotlinModel(method.response, `${methodPascal}Response`, method, 'response', classMap);
 
   const paramsList = requestModel.topItem?.items.map((item) => item.title).filter(Boolean) ?? [];
   const resultsList = responseModel.topItem?.items.map((item) => item.title).filter(Boolean) ?? [];
@@ -58,13 +63,14 @@ function buildKotlinModel(
   summary: TypeSummary | undefined,
   fallbackName: string,
   method: MethodDefinition,
-  scope: 'request' | 'response'
+  scope: 'request' | 'response',
+  classMap: Map<string, KotlinInnerClass>
 ): KotlinModelView {
   if (!summary) {
     return { clazz: [] };
   }
   const definition = ensureObjectDefinition(summary, fallbackName, method.interfaces);
-  const classMap = new Map<string, KotlinInnerClass>();
+  const alreadyDeclared = new Set(classMap.keys());
   const context: KotlinBuildContext = {
     methodPascal: toPascalCase(method.name),
     interfaces: method.interfaces,
@@ -75,7 +81,11 @@ function buildKotlinModel(
   const topItem = convertObjectToKotlinView(definition, context, true, []);
   return {
     topItem,
-    clazz: Array.from(classMap.values())
+    // Only what this model introduced: a nested type the request already
+    // declared is referenced by the response, not declared again.
+    clazz: Array.from(classMap.entries())
+      .filter(([name]) => !alreadyDeclared.has(name))
+      .map(([, value]) => value)
   };
 }
 
