@@ -6,6 +6,7 @@ package com.tiktok.sparkling.utils
 import android.content.res.Configuration
 import android.net.Uri
 import androidx.core.net.toUri
+import com.tiktok.sparkling.SparklingTheme
 import com.tiktok.sparkling.hybridkit.base.HybridContainerType
 import com.tiktok.sparkling.hybridkit.base.HybridKitType
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
@@ -111,7 +112,12 @@ object SchemeParser {
         val params = HybridSchemeParam()
         params.engineType = engineType
         params.containerType = containerType
-        params.forceThemeStyle = uri.safeGetQueryParameter(SchemeConstants.Param.FORCE_THEME_STYLE)
+        // An explicit force_theme_style wins; otherwise the container follows the
+        // app's own preference, so a page opened while the app is set to Dark is
+        // dark from its first frame instead of repainting once it has loaded.
+        params.forceThemeStyle =
+            uri.safeGetQueryParameter(SchemeConstants.Param.FORCE_THEME_STYLE)
+                ?: SparklingTheme.forcedStyle()
 
         params.bundle = uri.safeGetQueryParameter(SchemeConstants.Param.BUNDLE)
             ?: uri.safeGetQueryParameter(SchemeConstants.Param.URL)

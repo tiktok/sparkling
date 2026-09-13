@@ -181,3 +181,33 @@ spkView?.updateGlobalPropsByIncrement(mapOf("theme" to "dark"))
 - [多页面导航](./multi-page-navigation.md) — 页面间跳转、传递数据、关闭页面
 - [Sparkling SDK — iOS](../apis/sparkling-sdk-ios.md) — iOS API 参考
 - [Sparkling SDK — Android](../apis/sparkling-sdk-android.md) — Android API 参考
+
+## Light and dark across pages
+
+Every page is its own container, so a container's theme used to be decided once,
+when it was created, from `force_theme_style` or the device setting. An in-app
+preference therefore did not reach a page opened afterwards, and changing it did
+not reach a page that was already open.
+
+`SparklingTheme` is the one place that answers "which theme":
+
+```kotlin
+SparklingTheme.preference = SparklingTheme.Preference.DARK
+```
+
+- A container opened afterwards inherits it, from its first frame - the scheme
+  parser fills in `force_theme_style` when the URL did not.
+- A container that *was* given an explicit `force_theme_style` keeps it. A page
+  that asked to be light stays light.
+- Every live container is told, as the `themeChanged` event, so an open page can
+  repaint without being recreated:
+
+```ts
+lynx.getJSModule('GlobalEventEmitter').addListener('themeChanged', ({ theme }) => {
+  // 'light' | 'dark' | 'system'
+});
+```
+
+The preference is stored by the SDK and survives a relaunch. A host that keeps
+it somewhere of its own sets `SparklingTheme.persist = false` and assigns
+`preference` during startup.

@@ -79,6 +79,22 @@ class SchemeParserTest {
     }
 
     @Test
+    fun testParseSchemeInheritsTheAppThemePreference() {
+        com.tiktok.sparkling.SparklingTheme.preference = com.tiktok.sparkling.SparklingTheme.Preference.DARK
+        try {
+            // Nothing was forced on the URL, so the page follows the app.
+            val inherited = SchemeParser.parseScheme("hybrid://lynxview_page?bundle=b")
+            assertEquals("dark", inherited?.forceThemeStyle)
+
+            // An explicit value still wins: a page that asked for light gets it.
+            val forced = SchemeParser.parseScheme("hybrid://lynxview_page?bundle=b&force_theme_style=light")
+            assertEquals("light", forced?.forceThemeStyle)
+        } finally {
+            com.tiktok.sparkling.SparklingTheme.preference = com.tiktok.sparkling.SparklingTheme.Preference.SYSTEM
+        }
+    }
+
+    @Test
     fun testParseSchemeWithUnknownHost() {
         val scheme = "hybrid://unknown?bundle=test_bundle"
         val result = SchemeParser.parseScheme(scheme)

@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import com.tiktok.sparkling.hybridkit.base.IKitInitParam
+import com.tiktok.sparkling.SparklingTheme
 import com.tiktok.sparkling.hybridkit.base.IKitView
 import com.tiktok.sparkling.hybridkit.base.Theme
 import com.tiktok.sparkling.hybridkit.config.RuntimeInfo
@@ -146,15 +147,23 @@ open class HybridContext {
             }
 
             else -> {
-                val nightModeFlags =
-                    context
-                        ?.resources
-                        ?.configuration
-                        ?.uiMode
-                        ?.and(Configuration.UI_MODE_NIGHT_MASK)
-                when (nightModeFlags) {
-                    Configuration.UI_MODE_NIGHT_YES -> Theme.DARK
-                    else -> Theme.LIGHT
+                // Nothing was forced on this container, so the app preference
+                // decides; SYSTEM falls through to the device setting.
+                when (SparklingTheme.preference) {
+                    SparklingTheme.Preference.LIGHT -> Theme.LIGHT
+                    SparklingTheme.Preference.DARK -> Theme.DARK
+                    SparklingTheme.Preference.SYSTEM -> {
+                        val nightModeFlags =
+                            context
+                                ?.resources
+                                ?.configuration
+                                ?.uiMode
+                                ?.and(Configuration.UI_MODE_NIGHT_MASK)
+                        when (nightModeFlags) {
+                            Configuration.UI_MODE_NIGHT_YES -> Theme.DARK
+                            else -> Theme.LIGHT
+                        }
+                    }
                 }
             }
         }
