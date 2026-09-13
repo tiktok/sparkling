@@ -88,6 +88,102 @@ npx sparkling autolink
 - **Android** — Links Sparkling method Gradle projects and generates `SparklingAutolink.kt`. Debug-tool packages are linked as `debugImplementation`.
 - **iOS** — Links Sparkling method pods and generates `SparklingAutolink.swift`. Debug-tool packages are linked in the debug target.
 
+### `sparkling prebuild`
+
+Apply `app.config.ts` to the native projects.
+
+```bash
+npx sparkling prebuild
+```
+
+| Option | Description |
+| --- | --- |
+| `--platform <platform>` | `android`, `ios`, or `all` (default: `all`) |
+| `--check` | Report what would change and exit non-zero instead of writing |
+| `--revert` | Remove every prebuild region, leaving the projects as written by hand |
+
+`run:android` and `run:ios` run it for you before they build.
+
+**What it applies:**
+
+```ts
+const config: AppConfig = {
+  // ...
+  appIcon: './resource/app_icon.png',
+  android: {
+    permissions: ['INTERNET', 'CAMERA'],
+    intentFilters: [
+      { action: 'VIEW', categories: ['DEFAULT', 'BROWSABLE'], data: [{ scheme: 'myapp' }] },
+    ],
+  },
+  ios: {
+    urlSchemes: ['myapp'],
+    infoPlist: { NSCameraUsageDescription: 'Scan a code.' },
+    entitlements: { 'com.apple.developer.networking.multicast': true },
+  },
+};
+```
+
+- **Android** — permissions and intent filters, written into marked regions of
+  `AndroidManifest.xml`. An intent filter goes inside the launcher activity
+  unless it names `activity`.
+- **iOS** — `Info.plist` keys and entitlements, written into marked regions.
+  `urlSchemes` is sugar for a `CFBundleURLTypes` entry per scheme. An
+  entitlements file is created if it is needed and absent; adding it to the
+  Xcode target's `CODE_SIGN_ENTITLEMENTS` is still yours to do.
+- **Icons** — `appIcon` is resized into every Android density and into the iOS
+  asset catalogue. The iOS icon is composited onto white, because the App Store
+  rejects an icon with an alpha channel.
+
+**The projects stay yours.** Unlike Expo, Sparkling's `android/` and `ios/`
+directories are source: they are created once from the template, committed, and
+then edited by hand. Prebuild therefore does not regenerate them - it owns the
+text between its own markers and nothing else:
+
+```xml
+<!-- sparkling:begin(android-permissions) -->
+<uses-permission android:name="android.permission.INTERNET" />
+<!-- sparkling:end(android-permissions) -->
+```
+
+Running it twice produces the same file as running it once; removing a value
+from the config removes it from the project; `--revert` returns every file to
+what you wrote. A value you declared by hand outside a region is reported rather
+than duplicated, because two declarations of the same permission or plist key is
+a project that builds and behaves unpredictably.
+
+`--check` is what keeps this honest in CI: it turns "someone edited the manifest
+instead of the config" into a failed build rather than a divergence nobody
+notices.
+
+**Config plugins** extend it. A plugin receives the config and registers
+modifications; every modification for a file runs after all plugins have been
+applied, so two plugins touching the same `Info.plist` compose instead of racing:
+
+```ts
+// plugins/with-local-network.ts
+import { withInfoPlist } from 'sparkling-app-cli/prebuild/mods';
+
+export default function withLocalNetwork(config) {
+  return withInfoPlist(config, (values) => ({
+    ...values,
+    NSBonjourServices: ['_printer._tcp'],
+  }));
+}
+```
+
+```ts
+plugins: ['./plugins/with-local-network']
+```
+
+A plugin is named as a module specifier or a path. An inline function works only
+when the config is loaded through the CommonJS path - it cannot survive the JSON
+round trip the ESM loader makes - and prebuild says so rather than silently
+skipping it.
+
+The design and its trade-offs are in
+[RFC 0002](../../rfcs/0002-app-config-and-plugins.md).
+
 ### `sparkling run:android`
 
 Build, autolink, and launch the Android debug build in one step.

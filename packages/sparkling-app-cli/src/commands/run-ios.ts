@@ -6,6 +6,7 @@ import path from 'node:path';
 import { execSync } from 'node:child_process';
 import { getConfiguredDevServerPorts, loadAppConfig, resolveDevServerPort } from '../config';
 import { autolink } from './autolink';
+import { prebuild } from '../prebuild';
 import { buildProject } from './build';
 import { runCommand } from '../utils/exec';
 import { ui } from '../utils/ui';
@@ -300,6 +301,10 @@ export async function runIos(options: RunIosOptions): Promise<void> {
     verboseLog(`Podfile path: ${podfilePath} (exists: ${hasPodfile})`);
   }
 
+  // Apply app.config.ts to the native project before it is built. Both steps
+  // write into the same projects, and prebuild's regions have to be there
+  // before Gradle or Xcode reads the manifest.
+  await prebuild({ cwd: options.cwd, platform: 'ios', config });
   await autolink({ cwd: options.cwd, platform: 'ios' });
 
   if (hasPodfile) {

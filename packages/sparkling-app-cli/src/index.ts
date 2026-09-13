@@ -5,6 +5,7 @@
 import { Command } from 'commander';
 import path from 'node:path';
 import { autolink } from './commands/autolink';
+import { prebuild } from './prebuild';
 import { buildProject } from './commands/build';
 import { copyAssets } from './commands/copy-assets';
 import { devProject } from './commands/dev';
@@ -102,6 +103,31 @@ program
       console.warn(ui.warn(`Unknown platform "${opts.platform}", defaulting to 'all'.`));
     }
     await autolink({ cwd, platform });
+  });
+
+program
+  .command('prebuild')
+  .description('Apply app.config.ts and its config plugins to the native projects')
+  .option('--platform <platform>', 'Platform to prebuild: android|ios|all', 'all')
+  .option('--check', 'Report what would change and fail instead of writing')
+  .option('--revert', 'Remove every prebuild region, leaving the projects as written by hand')
+  .action(async (opts) => {
+    const cwd = process.cwd();
+    const raw = String(opts.platform ?? 'all').toLowerCase();
+    const allowed = ['android', 'ios', 'all'];
+    const platform = (allowed.includes(raw) ? raw : 'all') as 'android' | 'ios' | 'all';
+    if (!allowed.includes(raw)) {
+      console.warn(ui.warn(`Unknown platform "${opts.platform}", defaulting to 'all'.`));
+    }
+    const result = await prebuild({
+      cwd,
+      platform,
+      check: opts.check === true,
+      revert: opts.revert === true,
+    });
+    if (opts.check && result.changed.length > 0) {
+      process.exitCode = 1;
+    }
   });
 
 program

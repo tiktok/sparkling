@@ -7,6 +7,7 @@ import os from 'node:os';
 import { execSync } from 'node:child_process';
 import { getConfiguredDevServerPorts, loadAppConfig, resolveDevServerHost, resolveDevServerPort } from '../config';
 import { autolink } from './autolink';
+import { prebuild } from '../prebuild';
 import { buildProject } from './build';
 import { runCommand } from '../utils/exec';
 import { ui } from '../utils/ui';
@@ -145,6 +146,10 @@ export async function runAndroid(options: RunAndroidOptions): Promise<void> {
       `run:android options -> skipCopy: ${options.skipCopy === true}, devPort: ${devPort}, devHost: ${devServerHost}, emulatorCount: ${emulatorSerials.length}`,
     );
   }
+  // Apply app.config.ts to the native project before it is built. Both steps
+  // write into the same projects, and prebuild's regions have to be there
+  // before Gradle or Xcode reads the manifest.
+  await prebuild({ cwd: options.cwd, platform: 'android', config });
   await autolink({ cwd: options.cwd, platform: 'android' });
   await buildProject({ cwd: options.cwd, skipCopy: options.skipCopy });
 

@@ -240,7 +240,12 @@ function loadAppConfigViaEsm(cwd: string, configPath: string, originalError?: un
     `const url = ${JSON.stringify(fileUrl)};`,
     'const mod = await import(url);',
     'const cfg = (mod.default ?? mod);',
-    'const out = { lynxConfig: cfg.lynxConfig ?? {}, platform: cfg.platform ?? {}, paths: cfg.paths ?? {}, appName: cfg.appName, devtool: cfg.devtool, dev: cfg.dev };',
+    // The whole config, not a whitelist. Narrowing it here is why `appIcon`,
+    // `router` and `plugin` appeared to be read by nothing: they never reached
+    // the CLI at all. Functions do not survive JSON either way - `lynxConfig`
+    // was already passed through this path with its plugins dropped - so an
+    // inline function config plugin has to be named as a module instead.
+    'const out = { ...cfg, lynxConfig: cfg.lynxConfig ?? {}, platform: cfg.platform ?? {}, paths: cfg.paths ?? {} };',
     'process.stdout.write(JSON.stringify(out));',
   ].join('\n');
   fs.writeFileSync(readerScript, script);
