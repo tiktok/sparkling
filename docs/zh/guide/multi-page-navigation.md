@@ -141,3 +141,49 @@ export function Detail() {
   );
 }
 ```
+
+## Handling the hardware back button
+
+By default the container handles a back press: a page that is not the task root
+finishes, and one that is asks for a second press before leaving the app. A page
+that has unsaved work, an open sheet, or routing of its own can take over:
+
+```tsx
+import { onBackPress, close } from 'sparkling-navigation';
+
+useEffect(() => onBackPress(() => {
+  if (sheetOpen) {
+    setSheetOpen(false);
+    return;
+  }
+  close();
+}), [sheetOpen]);
+```
+
+`onBackPress` subscribes and turns interception on together, and the function it
+returns turns both off. They are one step because they are useless apart: a page
+that intercepts without listening is a page the back button cannot leave.
+
+While a page is intercepting, **the container does nothing else** - going back
+is the page calling `close()`.
+
+There is no hardware back button on iOS, so the call there succeeds and reports
+`supported: false`. A page that cares can check it:
+
+```ts
+setBackPressIntercept({ intercept: true }, ({ supported }) => {
+  if (!supported) {
+    // Show your own back affordance.
+  }
+});
+```
+
+The host decides whether this is offered at all, by implementing
+`IHostRouterDepend.setBackPressIntercept`; the generated app does, by delegating
+to `SparklingBackPress`. That object also carries what the container does on the
+task root, which used to be written into the activity:
+
+```kotlin
+SparklingBackPress.rootBehavior = SparklingBackPress.RootBehavior.EXIT
+SparklingBackPress.confirmWindowMillis = 3000
+```

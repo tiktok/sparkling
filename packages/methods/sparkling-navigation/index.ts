@@ -4,6 +4,11 @@
 export * from './src/open/open';
 export * from './src/close/close';
 export * from './src/navigate/navigate';
+export * from './src/backPress/backPress';
 export type { OpenRequest, OpenResponse, OpenOptions } from './src/open/open.d';
 export type { CloseRequest, CloseResponse } from './src/close/close.d';
 export type { NavigateRequest, NavigateResponse, NavigateOptions } from './src/navigate/navigate.d';
+export type {
+  SetBackPressInterceptRequest,
+  SetBackPressInterceptResponse,
+} from './src/backPress/backPress.d';

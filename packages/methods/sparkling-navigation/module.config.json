@@ -1,6 +1,9 @@
 {
   "name": "sparkling-navigation",
-  "platforms": ["android", "ios"],
+  "platforms": [
+    "android",
+    "ios"
+  ],
   "version": "1.0.0",
   "description": "Router methods for navigation and page management in Sparkling apps",
   "methods": {
@@ -25,6 +28,16 @@
       },
       "returns": {
         "success": "boolean"
+      }
+    },
+    "setBackPressIntercept": {
+      "description": "Let the page handle the hardware back button instead of the container",
+      "parameters": {
+        "intercept": "boolean",
+        "containerID": "string"
+      },
+      "returns": {
+        "supported": "boolean"
       }
     }
   },

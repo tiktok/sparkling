@@ -46,6 +46,22 @@ interface IHostRouterDepend {
         animated: Boolean? = false,
     ): Boolean
 
+    /**
+     * Let the page handle the hardware back button, or give it back to the host.
+     *
+     * Returns whether the host can do this at all, which is the answer the page
+     * gets: there is no hardware back button on iOS, and a host that embeds
+     * Sparkling in its own navigation may already own the gesture.
+     *
+     * The default is to decline, so a host written before this existed keeps
+     * compiling and keeps its own behaviour.
+     */
+    fun setBackPressIntercept(
+        bridgeContext: IBridgeContext?,
+        containerID: String?,
+        intercept: Boolean,
+    ): Boolean = false
+
     fun provideRouteOpenHandlerList(contextProviderFactory: ContextProviderFactory?): List<AbsRouteOpenHandler> = listOf()
 
     fun provideRouteOpenExceptionHandler(contextProviderFactory: ContextProviderFactory?): AbsRouteOpenHandler? = null

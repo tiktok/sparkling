@@ -2,16 +2,21 @@
 
 exports[`sparkling-navigation module exports snapshot testing for module structure should maintain consistent module export structure: module-export-structure 1`] = `
 {
-  "exportCount": 3,
+  "exportCount": 6,
   "exportedKeys": [
     "open",
     "close",
     "navigate",
+    "BACK_PRESS_EVENT",
+    "setBackPressIntercept",
+    "onBackPress",
   ],
   "functionNames": [
     "open",
     "close",
     "navigate",
+    "setBackPressIntercept",
+    "onBackPress",
   ],
 }
 `;

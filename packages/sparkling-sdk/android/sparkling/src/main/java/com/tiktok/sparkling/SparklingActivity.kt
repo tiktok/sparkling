@@ -16,10 +16,13 @@ import com.tiktok.sparkling.Sparkling.Companion.SPARKLING_CONTEXT_CONTAINER_ID
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 
 class SparklingActivity : AppCompatActivity() {
+    private var sparklingContext: SparklingContext? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val containerId = intent.getStringExtra(SPARKLING_CONTEXT_CONTAINER_ID)
         val sparklingContext = SparklingContextTransferStation.getSparklingContext(containerId)
+        this.sparklingContext = sparklingContext
         initStatusBar(sparklingContext)
         setContentView(R.layout.activity_sparkling)
         initToolBar(sparklingContext)
@@ -111,19 +114,34 @@ class SparklingActivity : AppCompatActivity() {
     }
 
     private var lastBackPressedTime: Long = 0
-    private val DOUBLE_CLICK_EXIT_INTERVAL = 2000
 
     override fun onBackPressed() {
-        if (isTaskRoot) {
-            val currentTime = System.currentTimeMillis()
-            if (currentTime - lastBackPressedTime < DOUBLE_CLICK_EXIT_INTERVAL) {
-                super.onBackPressed()
-            } else {
-                Toast.makeText(this, getString(R.string.click_again_to_exit), Toast.LENGTH_SHORT).show()
-                lastBackPressedTime = currentTime
-            }
-        } else {
-            super.onBackPressed()
+        // A page that has asked to intercept gets the event and the decision.
+        // The container does nothing else: going back from here is the page
+        // calling router.close when it is ready.
+        val context = sparklingContext
+        if (SparklingBackPress.isIntercepting(context?.containerId)) {
+            context?.sendEvent(SparklingBackPress.EVENT, null)
+            return
         }
+
+        if (!isTaskRoot || SparklingBackPress.rootBehavior == SparklingBackPress.RootBehavior.EXIT) {
+            super.onBackPressed()
+            return
+        }
+
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastBackPressedTime < SparklingBackPress.confirmWindowMillis) {
+            super.onBackPressed()
+        } else {
+            Toast.makeText(this, getString(R.string.click_again_to_exit), Toast.LENGTH_SHORT).show()
+            lastBackPressedTime = currentTime
+        }
+    }
+
+    override fun onDestroy() {
+        SparklingBackPress.forget(sparklingContext?.containerId)
+        sparklingContext = null
+        super.onDestroy()
     }
 }

@@ -5,6 +5,7 @@ package com.tiktok.sparkling.playground
 
 import android.content.Context
 import com.tiktok.sparkling.Sparkling
+import com.tiktok.sparkling.SparklingBackPress
 import com.tiktok.sparkling.SparklingContext
 import com.tiktok.sparkling.hybridkit.service.HybridActivityStackManager
 import com.tiktok.sparkling.method.registry.core.IBridgeContext
@@ -44,6 +45,18 @@ class SparklingHostRouterDepend : IHostRouterDepend {
         } else {
             HybridActivityStackManager.getTopActivity()?.finish()
         }
+        return true
+    }
+
+    override fun setBackPressIntercept(
+        bridgeContext: IBridgeContext?,
+        containerID: String?,
+        intercept: Boolean,
+    ): Boolean {
+        // The container consults this on every back press. While it is on, the
+        // page gets an `onBackPress` event and decides for itself - closing is
+        // then `router.close`, not the container acting on its own.
+        SparklingBackPress.setIntercepting(containerID ?: bridgeContext?.containerID, intercept)
         return true
     }
 }
