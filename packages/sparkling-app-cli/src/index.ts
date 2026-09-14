@@ -11,6 +11,7 @@ import { devProject } from './commands/dev';
 import { doctor } from './commands/doctor';
 import { runAndroid } from './commands/run-android';
 import { runIos } from './commands/run-ios';
+import { runHarmony } from './commands/run-harmony';
 import { DEV_SERVER_PORT } from './constants';
 import { ui } from './utils/ui';
 import { enableVerboseLogging, isVerboseEnabled, verboseLog } from './utils/verbose';
@@ -75,10 +76,14 @@ program
 
 program
   .command('copy-assets')
-  .description('Copy dist assets into Android/iOS resource locations')
+  .description('Copy dist assets into Android, iOS, and HarmonyOS resource locations')
   .option('--source <path>', 'Path to compiled assets', 'dist')
   .option('--android-dest <path>', 'Android asset destination', 'android/app/src/main/assets')
   .option('--ios-dest <path>', 'iOS asset destination', 'ios/LynxResources/Assets')
+  .option(
+    '--harmony-dest <path>',
+    'HarmonyOS asset destination',
+  )
   .action(async opts => {
     const cwd = process.cwd();
     await copyAssets({
@@ -86,18 +91,19 @@ program
       source: opts.source,
       androidDest: opts.androidDest,
       iosDest: opts.iosDest,
+      harmonyDest: opts.harmonyDest,
     });
   });
 
 program
   .command('autolink')
-  .description('Autolink Sparkling method modules for Android and iOS')
-  .option('--platform <platform>', 'Platform to autolink: android|ios|all', 'all')
+  .description('Autolink Sparkling method modules for Android, iOS, and HarmonyOS')
+  .option('--platform <platform>', 'Platform to autolink: android|ios|harmony|all', 'all')
   .action(async (opts) => {
     const cwd = process.cwd();
     const raw = String(opts.platform ?? 'all').toLowerCase();
-    const allowed = ['android', 'ios', 'all'];
-    const platform = (allowed.includes(raw) ? raw : 'all') as 'android' | 'ios' | 'all';
+    const allowed = ['android', 'ios', 'harmony', 'all'];
+    const platform = (allowed.includes(raw) ? raw : 'all') as 'android' | 'ios' | 'harmony' | 'all';
     if (!allowed.includes(raw)) {
       console.warn(ui.warn(`Unknown platform "${opts.platform}", defaulting to 'all'.`));
     }
@@ -137,13 +143,28 @@ program
   });
 
 program
+  .command('run:harmony')
+  .description('Build the Lynx bundle and HarmonyOS HAP')
+  .option('--copy', 'Copy assets to native shells')
+  .option('--skip-copy', 'Skip copying assets to native shells')
+  .action(async opts => {
+    const cwd = process.cwd();
+    const skipCopy = resolveSkipCopy(opts);
+    await runHarmony({ cwd, skipCopy });
+  });
+
+program
   .command('doctor')
   .description('Check if your environment is ready to build a Sparkling app')
-  .option('--platform <platform>', 'Platform to check: android|ios|all', 'all')
+  .option('--platform <platform>', 'Platform to check: android|ios|harmony|all', 'all')
   .action(async (opts) => {
     const raw = String(opts.platform ?? 'all').toLowerCase();
-    const allowed = ['android', 'ios', 'all'];
-    const platform = (allowed.includes(raw) ? raw : 'all') as 'android' | 'ios' | 'all';
+    const allowed = ['android', 'ios', 'harmony', 'all'];
+    const platform = (allowed.includes(raw) ? raw : 'all') as
+      | 'android'
+      | 'ios'
+      | 'harmony'
+      | 'all';
     if (!allowed.includes(raw)) {
       console.warn(ui.warn(`Unknown platform "${opts.platform}", defaulting to 'all'.`));
     }

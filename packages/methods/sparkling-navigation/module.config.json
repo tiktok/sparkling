@@ -1,6 +1,6 @@
 {
   "name": "sparkling-navigation",
-  "platforms": ["android", "ios"],
+  "platforms": ["android", "ios", "harmony"],
   "version": "1.0.0",
   "description": "Router methods for navigation and page management in Sparkling apps",
   "methods": {
@@ -38,6 +38,9 @@
     "className": "RouterMethod",
     "podspecPath": "ios/Sparkling-Router.podspec",
     "swiftVersion": "5.0"
+  },
+  "harmony": {
+    "methodNames": ["router.open", "router.close"]
   },
   "web": {
     "entryPoint": "index.ts",

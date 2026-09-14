@@ -13,6 +13,9 @@ import {
   checkXcode,
   checkCocoaPods,
   checkSimulator,
+  checkOhpm,
+  checkHvigor,
+  checkHdc,
 } from './checks';
 import type { CheckResult } from './types';
 
@@ -59,7 +62,7 @@ function buildAgentPrompt(failed: CheckResult[]): string {
 }
 
 export interface DoctorOptions {
-  platform: 'android' | 'ios' | 'all';
+  platform: 'android' | 'ios' | 'harmony' | 'all';
 }
 
 export async function doctor(opts: DoctorOptions): Promise<void> {
@@ -104,7 +107,20 @@ export async function doctor(opts: DoctorOptions): Promise<void> {
     }
   }
 
-  const allResults = [...generalResults, ...androidResults, ...iosResults];
+  const harmonyResults: CheckResult[] = [];
+  if (platform === 'harmony' || platform === 'all') {
+    harmonyResults.push(checkOhpm());
+    harmonyResults.push(checkHvigor());
+    harmonyResults.push(checkHdc());
+
+    console.log('');
+    console.log(ui.info('HarmonyOS:'));
+    for (const r of harmonyResults) {
+      console.log(formatCheckLine(r));
+    }
+  }
+
+  const allResults = [...generalResults, ...androidResults, ...iosResults, ...harmonyResults];
   const failed = allResults.filter((r) => r.status === 'fail');
   const warned = allResults.filter((r) => r.status === 'warn');
 

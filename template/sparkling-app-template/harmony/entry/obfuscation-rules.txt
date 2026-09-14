@@ -1,0 +1,2 @@
+# Keep the generated starter unobfuscated until application-specific rules are configured.
+-disable-obfuscation

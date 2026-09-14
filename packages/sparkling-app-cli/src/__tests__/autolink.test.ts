@@ -68,6 +68,12 @@ function createMethodModule(
     devtool?: boolean;
     packageVersion?: string;
     methods?: string[];
+    harmonyMethodNames?: string[];
+    harmonyHandler?: {
+      sourceDir: string;
+      entry: string;
+      className: string;
+    };
   } = {},
 ): string {
   const moduleDir = path.join(cwd, 'node_modules', name);
@@ -107,6 +113,12 @@ function createMethodModule(
       ...(opts.androidMavenDependency ? { mavenDependency: opts.androidMavenDependency } : {}),
     };
   }
+  if (opts.harmonyMethodNames?.length || opts.harmonyHandler) {
+    config.harmony = {
+      methodNames: opts.harmonyMethodNames ?? [],
+      ...opts.harmonyHandler,
+    };
+  }
 
   fs.writeFileSync(path.join(moduleDir, 'module.config.json'), JSON.stringify(config, null, 2));
   return moduleDir;
@@ -125,6 +137,8 @@ function scaffoldProject(cwd: string, opts?: { podfileContent?: string; settings
   fs.mkdirpSync(androidAppDir);
   fs.writeFileSync(path.join(cwd, 'android', 'settings.gradle.kts'), opts?.settingsContent ?? settingsTemplate());
   fs.writeFileSync(path.join(androidAppDir, 'build.gradle.kts'), opts?.buildGradleContent ?? buildGradleTemplate());
+
+  fs.mkdirpSync(path.join(cwd, 'harmony', 'entry', 'src', 'main', 'ets', 'bridge'));
 
   // node_modules (empty)
   fs.mkdirpSync(path.join(cwd, 'node_modules'));
@@ -730,6 +744,135 @@ describe('autolink', () => {
       );
       expect(androidRegistry).not.toContain('sparkling-debug-tool');
       expect(iosRegistry).not.toContain('sparkling-debug-tool');
+    });
+  });
+
+  describe('HarmonyOS registry', () => {
+    beforeEach(() => {
+      scaffoldProject(cwd);
+      createMethodModule(cwd, 'sparkling-navigation', {
+        harmonyMethodNames: ['router.open', 'router.close'],
+      });
+      createMethodModule(cwd, 'sparkling-storage', {
+        harmonyMethodNames: ['storage.getItem', 'storage.setItem'],
+      });
+    });
+
+    it('generates a HarmonyOS registry for linked method packages', async () => {
+      await autolink({ cwd, platform: 'harmony' });
+
+      const registry = fs.readFileSync(
+        path.join(cwd, 'harmony', 'entry', 'src', 'main', 'ets', 'bridge', 'SparklingAutolink.ets'),
+        'utf8',
+      );
+      expect(registry).toContain('new SparklingAutolinkModule("sparkling-navigation"');
+      expect(registry).toContain('"router.open"');
+      expect(registry).toContain('new SparklingAutolinkModule("sparkling-storage"');
+      expect(registry).toContain('"storage.setItem"');
+    });
+
+    it('cleans removed HarmonyOS modules from the generated registry', async () => {
+      await autolink({ cwd, platform: 'harmony' });
+      fs.removeSync(path.join(cwd, 'node_modules', 'sparkling-storage'));
+
+      await autolink({ cwd, platform: 'harmony' });
+
+      const registry = fs.readFileSync(
+        path.join(cwd, 'harmony', 'entry', 'src', 'main', 'ets', 'bridge', 'SparklingAutolink.ets'),
+        'utf8',
+      );
+      expect(registry).toContain('sparkling-navigation');
+      expect(registry).not.toContain('sparkling-storage');
+    });
+
+    it('copies and dispatches a declared ArkTS method handler', async () => {
+      const moduleDir = createMethodModule(cwd, 'sparkling-example', {
+        harmonyMethodNames: ['example.echo'],
+        harmonyHandler: {
+          sourceDir: 'harmony',
+          entry: 'ExampleHandler.ets',
+          className: 'ExampleHandler',
+        },
+      });
+      fs.mkdirpSync(path.join(moduleDir, 'harmony'));
+      fs.writeFileSync(
+        path.join(moduleDir, 'harmony', 'ExampleHandler.ets'),
+        'export class ExampleHandler { call(): void {} }\n',
+      );
+
+      await autolink({ cwd, platform: 'harmony' });
+
+      const bridgeDir = path.join(cwd, 'harmony', 'entry', 'src', 'main', 'ets', 'bridge');
+      const registry = fs.readFileSync(path.join(bridgeDir, 'SparklingAutolink.ets'), 'utf8');
+      expect(registry).toContain("import { ExampleHandler as SparklingHarmonyHandler");
+      expect(registry).toContain("from './SparklingAutolinkModules/sparkling-example/ExampleHandler'");
+      expect(registry).toContain('new SparklingAutolinkModule("sparkling-example", ["example.echo"])');
+      expect(registry).toMatch(/const sparklingHarmonyHandler\d+: SparklingHarmonyHandler\d+ = new SparklingHarmonyHandler\d+\(\)/);
+      expect(registry).toMatch(/sparklingHarmonyHandler\d+\.call/);
+      expect(registry).toContain('dispatchSparklingMethod');
+      expect(fs.readFileSync(
+        path.join(bridgeDir, 'SparklingAutolinkModules', 'sparkling-example', 'ExampleHandler.ets'),
+        'utf8',
+      )).toContain('class ExampleHandler');
+    });
+
+    it('removes copied ArkTS handlers when a package is removed', async () => {
+      const moduleDir = createMethodModule(cwd, 'sparkling-example', {
+        harmonyMethodNames: ['example.echo'],
+        harmonyHandler: {
+          sourceDir: 'harmony',
+          entry: 'ExampleHandler.ets',
+          className: 'ExampleHandler',
+        },
+      });
+      fs.mkdirpSync(path.join(moduleDir, 'harmony'));
+      fs.writeFileSync(path.join(moduleDir, 'harmony', 'ExampleHandler.ets'), 'export class ExampleHandler {}\n');
+      await autolink({ cwd, platform: 'harmony' });
+
+      fs.removeSync(moduleDir);
+      await autolink({ cwd, platform: 'harmony' });
+
+      expect(fs.existsSync(path.join(
+        cwd,
+        'harmony/entry/src/main/ets/bridge/SparklingAutolinkModules/sparkling-example',
+      ))).toBe(false);
+    });
+
+    it('does not report custom methods as linked without a valid ArkTS handler', async () => {
+      createMethodModule(cwd, 'sparkling-unimplemented', {
+        harmonyMethodNames: ['example.unimplemented'],
+      });
+
+      await autolink({ cwd, platform: 'harmony' });
+
+      const registry = fs.readFileSync(
+        path.join(cwd, 'harmony', 'entry', 'src', 'main', 'ets', 'bridge', 'SparklingAutolink.ets'),
+        'utf8',
+      );
+      expect(registry).not.toContain('sparkling-unimplemented');
+      expect(registry).not.toContain('example.unimplemented');
+    });
+
+    it('escapes generated HarmonyOS module and method string literals', async () => {
+      const moduleDir = createMethodModule(cwd, "sparkling-quote'test", {
+        harmonyMethodNames: ["example.echo'quoted"],
+        harmonyHandler: {
+          sourceDir: 'harmony',
+          entry: 'ExampleHandler.ets',
+          className: 'ExampleHandler',
+        },
+      });
+      fs.mkdirpSync(path.join(moduleDir, 'harmony'));
+      fs.writeFileSync(path.join(moduleDir, 'harmony', 'ExampleHandler.ets'), 'export class ExampleHandler {}\n');
+
+      await autolink({ cwd, platform: 'harmony' });
+
+      const registry = fs.readFileSync(
+        path.join(cwd, 'harmony', 'entry', 'src', 'main', 'ets', 'bridge', 'SparklingAutolink.ets'),
+        'utf8',
+      );
+      expect(registry).toContain('"sparkling-quote\'test"');
+      expect(registry).toContain('"example.echo\'quoted"');
     });
   });
 });

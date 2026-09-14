@@ -46,6 +46,7 @@ const config: AppConfig = {
   platform: {
     android: { packageName: 'com.example.myapp' },
     ios: { bundleIdentifier: 'com.example.myapp' },
+    harmony: { bundleName: 'com.example.myapp' },
   },
 };
 
@@ -61,6 +62,9 @@ optional appIcon: string;
 ```
 
 Path to the app icon image, relative to the project root.
+
+The current resource workflow applies this to Android and iOS. The generated HarmonyOS
+shell owns its icon under `harmony/AppScope/resources`.
 
 ***
 
@@ -116,6 +120,14 @@ optional androidAssets: string;
 
 Path to the Android assets directory relative to the project root.
 
+#### harmonyAssets?
+
+```ts
+optional harmonyAssets: string;
+```
+
+Path to the HarmonyOS rawfile directory relative to the project root.
+
 #### iosAssets?
 
 ```ts
@@ -126,7 +138,7 @@ Path to the iOS assets directory relative to the project root.
 
 #### Default Value
 
-`{ androidAssets: 'android/app/src/main/assets', iosAssets: 'ios/LynxResources/Assets' }`
+`{ androidAssets: 'android/app/src/main/assets', iosAssets: 'ios/LynxResources/Assets', harmonyAssets: 'harmony/entry/src/main/resources/rawfile' }`
 
 ***
 
@@ -136,7 +148,7 @@ Path to the iOS assets directory relative to the project root.
 optional platform: PlatformConfig;
 ```
 
-Platform-specific identifiers for Android and iOS builds.
+Platform-specific identifiers for Android, iOS, and HarmonyOS builds.
 
 ***
 

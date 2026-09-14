@@ -322,6 +322,7 @@ describe('showCompletionNotes', () => {
     const noteContent = (mockedNote.mock.calls[0][0] as string);
     expect(noteContent).toContain('npm run run:ios');
     expect(noteContent).toContain('npm run run:android');
+    expect(noteContent).toContain('npm run run:harmony');
   });
 
   it('uses short format for pnpm package manager', () => {
@@ -330,6 +331,7 @@ describe('showCompletionNotes', () => {
     const noteContent = (mockedNote.mock.calls[0][0] as string);
     expect(noteContent).toContain('pnpm run:ios');
     expect(noteContent).toContain('pnpm run:android');
+    expect(noteContent).toContain('pnpm run:harmony');
   });
 
   it('uses short format for yarn package manager', () => {

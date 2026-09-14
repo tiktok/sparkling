@@ -1,0 +1,15 @@
+{
+  "modelVersion": "6.0.0",
+  "description": "{{appName}} HarmonyOS application",
+  "overrides": {
+    "@ohos/imageknife": "3.2.6",
+    "@lynx/lynx": "3.8.1",
+    "@lynx/lynx_base": "3.8.1",
+    "@lynx/lynx_devtool": "3.8.1",
+    "@lynx/lynx_devtool_service": "3.8.1",
+    "@lynx/lynx_http_service": "3.8.1",
+    "@lynx/lynx_log_service": "3.8.1",
+    "@lynx/primjs": "3.8.0"
+  },
+  "devDependencies": {}
+}

@@ -48,6 +48,13 @@ export async function runCodegen(options: CodegenOptions = {}): Promise<void> {
     return;
   }
 
+  if (config.harmony) {
+    config.harmony.methodNames = Array.from(new Set(
+      methods.map(method => `${config.moduleName}.${method.name}`),
+    )).sort();
+    await fs.writeJson(path.join(projectRoot, 'module.config.json'), config, { spaces: 2 });
+  }
+
   const metadataDir = path.join(projectRoot, 'generated', 'metadata');
   await fs.ensureDir(metadataDir);
   const metadataNameUsage: Record<string, number> = {};
@@ -67,7 +74,10 @@ export async function runCodegen(options: CodegenOptions = {}): Promise<void> {
     await writeSwiftFile(projectRoot, config, method, swiftView, templates.swift);
     await writeTypeScriptFiles(projectRoot, config, method, typeScriptView, templates.typescript);
 
-    console.log(ui.success(`Generated metadata, Kotlin, Swift, and TypeScript IDL for ${method.name}`));
+    const harmonyOutput = config.harmony ? ', and HarmonyOS registration' : '';
+    console.log(ui.success(
+      `Generated metadata, Kotlin, Swift, TypeScript IDL${harmonyOutput} for ${method.name}`,
+    ));
   }
 }
 

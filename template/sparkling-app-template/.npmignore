@@ -9,6 +9,9 @@ android/.gradle/
 ios/build/
 ios/DerivedData/
 ios/Pods/
+harmony/oh_modules/
+harmony/.hvigor/
+harmony/**/build/
 **/*.lynx.bundle
 
 # IDE

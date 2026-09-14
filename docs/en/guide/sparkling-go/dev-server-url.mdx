@@ -7,6 +7,12 @@ server, connecting from a simulator or real device, using hot reload, and managi
 dev server URL. We use **Sparkling Go** (the official demo app) as the running example,
 but everything here applies to any Sparkling project.
 
+:::note HarmonyOS scope
+Automatic dev-server URL injection and the HMR workflow described here currently apply to Android
+and iOS. `sparkling run:harmony --copy` rebuilds the Lynx bundles, copies them into `rawfile`, and
+reinstalls the HAP; the generated HarmonyOS shell currently runs those local bundles.
+:::
+
 :::tip
 The core idea: an HTTP dev server on your machine serves JS bundles to the native shell,
 with hot updates pushed on every file save. No manual rebuild needed.
@@ -46,6 +52,9 @@ npx sparkling run:ios
 
 # Android
 npx sparkling run:android
+
+# HarmonyOS (local bundles; rebuild and reinstall after changes)
+npx sparkling run:harmony --copy
 ```
 
 Debug builds automatically connect to the dev server. The app loads

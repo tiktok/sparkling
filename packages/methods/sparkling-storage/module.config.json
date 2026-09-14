@@ -1,6 +1,6 @@
 {
   "name": "sparkling-storage",
-  "platforms": ["android", "ios", "web"],
+  "platforms": ["android", "ios", "harmony", "web"],
   "version": "1.0.0",
   "description": "Storage methods for data persistence in Sparkling apps",
   "methods": {
@@ -50,6 +50,9 @@
     "className": "StorageMethod",
     "podspecPath": "ios/Sparkling-Storage.podspec",
     "swiftVersion": "5.0"
+  },
+  "harmony": {
+    "methodNames": ["storage.getItem", "storage.setItem"]
   },
   "web": {
     "entryPoint": "index.ts",

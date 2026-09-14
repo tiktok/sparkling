@@ -36,6 +36,7 @@ export async function buildProject(options: BuildOptions): Promise<void> {
       cwd: options.cwd,
       androidDest: config.paths?.androidAssets ?? 'android/app/src/main/assets',
       iosDest: config.paths?.iosAssets ?? 'ios/LynxResources/Assets',
+      harmonyDest: config.paths?.harmonyAssets,
     });
   } else if (isVerboseEnabled()) {
     verboseLog('Skipping asset copy because --skip-copy is in effect.');

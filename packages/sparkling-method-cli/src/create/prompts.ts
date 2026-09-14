@@ -26,7 +26,7 @@ export async function promptProjectName(): Promise<string> {
 
 export async function promptModuleInfo(
   defaults: { packageName: string; moduleName: string },
-): Promise<Omit<ModuleConfig, 'projectName'>> {
+): Promise<Omit<ModuleConfig, 'projectName' | 'harmony'>> {
   const packageName = await p.text({
     message: 'Namespace / bundle identifier (e.g. com.example):',
     defaultValue: defaults.packageName,

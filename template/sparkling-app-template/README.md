@@ -40,7 +40,7 @@ Behavior:
 
 ## Optional sparkling method packages
 
-The template ships with **`sparkling-navigation` only** (router) in npm, native autolink, Gradle, and CocoaPods.
+The template ships with **`sparkling-navigation` only** (router) in npm and the native integration for all three shells.
 
 Other method packages like `sparkling-media` (image picker, camera) and `sparkling-storage` (key-value persistence) are **not included by default**. Add them when your app needs those capabilities:
 
@@ -65,6 +65,7 @@ This single command updates all native integration points:
 |----------|---------------|
 | Android  | Sparkling method Gradle links; `SparklingAutolink.kt` method registry |
 | iOS      | Sparkling method pod links; `SparklingAutolink.swift` method registry |
+| HarmonyOS | `SparklingAutolink.ets` registry; declared ArkTS handlers are copied and dispatched by `spkPipe` |
 
 ### 3. Reinstall pods (iOS only)
 
@@ -75,19 +76,21 @@ cd ios && pod install && cd ..
 ### 4. Rebuild native apps
 
 ```bash
-pnpm run:android   # or run:ios
+pnpm run:android
+pnpm run:ios
+pnpm run:harmony
 ```
 
 Now you can import and use the newly added methods in your Lynx code:
 
 ```ts
-import { pickImage } from 'sparkling-media'
+import { chooseMedia } from 'sparkling-media'
 import { setItem, getItem } from 'sparkling-storage'
 ```
 
 ## Lynx libraries
 
-The native host also enables the Lynx library Autolink plugins. A non-method Lynx library that ships `lynx.lib.json` can be installed as an npm dependency and linked by the Lynx Android Gradle and iOS CocoaPods plugins. Sparkling method packages continue to use `sparkling autolink` and `module.config.json`.
+The Android and iOS hosts also enable the Lynx library Autolink plugins. A non-method Lynx library that ships `lynx.lib.json` can be installed as an npm dependency and linked by the Lynx Android Gradle and iOS CocoaPods plugins. HarmonyOS does not yet autolink arbitrary Lynx libraries. Sparkling method packages continue to use `sparkling autolink` and `module.config.json`.
 
 ## Release Behavior
 
@@ -95,5 +98,6 @@ Release builds do not rely on debug-tool configuration.
 
 - iOS Release: loads from `bundle=...` only
 - Android Release: loads from `bundle=...` only
+- HarmonyOS: `run:harmony` builds a debug HAP; configure production signing and release products in DevEco Studio or Hvigor before distribution
 
 That means release packages read Lynx bundles from app assets/resources, not remote dev URLs.

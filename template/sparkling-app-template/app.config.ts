@@ -44,10 +44,14 @@ const config: AppConfig = {
     ios: {
       bundleIdentifier: '{{packageNamespace}}',
     },
+    harmony: {
+      bundleName: '{{packageNamespace}}',
+    },
   },
   paths: {
     androidAssets: 'android/app/src/main/assets',
     iosAssets: 'ios/LynxResources',
+    harmonyAssets: 'harmony/entry/src/main/resources/rawfile',
   },
   appIcon: './resource/app_icon.png',
   router: {

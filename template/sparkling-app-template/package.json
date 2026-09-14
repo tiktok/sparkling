@@ -15,7 +15,8 @@
     "autolink": "sparkling-app-cli autolink",
     "test": "vitest run --passWithNoTests",
     "run:android": "sparkling-app-cli run:android",
-    "run:ios": "sparkling-app-cli run:ios --copy"
+    "run:ios": "sparkling-app-cli run:ios --copy",
+    "run:harmony": "sparkling-app-cli run:harmony --copy"
   },
   "dependencies": {
     "@lynx-js/react": "^0.116.2",

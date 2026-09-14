@@ -17,10 +17,22 @@ const ANDROID_AUTOLINK_END = '// END SPARKLING AUTOLINK';
 const IOS_AUTOLINK_START = '# BEGIN SPARKLING AUTOLINK';
 const IOS_AUTOLINK_END = '# END SPARKLING AUTOLINK';
 
+const BUILTIN_HARMONY_METHODS: Record<string, string[]> = {
+  'sparkling-navigation': ['router.open', 'router.close'],
+  'sparkling-storage': ['storage.getItem', 'storage.setItem'],
+  'sparkling-media': [
+    'media.chooseMedia',
+    'media.uploadFile',
+    'media.downloadFile',
+    'media.saveDataURL',
+    'media.uploadImage',
+  ],
+};
+
 export interface AutolinkOptions {
   cwd: string;
   configFile?: string;
-  platform?: 'android' | 'ios' | 'all';
+  platform?: 'android' | 'ios' | 'harmony' | 'all';
 }
 
 /**
@@ -248,6 +260,7 @@ async function discoverModules(cwd: string): Promise<MethodModuleConfig[]> {
 
       const androidConfig = config.android as Record<string, unknown> | undefined;
       const iosConfig = config.ios as Record<string, unknown> | undefined;
+      const harmonyConfig = config.harmony as Record<string, unknown> | undefined;
       const methodsConfig = config.methods && typeof config.methods === 'object'
         ? config.methods as Record<string, unknown>
         : undefined;
@@ -292,6 +305,20 @@ async function discoverModules(cwd: string): Promise<MethodModuleConfig[]> {
           moduleName: typeof iosConfig?.moduleName === 'string' ? iosConfig.moduleName : undefined,
           className: typeof iosConfig?.className === 'string' ? iosConfig.className : undefined,
           podspecPath: iosPodspecPath,
+        },
+        harmony: {
+          methodNames: Array.isArray(harmonyConfig?.methodNames)
+            ? harmonyConfig.methodNames.filter((method): method is string => typeof method === 'string')
+            : BUILTIN_HARMONY_METHODS[name] ?? [],
+          sourceDir: typeof harmonyConfig?.sourceDir === 'string'
+            ? harmonyConfig.sourceDir.trim() || undefined
+            : undefined,
+          entry: typeof harmonyConfig?.entry === 'string'
+            ? harmonyConfig.entry.trim() || undefined
+            : undefined,
+          className: typeof harmonyConfig?.className === 'string'
+            ? harmonyConfig.className.trim() || undefined
+            : undefined,
         },
       });
     }
@@ -984,14 +1011,152 @@ function writeIosRegistry(modules: MethodModuleConfig[], bundleId: string, cwd: 
   fs.writeFileSync(filePath, content);
 }
 
+function writeHarmonyRegistry(modules: MethodModuleConfig[], cwd: string): boolean {
+  const bridgeDir = path.resolve(cwd, 'harmony/entry/src/main/ets/bridge');
+  if (!fs.existsSync(bridgeDir)) {
+    console.warn(ui.warn(`HarmonyOS bridge directory not found at ${bridgeDir}, skipping harmony autolink`));
+    return false;
+  }
+
+  const filePath = path.join(bridgeDir, 'SparklingAutolink.ets');
+  const modulesDir = path.join(bridgeDir, 'SparklingAutolinkModules');
+  fs.removeSync(modulesDir);
+  fs.ensureDirSync(modulesDir);
+
+  const imports: string[] = [];
+  const handlers: string[] = [];
+  const entries: string[] = [];
+  const dispatchers: string[] = [];
+  modules
+    .filter(module => (module.harmony?.methodNames?.length ?? 0) > 0)
+    .forEach((module, index) => {
+      const harmony = module.harmony;
+      const methodNames = harmony?.methodNames ?? [];
+      const methods = methodNames.map(method => JSON.stringify(method)).join(', ');
+      let linked = module.name in BUILTIN_HARMONY_METHODS;
+      if (harmony?.sourceDir || harmony?.entry || harmony?.className) {
+        if (!harmony.sourceDir || !harmony.entry || !harmony.className) {
+          console.warn(ui.warn(
+            `HarmonyOS module "${module.name}" must define sourceDir, entry, and className together; skipping its handler.`,
+          ));
+        } else {
+          const sourceDir = path.resolve(module.root, harmony.sourceDir);
+          const relativeSource = path.relative(module.root, sourceDir);
+          const entryPath = path.resolve(sourceDir, harmony.entry);
+          const relativeEntry = path.relative(sourceDir, entryPath);
+          if (relativeSource.startsWith('..') || path.isAbsolute(relativeSource)
+            || relativeEntry.startsWith('..') || path.isAbsolute(relativeEntry)) {
+            console.warn(ui.warn(
+              `HarmonyOS source for "${module.name}" must stay inside the method package; skipping its handler.`,
+            ));
+          } else if (!fs.existsSync(sourceDir) || !fs.existsSync(entryPath)) {
+            console.warn(ui.warn(
+              `HarmonyOS source or entry for "${module.name}" was not found; skipping its handler.`,
+            ));
+          } else if (/^[A-Z_$][\w$]*$/i.exec(harmony.className) === null) {
+            console.warn(ui.warn(
+              `HarmonyOS className for "${module.name}" is invalid; skipping its handler.`,
+            ));
+          } else {
+            const directoryName = module.name.replace(/[^\w.-]/g, '_');
+            const destination = path.join(modulesDir, directoryName);
+            fs.copySync(sourceDir, destination, { overwrite: true, dereference: true });
+            const importName = `SparklingHarmonyHandler${index}`;
+            const importEntry = `./${toPosixPath(path.join(
+              'SparklingAutolinkModules',
+              directoryName,
+              harmony.entry.replace(/\.ets$/, ''),
+            ))}`;
+            imports.push(`import { ${harmony.className} as ${importName} } from '${importEntry}';`);
+            handlers.push(`const sparklingHarmonyHandler${index}: ${importName} = new ${importName}();`);
+            const methodCondition = methodNames
+              .map(method => `method === ${JSON.stringify(method)}`)
+              .join(' || ');
+            dispatchers.push(
+              `  if (${methodCondition}) {`,
+              `    sparklingHarmonyHandler${index}.call(context, method, request, (code: number, msg: string, data?: Object): void => {`,
+              '      const response: SparklingAutolinkResponse = { code, msg };',
+              '      if (data !== undefined) {',
+              '        response.data = data;',
+              '      }',
+              '      callback(response);',
+              '    });',
+              '    return true;',
+              '  }',
+            );
+            linked = true;
+          }
+        }
+      } else if (!linked) {
+        console.warn(ui.warn(
+          `HarmonyOS module "${module.name}" has no ArkTS handler metadata; skipping its methods.`,
+        ));
+      }
+      if (linked) {
+        entries.push(`  new SparklingAutolinkModule(${JSON.stringify(module.name)}, [${methods}]),`);
+      }
+    });
+  const content = [
+    '// Generated by sparkling autolink. Do not edit manually.',
+    ...imports,
+    '',
+    ...handlers,
+    ...(handlers.length > 0 ? [''] : []),
+    'export interface SparklingAutolinkResponse {',
+    '  code: number;',
+    '  msg: string;',
+    '  data?: Object;',
+    '}',
+    '',
+    'export type SparklingAutolinkCallback = (response: SparklingAutolinkResponse) => void;',
+    '',
+    'export class SparklingAutolinkModule {',
+    '  name: string;',
+    '  methodNames: string[];',
+    '',
+    '  constructor(name: string, methodNames: string[]) {',
+    '    this.name = name;',
+    '    this.methodNames = methodNames;',
+    '  }',
+    '}',
+    '',
+    'export const sparklingAutolinkModules: SparklingAutolinkModule[] = [',
+    ...entries,
+    '];',
+    '',
+    'export function isSparklingMethodLinked(method: string): boolean {',
+    '  for (const module of sparklingAutolinkModules) {',
+    '    if (module.methodNames.includes(method)) {',
+    '      return true;',
+    '    }',
+    '  }',
+    '  return false;',
+    '}',
+    '',
+    'export function dispatchSparklingMethod(',
+    '  context: Context,',
+    '  method: string,',
+    '  request: Object,',
+    '  callback: SparklingAutolinkCallback,',
+    '): boolean {',
+    ...dispatchers,
+    '  return false;',
+    '}',
+    '',
+  ].join('\n');
+  fs.writeFileSync(filePath, content);
+  return true;
+}
+
 export async function autolink(options: AutolinkOptions): Promise<MethodModuleConfig[]> {
   const platform = options.platform ?? 'all';
   const doAndroid = platform === 'android' || platform === 'all';
   const doIos = platform === 'ios' || platform === 'all';
+  const doHarmony = platform === 'harmony' || platform === 'all';
   let modules = await discoverModules(options.cwd);
   if (isVerboseEnabled()) {
     const moduleNames = modules.map(m => m.name).join(', ') || '(none)';
-    verboseLog(`Autolink platforms -> android: ${doAndroid}, ios: ${doIos}`);
+    verboseLog(`Autolink platforms -> android: ${doAndroid}, ios: ${doIos}, harmony: ${doHarmony}`);
     verboseLog(`Autolink discovered modules: ${moduleNames}`);
   }
   // Prefer user-defined IDs but fall back to defaults to stay compatible even if config can't load.
@@ -1068,8 +1233,11 @@ export async function autolink(options: AutolinkOptions): Promise<MethodModuleCo
   if (doIos) {
     writeIosRegistry(registryModules, iosBundle, options.cwd);
   }
+  if (doHarmony) {
+    writeHarmonyRegistry(registryModules, options.cwd);
+  }
 
-  const platformLabel = platform === 'all' ? 'Android & iOS' : platform.toUpperCase();
+  const platformLabel = platform === 'all' ? 'Android, iOS & HarmonyOS' : platform.toUpperCase();
   if (modules.length) {
     console.log(ui.success(`Autolinked ${modules.length} module(s) for ${platformLabel}.`));
   } else {

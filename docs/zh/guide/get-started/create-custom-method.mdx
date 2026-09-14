@@ -2,7 +2,12 @@ import { Steps } from '@theme';
 
 # 创建自定义 Sparkling Method
 
-Sparkling Method 是一个在 Android 和 iOS 上都能工作的类型化 JS 与原生桥接包。你在 TypeScript 中定义 API，使用 CLI 生成原生代码，然后在 Kotlin 和 Swift 中实现业务逻辑。
+Sparkling Method 是面向 Android、iOS 和 HarmonyOS 的类型化 JS 与原生桥接包。你在 TypeScript 中定义 API，使用 CLI 生成 Kotlin 和 Swift 代码，并在生成的 HarmonyOS handler 中实现 ArkTS 业务逻辑。
+
+:::note HarmonyOS 范围
+当前 Method 代码生成器只生成 Kotlin 和 Swift 实现，但 Method 包可以携带手写 ArkTS handler。
+HarmonyOS autolink 会把源码复制到应用中、生成静态 import，并通过 `spkPipe` 分发声明的方法名。
+:::
 
 <Steps>
 
@@ -27,8 +32,10 @@ sparkling-my-greeting/
 │       └── my-greeting.d.ts  # TypeScript 声明文件（需要你编辑）
 ├── android/
 │   └── ...                   # Android 工程结构（稍后生成）
-└── ios/
-    └── ...                   # iOS 工程结构（稍后生成）
+├── ios/
+│   └── ...                   # iOS 工程结构（稍后生成）
+└── harmony/
+    └── *HarmonyHandler.ets   # HarmonyOS handler 骨架
 ```
 
 `module.config.json` 定义了模块元数据，代码生成和 autolink 都会使用：
@@ -39,6 +46,32 @@ sparkling-my-greeting/
   "packageName": "com.tiktok.sparkling.methods.mygreeting",
   "moduleName": "MyGreeting",
   "androidDsl": "kts"
+}
+```
+
+脚手架会写入以下 HarmonyOS 元数据；codegen 会根据 TypeScript 声明持续同步 `methodNames`：
+
+```json
+{
+  "harmony": {
+    "methodNames": ["myGreeting.hello"],
+    "sourceDir": "harmony",
+    "entry": "MyGreetingHandler.ets",
+    "className": "MyGreetingHandler"
+  }
+}
+```
+
+导出的类必须实现 `call(context, method, request, callback)`；回调 ABI 为
+`callback(code: number, msg: string, data?: Object)`。例如：
+
+```ts
+type MethodCallback = (code: number, msg: string, data?: Object) => void;
+
+export class MyGreetingHandler {
+  call(context: Context, method: string, request: Object, callback: MethodCallback): void {
+    callback(1, 'ok');
+  }
 }
 ```
 
@@ -200,12 +233,14 @@ npx sparkling autolink
 autolink 会自动完成：
 - **Android**：链接 Sparkling 方法模块的 Gradle project，并生成 `SparklingAutolink.kt` 注册文件。
 - **iOS**：链接 Sparkling 方法模块的 pod，并生成 `SparklingAutolink.swift` 注册文件。
+- **HarmonyOS**：复制声明的 ArkTS 源码目录，并在 `SparklingAutolink.ets` 中生成 import 和分发代码。
 
 #### 运行并测试
 
 ```bash
 npm run run:android
 npm run run:ios
+npm run run:harmony
 ```
 
 在 Lynx/JS 代码中调用该方法：
@@ -236,6 +271,7 @@ hello({ name: 'Sparkling', style: 'casual' }, (res) => {
     "android/src",
     "android/build.gradle.kts",
     "ios",
+    "harmony",
     "module.config.json"
   ]
 }
@@ -262,7 +298,7 @@ npx sparkling autolink
   方法名使用 `<module>.<action>`（如 `mygreeting.hello`）。
 - **单一数据源**：始终编辑 `.d.ts` 声明文件并重新运行 codegen ——
   不要直接编辑生成的文件。
-- **平台一致性**：在 Android 和 iOS 上实现相同的行为。
+- **平台一致性**：在 Android、iOS 和 HarmonyOS 上实现相同的行为。
 - **错误处理**：成功时返回 `code: 1`，失败时返回 `code: 0`，错误时返回负数，
   并附带描述性的 `msg`。详见[响应码](/apis/response-codes)。
-- **测试**：发布前在两个平台上测试。
+- **测试**：发布前在所有支持的平台上测试。

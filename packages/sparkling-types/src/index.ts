@@ -7,19 +7,22 @@ declare module '@lynx-js/types' {
    * Global properties injected by the Sparkling native SDK into every Lynx
    * container. Access these at runtime via `lynx.__globalProps`.
    *
-   * The native layer (iOS / Android) populates these values before the Lynx
-   * bundle starts executing. Some fields are **stable** (set once on app
-   * launch) and some are **unstable** (may change per container or over time).
+   * The Android and iOS SDKs populate these values before the Lynx bundle starts
+   * executing. The generated HarmonyOS shell currently provides the device,
+   * screen, URL/query, platform, language, orientation, and container identity
+   * fields; properties marked for a specific platform are not implied to exist
+   * on HarmonyOS. Some fields are **stable** (set once on app launch) and some
+   * are **unstable** (may change per container or over time).
    *
    * @see {@link https://tiktok.github.io/sparkling/apis/global-props/GlobalProps | Full documentation}
    */
   interface GlobalProps {
     // ── Device / Screen ────────────────────────────────────────────────
 
-    /** Screen width in logical points (dp on Android, pt on iOS). */
+    /** Screen width in logical points (dp on Android, pt on iOS, vp on HarmonyOS). */
     screenWidth: number;
 
-    /** Screen height in logical points (dp on Android, pt on iOS). */
+    /** Screen height in logical points (dp on Android, pt on iOS, vp on HarmonyOS). */
     screenHeight: number;
 
     /** Height of the system status bar in logical points. */
@@ -58,10 +61,7 @@ declare module '@lynx-js/types' {
      */
     contentHeight: number;
 
-    /**
-     * Device pixel ratio (e.g. `2.0`, `3.0`).
-     * @platform Android
-     */
+    /** Device pixel ratio (e.g. `2.0`, `3.0`). */
     pixelRatio: number;
 
     // ── Device Info ────────────────────────────────────────────────────
@@ -70,6 +70,7 @@ declare module '@lynx-js/types' {
      * Operating system identifier.
      * - `"ios"` on iOS
      * - `"android"` on Android
+     * - `"harmony"` on HarmonyOS
      */
     os: string;
 
@@ -79,7 +80,7 @@ declare module '@lynx-js/types' {
     /** Device model identifier in lowercase (e.g. `"iphone15,2"`, `"pixel 8"`). */
     deviceModel: string;
 
-    /** `1` if the device is a tablet (iPad / Android tablet), `0` otherwise. */
+    /** `1` if the device is a tablet (iPad / Android or HarmonyOS tablet), `0` otherwise. */
     isPad: number;
 
     /**

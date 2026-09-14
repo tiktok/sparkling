@@ -138,7 +138,7 @@ type EventCallback = (event: unknown) => void;
 
 ## 响应码
 
-Sparkling Method 响应码遵循 Android/iOS 原生桥接约定：`1` 表示成功，
+Sparkling Method 响应码遵循共享的原生桥接约定：`1` 表示成功，
 `0` 表示方法已执行但失败，负数表示桥接或方法错误。详见[响应码](./response-codes.md)。
 
 ## 与方法包的关系

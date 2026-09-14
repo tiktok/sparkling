@@ -1,0 +1,7 @@
+{
+  "string": [
+    { "name": "module_desc", "value": "Sparkling HarmonyOS application" },
+    { "name": "entry_ability_desc", "value": "Sparkling entry ability" },
+    { "name": "network", "value": "Load Lynx resources" }
+  ]
+}

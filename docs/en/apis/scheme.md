@@ -3,6 +3,12 @@
 Sparkling pages/containers are opened by a `hybrid://...` URL. This document defines the **unified scheme**
 format and parameters that are **applied on both Android and iOS**.
 
+The generated HarmonyOS shell supports full-page `lynxview_page` navigation and the following
+page options: `bundle`/`url`, `title`, `hide_nav_bar`, `hide_back_button`, `title_color`,
+`nav_bar_color`, `container_bg_color`, `force_theme_style`, `hide_status_bar`,
+`trans_status_bar`, and `screen_orientation`. Card/WebView containers and the loading/error-view
+parameters in this reference are not yet implemented by that shell.
+
 ## Hosts (container types)
 
 Sparkling supports multiple `hybrid://` hosts:
@@ -89,5 +95,4 @@ Force dark theme:
 ```
 hybrid://lynxview_page?bundle=main.lynx.bundle&force_theme_style=dark
 ```
-
 

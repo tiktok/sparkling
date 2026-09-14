@@ -1,6 +1,6 @@
 # Sparkling CLI
 
-Sparkling CLI (`sparkling-app-cli`) is the built-in command-line tool that powers the development workflow. It handles building Lynx bundles, autolinking native method modules, running apps on Android/iOS, and diagnosing your environment.
+Sparkling CLI (`sparkling-app-cli`) is the built-in command-line tool that powers the development workflow. It handles building Lynx bundles, autolinking native method modules, running apps on Android, iOS, and HarmonyOS, and diagnosing your environment.
 
 ## Installation
 
@@ -25,7 +25,7 @@ npx sparkling build
 | Option | Description |
 | --- | --- |
 | `--config <path>` | Path to `app.config.ts` (default: `app.config.ts`) |
-| `--copy` | Copy built assets to Android and iOS native shells |
+| `--copy` | Copy built assets to Android, iOS, and HarmonyOS native shells |
 | `--skip-copy` | Skip copying assets (default) |
 
 By default, asset copying is skipped for faster iteration during development. Use `--copy` when you need the bundles inside the native projects (e.g. for a release build).
@@ -59,7 +59,7 @@ Once the server is running, point your app to `http://<your-ip>:5969/main.lynx.b
 
 ### `sparkling copy-assets`
 
-Copy compiled bundles into Android and iOS resource directories.
+Copy compiled bundles into Android, iOS, and HarmonyOS resource directories.
 
 ```bash
 npx sparkling copy-assets
@@ -69,11 +69,15 @@ npx sparkling copy-assets
 | --- | --- |
 | `--source <path>` | Path to compiled assets (default: `dist`) |
 | `--android-dest <path>` | Android asset destination (default: `android/app/src/main/assets`) |
-| `--ios-dest <path>` | iOS asset destination (default: `ios/LynxResources`) |
+| `--ios-dest <path>` | iOS asset destination (default: `ios/LynxResources/Assets`) |
+| `--harmony-dest <path>` | HarmonyOS asset destination (defaults to `harmony/entry/src/main/resources/rawfile` when a `harmony/` project exists) |
+
+For compatibility with existing Android/iOS-only apps, the default command does not create a new
+`harmony/` directory. Pass `--harmony-dest` explicitly or generate the HarmonyOS shell first.
 
 ### `sparkling autolink`
 
-Discover Sparkling method modules for Android and iOS. The CLI scans for `module.config.json` files in the workspace and `node_modules`, then updates the native Sparkling method links and generates Sparkling registry files. Host apps also enable the Lynx library Autolink plugins, so non-method Lynx libraries that ship `lynx.lib.json` can be linked by the Lynx toolchain.
+Discover Sparkling method modules for Android, iOS, and HarmonyOS. The CLI scans for `module.config.json` files in the workspace and `node_modules`, then updates the native Sparkling method links and generates Sparkling registry files. Host apps also enable the Lynx library Autolink plugins, so non-method Lynx libraries that ship `lynx.lib.json` can be linked by the Lynx toolchain.
 
 ```bash
 npx sparkling autolink
@@ -81,12 +85,13 @@ npx sparkling autolink
 
 | Option | Description |
 | --- | --- |
-| `--platform <platform>` | Platform to autolink: `android`, `ios`, or `all` (default: `all`) |
+| `--platform <platform>` | Platform to autolink: `android`, `ios`, `harmony`, or `all` (default: `all`) |
 
 **What it does:**
 
 - **Android** — Links Sparkling method Gradle projects and generates `SparklingAutolink.kt`. Debug-tool packages are linked as `debugImplementation`.
 - **iOS** — Links Sparkling method pods and generates `SparklingAutolink.swift`. Debug-tool packages are linked in the debug target.
+- **HarmonyOS** — Generates `SparklingAutolink.ets`; declared ArkTS handlers are copied, statically imported, and dispatched through `spkPipe`.
 
 ### `sparkling run:android`
 
@@ -140,6 +145,23 @@ This command will:
 
 You can also set the `SPARKLING_IOS_SIMULATOR` environment variable to specify a default simulator.
 
+### `sparkling run:harmony`
+
+Build, autolink, and launch the HarmonyOS debug HAP in one step.
+
+```bash
+npx sparkling run:harmony --copy
+```
+
+This command will:
+
+1. Autolink method modules for HarmonyOS
+2. Build the Lynx bundle
+3. Copy bundles into `harmony/entry/src/main/resources/rawfile` when `--copy` is specified
+4. Install OHPM dependencies
+5. Run `hvigorw assembleHap`
+6. Install and launch the HAP with `hdc` when a connected device or emulator is available
+
 ### `sparkling doctor`
 
 Verify that your development environment is properly set up.
@@ -150,7 +172,7 @@ npx sparkling doctor
 
 | Option | Description |
 | --- | --- |
-| `--platform <platform>` | Platform to check: `android`, `ios`, or `all` (default: `all`) |
+| `--platform <platform>` | Platform to check: `android`, `ios`, `harmony`, or `all` (default: `all`) |
 
 The doctor command checks:
 
@@ -164,6 +186,9 @@ The doctor command checks:
 | Xcode | Version >= 16 (macOS only) |
 | CocoaPods | Installed (macOS only) |
 | iOS Simulator | At least one available (macOS only) |
+| OHPM | Available from PATH, HarmonyOS Command Line Tools, or DevEco Studio |
+| Hvigor | Available from PATH, HarmonyOS Command Line Tools, or DevEco Studio |
+| hdc | Available from PATH, HarmonyOS Command Line Tools, or DevEco Studio |
 
 If any check fails, the output includes a hint on how to fix it.
 
@@ -196,6 +221,9 @@ npx sparkling run:android
 # 5. Run on iOS
 npx sparkling run:ios
 
-# 6. Build bundles for release
+# 6. Run on HarmonyOS (local bundled assets)
+npx sparkling run:harmony --copy
+
+# 7. Build bundles for release
 npx sparkling build --copy
 ```

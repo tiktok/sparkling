@@ -114,3 +114,20 @@ export function iosUnitTestTemplate(moduleId: string): string {
     '',
   ].join('\n');
 }
+
+export function harmonyHandlerTemplate(className: string): string {
+  return [
+    '// Copyright 2025 The Sparkling Authors. All rights reserved.',
+    '// Licensed under the Apache License Version 2.0 that can be found in the',
+    '// LICENSE file in the root directory of this source tree.',
+    '',
+    'type SparklingHarmonyCallback = (code: number, msg: string, data?: Object) => void;',
+    '',
+    `export class ${className} {`,
+    '  call(context: Context, method: string, request: Object, callback: SparklingHarmonyCallback): void {',
+    "    callback(-1, `Unsupported method: ${method}`);",
+    '  }',
+    '}',
+    '',
+  ].join('\n');
+}
