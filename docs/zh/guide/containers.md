@@ -2,6 +2,11 @@
 
 Sparkling 内容始终运行在**原生容器**中 — 一个承载 Lynx 运行时的平台视图。SDK 提供两种容器模式以适配不同场景。
 
+:::note HarmonyOS 范围
+生成的 HarmonyOS Shell 当前提供带应用内页面栈的全页 ArkUI 宿主。下文可复用的全页容器和
+嵌入式容器 API 属于 Android/iOS SDK；HarmonyOS 尚未提供可复用的嵌入式容器 API。
+:::
+
 ## 两种容器模式
 
 | | 全页容器 | 嵌入式容器 |

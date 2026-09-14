@@ -10,6 +10,7 @@ import {
   ensurePlatformScaffolds,
   resolveTemplateDir,
   writeAndroidConfigs,
+  writeHarmonyConfigs,
   writeIosConfigs,
   writeModuleConfig,
 } from './scaffold';
@@ -42,7 +43,7 @@ function validateAndroidDsl(value: string): AndroidDsl {
 async function resolveModuleConfig(
   defaults: { packageName: string; moduleName: string },
   options: InitOptions,
-): Promise<Omit<ModuleConfig, 'projectName'>> {
+): Promise<Omit<ModuleConfig, 'projectName' | 'harmony'>> {
   const hasPackageName = options.packageName != null && options.packageName.trim() !== '';
   const hasModuleName = options.moduleName != null && options.moduleName.trim() !== '';
 
@@ -91,6 +92,7 @@ export async function runInit(projectName: string | undefined, options: InitOpti
   await ensurePlatformScaffolds(persisted, targetDir);
   await writeAndroidConfigs(persisted, targetDir);
   await writeIosConfigs(persisted, targetDir);
+  await writeHarmonyConfigs(persisted, targetDir);
 
   console.log(ui.success('\n✅ Project created successfully.'));
   console.log(ui.tip(`cd ${normalizedProjectName}`));

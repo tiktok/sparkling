@@ -6,6 +6,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import semver from 'semver';
+import { resolveHarmonyTool } from '../../utils/harmony-tools';
 import { verboseLog } from '../../utils/verbose';
 import type { CheckResult } from './types';
 
@@ -395,4 +396,53 @@ export function checkSimulator(): CheckResult {
     status: 'pass',
     message: `${deviceLines.length} simulator(s) available`,
   };
+}
+
+function checkHarmonyCommand(
+  name: string,
+  command: string,
+  args: string[],
+  installHint: string,
+): CheckResult {
+  const output = exec(command, args);
+  if (!output) {
+    return {
+      name,
+      category: 'harmony',
+      status: 'fail',
+      message: `${name} could not be found`,
+      fixHint: `${command} is not available. ${installHint}`,
+    };
+  }
+
+  const version = output.split('\n')[0].trim();
+  verboseLog(`${name} version: ${version}`);
+  return { name, category: 'harmony', status: 'pass', version };
+}
+
+export function checkOhpm(): CheckResult {
+  return checkHarmonyCommand(
+    'OHPM',
+    resolveHarmonyTool('ohpm'),
+    ['--version'],
+    'Install DevEco Studio or Command Line Tools, or add ohpm to PATH.',
+  );
+}
+
+export function checkHvigor(): CheckResult {
+  return checkHarmonyCommand(
+    'Hvigor',
+    resolveHarmonyTool('hvigorw'),
+    ['--version'],
+    'Install DevEco Studio or Command Line Tools, or add hvigorw to PATH.',
+  );
+}
+
+export function checkHdc(): CheckResult {
+  return checkHarmonyCommand(
+    'hdc',
+    resolveHarmonyTool('hdc'),
+    ['-v'],
+    'Install DevEco Studio or Command Line Tools, or add hdc to PATH.',
+  );
 }

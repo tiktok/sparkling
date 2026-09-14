@@ -1,7 +1,7 @@
 Shared app resources
 
 This directory holds cross-platform assets used by Sparkling templates:
-- app_icon.png — App icon for Android/iOS
+- app_icon.png — App icon source used by the current Android/iOS resource workflow
 - splash_icon.png — Splash image (light)
 - splash_icon_dark.png — Splash image (dark)
 
@@ -24,3 +24,7 @@ export default {
 ```
 
 Place your images here and adjust paths in `app.config.ts`.
+
+The generated HarmonyOS shell currently owns its application icon at
+`harmony/AppScope/resources/base/media/app_icon.svg`; `appIcon` and the `splash-screen` plugin do
+not yet rewrite HarmonyOS resources.

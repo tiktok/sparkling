@@ -2,7 +2,13 @@ import { Steps } from '@theme';
 
 # Create a Custom Sparkling Method
 
-A Sparkling Method is a typed JS ↔ native bridge package that works on both Android and iOS. You define the API in TypeScript, generate native code with the CLI, then implement business logic in Kotlin and Swift.
+A Sparkling Method is a typed JS ↔ native bridge package for Android, iOS, and HarmonyOS. You define the API in TypeScript, generate Kotlin and Swift code with the CLI, and implement the generated HarmonyOS handler in ArkTS.
+
+:::note HarmonyOS scope
+The method code generator currently produces Kotlin and Swift implementations only. A method
+package can nevertheless ship a handwritten ArkTS handler: HarmonyOS autolink copies that source
+into the app, generates a static import, and dispatches its declared method names through `spkPipe`.
+:::
 
 <Steps>
 
@@ -27,8 +33,10 @@ sparkling-my-greeting/
 │       └── my-greeting.d.ts  # TypeScript declarations (you edit this)
 ├── android/
 │   └── ...                   # Android project structure (generated later)
-└── ios/
-    └── ...                   # iOS project structure (generated later)
+├── ios/
+│   └── ...                   # iOS project structure (generated later)
+└── harmony/
+    └── *HarmonyHandler.ets   # HarmonyOS handler scaffold
 ```
 
 The `module.config.json` defines module metadata used by both codegen and autolink:
@@ -39,6 +47,33 @@ The `module.config.json` defines module metadata used by both codegen and autoli
   "packageName": "com.tiktok.sparkling.methods.mygreeting",
   "moduleName": "MyGreeting",
   "androidDsl": "kts"
+}
+```
+
+The scaffold includes the following HarmonyOS metadata. Codegen keeps `methodNames` synchronized
+with the TypeScript declarations:
+
+```json
+{
+  "harmony": {
+    "methodNames": ["myGreeting.hello"],
+    "sourceDir": "harmony",
+    "entry": "MyGreetingHandler.ets",
+    "className": "MyGreetingHandler"
+  }
+}
+```
+
+The exported class must provide `call(context, method, request, callback)`. The callback ABI is
+`callback(code: number, msg: string, data?: Object)`. For example:
+
+```ts
+type MethodCallback = (code: number, msg: string, data?: Object) => void;
+
+export class MyGreetingHandler {
+  call(context: Context, method: string, request: Object, callback: MethodCallback): void {
+    callback(1, 'ok');
+  }
 }
 ```
 
@@ -200,12 +235,14 @@ npx sparkling autolink
 Autolink automatically:
 - **Android**: links the Sparkling method Gradle project and generates the `SparklingAutolink.kt` registry.
 - **iOS**: links the Sparkling method pod and generates the `SparklingAutolink.swift` registry.
+- **HarmonyOS**: copies a declared ArkTS source tree and generates imports and dispatch code in `SparklingAutolink.ets`.
 
 #### Run and test
 
 ```bash
 npm run run:android
 npm run run:ios
+npm run run:harmony
 ```
 
 Call the method from your Lynx/JS code:
@@ -236,6 +273,7 @@ When the method is ready for distribution:
     "android/src",
     "android/build.gradle.kts",
     "ios",
+    "harmony",
     "module.config.json"
   ]
 }
@@ -262,7 +300,7 @@ npx sparkling autolink
   Method names use `<module>.<action>` (e.g. `mygreeting.hello`).
 - **Single source of truth**: always edit `.d.ts` declarations and re-run codegen —
   never edit generated files directly.
-- **Platform parity**: implement the same behavior on both Android and iOS.
+- **Platform parity**: implement the same behavior on Android, iOS, and HarmonyOS.
 - **Error handling**: return `code: 1` for success, `code: 0` for failure, and negative codes for errors,
   with a descriptive `msg`. See [Response codes](/apis/response-codes).
-- **Testing**: test on both platforms before publishing.
+- **Testing**: test on all supported platforms before publishing.

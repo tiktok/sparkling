@@ -128,10 +128,12 @@ export function showCompletionNotes(targetDir: string, packageManager?: string, 
 
   nextSteps.push(formatScriptCommand('run:ios'));
   nextSteps.push(formatScriptCommand('run:android'));
+  nextSteps.push(formatScriptCommand('run:harmony'));
 
   const tips = [
     'iOS: ensure Xcode Command Line Tools are installed.',
     'Android: ensure ANDROID_HOME and SDK platforms are set.',
+    'HarmonyOS: ensure DevEco Studio or Command Line Tools are installed.',
   ];
 
   p.note(

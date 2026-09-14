@@ -96,6 +96,7 @@ describe('Project Creation (runInit)', () => {
         const config = await fs.readJson(configPath);
         expect(config.packageName).toBe('com.example.test');
         expect(config.moduleName).toBe('TestModule');
+        expect(config.harmony.className).toBe('TestModuleHarmonyHandler');
       });
     });
 
@@ -450,6 +451,7 @@ describe('Project Creation (runInit)', () => {
         const pkgJson = await fs.readJson(path.join(projectDir, 'package.json'));
         expect(pkgJson.name).toBe('non-interactive-test');
         expect(pkgJson.files).toContain('module.config.json');
+        expect(pkgJson.files).toContain('harmony');
         expect(pkgJson.files).not.toContain('lynx.lib.json');
       });
     });
@@ -535,6 +537,9 @@ describe('Project Creation (runInit)', () => {
         // Verify iOS structure
         const iosDir = path.join(projectDir, 'ios', 'Source', 'Core', 'platformmodule');
         expect(await fs.pathExists(iosDir)).toBe(true);
+
+        const harmonyHandler = path.join(projectDir, 'harmony', 'PlatformModuleHarmonyHandler.ets');
+        expect(await fs.pathExists(harmonyHandler)).toBe(true);
       });
     });
 

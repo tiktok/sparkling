@@ -138,7 +138,7 @@ type EventCallback = (event: unknown) => void;
 
 ## Response codes
 
-Sparkling Method response codes follow the Android/iOS native bridge convention:
+Sparkling Method response codes follow the shared native bridge convention:
 `1` means success, `0` means the method ran but failed, and negative values are
 bridge or method errors. See [Response codes](./response-codes.md) for details.
 

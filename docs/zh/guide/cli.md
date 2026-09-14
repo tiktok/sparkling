@@ -1,6 +1,6 @@
 # Sparkling CLI
 
-Sparkling CLI（`sparkling-app-cli`）是内置的命令行工具，驱动整个开发工作流。它负责构建 Lynx bundle、自动链接原生方法模块、在 Android/iOS 上运行应用以及诊断开发环境。
+Sparkling CLI（`sparkling-app-cli`）是内置的命令行工具，驱动整个开发工作流。它负责构建 Lynx bundle、自动链接原生方法模块、在 Android、iOS 和 HarmonyOS 上运行应用以及诊断开发环境。
 
 ## 安装
 
@@ -25,7 +25,7 @@ npx sparkling build
 | 选项 | 说明 |
 | --- | --- |
 | `--config <path>` | `app.config.ts` 路径（默认：`app.config.ts`） |
-| `--copy` | 将构建产物复制到 Android 和 iOS 原生 Shell |
+| `--copy` | 将构建产物复制到 Android、iOS 和 HarmonyOS 原生 Shell |
 | `--skip-copy` | 跳过复制（默认行为） |
 
 默认跳过资源复制以加快开发迭代速度。需要将 bundle 放入原生项目时（如发布构建），请使用 `--copy`。
@@ -59,7 +59,7 @@ npx sparkling dev
 
 ### `sparkling copy-assets`
 
-将编译好的 bundle 复制到 Android 和 iOS 资源目录。
+将编译好的 bundle 复制到 Android、iOS 和 HarmonyOS 资源目录。
 
 ```bash
 npx sparkling copy-assets
@@ -69,11 +69,15 @@ npx sparkling copy-assets
 | --- | --- |
 | `--source <path>` | 编译产物路径（默认：`dist`） |
 | `--android-dest <path>` | Android 资源目标路径（默认：`android/app/src/main/assets`） |
-| `--ios-dest <path>` | iOS 资源目标路径（默认：`ios/LynxResources`） |
+| `--ios-dest <path>` | iOS 资源目标路径（默认：`ios/LynxResources/Assets`） |
+| `--harmony-dest <path>` | HarmonyOS 资源目标路径（存在 `harmony/` 工程时默认为 `harmony/entry/src/main/resources/rawfile`） |
+
+为兼容仅包含 Android/iOS 的现有应用，默认命令不会创建新的 `harmony/` 目录。需要时请显式传入
+`--harmony-dest`，或先生成 HarmonyOS Shell。
 
 ### `sparkling autolink`
 
-自动发现 Sparkling 方法模块。CLI 会扫描工作区和 `node_modules` 中的 `module.config.json` 文件，然后更新 Sparkling 方法模块的原生链接并生成 Sparkling 注册文件。宿主应用同时启用 Lynx library Autolink 插件，因此带有 `lynx.lib.json` 的非 Method Lynx library 可以由 Lynx 工具链链接。
+自动发现 Android、iOS 和 HarmonyOS 的 Sparkling 方法模块。CLI 会扫描工作区和 `node_modules` 中的 `module.config.json` 文件，然后更新 Sparkling 方法模块的原生链接并生成 Sparkling 注册文件。宿主应用同时启用 Lynx library Autolink 插件，因此带有 `lynx.lib.json` 的非 Method Lynx library 可以由 Lynx 工具链链接。
 
 ```bash
 npx sparkling autolink
@@ -81,12 +85,13 @@ npx sparkling autolink
 
 | 选项 | 说明 |
 | --- | --- |
-| `--platform <platform>` | 目标平台：`android`、`ios` 或 `all`（默认：`all`） |
+| `--platform <platform>` | 目标平台：`android`、`ios`、`harmony` 或 `all`（默认：`all`） |
 
 **执行内容：**
 
 - **Android** — 链接 Sparkling 方法模块的 Gradle project，并生成 `SparklingAutolink.kt`。Debug-tool 包仍以 `debugImplementation` 方式链接。
 - **iOS** — 链接 Sparkling 方法模块的 pod，并生成 `SparklingAutolink.swift`。Debug-tool 包仍链接到调试目标。
+- **HarmonyOS** — 生成 `SparklingAutolink.ets`；声明的 ArkTS handler 会被复制、静态导入，并通过 `spkPipe` 分发。
 
 ### `sparkling run:android`
 
@@ -140,6 +145,23 @@ npx sparkling run:ios
 
 你也可以通过设置 `SPARKLING_IOS_SIMULATOR` 环境变量来指定默认模拟器。
 
+### `sparkling run:harmony`
+
+一键完成构建、自动链接和启动 HarmonyOS 调试 HAP。
+
+```bash
+npx sparkling run:harmony --copy
+```
+
+该命令会依次执行：
+
+1. 为 HarmonyOS 自动链接方法模块
+2. 构建 Lynx bundle
+3. 指定 `--copy` 时把 bundle 复制到 `harmony/entry/src/main/resources/rawfile`
+4. 安装 OHPM 依赖
+5. 执行 `hvigorw assembleHap`
+6. 检测到已连接真机或模拟器时，通过 `hdc` 安装并启动 HAP
+
 ### `sparkling doctor`
 
 检查开发环境是否正确配置。
@@ -150,7 +172,7 @@ npx sparkling doctor
 
 | 选项 | 说明 |
 | --- | --- |
-| `--platform <platform>` | 检查平台：`android`、`ios` 或 `all`（默认：`all`） |
+| `--platform <platform>` | 检查平台：`android`、`ios`、`harmony` 或 `all`（默认：`all`） |
 
 doctor 命令检查的内容：
 
@@ -163,6 +185,9 @@ doctor 命令检查的内容：
 | Ruby | 版本 >= 3.2.6, < 3.4 |
 | Xcode | 版本 >= 16（仅 macOS） |
 | CocoaPods | 已安装（仅 macOS） |
+| OHPM | 可从 PATH、HarmonyOS Command Line Tools 或 DevEco Studio 获取 |
+| Hvigor | 可从 PATH、HarmonyOS Command Line Tools 或 DevEco Studio 获取 |
+| hdc | 可从 PATH、HarmonyOS Command Line Tools 或 DevEco Studio 获取 |
 | iOS 模拟器 | 至少有一个可用（仅 macOS） |
 
 如果检查未通过，输出会包含修复提示。
@@ -196,6 +221,9 @@ npx sparkling run:android
 # 5. 在 iOS 上运行
 npx sparkling run:ios
 
-# 6. 构建发布用 bundle
+# 6. 在 HarmonyOS 上运行（使用本地打包资源）
+npx sparkling run:harmony --copy
+
+# 7. 构建发布用 bundle
 npx sparkling build --copy
 ```

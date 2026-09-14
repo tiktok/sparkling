@@ -3,9 +3,10 @@
 Global properties injected by the Sparkling native SDK into every Lynx
 container. Access these at runtime via `lynx.__globalProps`.
 
-The native layer (iOS / Android) populates these values before the Lynx
-bundle starts executing. Some fields are **stable** (set once on app
-launch) and some are **unstable** (may change per container or over time).
+Android 和 iOS SDK 会在 Lynx bundle 开始执行前注入这些值。生成的 HarmonyOS Shell
+当前提供设备、屏幕、URL/query、平台、语言、方向和容器标识字段；下文标注为特定平台
+的属性不代表 HarmonyOS 同样提供。部分字段是**稳定的**（应用启动时设置一次），部分字段
+是**非稳定的**（可能随容器或时间变化）。
 
 ## Properties
 
@@ -306,7 +307,7 @@ on Android it is derived from screen metrics.
 screenHeight: number;
 ```
 
-Screen height in logical points (dp on Android, pt on iOS).
+逻辑单位的屏幕高度（Android 为 dp，iOS 为 pt，HarmonyOS 为 vp）。
 
 ***
 
@@ -329,7 +330,7 @@ Possible values: `"Portrait"`, `"PortraitUpsideDown"`, `"LandscapeLeft"`,
 screenWidth: number;
 ```
 
-Screen width in logical points (dp on Android, pt on iOS).
+逻辑单位的屏幕宽度（Android 为 dp，iOS 为 pt，HarmonyOS 为 vp）。
 
 ***
 

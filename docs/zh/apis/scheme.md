@@ -2,6 +2,11 @@
 
 Sparkling 页面/容器通过 `hybrid://...` URL 打开。本文档定义了 **Android 和 iOS 双端通用**的统一 Scheme 格式与参数。
 
+生成的 HarmonyOS Shell 支持全页 `lynxview_page` 导航，以及 `bundle`/`url`、`title`、
+`hide_nav_bar`、`hide_back_button`、`title_color`、`nav_bar_color`、
+`container_bg_color`、`force_theme_style`、`hide_status_bar`、`trans_status_bar` 和
+`screen_orientation`。该 Shell 尚未实现卡片/WebView 容器以及本文中的加载/错误视图参数。
+
 ## Host（容器类型）
 
 Sparkling 支持多种 `hybrid://` host：

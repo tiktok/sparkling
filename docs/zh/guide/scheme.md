@@ -2,6 +2,12 @@
 
 在 Sparkling 中，每个页面或容器都通过一个 **scheme URL** 来标识和打开 —— 一个 `hybrid://` URI，用于告诉原生层_渲染什么_以及_如何配置_。
 
+:::note HarmonyOS 范围
+生成的 HarmonyOS Shell 支持全页 `lynxview_page` 流程和部分页面参数。卡片/WebView host、
+嵌入式容器以及加载/错误视图参数目前仍仅适用于 Android/iOS；准确范围见
+[Scheme API 参考](/apis/scheme)。
+:::
+
 ## 为什么使用 Scheme？
 
 Sparkling 是一个混合框架：UI 用 Lynx/JS 编写，但每个页面都运行在原生容器中（iOS 上是 `UIViewController`，Android 上是 `Activity`/`Fragment`）。Scheme URL 是这两个世界之间的契约 —— 它让 JS 代码无需了解原生 API 就能打开原生容器，也让原生代码无需了解 JS 内部实现就能配置容器。

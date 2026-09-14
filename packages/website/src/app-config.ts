@@ -48,6 +48,7 @@
  *   platform: {
  *     android: { packageName: 'com.example.myapp' },
  *     ios: { bundleIdentifier: 'com.example.myapp' },
+ *     harmony: { bundleName: 'com.example.myapp' },
  *   },
  * };
  *
@@ -77,7 +78,7 @@ export interface AppConfig {
    */
   appName?: string;
 
-  /** Platform-specific identifiers for Android and iOS builds. */
+  /** Platform-specific identifiers for Android, iOS, and HarmonyOS builds. */
   platform?: PlatformConfig;
 
   /**
@@ -86,16 +87,23 @@ export interface AppConfig {
    * After `sparkling build`, the CLI copies the output bundles to these
    * directories so the native apps can load them as local assets.
    *
-   * @defaultValue `{ androidAssets: 'android/app/src/main/assets', iosAssets: 'ios/LynxResources/Assets' }`
+   * @defaultValue `{ androidAssets: 'android/app/src/main/assets', iosAssets: 'ios/LynxResources/Assets', harmonyAssets: 'harmony/entry/src/main/resources/rawfile' }`
    */
   paths?: {
     /** Path to the Android assets directory relative to the project root. */
     androidAssets?: string;
     /** Path to the iOS assets directory relative to the project root. */
     iosAssets?: string;
+    /** Path to the HarmonyOS rawfile directory relative to the project root. */
+    harmonyAssets?: string;
   };
 
-  /** Path to the app icon image, relative to the project root. */
+  /**
+   * Path to the app icon image, relative to the project root.
+   *
+   * The current resource workflow applies this to Android and iOS. The generated HarmonyOS
+   * shell owns its icon under `harmony/AppScope/resources`.
+   */
   appIcon?: string;
 
   /**
@@ -155,6 +163,11 @@ export interface PlatformConfig {
      */
     simulator?: string;
   };
+  /** HarmonyOS platform settings. */
+  harmony?: {
+    /** HarmonyOS application bundle name (e.g. `"com.example.myapp"`). */
+    bundleName?: string;
+  };
 }
 
 /** A single route entry pointing to a Lynx page bundle. */
@@ -179,6 +192,7 @@ export interface RouterConfig {
  * Splash screen plugin configuration.
  *
  * Controls the native splash screen shown while the Lynx bundle loads.
+ * The generated HarmonyOS shell does not yet consume this plugin.
  */
 export interface SplashScreenPluginConfig {
   /** Background color of the splash screen (hex string, e.g. `"#FFFFFF"`). */

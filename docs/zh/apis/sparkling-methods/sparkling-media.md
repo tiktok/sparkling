@@ -209,5 +209,7 @@ saveDataURL(
 
 你的宿主应用必须注册这些方法的原生实现。参阅
 [Sparkling Method SDK](../sparkling-method-android.md) / [iOS](../sparkling-method-ios.md)。
+生成的 HarmonyOS Shell 通过内置 `spkPipe` bridge 提供这些方法，`sparkling autolink`
+负责注册包中声明的 HarmonyOS 方法名。
 
 所有方法都使用统一的 [Sparkling Method 响应码](../response-codes.md)。

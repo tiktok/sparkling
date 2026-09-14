@@ -1,7 +1,7 @@
 {
   "name": "sparkling-app-cli",
   "version": "2.0.0-rc.6",
-  "description": "Sparkling workspace helper CLI (build, copy-assets, autolink, run android/ios)",
+  "description": "Sparkling workspace helper CLI (build, copy-assets, autolink, run Android/iOS/HarmonyOS)",
   "homepage": "https://tiktok.github.io/sparkling/",
   "repository": {
     "type": "git",

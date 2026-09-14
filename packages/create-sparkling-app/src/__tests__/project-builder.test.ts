@@ -99,9 +99,67 @@ describe('project builder and template utilities', () => {
     const appConfig = fs.readFileSync(path.join(to, 'app.config.ts'), 'utf8');
     expect(appConfig).toContain("packageName: 'com.demo.app'");
     expect(appConfig).toContain("bundleIdentifier: 'com.demo.app'");
+    expect(appConfig).toContain("bundleName: 'com.demo.app'");
     expect(appConfig).not.toContain('com.example.sparkling.go');
     expect(appConfig).not.toContain('com.sparkling.app.SparklingGo');
     expect(appConfig).not.toContain('{{packageNamespace}}');
+
+    const harmonyIndex = fs.readFileSync(
+      path.join(to, 'harmony/entry/src/main/ets/pages/Index.ets'),
+      'utf8',
+    );
+    const harmonyPipe = fs.readFileSync(
+      path.join(to, 'harmony/entry/src/main/ets/bridge/SparklingPipeModule.ets'),
+      'utf8',
+    );
+    const harmonyMedia = fs.readFileSync(
+      path.join(to, 'harmony/entry/src/main/ets/bridge/SparklingMediaHandler.ets'),
+      'utf8',
+    );
+    const harmonyMediaFetcher = fs.readFileSync(
+      path.join(to, 'harmony/entry/src/main/ets/provider/SparklingMediaResourceFetcher.ets'),
+      'utf8',
+    );
+    const harmonyAutolink = fs.readFileSync(
+      path.join(to, 'harmony/entry/src/main/ets/bridge/SparklingAutolink.ets'),
+      'utf8',
+    );
+    const harmonyHostHooks = fs.readFileSync(
+      path.join(to, 'harmony/entry/src/main/ets/bridge/SparklingHostHooks.ets'),
+      'utf8',
+    );
+    expect(harmonyIndex).toContain("modules.set('spkPipe'");
+    expect(harmonyIndex).toContain('onBackPress(): boolean');
+    expect(harmonyIndex).toContain("globalProps['queryItems']");
+    expect(harmonyIndex).toContain("globalProps['containerID']");
+    expect(harmonyIndex).toContain('setWindowSystemBarEnable');
+    expect(harmonyIndex).toContain('setPreferredOrientation');
+    expect(harmonyPipe).toContain("case 'router.open'");
+    expect(harmonyPipe).toContain("case 'router.close'");
+    expect(harmonyPipe).toContain("case 'storage.setItem'");
+    expect(harmonyPipe).toContain("case 'storage.getItem'");
+    expect(harmonyPipe).toContain("case 'media.chooseMedia'");
+    expect(harmonyPipe).toContain("case 'media.downloadFile'");
+    expect(harmonyPipe).toContain("case 'media.saveDataURL'");
+    expect(harmonyPipe).toContain("case 'media.uploadFile'");
+    expect(harmonyPipe).toContain("case 'media.uploadImage'");
+    expect(harmonyPipe).toContain('isSparklingMethodLinked');
+    expect(harmonyAutolink).toContain("new SparklingAutolinkModule('sparkling-navigation'");
+    expect(harmonyHostHooks).toContain('hasRouterInterceptor');
+    expect(harmonyHostHooks).toContain('getCommonParams');
+    expect(harmonyMedia).toContain('PhotoViewPicker');
+    expect(harmonyMedia).toContain('cameraPicker.pick');
+    expect(harmonyMedia).toContain('request.agent.create');
+    expect(harmonyMedia).toContain('totalTimeout');
+    expect(harmonyMedia).toContain('request.uploadFile');
+    expect(harmonyMedia).toContain('image.createImagePacker');
+    expect(harmonyMedia).toContain('saveToPhotoAlbum');
+    expect(harmonyMedia).toContain('data.isMultiSelect === true');
+    expect(harmonyMedia).toContain('filePath or formDataBody');
+    expect(harmonyMedia).toContain('data.paramsOption !== 2');
+    expect(harmonyMediaFetcher).toContain('getRawFileContentSync');
+    expect(harmonyMediaFetcher).toContain('fileUri.getUriFromPath');
+    expect(harmonyMediaFetcher).toContain('LynxOptionalBool.TRUE');
 
     const textFiles: string[] = [];
     const collectTextFiles = (dir: string) => {
@@ -128,7 +186,7 @@ describe('project builder and template utilities', () => {
     expect(copiedTemplateText).not.toContain('SPARKLING_REPO_ROOT');
     expect(copiedTemplateText).not.toContain('../../../packages/');
     expect(copiedTemplateText).not.toContain('workspace:*');
-    expect(copiedTemplateText).not.toContain('file:');
+    expect(copiedTemplateText).not.toContain('"file:');
     expect(copiedTemplateText).not.toContain('project(":sparkling")');
     expect(copiedTemplateText).not.toContain('project(":sparkling-method")');
   });

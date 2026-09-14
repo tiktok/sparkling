@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/sparkling-app-cli.svg)](https://npmjs.com/package/sparkling-app-cli)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../../LICENSE)
 
-Workspace helper CLI for building, running, and managing Sparkling applications on Android and iOS.
+Workspace helper CLI for building, running, and managing Sparkling applications on Android, iOS, and HarmonyOS.
 
 ## Installation
 
@@ -23,7 +23,7 @@ npm install sparkling-app-cli@latest --save-dev
 # Build Lynx bundle (uses app.config.ts)
 sparkling build
 
-# Copy dist/ assets into Android/iOS resource folders
+# Copy dist/ assets into Android/iOS/HarmonyOS resource folders
 sparkling copy-assets
 
 # Auto-link sparkling-method modules to native projects
@@ -34,6 +34,12 @@ sparkling run:android
 
 # Build and run on iOS simulator
 sparkling run:ios
+
+# Build and run on a HarmonyOS emulator/device
+sparkling run:harmony
+
+# Check one platform's native toolchain
+sparkling doctor --platform harmony
 ```
 
 Run `sparkling --help` to see all available commands and options.
@@ -43,7 +49,7 @@ Run `sparkling --help` to see all available commands and options.
 - `sparkling dev` resolves the port from (highest to lowest): `--port` -> `app.config.ts` `dev.server.port` -> `app.config.ts` `lynxConfig.server.port` -> `5969`.
 - `sparkling dev` resolves the host from (highest to lowest): `--host` -> `app.config.ts` `dev.server.host` -> Rspeedy's default host.
 - `sparkling dev --port <x>` persists the selected port back to `app.config.ts` as `dev.server.port`.
-- `sparkling run:ios` and `sparkling run:android` reuse the same resolved port and auto-start a dev server when needed.
+- `sparkling run:ios` and `sparkling run:android` reuse the same resolved port and auto-start a dev server when needed. `run:harmony` currently rebuilds and installs local bundled assets.
 - For Android, `run:android` auto-detects connected targets:
   - emulator: app uses `127.0.0.1` and CLI applies `adb reverse tcp:<port> tcp:<port>`
   - physical device: app uses your local LAN IPv4 and CLI binds the server to that same LAN IPv4
@@ -64,7 +70,8 @@ When developing inside the Sparkling monorepo, see [LOCAL_TESTING.md](./LOCAL_TE
 
 ## Requirements
 
-- Node.js >= 18
+- Node.js 22 or 24
+- HarmonyOS: DevEco Studio or HarmonyOS Command Line Tools with OHPM, Hvigor, and hdc
 
 ## See Also
 

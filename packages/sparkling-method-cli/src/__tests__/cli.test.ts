@@ -54,11 +54,20 @@ describe('sparkling-method cli', () => {
       expect(moduleConfig.packageName).toBe('com.example.toast');
       expect(moduleConfig.moduleName).toBe('Demo');
       expect(moduleConfig.androidDsl).toBe('kts');
+      expect(moduleConfig.harmony).toEqual({
+        methodNames: [],
+        sourceDir: 'harmony',
+        entry: 'DemoHarmonyHandler.ets',
+        className: 'DemoHarmonyHandler',
+      });
 
       const androidDir = path.join(projectDir, 'android', 'src', 'main', 'java', 'com', 'example', 'toast', 'demo');
       const iosDir = path.join(projectDir, 'ios', 'Source', 'Core', 'demo');
       await expect(fs.pathExists(androidDir)).resolves.toBe(true);
       await expect(fs.pathExists(iosDir)).resolves.toBe(true);
+      await expect(fs.pathExists(
+        path.join(projectDir, 'harmony', 'DemoHarmonyHandler.ets'),
+      )).resolves.toBe(true);
     });
   });
 
@@ -86,7 +95,13 @@ describe('sparkling-method cli', () => {
     await withTempDir(async (cwd) => {
       await fs.writeJson(path.join(cwd, 'module.config.json'), {
         packageName: 'com.example.toast',
-        moduleName: 'demo'
+        moduleName: 'demo',
+        harmony: {
+          methodNames: [],
+          sourceDir: 'harmony',
+          entry: 'DemoHarmonyHandler.ets',
+          className: 'DemoHarmonyHandler',
+        },
       });
 
       const srcDir = path.join(cwd, 'src');
@@ -102,6 +117,8 @@ describe('sparkling-method cli', () => {
       const metadata = await fs.readJson(metadataPath);
       expect(metadata.name).toBe('showToast');
       expect(metadata.moduleName).toBe('demo');
+      const moduleConfig = await fs.readJson(path.join(cwd, 'module.config.json'));
+      expect(moduleConfig.harmony.methodNames).toEqual(['demo.showToast']);
 
       const kotlinPath = path.join(
         cwd,

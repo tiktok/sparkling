@@ -21,7 +21,7 @@
 
 Large-scale apps like TikTok are never built with a single technology. Sparkling is the infrastructure we built to unlock [Lynx](https://lynxjs.org) [at TikTok's scale](https://lynxjs.org/next/blog/lynx-unlock-native-for-more#ship-native-at-scale-and-velocity), and we believe it can do the same for your app.
 
-- 📦 **Scaffold in minutes.** Create a Lynx app targeting Android & iOS with a single CLI command.
+- 📦 **Scaffold in minutes.** Create a Lynx app targeting Android, iOS, and HarmonyOS with a single CLI command.
 - 🔀 **Scheme-driven navigation.** Route between Lynx pages and native screens with a unified URL scheme.
 - 🧩 **Production-proven native APIs.** Built-in media, storage, and extensible through Sparkling Method.
 

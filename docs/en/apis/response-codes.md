@@ -1,6 +1,6 @@
 # Response codes
 
-Sparkling Method response codes follow the Android/iOS native bridge convention.
+Sparkling Method response codes follow the shared Android, iOS, and HarmonyOS native bridge convention.
 This convention is the source of truth for `sparkling-method`, generated method
 wrappers, and built-in method packages.
 

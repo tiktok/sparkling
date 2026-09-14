@@ -8,6 +8,12 @@ export interface CodegenOptions {
 export interface ModuleConfig {
   packageName: string;
   moduleName: string;
+  harmony?: {
+    methodNames?: string[];
+    sourceDir?: string;
+    entry?: string;
+    className?: string;
+  };
 }
 
 export type PrimitiveKind = 'string' | 'number' | 'boolean' | 'void' | 'object' | 'any';

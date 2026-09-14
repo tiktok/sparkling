@@ -46,6 +46,7 @@ const config: AppConfig = {
   platform: {
     android: { packageName: 'com.example.myapp' },
     ios: { bundleIdentifier: 'com.example.myapp' },
+    harmony: { bundleName: 'com.example.myapp' },
   },
 };
 
@@ -61,6 +62,9 @@ optional appIcon: string;
 ```
 
 Path to the app icon image, relative to the project root.
+
+当前资源流程会将其应用到 Android 和 iOS。生成的 HarmonyOS Shell 使用
+`harmony/AppScope/resources` 下独立维护的图标资源。
 
 ***
 
@@ -124,9 +128,17 @@ optional iosAssets: string;
 
 Path to the iOS assets directory relative to the project root.
 
+#### harmonyAssets?
+
+```ts
+optional harmonyAssets: string;
+```
+
+相对于项目根目录的 HarmonyOS rawfile 目录路径。
+
 #### Default Value
 
-`{ androidAssets: 'android/app/src/main/assets', iosAssets: 'ios/LynxResources/Assets' }`
+`{ androidAssets: 'android/app/src/main/assets', iosAssets: 'ios/LynxResources/Assets', harmonyAssets: 'harmony/entry/src/main/resources/rawfile' }`
 
 ***
 
@@ -136,7 +148,7 @@ Path to the iOS assets directory relative to the project root.
 optional platform: PlatformConfig;
 ```
 
-Platform-specific identifiers for Android and iOS builds.
+Android、iOS 和 HarmonyOS 构建的平台标识配置。
 
 ***
 

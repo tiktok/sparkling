@@ -6,5 +6,14 @@
   "projectName": "sparkling-media",
   "ios": {
     "podspecPath": "ios/Sparkling-Media.podspec"
+  },
+  "harmony": {
+    "methodNames": [
+      "media.chooseMedia",
+      "media.uploadFile",
+      "media.downloadFile",
+      "media.saveDataURL",
+      "media.uploadImage"
+    ]
   }
 }

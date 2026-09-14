@@ -44,6 +44,7 @@ describe('createSparklingApp', () => {
         "  platform: {",
         "    android: { packageName: '{{packageNamespace}}' },",
         "    ios: { bundleIdentifier: '{{packageNamespace}}' },",
+        "    harmony: { bundleName: '{{packageNamespace}}' },",
         "  },",
         "};",
         "",
@@ -71,6 +72,7 @@ describe('createSparklingApp', () => {
     const appConfig = fs.readFileSync(path.join(work, 'demo-app', 'app.config.ts'), 'utf8');
     expect(appConfig).toContain("android: { packageName: 'com.demo.app' }");
     expect(appConfig).toContain("ios: { bundleIdentifier: 'com.demo.app' }");
+    expect(appConfig).toContain("harmony: { bundleName: 'com.demo.app' }");
     expect(appConfig).not.toContain('{{packageNamespace}}');
   });
 });

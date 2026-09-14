@@ -25,6 +25,9 @@ npm run run:android
 
 # iOS
 npm run run:ios
+
+# HarmonyOS
+npm run run:harmony
 ```
 
 ### 根据需要添加 Sparkling 方法
@@ -46,16 +49,16 @@ npx sparkling build
 ### 你将获得
 
 - 一个 Lynx 应用项目（基于默认模板）
-- 已为 Sparkling 配置好的 Android 和 iOS 原生 Shell
+- 同时创建 Android、iOS 和 HarmonyOS 三端原生 Shell
 - 一个可用的 JS 与原生管道方法示例（路由）
 - 开发工作流命令（build / autolink / run）
 
 默认模板创建的关键目录/文件：
 
 - `src/`：Lynx/React 入口和资源文件
-- `android/`、`ios/`：已接入 Sparkling SDK 的原生 Shell
+- `android/`、`ios/`、`harmony/`：原生 Shell；HarmonyOS 端直接嵌入 Lynx
 - `app.config.ts`：由 `sparkling-app-cli` 使用的构建和路由配置
-- `package.json`：脚本（`dev`、`build`、`run:android`、`run:ios`）
+- `package.json`：脚本（`dev`、`build`、`run:android`、`run:ios`、`run:harmony`）
 
 ### 前置条件
 
@@ -64,3 +67,4 @@ npx sparkling build
 - 运行原生 Shell 需要：
   - Android Studio / Android SDK (Android) / JDK 11
   - Xcode 16+ + iOS Simulator (iOS)
+  - DevEco Studio 或 HarmonyOS Command Line Tools，以及 SDK 6.0.0（API 20）、`ohpm`、`hvigorw` 和 `hdc`（HarmonyOS）

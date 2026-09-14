@@ -1,6 +1,6 @@
 # 响应码
 
-Sparkling Method 响应码遵循 Android/iOS 原生桥接约定。该约定是
+Sparkling Method 响应码遵循 Android、iOS 和 HarmonyOS 共享的原生桥接约定。该约定是
 `sparkling-method`、生成的 method wrapper 以及内置 method 包的唯一权威标准。
 
 | 状态码 | 含义 |

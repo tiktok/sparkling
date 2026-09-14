@@ -6,6 +6,12 @@ import { Steps } from '@theme';
 使用热更新，以及管理 dev server URL。我们以 **Sparkling Go**（官方 demo 应用）为
 例，但这里的所有内容适用于任何 Sparkling 项目。
 
+:::note HarmonyOS 范围
+本文所述的 dev server URL 自动注入和 HMR 流程当前适用于 Android 和 iOS。
+`sparkling run:harmony --copy` 会重新构建 Lynx bundle、复制到 `rawfile` 并重新安装 HAP；
+生成的 HarmonyOS Shell 当前运行这些本地 bundle。
+:::
+
 :::tip
 核心思路：你机器上的 HTTP dev server 向 native shell 提供 JS bundle，每次保存文件
 时推送热更新，无需手动重新构建。
@@ -45,6 +51,9 @@ npx sparkling run:ios
 
 # Android
 npx sparkling run:android
+
+# HarmonyOS（本地 bundle；修改后重新构建并安装）
+npx sparkling run:harmony --copy
 ```
 
 Debug 构建会自动连接 dev server。应用从 dev server URL 加载 `main.lynx.bundle`，

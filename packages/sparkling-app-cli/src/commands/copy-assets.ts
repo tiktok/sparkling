@@ -11,6 +11,7 @@ export interface CopyAssetsOptions {
   source?: string;
   androidDest?: string;
   iosDest?: string;
+  harmonyDest?: string;
   cwd: string;
 }
 
@@ -27,13 +28,21 @@ export async function copyAssets(options: CopyAssetsOptions): Promise<void> {
   const source = path.resolve(options.cwd, options.source ?? 'dist');
   const androidDest = path.resolve(options.cwd, options.androidDest ?? 'android/app/src/main/assets');
   const iosDest = path.resolve(options.cwd, options.iosDest ?? 'ios/LynxResources/Assets');
+  const hasHarmonyProject = fs.existsSync(path.resolve(options.cwd, 'harmony'));
+  const harmonyDest = options.harmonyDest || hasHarmonyProject
+    ? path.resolve(
+      options.cwd,
+      options.harmonyDest ?? 'harmony/entry/src/main/resources/rawfile',
+    )
+    : undefined;
   if (isVerboseEnabled()) {
     verboseLog(`Copy assets source: ${source}`);
     verboseLog(`Android assets destination: ${androidDest}`);
     verboseLog(`iOS assets destination: ${iosDest}`);
+    verboseLog(`HarmonyOS assets destination: ${harmonyDest ?? '(project not present)'}`);
   }
 
-  for (const dest of [androidDest, iosDest]) {
+  for (const dest of [androidDest, iosDest, harmonyDest].filter((value): value is string => Boolean(value))) {
     console.log(ui.info(`Copying ${relativeTo(options.cwd, source)} -> ${relativeTo(options.cwd, dest)}`));
     copyDir(source, dest);
   }

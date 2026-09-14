@@ -209,5 +209,7 @@ This package calls:
 
 Your host app must register native implementations for these methods. See
 [Sparkling Method SDK](../sparkling-method-android.md) / [iOS](../sparkling-method-ios.md).
+The generated HarmonyOS shell provides these methods through its built-in `spkPipe` bridge;
+`sparkling autolink` registers the package's HarmonyOS method names.
 
 All methods use the shared [Sparkling Method response codes](../response-codes.md).

@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/sparkling-method-cli.svg)](https://npmjs.com/package/sparkling-method-cli)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](../../LICENSE)
 
-CLI utilities for creating and managing Sparkling method modules with cross-platform code generation.
+CLI utilities for creating and managing Sparkling method modules for Android, iOS, and HarmonyOS.
 
 ## Installation
 
@@ -23,7 +23,7 @@ npm install sparkling-method-cli@latest --save-dev
 # Create a new method module
 sparkling-method-cli init my-method
 
-# Generate native code from TypeScript definitions
+# Generate native code and synchronize HarmonyOS method registration
 sparkling-method-cli codegen
 ```
 
@@ -38,4 +38,5 @@ When developing inside the Sparkling monorepo, see [LOCAL_TESTING.md](./LOCAL_TE
 1. Create method module: `sparkling-method-cli init my-method`
 2. Define TypeScript interfaces in `src/*.d.ts`
 3. Generate native code: `sparkling-method-cli codegen`
-4. Implement native handlers in `android/` and `ios/`
+4. Implement native handlers in `android/`, `ios/`, and the generated ArkTS handler under `harmony/`
+5. Publish `module.config.json` and the `harmony/` source tree so `sparkling autolink` can copy and register the ArkTS handler

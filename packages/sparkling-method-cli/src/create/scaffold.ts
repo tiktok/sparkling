@@ -5,7 +5,13 @@ import fs from 'fs-extra';
 import path from 'path';
 
 import type { ModuleConfig } from './types';
-import { androidGradleTemplate, androidManifestTemplate, iosPodspecTemplate, iosUnitTestTemplate } from './templates';
+import {
+  androidGradleTemplate,
+  androidManifestTemplate,
+  harmonyHandlerTemplate,
+  iosPodspecTemplate,
+  iosUnitTestTemplate,
+} from './templates';
 import { normalizePackageName, toPascalCase } from './utils';
 import { isVerboseEnabled, verboseLog } from '../verbose';
 
@@ -56,7 +62,7 @@ export async function createPackageJson(projectName: string, targetDir: string):
       codegen: 'npx sparkling-method-cli codegen',
       test: 'echo "Add your tests"',
     },
-    files: ['dist', 'android', 'ios', 'generated', 'module.config.json'],
+    files: ['dist', 'android', 'ios', 'harmony', 'generated', 'module.config.json'],
     devDependencies: {},
     dependencies: {},
   };
@@ -130,10 +136,31 @@ export async function writeIosConfigs(config: ModuleConfig, projectDir: string):
   }
 }
 
-export async function writeModuleConfig(projectName: string, config: Omit<ModuleConfig, 'projectName'>, dir: string): Promise<ModuleConfig> {
+export async function writeHarmonyConfigs(config: ModuleConfig, projectDir: string): Promise<void> {
+  const entryPath = path.join(projectDir, config.harmony.sourceDir, config.harmony.entry);
+  await fs.ensureDir(path.dirname(entryPath));
+  if (!await fs.pathExists(entryPath)) {
+    await fs.writeFile(entryPath, harmonyHandlerTemplate(config.harmony.className), 'utf8');
+  }
+  if (isVerboseEnabled()) {
+    verboseLog(`HarmonyOS handler ensured at ${entryPath}`);
+  }
+}
+
+export async function writeModuleConfig(
+  projectName: string,
+  config: Omit<ModuleConfig, 'projectName' | 'harmony'>,
+  dir: string,
+): Promise<ModuleConfig> {
   const resolved: ModuleConfig = {
     ...config,
     projectName,
+    harmony: {
+      methodNames: [],
+      sourceDir: 'harmony',
+      entry: `${toPascalCase(config.moduleName)}HarmonyHandler.ets`,
+      className: `${toPascalCase(config.moduleName)}HarmonyHandler`,
+    },
   };
 
   await fs.writeJson(path.join(dir, 'module.config.json'), resolved, { spaces: 2 });

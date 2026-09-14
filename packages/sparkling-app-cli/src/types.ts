@@ -12,6 +12,9 @@ export interface PlatformConfig {
     bundleIdentifier?: string;
     simulator?: string;
   };
+  harmony?: {
+    bundleName?: string;
+  };
 }
 
 export type LynxConfig = unknown;
@@ -55,6 +58,7 @@ export interface AppConfig {
   paths?: {
     androidAssets?: string;
     iosAssets?: string;
+    harmonyAssets?: string;
   };
   appIcon?: string;
   router?: RouterConfig;
@@ -80,5 +84,14 @@ export interface MethodModuleConfig {
     moduleName?: string;
     className?: string;
     podspecPath?: string;
+  };
+  harmony?: {
+    methodNames?: string[];
+    /** ArkTS source tree copied into the generated HarmonyOS application. */
+    sourceDir?: string;
+    /** Entry file relative to sourceDir that exports className. */
+    entry?: string;
+    /** Exported ArkTS handler class instantiated by the generated registry. */
+    className?: string;
   };
 }

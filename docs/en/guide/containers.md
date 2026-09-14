@@ -2,6 +2,12 @@
 
 Sparkling content always runs inside a **native container** — a platform view that hosts the Lynx runtime. The SDK provides two container modes to fit different use cases.
 
+:::note HarmonyOS scope
+The generated HarmonyOS shell currently provides a full-page ArkUI host with an in-app page stack.
+The reusable full-page and embedded container APIs documented below are Android/iOS SDK APIs;
+HarmonyOS does not yet expose a reusable embedded-container API.
+:::
+
 ## Two container modes
 
 | | Full-page | Embedded |

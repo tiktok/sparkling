@@ -20,6 +20,9 @@ exports[`Project Creation (runInit) snapshot testing should create consistent pr
       },
     },
   },
+  "harmony": {
+    "SnapshotModuleHarmonyHandler.ets": "file",
+  },
   "ios": {
     "Source": {
       "Core": {

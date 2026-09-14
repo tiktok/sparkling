@@ -2,6 +2,12 @@
 
 In Sparkling, every page or container is identified and opened by a **scheme URL** — a `hybrid://` URI that tells the native layer _what_ to render and _how_ to configure it.
 
+:::note HarmonyOS scope
+The generated HarmonyOS shell supports the full-page `lynxview_page` flow and a subset of page
+options. Card/WebView hosts, embedded containers, and loading/error-view options remain
+Android/iOS-only; see the [Scheme API reference](/apis/scheme) for the exact subset.
+:::
+
 ## Why schemes?
 
 Sparkling is a hybrid framework: your UI is written in Lynx/JS, but each page lives inside a native container (a `UIViewController` on iOS, an `Activity`/`Fragment` on Android). The scheme URL is the contract between the two worlds — it lets JS code open native containers without knowing native APIs, and lets native code configure containers without knowing JS internals.

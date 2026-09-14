@@ -19,4 +19,10 @@ export interface ModuleConfig {
   moduleName: string;
   projectName: string;
   androidDsl: AndroidDsl;
+  harmony: {
+    methodNames: string[];
+    sourceDir: string;
+    entry: string;
+    className: string;
+  };
 }

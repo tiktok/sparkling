@@ -82,6 +82,13 @@ navigate(
 - `interceptor?: string`
 - `extra?: object`
 
+## Native method names
+
+This package calls `router.open` and `router.close`. Android and iOS hosts register them through
+the [Sparkling Method SDK](../sparkling-method-android.md) / [iOS](../sparkling-method-ios.md).
+The generated HarmonyOS shell provides them through its built-in `spkPipe` bridge;
+`sparkling autolink` registers the package's HarmonyOS method names.
+
 See also:
 - [sparkling-method](../sparkling-method-ts.md) – underlying pipe SDK
 - [Response codes](../response-codes.md) – shared success and error code convention

@@ -26,6 +26,9 @@ npm run run:android
 
 # iOS
 npm run run:ios
+
+# HarmonyOS
+npm run run:harmony
 ```
 
 ### Add Sparkling methods as needed
@@ -47,16 +50,16 @@ npx sparkling build
 ### What you get
 
 - A Lynx app project (based on the default template)
-- Android and iOS native shells already wired for Sparkling
+- Android, iOS, and HarmonyOS native shells created together
 - A working JS ↔ native pipe method example (router)
 - Developer workflow commands (build / autolink / run)
 
 Key folders/files created by the default template:
 
 - `src/`: Lynx/React entry points and assets
-- `android/`, `ios/`: native shells wired to Sparkling SDK
+- `android/`, `ios/`, `harmony/`: native shells; HarmonyOS embeds Lynx directly
 - `app.config.ts`: build + routing config consumed by `sparkling-app-cli`
-- `package.json`: scripts (`dev`, `build`, `run:android`, `run:ios`)
+- `package.json`: scripts (`dev`, `build`, `run:android`, `run:ios`, `run:harmony`)
 
 ### Prerequisites
 
@@ -66,3 +69,4 @@ Key folders/files created by the default template:
   - Android Studio / Android SDK (Android) / JDK 11
   - Xcode 16+ + iOS Simulator (iOS)
   - Ruby (≥3.2.6, &lt;3.4) for iOS build
+  - DevEco Studio or HarmonyOS Command Line Tools with SDK 6.0.0 (API 20), including `ohpm`, `hvigorw`, and `hdc` (HarmonyOS)
