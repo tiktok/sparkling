@@ -17,6 +17,15 @@ class Sparkling private constructor(
 
         const val SPARKLING_CONTEXT_CONTAINER_ID = "SparklingContextContainerId"
 
+        /**
+         * The scheme and initial data ride in the Intent as well as in the
+         * context map, because the Intent survives the process and the map does
+         * not. Without them a container recreated after Android reclaimed the
+         * app had nothing to render.
+         */
+        const val SPARKLING_CONTEXT_SCHEME = "SparklingContextScheme"
+        const val SPARKLING_CONTEXT_INIT_DATA = "SparklingContextInitData"
+
         const val TYPE_PAGE = 1
         const val TYPE_POPUP = 2 // not implemented yet
         const val TYPE_CARD = 3
@@ -48,6 +57,8 @@ class Sparkling private constructor(
             processSparklingContext(sparklingContext)
             val intent = Intent(context, SparklingActivity::class.java)
             intent.putExtra(SPARKLING_CONTEXT_CONTAINER_ID, sparklingContext.containerId)
+            sparklingContext.scheme?.let { intent.putExtra(SPARKLING_CONTEXT_SCHEME, it) }
+            sparklingContext.initData()?.let { intent.putExtra(SPARKLING_CONTEXT_INIT_DATA, it) }
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             SparklingContextTransferStation.saveSparklingContext(sparklingContext)
             context.startActivity(intent)

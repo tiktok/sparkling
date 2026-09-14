@@ -5,6 +5,7 @@ package com.tiktok.sparkling
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -12,14 +13,26 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.tiktok.sparkling.Sparkling.Companion.SPARKLING_CONTEXT_CONTAINER_ID
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 
 class SparklingActivity : AppCompatActivity() {
+    private companion object {
+        private const val TAG = "SparklingActivity"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val containerId = intent.getStringExtra(SPARKLING_CONTEXT_CONTAINER_ID)
-        val sparklingContext = SparklingContextTransferStation.getSparklingContext(containerId)
+        // Rebuilds the context when the process has been restarted under us; see
+        // SparklingContextTransferStation.restore.
+        val sparklingContext = SparklingContextTransferStation.restore(intent)
+        if (sparklingContext == null) {
+            // Nothing to render. Finishing hands the task back rather than
+            // leaving the person on an empty page they can do nothing with, and
+            // the next launch starts cleanly.
+            Log.w(TAG, "No context for this container; finishing instead of showing an empty page")
+            finish()
+            return
+        }
         initStatusBar(sparklingContext)
         setContentView(R.layout.activity_sparkling)
         initToolBar(sparklingContext)

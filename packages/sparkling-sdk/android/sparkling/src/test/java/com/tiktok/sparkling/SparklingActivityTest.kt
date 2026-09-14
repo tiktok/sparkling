@@ -7,6 +7,8 @@ import android.app.Application
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 import org.junit.After
+import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
@@ -40,10 +42,33 @@ class SparklingActivityTest {
     }
 
     @Test
-    fun onCreateWithoutContextRendersDefaultLayout() {
+    fun onCreateWithoutContextFinishesInsteadOfShowingAnEmptyPage() {
+        // This used to render the default layout: a toolbar reading "Sparkling
+        // Page" over an empty container. It is what a hot start landed on after
+        // Android reclaimed the app, because the Intent named a container whose
+        // context had died with the process. There is nothing here to render, so
+        // the activity finishes and the task starts cleanly next time.
         val activity = Robolectric.buildActivity(SparklingActivity::class.java).create().get()
         assertNotNull(activity)
+        assertTrue(activity.isFinishing)
+    }
+
+    @Test
+    fun onCreateRebuildsTheContextAfterAProcessRestart() {
+        // The same Intent the task record holds, with an empty context map:
+        // exactly the state a recreated activity starts in.
+        val intent = android.content.Intent(application, SparklingActivity::class.java)
+        intent.putExtra(Sparkling.SPARKLING_CONTEXT_CONTAINER_ID, "restored-container")
+        intent.putExtra(
+            Sparkling.SPARKLING_CONTEXT_SCHEME,
+            "hybrid://lynxview_page?bundle=main.lynx.bundle",
+        )
+
+        val activity = Robolectric.buildActivity(SparklingActivity::class.java, intent).create().get()
+
+        assertFalse(activity.isFinishing)
         assertNotNull(activity.findViewById<android.view.View>(R.id.toolbar))
+        assertNotNull(SparklingContextTransferStation.getSparklingContext("restored-container"))
     }
 
     @Test

@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.tiktok.sparkling.Sparkling.Companion.SPARKLING_CONTEXT_CONTAINER_ID
 import com.tiktok.sparkling.hybridkit.base.IPerformanceView
 
 class SparklingFragment : Fragment() {
@@ -24,8 +23,9 @@ class SparklingFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        val containerId = activity?.intent?.getStringExtra(SPARKLING_CONTEXT_CONTAINER_ID)
-        val sparklingContext = SparklingContextTransferStation.getSparklingContext(containerId)
+        // The activity has already restored this, but a fragment can be recreated
+        // on its own, so it asks the same way rather than assuming.
+        val sparklingContext = SparklingContextTransferStation.restore(activity?.intent)
         if (sparklingContext != null && context != null) {
             sparklingView = SparklingView(requireContext())
             sparklingView?.prepare(sparklingContext)
