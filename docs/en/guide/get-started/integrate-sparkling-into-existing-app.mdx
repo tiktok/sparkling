@@ -147,7 +147,7 @@ let context = SPKContext()
 spkView.load(withURL: "hybrid://lynxview?bundle=card.lynx.bundle", context)
 ```
 
-  Embedded containers require manual lifecycle forwarding — see [Containers](../containers.md) for the full guide.
+  Embedded containers require manual lifecycle forwarding — see [Containers](../containers) for the full guide.
 
 </Steps>
 
@@ -156,6 +156,6 @@ spkView.load(withURL: "hybrid://lynxview?bundle=card.lynx.bundle", context)
 - Build platform artifacts (`./gradlew assembleDebug`, `xcodebuild`) and open a `hybrid://` URL to
   confirm rendering and pipe calls.
 - **Blank screen / failed to load**: verify the `bundle=` name exists in app assets and your scheme
-  matches the host type (`lynxview_page`, `lynxview_card`, etc.). See [Scheme](../../apis/scheme.md) for details.
+  matches the host type (`lynxview_page`, `lynxview_card`, etc.). See [Scheme](../../apis/scheme) for details.
 - **Router methods do nothing**: ensure you registered the native IDL methods and that the JS side
   calls match the same method names (e.g. `router.open`).

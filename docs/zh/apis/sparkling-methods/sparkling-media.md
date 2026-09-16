@@ -208,6 +208,6 @@ saveDataURL(
 - `media.saveDataURL`
 
 你的宿主应用必须注册这些方法的原生实现。参阅
-[Sparkling Method SDK](../sparkling-method-android.md) / [iOS](../sparkling-method-ios.md)。
+[Sparkling Method SDK](../sparkling-method-android) / [iOS](../sparkling-method-ios)。
 
-所有方法都使用统一的 [Sparkling Method 响应码](../response-codes.md)。
+所有方法都使用统一的 [Sparkling Method 响应码](../response-codes)。

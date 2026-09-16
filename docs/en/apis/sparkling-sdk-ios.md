@@ -1,8 +1,8 @@
 # Sparkling SDK - iOS API Reference
 
 Native iOS SDK for hosting Sparkling content.
-For usage guide and concepts, see [Containers](../guide/containers.md).
-For the `hybrid://...` URL format, see [Scheme](./scheme.md).
+For usage guide and concepts, see [Containers](../guide/containers).
+For the `hybrid://...` URL format, see [Scheme](./scheme).
 
 ## Dependency (CocoaPods)
 
@@ -27,7 +27,7 @@ must depend on `SparklingMacro` and import it before calling this function.
 
 ## SPKRouter
 
-Opens full-page Sparkling containers. See [Containers — Full-page](../guide/containers.md#full-page-containers) for usage guide.
+Opens full-page Sparkling containers. See [Containers — Full-page](../guide/containers#full-page-containers) for usage guide.
 
 | Method | Description |
 |--------|-------------|
@@ -38,7 +38,7 @@ Opens full-page Sparkling containers. See [Containers — Full-page](../guide/co
 
 ## SPKContainerView
 
-Embeds Sparkling content as a subview. See [Containers — Embedded](../guide/containers.md#embedded-containers) for usage guide.
+Embeds Sparkling content as a subview. See [Containers — Embedded](../guide/containers#embedded-containers) for usage guide.
 
 | Method / Property | Description |
 |-------------------|-------------|

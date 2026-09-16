@@ -13,7 +13,7 @@ Sparkling content always runs inside a **native container** — a platform view 
 
 ## Full-page containers
 
-Full-page containers are the default way to display Sparkling content. The native layer manages the navigation bar, status bar, screen orientation, and loading/error views — you configure them via [scheme parameters](./scheme.md).
+Full-page containers are the default way to display Sparkling content. The native layer manages the navigation bar, status bar, screen orientation, and loading/error views — you configure them via [scheme parameters](./scheme).
 
 ### iOS
 
@@ -49,7 +49,7 @@ Full-page containers are configured through URL query parameters. Some common on
 | `nav_bar_color` | Navigation bar background color |
 | `container_bg_color` | Container background color |
 
-See [Scheme](./scheme.md) for the full parameter list.
+See [Scheme](./scheme) for the full parameter list.
 
 ## Embedded containers
 
@@ -177,7 +177,7 @@ spkView?.updateGlobalPropsByIncrement(mapOf("theme" to "dark"))
 
 ## Next steps
 
-- [Scheme](./scheme.md) — full list of URL parameters for configuring containers
-- [Multi-page Navigation](./multi-page-navigation.md) — navigate between pages, pass data, close pages
-- [Sparkling SDK — iOS](../apis/sparkling-sdk-ios.md) — iOS API reference
-- [Sparkling SDK — Android](../apis/sparkling-sdk-android.md) — Android API reference
+- [Scheme](./scheme) — full list of URL parameters for configuring containers
+- [Multi-page Navigation](./multi-page-navigation) — navigate between pages, pass data, close pages
+- [Sparkling SDK — iOS](../apis/sparkling-sdk-ios) — iOS API reference
+- [Sparkling SDK — Android](../apis/sparkling-sdk-android) — Android API reference

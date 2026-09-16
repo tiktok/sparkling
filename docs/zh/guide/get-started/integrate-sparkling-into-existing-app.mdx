@@ -146,7 +146,7 @@ let context = SPKContext()
 spkView.load(withURL: "hybrid://lynxview?bundle=card.lynx.bundle", context)
 ```
 
-  嵌入式容器需要手动转发生命周期事件 — 完整指南请参阅[容器](../containers.md)。
+  嵌入式容器需要手动转发生命周期事件 — 完整指南请参阅[容器](../containers)。
 
 </Steps>
 
@@ -155,5 +155,5 @@ spkView.load(withURL: "hybrid://lynxview?bundle=card.lynx.bundle", context)
 - 运行平台构建（`./gradlew assembleDebug`、`xcodebuild`），打开 `hybrid://` URL 确认
   渲染和管道调用正常。
 - **白屏 / 加载失败**：确认 `bundle=` 名称存在于 App 资源中，且 Scheme 匹配正确的
-  host 类型（`lynxview_page`、`lynxview_card` 等）。详见 [Scheme](../../apis/scheme.md)。
+  host 类型（`lynxview_page`、`lynxview_card` 等）。详见 [Scheme](../../apis/scheme)。
 - **路由方法无响应**：确保已注册原生 IDL 方法，且 JS 端调用的方法名匹配（如 `router.open`）。
