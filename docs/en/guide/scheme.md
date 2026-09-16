@@ -26,7 +26,7 @@ protocol     host                        query parameters
 
 ## Container types (hosts)
 
-The host determines which native container is used to render the content. See [Containers](./containers.md) for details on each container mode.
+The host determines which native container is used to render the content. See [Containers](./containers) for details on each container mode.
 
 | Host | Description |
 | --- | --- |
@@ -57,7 +57,7 @@ For the full parameter reference, see the [Scheme API doc](/apis/scheme).
 
 ## Usage from JS
 
-You rarely need to construct scheme URLs by hand. The [`navigate()`](/apis/sparkling-methods/sparkling-navigation) function builds them for you. See [Multi-page Navigation](./multi-page-navigation.md) for common navigation patterns (passing data, closing pages, etc.).
+You rarely need to construct scheme URLs by hand. The [`navigate()`](/apis/sparkling-methods/sparkling-navigation) function builds them for you. See [Multi-page Navigation](./multi-page-navigation) for common navigation patterns (passing data, closing pages, etc.).
 
 ```ts
 import { navigate } from 'sparkling-navigation';

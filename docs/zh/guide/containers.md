@@ -13,7 +13,7 @@ Sparkling 内容始终运行在**原生容器**中 — 一个承载 Lynx 运行�
 
 ## 全页容器
 
-全页容器是展示 Sparkling 内容的默认方式。原生层管理导航栏、状态栏、屏幕方向和加载/错误视图 — 通过 [Scheme 参数](./scheme.md)配置。
+全页容器是展示 Sparkling 内容的默认方式。原生层管理导航栏、状态栏、屏幕方向和加载/错误视图 — 通过 [Scheme 参数](./scheme)配置。
 
 ### iOS
 
@@ -49,7 +49,7 @@ Sparkling.build(this, ctx).navigate()   // 启动 SparklingActivity
 | `nav_bar_color` | 导航栏背景色 |
 | `container_bg_color` | 容器背景色 |
 
-完整参数列表请参阅 [Scheme](./scheme.md)。
+完整参数列表请参阅 [Scheme](./scheme)。
 
 ## 嵌入式容器
 
@@ -177,7 +177,7 @@ spkView?.updateGlobalPropsByIncrement(mapOf("theme" to "dark"))
 
 ## 下一步
 
-- [Scheme](./scheme.md) — 配置容器的完整 URL 参数列表
-- [多页面导航](./multi-page-navigation.md) — 页面间跳转、传递数据、关闭页面
-- [Sparkling SDK — iOS](../apis/sparkling-sdk-ios.md) — iOS API 参考
-- [Sparkling SDK — Android](../apis/sparkling-sdk-android.md) — Android API 参考
+- [Scheme](./scheme) — 配置容器的完整 URL 参数列表
+- [多页面导航](./multi-page-navigation) — 页面间跳转、传递数据、关闭页面
+- [Sparkling SDK — iOS](../apis/sparkling-sdk-ios) — iOS API 参考
+- [Sparkling SDK — Android](../apis/sparkling-sdk-android) — Android API 参考

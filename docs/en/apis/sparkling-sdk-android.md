@@ -1,8 +1,8 @@
 # Sparkling SDK - Android API Reference
 
 Native Android SDK for hosting Sparkling content.
-For usage guide and concepts, see [Containers](../guide/containers.md).
-For the `hybrid://...` URL format, see [Scheme](./scheme.md).
+For usage guide and concepts, see [Containers](../guide/containers).
+For the `hybrid://...` URL format, see [Scheme](./scheme).
 
 ## Dependency
 
@@ -31,7 +31,7 @@ HybridKit.initLynxKit()
 
 ## Sparkling
 
-Entry point for creating containers. See [Containers](../guide/containers.md) for usage guide.
+Entry point for creating containers. See [Containers](../guide/containers) for usage guide.
 
 | Method | Description |
 |--------|-------------|
@@ -41,7 +41,7 @@ Entry point for creating containers. See [Containers](../guide/containers.md) fo
 
 ## SparklingView
 
-Embedded container — a `FrameLayout` hosting Lynx content. See [Containers — Embedded](../guide/containers.md#embedded-containers) for usage guide.
+Embedded container — a `FrameLayout` hosting Lynx content. See [Containers — Embedded](../guide/containers#embedded-containers) for usage guide.
 
 | Method / Property | Description |
 |-------------------|-------------|

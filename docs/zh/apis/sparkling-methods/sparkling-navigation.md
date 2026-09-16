@@ -77,7 +77,7 @@ navigate(
 
 说明：
 - `navigate(...).options.params` 支持多种参数（如 `title`、`hide_nav_bar`、`container_bg_color` 等）。
-  某个参数是否生效取决于原生端的支持情况。关于跨平台参数子集，请参阅 [Scheme](../scheme.md)。
+  某个参数是否生效取决于原生端的支持情况。关于跨平台参数子集，请参阅 [Scheme](../scheme)。
 
 ## 原生方法名
 
@@ -86,6 +86,6 @@ navigate(
 - `router.close`
 
 你的宿主应用必须注册这些方法的原生实现。参阅
-[Sparkling Method SDK](../sparkling-method-android.md) / [iOS](../sparkling-method-ios.md)。
+[Sparkling Method SDK](../sparkling-method-android) / [iOS](../sparkling-method-ios)。
 
-所有方法都使用统一的 [Sparkling Method 响应码](../response-codes.md)。
+所有方法都使用统一的 [Sparkling Method 响应码](../response-codes)。

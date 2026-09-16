@@ -1,8 +1,8 @@
 # Sparkling SDK - iOS API 参考
 
 用于承载 Sparkling 内容的 iOS 原生 SDK。
-使用指南和概念说明请参阅[容器](../guide/containers.md)。
-关于 `hybrid://...` URL 格式，请参阅 [Scheme](./scheme.md)。
+使用指南和概念说明请参阅[容器](../guide/containers)。
+关于 `hybrid://...` URL 格式，请参阅 [Scheme](./scheme)。
 
 ## 依赖（CocoaPods）
 
@@ -27,7 +27,7 @@ SPKExecuteAllPrepareBootTask()
 
 ## SPKRouter
 
-打开全页 Sparkling 容器。使用指南请参阅[容器 — 全页容器](../guide/containers.md#全页容器)。
+打开全页 Sparkling 容器。使用指南请参阅[容器 — 全页容器](../guide/containers#全页容器)。
 
 | 方法 | 说明 |
 |------|------|
@@ -38,7 +38,7 @@ SPKExecuteAllPrepareBootTask()
 
 ## SPKContainerView
 
-以子视图形式嵌入 Sparkling 内容。使用指南请参阅[容器 — 嵌入式容器](../guide/containers.md#嵌入式容器)。
+以子视图形式嵌入 Sparkling 内容。使用指南请参阅[容器 — 嵌入式容器](../guide/containers#嵌入式容器)。
 
 | 方法 / 属性 | 说明 |
 |-------------|------|
