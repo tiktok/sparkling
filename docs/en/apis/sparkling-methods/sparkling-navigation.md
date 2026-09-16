@@ -83,5 +83,5 @@ navigate(
 - `extra?: object`
 
 See also:
-- [sparkling-method](../sparkling-method-ts.md) – underlying pipe SDK
-- [Response codes](../response-codes.md) – shared success and error code convention
+- [sparkling-method](../sparkling-method-ts) – underlying pipe SDK
+- [Response codes](../response-codes) – shared success and error code convention
