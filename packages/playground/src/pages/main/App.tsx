@@ -51,7 +51,7 @@ const CATEGORIES: Category[] = [
     icon: '\u{1F4BE}',
     color: '#ff9500',
     items: [
-      { title: 'setItem / getItem', description: 'Persistent key-value storage with TTL', bundle: 'storage-demo.lynx.bundle', icon: '\u{1F5C4}' },
+      { title: 'setItem / getItem / removeItem', description: 'Persistent key-value storage', bundle: 'storage-demo.lynx.bundle', icon: '\u{1F5C4}' },
     ],
   },
   {

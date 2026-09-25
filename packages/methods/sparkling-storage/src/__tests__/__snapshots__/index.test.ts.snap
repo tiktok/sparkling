@@ -2,14 +2,16 @@
 
 exports[`sparkling-storage module exports snapshot testing for module structure should maintain consistent module export structure: storage-module-export-structure 1`] = `
 {
-  "exportCount": 2,
+  "exportCount": 3,
   "exportedKeys": [
     "setItem",
     "getItem",
+    "removeItem",
   ],
   "functionNames": [
     "setItem",
     "getItem",
+    "removeItem",
   ],
 }
 `;

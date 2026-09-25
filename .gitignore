@@ -18,6 +18,10 @@ docs/**/*.html
 .vscode/*
 !.vscode/extensions.json
 .idea
+**/xcuserdata/
+
+# Local lint cache
+.zhongkui/
 
 # Template: the template's .gitignore is stored without a leading dot so that
 # npm can publish it correctly. Git won't recognise it, so we duplicate the

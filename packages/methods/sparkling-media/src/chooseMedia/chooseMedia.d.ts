@@ -54,8 +54,8 @@ export interface TempFile {
   tempFileAbsolutePath?: string;
   /** File size in bytes */
   size: number;
-  /** Media type: 'image' or 'video' */
-  mediaType: MediaType;
+  /** Media type: iOS returns 1 (image) or 2 (video); other platforms use strings. */
+  mediaType: MediaType | 1 | 2;
   /** MIME type of the file */
   mimeType?: string;
   /** Base64 encoded data (if needBase64Data is true) */

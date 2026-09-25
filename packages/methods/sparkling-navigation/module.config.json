@@ -37,7 +37,7 @@
     "moduleName": "Router",
     "className": "RouterMethod",
     "podspecPath": "ios/Sparkling-Router.podspec",
-    "swiftVersion": "5.0"
+    "swiftVersion": "5.10"
   },
   "web": {
     "entryPoint": "index.ts",

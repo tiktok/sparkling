@@ -22,7 +22,7 @@ describe('sparkling-storage module exports', () => {
     });
 
     it('should export all required functions', async () => {
-      const expectedFunctions = ['setItem', 'getItem'];
+      const expectedFunctions = ['setItem', 'getItem', 'removeItem'];
       const moduleAny: Record<string, unknown> = storageModule as unknown as Record<string, unknown>;
       expectedFunctions.forEach(functionName => {
         expect(moduleAny[functionName]).toBeDefined();
@@ -50,7 +50,7 @@ describe('sparkling-storage module exports', () => {
     it('should not export unintended properties', async () => {
       const exportedKeys = Object.keys(storageModule as unknown as Record<string, unknown>);
 
-      const expectedExports = ['setItem', 'getItem'];
+      const expectedExports = ['setItem', 'getItem', 'removeItem'];
 
       const unexpectedExports = exportedKeys.filter(key => expectedExports.indexOf(key) === -1);
       expect(unexpectedExports).toHaveLength(0);
@@ -59,7 +59,7 @@ describe('sparkling-storage module exports', () => {
     it('should export exactly the expected number of functions', async () => {
       const moduleAny: Record<string, unknown> = storageModule as unknown as Record<string, unknown>;
       const exportedFunctions = Object.keys(moduleAny).filter(key => typeof moduleAny[key] === 'function');
-      expect(exportedFunctions).toHaveLength(2); // setItem and getItem
+      expect(exportedFunctions).toHaveLength(3); // setItem, getItem, and removeItem
     });
   });
 

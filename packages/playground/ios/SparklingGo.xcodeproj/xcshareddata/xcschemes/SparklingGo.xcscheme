@@ -52,17 +52,6 @@
                ReferencedContainer = "container:SparklingGo.xcodeproj">
             </BuildableReference>
          </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "44A4C3022E271D570011A613"
-               BuildableName = "SparklingMethodTests.xctest"
-               BlueprintName = "SparklingMethodTests"
-               ReferencedContainer = "container:SparklingGo.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

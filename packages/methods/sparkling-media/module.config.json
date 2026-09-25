@@ -1,10 +1,13 @@
 {
   "name": "sparkling-media",
+  "platforms": ["android", "ios", "web"],
   "packageName": "com.tiktok.sparkling.method",
   "moduleName": "Media",
   "androidDsl": "kts",
   "projectName": "sparkling-media",
   "ios": {
-    "podspecPath": "ios/Sparkling-Media.podspec"
+    "moduleName": "Media",
+    "podspecPath": "ios/Sparkling-Media.podspec",
+    "swiftVersion": "5.10"
   }
 }

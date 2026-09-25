@@ -1,68 +1,41 @@
-require 'json'
-
 Pod::Spec.new do |s|
-  s.name           = 'SparklingMethod'
-  s.version        = "2.1.0-rc.12"
-  s.summary        = "iOS SDK for Sparkling Method"
-  s.description    = "Core iOS method runtime for Sparkling, with Lynx integration, dependency injection support, and debug helpers."
-  s.license        = "Apache 2.0"
-  s.author         = "zhangyujie"
-  s.homepage       = 'https://github.com/tiktok/sparkling.git'
-  s.readme         = 'packages/sparkling-method/README.md'
-  s.platforms      = {
-    :ios => '12.0'
-  }
-  s.swift_version  = '5.10'
-  s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s }
-  s.static_framework = true
+  s.name             = 'SparklingMethod'
+  s.version          = '2.1.0-rc.12'
+  s.summary          = 'Native method runtime for Sparkling'
+  s.description      = 'Method registration, invocation, models, and events for Sparkling.'
+  s.homepage         = 'https://github.com/tiktok/sparkling'
+  s.license          = { :type => 'Apache-2.0', :file => 'LICENSE' }
+  s.authors          = 'The Sparkling Authors'
+  s.source           = { :git => 'https://github.com/tiktok/sparkling.git', :tag => s.version.to_s }
+  s.ios.deployment_target = '14.0'
+  s.frameworks       = 'Foundation'
+  s.swift_version    = '5.10'
+  s.preserve_paths   = 'Release/SparklingMethodMacroPlugin'
 
-  s.pod_target_xcconfig = {
-    'DEFINES_MODULE' => 'YES',
-    'SWIFT_COMPILATION_MODE' => 'wholemodule'
-  }
-    
   s.subspec 'Core' do |core|
-    core.source_files = [
-      'Sources/Core/Definitions/*.{h,m,swift}',
-      'Sources/Core/Pipe/*.{h,m,swift}',
-      'Sources/Core/Models/*.{h,m,swift}',
-      'Sources/Core/Protocols/*.{h,m,swift}',
-      'Sources/Core/Utils/*.{h,m,swift}',
-      'Sources/Core/DI/**/*.{h,m,swift}',
-    ]
-    core.dependency 'Mantle', '~> 2.2.0'
+    core.frameworks = 'WebKit'
+    core.dependency 'Mantle', '2.2.0'
+    core.source_files = 'Sources/SparklingMethod/**/*.{h,m}'
+    core.exclude_files = 'Sources/SparklingMethod/Implementation/Transport/Lynx/**/*'
+    core.public_header_files = 'Sources/SparklingMethod/include/SparklingMethod/*.h'
+    core.private_header_files = 'Sources/SparklingMethod/Implementation/Runtime/Internal/*.h'
   end
-  
+
   s.subspec 'Lynx' do |lynx|
-    lynx.source_files = [
-      'Sources/Lynx/Pipe/*.{h,m,swift}',
-      'Sources/Lynx/Engine/*.{h,m,swift}',
-      'Sources/Lynx/Definitions/*.{h,m,swift}',
-      'Sources/Lynx/Module/*.{h,m,swift}',
-      'Sources/Lynx/Models/*.{h,m,swift}',
-    ]
-    
     lynx.dependency 'SparklingMethod/Core'
-    lynx.dependency 'Lynx/Framework'
-    lynx.dependency 'LynxBase/Framework'
-    lynx.dependency 'LynxServiceAPI'
-    lynx.dependency 'PrimJS/quickjs', '>=2.12.0'
-    lynx.dependency 'PrimJS/napi', '>=2.12.0'
-  end
-  
-  s.subspec 'DIProvider' do |di|
-    di.source_files = [
-      'Sources/DIProvider/**/*.{h,m,swift}',
+    lynx.dependency 'Lynx/Framework', '>= 1.3'
+    lynx.source_files = [
+      'Sources/SparklingMethod/Implementation/Transport/Lynx/**/*.{h,m}',
+      'Sources/SparklingMethodLynxHeaders/*.h'
     ]
-    
-    di.dependency 'SparklingMethod/Core'
+    lynx.public_header_files = 'Sources/SparklingMethodLynxHeaders/*.h'
+    lynx.private_header_files = 'Sources/SparklingMethod/Implementation/Transport/Lynx/Internal/*.h'
   end
-  
-  s.subspec 'Debug' do |de|
-    de.source_files = [
-      'Sources/Debug/**/*.{h,m,swift}',
-    ]
-    
-    de.dependency 'SparklingMethod/Core'
+
+  s.subspec 'Macros' do |macros|
+    macros.dependency 'SparklingMethod/Core'
+    macros.source_files = 'Sources/SparklingMethodMacros/SPKGlobalMethod.swift'
   end
+
+  s.default_subspecs = 'Core'
 end

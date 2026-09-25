@@ -11,19 +11,11 @@
 		90C786CC2F3D5FB6008FED78 /* LynxResources in Resources */ = {isa = PBXBuildFile; fileRef = 90C786CB2F3D5FB6008FED78 /* LynxResources */; };
 		BD26C18BAC3F8A1D14F3D51E /* Pods_SparklingGoInHouse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8C421A83FD99B16BD0A3E3E /* Pods_SparklingGoInHouse.framework */; };
 		CEAB8C5202B26CF8F0BE5581 /* Pods_SparklingGo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B00F0DF4C89E15C31BC93A3 /* Pods_SparklingGo.framework */; };
-		DE44680A8011EA315778F328 /* Pods_SparklingMethodTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 80857B85C0422883390B2606 /* Pods_SparklingMethodTests.framework */; };
 		DF4098C8CC6BF6DB06FE60D9 /* LynxResources in Resources */ = {isa = PBXBuildFile; fileRef = 90C786CB2F3D5FB6008FED78 /* LynxResources */; };
 		E1EA18997313C777BCB28C73 /* Pods_SparklingGoTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34294AA1E3153C7FF24DA29D /* Pods_SparklingGoTests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		44A4C3072E271D570011A613 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 44B59A7F2DE9041F00A05B89 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 44B59A862DE9041F00A05B89;
-			remoteInfo = SparklingGo;
-		};
 		44B59A992DE9042100A05B89 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 44B59A7F2DE9041F00A05B89 /* Project object */;
@@ -43,13 +35,10 @@
 /* Begin PBXFileReference section */
 		105D1EA8BB03A87166570D75 /* Pods-SparklingGoTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGoTests.debug.xcconfig"; path = "Target Support Files/Pods-SparklingGoTests/Pods-SparklingGoTests.debug.xcconfig"; sourceTree = "<group>"; };
 		34294AA1E3153C7FF24DA29D /* Pods_SparklingGoTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SparklingGoTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		44A4C3032E271D570011A613 /* SparklingMethodTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SparklingMethodTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44B59A872DE9041F00A05B89 /* SparklingGo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SparklingGo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44B59A982DE9042100A05B89 /* SparklingGoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SparklingGoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44B59AA22DE9042100A05B89 /* SparklingGoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SparklingGoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B00F0DF4C89E15C31BC93A3 /* Pods_SparklingGo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SparklingGo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		80857B85C0422883390B2606 /* Pods_SparklingMethodTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SparklingMethodTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8C76000D4A2F6C5E1542B66F /* Pods-SparklingMethodTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingMethodTests.debug.xcconfig"; path = "Target Support Files/Pods-SparklingMethodTests/Pods-SparklingMethodTests.debug.xcconfig"; sourceTree = "<group>"; };
 		8CA3C88BC922913EC94B79D5 /* Pods-SparklingGo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGo.release.xcconfig"; path = "Target Support Files/Pods-SparklingGo/Pods-SparklingGo.release.xcconfig"; sourceTree = "<group>"; };
 		90C786CB2F3D5FB6008FED78 /* LynxResources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = LynxResources; sourceTree = "<group>"; };
 		9AD74935FFBD17E3B3D4E69A /* Pods_SparklingGoUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SparklingGoUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -58,20 +47,12 @@
 		B5E42D779278857A5AAB06BF /* Pods-SparklingGoUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGoUITests.debug.xcconfig"; path = "Target Support Files/Pods-SparklingGoUITests/Pods-SparklingGoUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		BDC8D2EB13B568D4F1740748 /* SparklingGoInHouse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SparklingGoInHouse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEB0A8939FDC0E69DE1ACBE1 /* Pods-SparklingGoUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGoUITests.release.xcconfig"; path = "Target Support Files/Pods-SparklingGoUITests/Pods-SparklingGoUITests.release.xcconfig"; sourceTree = "<group>"; };
-		C50586CC4ECBC63F4329F466 /* Pods-SparklingMethodTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingMethodTests.release.xcconfig"; path = "Target Support Files/Pods-SparklingMethodTests/Pods-SparklingMethodTests.release.xcconfig"; sourceTree = "<group>"; };
 		E28DB50001F3EFBF06162E18 /* Pods-SparklingGo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGo.debug.xcconfig"; path = "Target Support Files/Pods-SparklingGo/Pods-SparklingGo.debug.xcconfig"; sourceTree = "<group>"; };
 		F37D60B7A70AAC4EB75DD22C /* Pods-SparklingGoInHouse.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGoInHouse.debug.xcconfig"; path = "Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse.debug.xcconfig"; sourceTree = "<group>"; };
 		FC9A690424F49FA47736FA61 /* Pods-SparklingGoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SparklingGoTests.release.xcconfig"; path = "Target Support Files/Pods-SparklingGoTests/Pods-SparklingGoTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		44A4C3042E271D570011A613 /* SparklingMethodTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			path = SparklingMethodTests;
-			sourceTree = "<group>";
-		};
 		44B59A892DE9041F00A05B89 /* SparklingGo */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -96,14 +77,6 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		44A4C3002E271D570011A613 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				DE44680A8011EA315778F328 /* Pods_SparklingMethodTests.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		44B59A842DE9041F00A05B89 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -145,7 +118,6 @@
 				4B00F0DF4C89E15C31BC93A3 /* Pods_SparklingGo.framework */,
 				34294AA1E3153C7FF24DA29D /* Pods_SparklingGoTests.framework */,
 				9AD74935FFBD17E3B3D4E69A /* Pods_SparklingGoUITests.framework */,
-				80857B85C0422883390B2606 /* Pods_SparklingMethodTests.framework */,
 				A8C421A83FD99B16BD0A3E3E /* Pods_SparklingGoInHouse.framework */,
 			);
 			name = Frameworks;
@@ -158,7 +130,6 @@
 				44B59A892DE9041F00A05B89 /* SparklingGo */,
 				44B59A9B2DE9042100A05B89 /* SparklingGoTests */,
 				44B59AA52DE9042100A05B89 /* SparklingGoUITests */,
-				44A4C3042E271D570011A613 /* SparklingMethodTests */,
 				44B59A882DE9041F00A05B89 /* Products */,
 				ADC955934F105445573B90AE /* Pods */,
 				2C26194B87B073C85741772F /* Frameworks */,
@@ -172,7 +143,6 @@
 				44B59A872DE9041F00A05B89 /* SparklingGo.app */,
 				44B59A982DE9042100A05B89 /* SparklingGoTests.xctest */,
 				44B59AA22DE9042100A05B89 /* SparklingGoUITests.xctest */,
-				44A4C3032E271D570011A613 /* SparklingMethodTests.xctest */,
 				BDC8D2EB13B568D4F1740748 /* SparklingGoInHouse.app */,
 			);
 			name = Products;
@@ -187,8 +157,6 @@
 				FC9A690424F49FA47736FA61 /* Pods-SparklingGoTests.release.xcconfig */,
 				B5E42D779278857A5AAB06BF /* Pods-SparklingGoUITests.debug.xcconfig */,
 				BEB0A8939FDC0E69DE1ACBE1 /* Pods-SparklingGoUITests.release.xcconfig */,
-				8C76000D4A2F6C5E1542B66F /* Pods-SparklingMethodTests.debug.xcconfig */,
-				C50586CC4ECBC63F4329F466 /* Pods-SparklingMethodTests.release.xcconfig */,
 				F37D60B7A70AAC4EB75DD22C /* Pods-SparklingGoInHouse.debug.xcconfig */,
 				9DAB5FA9ECA8B400DB3F300A /* Pods-SparklingGoInHouse.release.xcconfig */,
 			);
@@ -207,7 +175,6 @@
 				C033E9C113E1E698019BF3F4 /* Frameworks */,
 				F9F42152B9FB6FA0002CB348 /* Resources */,
 				8811720C0D66DA4CF5F429BA /* [CP] Copy Pods Resources */,
-				529DC74D1E5F28E30D7B651E /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -221,29 +188,6 @@
 			productReference = BDC8D2EB13B568D4F1740748 /* SparklingGoInHouse.app */;
 			productType = "com.apple.product-type.application";
 		};
-		44A4C3022E271D570011A613 /* SparklingMethodTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 44A4C30B2E271D570011A613 /* Build configuration list for PBXNativeTarget "SparklingMethodTests" */;
-			buildPhases = (
-				15E2251E3528E6A032E43097 /* [CP] Check Pods Manifest.lock */,
-				44A4C2FF2E271D570011A613 /* Sources */,
-				44A4C3002E271D570011A613 /* Frameworks */,
-				44A4C3012E271D570011A613 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				44A4C3082E271D570011A613 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				44A4C3042E271D570011A613 /* SparklingMethodTests */,
-				44B59A892DE9041F00A05B89 /* SparklingGo */,
-			);
-			name = SparklingMethodTests;
-			productName = SparklingMethodTests;
-			productReference = 44A4C3032E271D570011A613 /* SparklingMethodTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		44B59A862DE9041F00A05B89 /* SparklingGo */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 44B59AAC2DE9042100A05B89 /* Build configuration list for PBXNativeTarget "SparklingGo" */;
@@ -253,7 +197,6 @@
 				44B59A842DE9041F00A05B89 /* Frameworks */,
 				44B59A852DE9041F00A05B89 /* Resources */,
 				05432948B3D7FB29B5325F53 /* [CP] Copy Pods Resources */,
-				EC14B9C7D5E99D7D2F4ADDCD /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -324,10 +267,6 @@
 					0F3D1595293D70FE62E1D699 = {
 						CreatedOnToolsVersion = 16.1;
 					};
-					44A4C3022E271D570011A613 = {
-						CreatedOnToolsVersion = 16.1;
-						LastSwiftMigration = 1610;
-					};
 					44B59A862DE9041F00A05B89 = {
 						CreatedOnToolsVersion = 16.1;
 					};
@@ -357,20 +296,12 @@
 				44B59A862DE9041F00A05B89 /* SparklingGo */,
 				44B59A972DE9042100A05B89 /* SparklingGoTests */,
 				44B59AA12DE9042100A05B89 /* SparklingGoUITests */,
-				44A4C3022E271D570011A613 /* SparklingMethodTests */,
 				0F3D1595293D70FE62E1D699 /* SparklingGoInHouse */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		44A4C3012E271D570011A613 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		44B59A852DE9041F00A05B89 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -412,56 +343,17 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SparklingGo/Pods-SparklingGo-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SparklingGo/Pods-SparklingGo-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
+			outputPaths = (
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SparklingGo/Pods-SparklingGo-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		15E2251E3528E6A032E43097 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-SparklingMethodTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		529DC74D1E5F28E30D7B651E /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		5F3A6C570D27881AD0B9D61E /* [CP] Check Pods Manifest.lock */ = {
@@ -494,9 +386,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SparklingGoInHouse/Pods-SparklingGoInHouse-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -569,38 +465,10 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		EC14B9C7D5E99D7D2F4ADDCD /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SparklingGo/Pods-SparklingGo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SparklingGo/Pods-SparklingGo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SparklingGo/Pods-SparklingGo-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		30FBC3F8EE5A026AC9B722C8 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		44A4C2FF2E271D570011A613 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -631,11 +499,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		44A4C3082E271D570011A613 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 44B59A862DE9041F00A05B89 /* SparklingGo */;
-			targetProxy = 44A4C3072E271D570011A613 /* PBXContainerItemProxy */;
-		};
 		44B59A9A2DE9042100A05B89 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 44B59A862DE9041F00A05B89 /* SparklingGo */;
@@ -649,52 +512,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		44A4C3092E271D570011A613 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8C76000D4A2F6C5E1542B66F /* Pods-SparklingMethodTests.debug.xcconfig */;
-			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sparkling.app.SparklingMethodTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SparklingGo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SparklingGo";
-			};
-			name = Debug;
-		};
-		44A4C30A2E271D570011A613 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = C50586CC4ECBC63F4329F466 /* Pods-SparklingMethodTests.release.xcconfig */;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sparkling.app.SparklingMethodTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 		44B59AAA2DE9042100A05B89 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1086,15 +903,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		44A4C30B2E271D570011A613 /* Build configuration list for PBXNativeTarget "SparklingMethodTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				44A4C3092E271D570011A613 /* Debug */,
-				44A4C30A2E271D570011A613 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		44B59A822DE9041F00A05B89 /* Build configuration list for PBXProject "SparklingGo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -20,7 +20,7 @@ export function ResultCard(props: ResultCardProps) {
     ? (typeof props.data === 'string' ? props.data : JSON.stringify(props.data, null, 2))
     : null
 
-  const isSuccess = props.code === 0 || props.code === '0'
+  const isSuccess = props.code === 1 || props.code === '1'
 
   return (
     <view className={`result-card ${isDark ? 'result-card--dark' : 'result-card--light'}`}>

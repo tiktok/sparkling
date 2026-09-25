@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
   s.homepage       = 'https://github.com/tiktok/sparkling.git'
   s.readme         = 'packages/sparkling-sdk/README.md'
   s.platforms      = {
-    :ios => '12.0'
+    :ios => '14.0'
   }
   s.swift_version  = '5.10'
   s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s }

@@ -9,7 +9,7 @@ import SparklingMethod
 /// Lynx-based view implementation for rendering hybrid content.
 ///
 /// This class extends LynxView to provide SPK framework integration,
-/// handling template loading, resource management, method pipe communication,
+/// handling template loading, resource management, method runtime communication,
 /// and lifecycle events. It serves as the primary view component for
 /// Lynx-rendered content within the SPK ecosystem.
 @objcMembers
@@ -65,11 +65,12 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
     /// providers, and other configuration needed for view setup.
     public var params: (any SPKHybridParams)?
 
-    /// Method pipe instance for JavaScript-native communication.
-    ///
-    /// This property holds the method pipe that enables bidirectional
-    /// communication between JavaScript and native code.
+    /// Runtime instance for JavaScript-native communication.
     public var anyMethodPipe: Any?
+
+    private var methodCallRouter: SPKMethodCallRouter?
+    private var methodMessageHandler: SPKMethodHostHandler?
+    private var methodLynxTransport: SPKMethodLynxTransport?
 
     /// Delegate for receiving view lifecycle events.
     ///
@@ -141,7 +142,7 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
     /// This initializer sets up the complete Lynx rendering environment including:
     /// - Configuration of the Lynx engine with resource providers
     /// - Registration of required modules (NavigationModule, custom modules)
-    /// - Setup of method pipes for communication
+    /// - Setup of the method runtime and Lynx transport
     /// - Configuration of resource fetchers and providers
     /// - Thread strategy setup for rendering
     ///
@@ -151,17 +152,12 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
     public required init(withFrame frame: CGRect, params: SPKLynxKitParams?) {
         var lynxConfig: LynxConfig? = nil
         let containerID = UUID().uuidString
-        let namescope = params?.context?.pipeNameSpace ?? "host"
         super.init { builder in
             lynxConfig = LynxConfig(provider: params?.context?.templateProvider ?? Self.globalResourceProvider)
             builder.config = lynxConfig
             builder.config?.register(NavigationModule.self)
 
-            if let lynxConfig = lynxConfig {
-                lynxConfig.spk_containerID = containerID
-                lynxConfig.spk_namescope = namescope
-                MethodPipe.setupLynxPipe(config: lynxConfig)
-            }
+            builder.config?.register(SPKMethodLynxModule.self, param: ["containerID": containerID])
 
             params?.context?.lynxModule?.forEach({ (name: String, params: Any) in
                 guard let module = NSClassFromString(name) as? LynxModule.Type else {
@@ -196,7 +192,7 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
         self.setupGlobalProps()
         self.globalProps?.update(self.containerID, forKey: "containerID")
 
-        self.setupPipe()
+        self.setupMethodRuntime()
 
         self.internalResourceProvider.lynxView = self
         self.addLifecycleClient(self)
@@ -210,16 +206,25 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
         NotificationCenter.default.post(name: SPKWrapperLynxView.willDestroyNotification, object: self)
     }
 
-    /// Sets up the method pipe for communication between native and Lynx environments.
-    ///
-    /// This method creates a MethodPipe instance and registers any pipe methods
-    /// from the context. The method pipe enables bidirectional communication
-    /// between the native iOS code and the Lynx JavaScript runtime environment.
-    private func setupPipe() {
-        self.anyMethodPipe = MethodPipe(withLynxView: self)
-        if let pipeMethods = self.params?.context?.pipeMethodInstances?.compactMap { $0 as? (PipeMethod) }, !pipeMethods.isEmpty {
-            self.methodPipe?.register(localMethods: pipeMethods)
+    /// Connects the Lynx transport to a per-view method runtime.
+    /// Global declarations and local method instances are registered before loading.
+    private func setupMethodRuntime() {
+        let runtime = SPKMethodRuntime()
+        runtime.registerDeclaredGlobalMethodsLazily(true)
+        self.params?.context?.pipeMethodInstances?.forEach { instance in
+            if let method = instance as? SPKMethod {
+                runtime.registerLocalMethod(method)
+            }
         }
+        let router = SPKMethodCallRouter(runtime: runtime)
+        router.hooksProvider = { [weak self] _ in self?.methodInvocationHooks() }
+        let transport = SPKMethodLynxTransport(lynxView: self, containerID: self.containerID)
+        let handler = SPKMethodHostHandler(router: router)
+        transport.messageHandler = handler
+        self.methodMessageHandler = handler
+        self.anyMethodPipe = runtime
+        self.methodCallRouter = router
+        self.methodLynxTransport = transport
     }
 
     /// Sets up global properties for the Lynx view.
@@ -295,7 +300,7 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
         self.lynxConfig?.registerUI(ui, withName: name)
     }
 
-    //MARK: - Method Pipe Service
+    // MARK: - Method Runtime
 
     /// Sends an event to the Lynx JavaScript runtime.
     ///
@@ -305,7 +310,13 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
     ///   - callback: Optional callback to handle the response
     ///
     public func send(event: String, params: [String: Any]? = nil, callback: ((Any?) -> Void)? = nil) {
-        self.methodPipe?.fireEvent(name: event, params: params)
+        var message: [String: Any] = [
+            "code": 1,
+            "containerID": self.containerID,
+            "protocolVersion": "1.1.0"
+        ]
+        message["data"] = params
+        self.sendGlobalEvent(event, withParams: [message])
     }
 
     /// Configures the view with new parameters.
@@ -542,6 +553,24 @@ extension SPKWrapperLynxView: LynxViewLifecycle {
     public func lynxView(_ view: LynxView!, didReceiveUpdatePerf perf: LynxPerformance!) {
         DispatchQueue.spk.asyncMain { [weak self] in
             self?.lifeCycleDelegate?.view?(self, didReceivePerformance: perf.toDictionary())
+        }
+    }
+}
+
+/// Preserves the original MethodPipe+Lynx thread policy while forwarding to the shared router.
+final class SPKMethodHostHandler: NSObject, SPKMethodCallMessageHandler {
+    private let router: SPKMethodCallRouter
+
+    init(router: SPKMethodCallRouter) {
+        self.router = router
+    }
+
+    func handle(_ message: SPKMethodCallMessage, resultHandler: @escaping SPKMethodResponseBlock) {
+        let invoke = { self.router.handle(message, resultHandler: resultHandler) }
+        if message.params?["threadType"] as? String == "CURRENT_THREAD" || Thread.isMainThread {
+            invoke()
+        } else {
+            DispatchQueue.main.async(execute: invoke)
         }
     }
 }

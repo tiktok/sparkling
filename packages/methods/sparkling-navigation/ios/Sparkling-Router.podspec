@@ -1,39 +1,24 @@
 Pod::Spec.new do |s|
   s.name           = 'Sparkling-Router'
-  s.version        = "2.1.0-rc.12"
-  s.summary        = "iOS navigation router SDK for Sparkling"
-  s.description    = "iOS navigation router SDK for Sparkling"
-  s.license        = "Apache-2.0"
-  s.author         = "TikTok"
+  s.version        = '2.1.0-rc.12'
+  s.summary        = 'iOS navigation methods for Sparkling'
+  s.description    = 'Navigation methods implemented on SparklingMethod and Sparkling.'
+  s.license        = 'Apache-2.0'
+  s.author         = 'TikTok'
   s.homepage       = 'https://github.com/tiktok/sparkling'
-  s.platforms      = {
-    :ios => '12.0'
-  }
-  s.swift_version  = '5.7'
-  s.source         = { git: 'https://github.com/tiktok/sparkling.git', tag: s.version.to_s, path: 'packages/methods/sparkling-navigation/ios' }
+  s.platforms      = { :ios => '14.0' }
+  s.swift_version  = '5.10'
+  s.source         = { :git => 'https://github.com/tiktok/sparkling.git', :tag => s.version.to_s }
   s.static_framework = true
+  s.source_files   = 'Sources/Core/Methods/**/*.swift'
+  s.dependency 'SparklingMethod/Macros', s.version.to_s
+  s.dependency 'Sparkling', s.version.to_s
 
+  # CocoaPods compiles the Swift declaration in SparklingMethod/Macros; the
+  # consumer target also needs the host compiler plugin executable.
+  macro_binary = '$(SPK_METHOD_MACRO_PLUGIN)'
   s.pod_target_xcconfig = {
-    'DEFINES_MODULE' => 'YES',
-    'SWIFT_COMPILATION_MODE' => 'wholemodule'
+    'SPK_METHOD_MACRO_PLUGIN' => '${PODS_ROOT}/SparklingMethod/Release/SparklingMethodMacroPlugin',
+    'OTHER_SWIFT_FLAGS' => "-enable-experimental-feature SymbolLinkageMarkers -D_SYMBOL_LINKAGE_MARKERS_ENABLED -Xfrontend -load-plugin-executable -Xfrontend #{macro_binary}#SparklingMethodMacroPlugin"
   }
-
-  s.subspec 'Core' do |core|
-    core.source_files = [
-      'Sources/Core/Methods/**/*.{h,m,swift}',
-      'Sources/Core/Protocols/*.{h,m,swift}',
-      'Sources/Core/Utils/*.{h,m,swift}',
-    ]
-  end
-
-  s.test_spec 'Tests' do |tests|
-    tests.requires_app_host = false
-    tests.source_files = [
-      'SparklingMethodTests/**/*.{h,m,swift}',
-    ]
-  end
-
-  s.dependency 'SparklingMethod/Core'
-  s.dependency 'SparklingMethod/DIProvider'
-  s.dependency 'Mantle', '~> 2.2.0'
 end

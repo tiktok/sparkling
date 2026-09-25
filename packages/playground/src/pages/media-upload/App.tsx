@@ -59,7 +59,7 @@ function MediaUploadContent() {
     chooseMedia(
       { mediaTypes: ['image', 'video'], sourceType: 'album', maxCount: 1 } as any,
       (res: { code: number; msg?: string; data?: { tempFiles?: { tempFilePath?: string; size?: number }[] } }) => {
-        if (res.code === 0 && res.data?.tempFiles?.[0]?.tempFilePath) {
+        if (res.code === 1 && res.data?.tempFiles?.[0]?.tempFilePath) {
           const f = res.data.tempFiles[0]
           setFileFilePath(f.tempFilePath!)
           setFileChooseStatus('Selected: ' + f.tempFilePath!)
@@ -77,7 +77,7 @@ function MediaUploadContent() {
     chooseMedia(
       { mediaTypes: ['image'], sourceType: 'album', maxCount: 1 } as any,
       (res: { code: number; msg?: string; data?: { tempFiles?: { tempFilePath?: string }[] } }) => {
-        if (res.code === 0 && res.data?.tempFiles?.[0]?.tempFilePath) {
+        if (res.code === 1 && res.data?.tempFiles?.[0]?.tempFilePath) {
           setImageFilePath(res.data.tempFiles[0].tempFilePath!)
           setImageChooseStatus('Selected: ' + res.data.tempFiles[0].tempFilePath!)
         } else {

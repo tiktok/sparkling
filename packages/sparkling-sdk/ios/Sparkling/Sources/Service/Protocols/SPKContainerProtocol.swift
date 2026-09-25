@@ -68,17 +68,17 @@ public protocol SPKContainerProtocol: SPKBaseProtocol {
     @objc optional func handleViewDidDisappear(withType type: SPKDisappearType)
 }
 
-/// Extension providing convenient method pipe registration.
+/// Extension providing local method registration.
 extension SPKContainerProtocol {
-    /// Registers pipe methods with the container's kit view.
+    /// Registers methods with the container's kit view.
     ///
-    /// This method provides a convenient way to register multiple pipe methods
-    /// at once with the container's underlying kit view method pipe.
+    /// This method provides a convenient way to register multiple methods
+    /// at once with the container's method runtime.
     ///
-    /// - Parameter methods: Array of pipe methods to register, or nil
-    public func register(pipeMethods methods: [PipeMethod]?) {
-        if let methods = methods {
-            self.kitView?.methodPipe?.register(localMethods: methods)
+    /// - Parameter methods: Array of local methods to register, or nil
+    public func register(methods: [SPKMethod]?) {
+        methods?.forEach { method in
+            self.kitView?.methodRuntime?.registerLocalMethod(method)
         }
     }
 }

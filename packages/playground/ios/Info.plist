@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Choose a photo or video for the media demo.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Record a video for the media demo.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose media from your photo library.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save selected or downloaded media to your library.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

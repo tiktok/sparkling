@@ -707,8 +707,8 @@ function injectAndroidDependencies(appGradlePath: string, modules: MethodModuleC
   const depIndent = depIndentMatch ? depIndentMatch[1] : '';
   const innerIndent = `${depIndent}    `;
 
-  const regularModules = modules.filter(m => !m.devtool);
-  const devtoolModules = modules.filter(m => m.devtool);
+  const regularModules = modules.filter(m => !m.devtool && hasIosPodspec(m));
+  const devtoolModules = modules.filter(m => m.devtool && hasIosPodspec(m));
   const regularLocalModules = regularModules.filter(m => !m.android?.mavenDependency);
   const regularRemoteModules = regularModules.filter(m => m.android?.mavenDependency);
 
@@ -842,6 +842,11 @@ function replaceDefAutolinkRegion(content: string, defName: string, region: stri
   return content.replace(existing, updated);
 }
 
+function hasIosPodspec(module: MethodModuleConfig): boolean {
+  const podspecPath = module.ios?.podspecPath;
+  return Boolean(podspecPath && fs.existsSync(podspecPath) && fs.statSync(podspecPath).isFile());
+}
+
 function injectPodfile(podfilePath: string, modules: MethodModuleConfig[]) {
   if (!fs.existsSync(podfilePath)) {
     console.warn(ui.warn(`Podfile not found at ${podfilePath}, skipping iOS autolink`));
@@ -850,8 +855,8 @@ function injectPodfile(podfilePath: string, modules: MethodModuleConfig[]) {
 
   let content = fs.readFileSync(podfilePath, 'utf8');
 
-  const regularModules = modules.filter(m => !m.devtool);
-  const devtoolModules = modules.filter(m => m.devtool);
+  const regularModules = modules.filter(m => !m.devtool && hasIosPodspec(m));
+  const devtoolModules = modules.filter(m => m.devtool && hasIosPodspec(m));
 
   // --- sparkling_methods_dep (regular method modules) ---
   const hasMethodsDep = content.includes('def sparkling_methods_dep');
@@ -975,9 +980,7 @@ function writeIosRegistry(modules: MethodModuleConfig[], bundleId: string, cwd: 
     '}',
     '',
     `let sparklingAutolinkBundleId = "${bundleId}"`,
-    'let sparklingAutolinkModules: [SparklingAutolinkModule] = [',
-    `    ${entries}`,
-    ']',
+    `let sparklingAutolinkModules: [SparklingAutolinkModule] = ${entries ? `[\n    ${entries}\n]` : '[]'}`,
     '',
   ].join('\n');
 
@@ -1066,7 +1069,7 @@ export async function autolink(options: AutolinkOptions): Promise<MethodModuleCo
     writeAndroidRegistry(registryModules, androidPackage, options.cwd);
   }
   if (doIos) {
-    writeIosRegistry(registryModules, iosBundle, options.cwd);
+    writeIosRegistry(registryModules.filter(hasIosPodspec), iosBundle, options.cwd);
   }
 
   const platformLabel = platform === 'all' ? 'Android & iOS' : platform.toUpperCase();

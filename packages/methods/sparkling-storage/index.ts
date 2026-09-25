@@ -3,5 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 export * from './src/setStorageItem/setStorageItem';
 export * from './src/getStorageItem/getStorageItem';
+export * from './src/removeStorageItem/removeStorageItem';
 export type { SetItemRequest, SetItemResponse } from './src/setStorageItem/setStorageItem.d';
 export type { GetItemRequest, GetItemResponse } from './src/getStorageItem/getStorageItem.d';
+export type { RemoveItemRequest, RemoveItemResponse } from './src/removeStorageItem/removeStorageItem.d';

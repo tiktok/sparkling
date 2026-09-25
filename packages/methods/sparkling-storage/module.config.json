@@ -46,10 +46,9 @@
     "buildGradle": "android/build.gradle.kts"
   },
   "ios": {
-    "moduleName": "SPKStorage",
-    "className": "StorageMethod",
+    "moduleName": "Storage",
     "podspecPath": "ios/Sparkling-Storage.podspec",
-    "swiftVersion": "5.0"
+    "swiftVersion": "5.10"
   },
   "web": {
     "entryPoint": "index.ts",

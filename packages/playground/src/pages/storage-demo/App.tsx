@@ -1,5 +1,5 @@
 import { useState, useCallback } from '@lynx-js/react'
-import { setItem, getItem } from 'sparkling-storage'
+import { setItem, getItem, removeItem } from 'sparkling-storage'
 import { ThemeProvider, useTheme } from '../../lib/theme.js'
 import { DemoPage } from '../../components/DemoPage/index.js'
 import { FormField } from '../../components/FormField/index.js'
@@ -9,7 +9,7 @@ import './App.css'
 
 interface LogEntry {
   id: number
-  type: 'setItem' | 'getItem'
+  type: 'setItem' | 'getItem' | 'removeItem'
   request: Record<string, unknown>
   response?: { code?: number; msg?: string; data?: unknown }
   timestamp: string
@@ -40,6 +40,8 @@ function StorageDemoContent() {
   const [getResultCode, setGetResultCode] = useState<number | undefined>(undefined)
   const [getResultMsg, setGetResultMsg] = useState<string | undefined>(undefined)
   const [getResultData, setGetResultData] = useState<unknown>(undefined)
+  const [removeResultCode, setRemoveResultCode] = useState<number | undefined>(undefined)
+  const [removeResultMsg, setRemoveResultMsg] = useState<string | undefined>(undefined)
 
   // Operation log
   const [logs, setLogs] = useState<LogEntry[]>([])
@@ -77,7 +79,7 @@ function StorageDemoContent() {
 
     setItem(params, (res: { code: number; msg?: string; data?: unknown }) => {
       setSetResultCode(res.code)
-      setSetResultMsg(res.msg || (res.code === 0 ? 'Success' : 'Failed'))
+      setSetResultMsg(res.msg || (res.code === 1 ? 'Success' : 'Failed'))
       setSetResultData(res.data)
       addLog({ type: 'setItem', request: reqLog, response: res })
     })
@@ -97,9 +99,21 @@ function StorageDemoContent() {
 
     getItem(params, (res: { code: number; msg?: string; data?: { data?: unknown } }) => {
       setGetResultCode(res.code)
-      setGetResultMsg(res.msg || (res.code === 0 ? 'Success' : 'Failed'))
+      setGetResultMsg(res.msg || (res.code === 1 ? 'Success' : 'Failed'))
       setGetResultData(res.data)
       addLog({ type: 'getItem', request: reqLog, response: res })
+    })
+  }
+
+  const handleRemoveItem = () => {
+    'background only'
+    setRemoveResultCode(undefined)
+    setRemoveResultMsg(undefined)
+    const params = { key: getKey, biz: getBiz || undefined }
+    removeItem(params, (res) => {
+      setRemoveResultCode(res.code)
+      setRemoveResultMsg(res.msg || (res.code === 1 ? 'Success' : 'Failed'))
+      addLog({ type: 'removeItem', request: params, response: res })
     })
   }
 
@@ -141,7 +155,7 @@ function StorageDemoContent() {
         <FormField
           type="input"
           label="biz"
-          description="Business namespace (optional)"
+          description="Business namespace (optional; not used on iOS)"
           value={setBiz}
           placeholder="e.g. demo"
           onInput={setSetBiz}
@@ -149,7 +163,7 @@ function StorageDemoContent() {
         <FormField
           type="input"
           label="validDuration"
-          description="Expiration in seconds (optional)"
+          description="Expiration in seconds (optional; not used on iOS)"
           value={setValidDuration}
           placeholder="e.g. 3600"
           onInput={setSetValidDuration}
@@ -185,7 +199,7 @@ function StorageDemoContent() {
         <FormField
           type="input"
           label="biz"
-          description="Business namespace (optional)"
+          description="Business namespace (optional; not used on iOS)"
           value={getBiz}
           placeholder="e.g. demo"
           onInput={setGetBiz}
@@ -196,6 +210,11 @@ function StorageDemoContent() {
         </view>
 
         <ResultCard label="getItem Response" code={getResultCode} msg={getResultMsg} data={getResultData} />
+
+        <view className={dk('sto-btn')} bindtap={handleRemoveItem}>
+          <text className="sto-btn-text">Remove</text>
+        </view>
+        <ResultCard label="removeItem Response" code={removeResultCode} msg={removeResultMsg} />
       </view>
 
       {/* Operation Log */}
@@ -215,7 +234,7 @@ function StorageDemoContent() {
         {logs.length === 0 ? (
           <view className={dk('sto-log-empty')}>
             <text className={dk('sto-log-empty-text')}>
-              No operations yet. Use setItem or getItem above to see the log.
+              No operations yet. Use a storage method above to see the log.
             </text>
           </view>
         ) : null}

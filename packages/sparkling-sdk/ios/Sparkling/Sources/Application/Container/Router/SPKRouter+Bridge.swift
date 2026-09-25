@@ -6,7 +6,7 @@ import Foundation
 import SparklingMethod
 
 extension SPKRouter {
-    public static func close(container: PipeContainer?) -> Bool {
+    public static func close(container: UIResponder?) -> Bool {
         guard let uiResponder = container as? UIResponder else {
             return false
         }

@@ -7,6 +7,8 @@ import CoreServices
 import MobileCoreServices
 import Photos
 import UIKit
+import SparklingMethod
+import Mantle
 
 enum SPKChooseMediaMediaType: Int {
     case image = 1
@@ -46,20 +48,20 @@ enum SPKChooseMediaParamValue {
     static let back = "back"
 }
 
-typealias SPKChooseMediaCompletionHandler = (SPKChooseMediaMethodResultModel?, SPKStatus?) -> Void
+typealias SPKChooseMediaCompletionHandler = (SPKChooseMediaResult?, SPKStatus?) -> Void
 
 protocol SPKChooseMediaPicker {
-    func supported(with paramModel: SPKChooseMediaMethodParamModel) -> Bool
-    func mediaPicker(with paramModel: SPKChooseMediaMethodParamModel, completionHandler: @escaping SPKChooseMediaCompletionHandler) -> UIViewController?
+    func supported(with paramModel: SPKChooseMediaParams) -> Bool
+    func mediaPicker(with paramModel: SPKChooseMediaParams, completionHandler: @escaping SPKChooseMediaCompletionHandler) -> UIViewController?
 }
 
 class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
 
-    private var params: SPKChooseMediaMethodParamModel?
+    private var params: SPKChooseMediaParams?
     private var completionHandler: SPKChooseMediaCompletionHandler?
     private weak var imagePicker: UIImagePickerController?
 
-    func supported(with paramModel: SPKChooseMediaMethodParamModel) -> Bool {
+    func supported(with paramModel: SPKChooseMediaParams) -> Bool {
         return true
     }
 
@@ -104,11 +106,8 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
         }
     }
 
-    func mediaPicker(with paramModel: SPKChooseMediaMethodParamModel, completionHandler: @escaping SPKChooseMediaCompletionHandler) -> UIViewController? {
+    func mediaPicker(with paramModel: SPKChooseMediaParams, completionHandler: @escaping SPKChooseMediaCompletionHandler) -> UIViewController? {
         self.params = paramModel
-        if params?.compressOption == nil {
-            params?.compressOption = SPKChooseMediaCompressOption.default.rawValue
-        }
 
         guard let sourceType = imagePickerSourceType(for: paramModel.sourceType) else {
             completionHandler(nil, SPKStatus(code: SPKStatusCode.invalidParameter, message: "Unknown source type: \(paramModel.sourceType)"))
@@ -170,15 +169,15 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
     }
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-        let tempFileModel = SPKChooseMediaMethodResultTempFileModel()
+        guard let tempFileModel = SPKChooseMediaMethodResultTempFileModel() else { return }
 
         if let mediaType = info[.mediaType] as? String {
             if UTTypeConformsTo(mediaType as CFString, kUTTypeMovie as CFString) {
                 if let mediaURL = info[.mediaURL] as? URL {
                     tempFileModel.mediaType = SPKChooseMediaMediaType.video.rawValue
 
-                    tempFileModel.tempFilePath = mediaURL.path.spk_stringByStrippingSandboxPath()
-                    tempFileModel.tempFileAbsolutePath = tempFileModel.tempFilePath?.spk_stringFromProcessFile()
+                    tempFileModel.tempFilePath = mediaURL.path
+                    tempFileModel.tempFileAbsolutePath = tempFileModel.tempFilePath
 
                     do {
                         let resourceValues = try mediaURL.resourceValues(forKeys: [.fileSizeKey])
@@ -208,8 +207,8 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
 
                     if let imageData = imageDataForImage(image) {
                         if let filePath = writeImageDataToDisk(imageData) {
-                            tempFileModel.tempFilePath = filePath.spk_stringByStrippingSandboxPath()
-                            tempFileModel.tempFileAbsolutePath = tempFileModel.tempFilePath?.spk_stringFromProcessFile()
+                            tempFileModel.tempFilePath = filePath
+                            tempFileModel.tempFileAbsolutePath = tempFileModel.tempFilePath
                             tempFileModel.size = Int64(imageData.count)
                             tempFileModel.mimeType = "image/jpeg"
 
@@ -238,8 +237,9 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
             }
         }
 
-        let resultModel = SPKChooseMediaMethodResultModel()
-        resultModel.tempFiles = [tempFileModel]
+        guard let resultModel = SPKChooseMediaResult(),
+              let json = try? MTLJSONAdapter.jsonDictionary(fromModel: tempFileModel) else { return }
+        resultModel.tempFiles = [json]
         finish(with: resultModel, status: nil)
     }
 
@@ -249,56 +249,7 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
     }
 
     func imageDataForImage(_ image: UIImage) -> Data? {
-        guard let params = params else { return nil }
-
-        if params.compressOption == SPKChooseMediaCompressOption.none.rawValue {
-            return image.jpegData(compressionQuality: 1.0)
-        }
-
-        if params.compressOption == SPKChooseMediaCompressOption.both.rawValue || params.compressOption == SPKChooseMediaCompressOption.onlyImage.rawValue
-            || params.compressOption == SPKChooseMediaCompressOption.default.rawValue
-        {
-
-            let compressWidth = params.compressWidth ?? 0
-            let compressHeight = params.compressHeight ?? 0
-
-            if compressWidth > 0 && compressHeight > 0 {
-                let imageWidth = image.size.width
-                let imageHeight = image.size.height
-                let wScale = imageWidth / CGFloat(compressWidth)
-                let hScale = imageHeight / CGFloat(compressHeight)
-
-                var newSize = image.size
-                var needRedraw = false
-
-                if wScale > hScale && wScale > 1 {
-                    newSize.width = CGFloat(compressWidth)
-                    newSize.height = imageHeight / wScale
-                    needRedraw = true
-                } else if hScale > wScale && hScale > 1 {
-                    newSize.width = imageWidth / hScale
-                    newSize.height = CGFloat(compressHeight)
-                    needRedraw = true
-                }
-
-                if needRedraw {
-                    UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0)
-                    image.draw(in: CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height))
-                    let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
-                    UIGraphicsEndImageContext()
-
-                    if let resizedImage = resizedImage {
-                        let compressionQuality = params.compressionQuality ?? 0.8
-                        return resizedImage.jpegData(compressionQuality: compressionQuality)
-                    }
-                }
-            }
-
-            let compressionQuality = params.compressionQuality ?? 0.8
-            return image.jpegData(compressionQuality: compressionQuality)
-        }
-
-        return image.jpegData(compressionQuality: 0.8)
+        return params?.imageData(for: image)
     }
 
     func writeImageDataToDisk(_ imageData: Data) -> String? {
@@ -314,7 +265,7 @@ class SPKDefaultMediaPicker: NSObject, SPKChooseMediaPicker, UINavigationControl
         }
     }
 
-    func finish(with resultModel: SPKChooseMediaMethodResultModel?, status: SPKStatus?) {
+    func finish(with resultModel: SPKChooseMediaResult?, status: SPKStatus?) {
         imagePicker?.dismiss(animated: true, completion: nil)
         completionHandler?(resultModel, status)
         completionHandler = nil

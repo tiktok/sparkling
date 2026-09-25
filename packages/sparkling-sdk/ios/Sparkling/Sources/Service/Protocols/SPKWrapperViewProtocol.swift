@@ -40,7 +40,7 @@ import UIKit
     /// Delegate for handling view lifecycle events.
     weak var lifeCycleDelegate: SPKWrapperViewLifecycleProtocol? { set get }
 
-    /// Method pipe instance for communication with JavaScript runtime.
+    /// Runtime instance for communication with JavaScript.
     var anyMethodPipe: Any? { get }
 
     /// Progress indicator for loading operations (0.0 to 1.0).
@@ -97,12 +97,36 @@ import UIKit
     @objc optional func onVCWillDestory()
 }
 
-/// Extension providing convenient access to the method pipe.
+/// Extension providing typed access to the method runtime.
 extension SPKWrapperViewProtocol {
-    /// Provides typed access to the method pipe facade.
-    ///
-    /// - Returns: The method pipe as a MethodPipeFacade, or nil if not available
-    public var methodPipe: MethodPipeFacade? {
-        return anyMethodPipe as? MethodPipeFacade
+    /// Runtime attached to this view, when method transport is configured.
+    public var methodRuntime: SPKMethodRuntime? {
+        return anyMethodPipe as? SPKMethodRuntime
+    }
+}
+
+// Each invocation carries its originating view weakly, as the original MethodContext did.
+private var spkCallingContextKey: UInt8 = 0
+extension SPKMethodModel {
+    public var spk_callingContainer: UIView? {
+        get {
+            let context = objc_getAssociatedObject(self, &spkCallingContextKey) as? SPKMethodContext
+            return context?["spk.pipe.container.key"] as? UIView
+        }
+        set {
+            let context = SPKMethodContext()
+            context.setWeakObject(newValue, forKey: "spk.pipe.container.key")
+            objc_setAssociatedObject(self, &spkCallingContextKey, context, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+}
+
+extension SPKWrapperViewProtocol where Self: UIView {
+    func methodInvocationHooks() -> SPKMethodInvocationHooks {
+        let hooks = SPKMethodInvocationHooks()
+        hooks.willInvoke = { [weak self] _, model in
+            model?.spk_callingContainer = self
+        }
+        return hooks
     }
 }

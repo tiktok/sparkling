@@ -11,7 +11,7 @@ interface TempFile {
   tempFilePath?: string
   tempFileAbsolutePath?: string
   size?: number
-  mediaType?: string
+  mediaType?: string | number
   mimeType?: string
   base64Data?: string
 }
@@ -83,7 +83,7 @@ function MediaChooseContent() {
       setRawResponse(JSON.stringify(res, null, 2))
       const code = res?.code ?? -1
       setResultCode(code)
-      setResultMsg(res?.msg || (code === 0 || code === 1 ? 'Success' : 'Failed'))
+      setResultMsg(res?.msg || (code === 1 ? 'Success' : 'Failed'))
       // tempFiles may be in res.data.tempFiles or res.tempFiles
       const files = res?.data?.tempFiles || res?.tempFiles || []
       if (files.length > 0) {
@@ -175,7 +175,7 @@ function MediaChooseContent() {
               <view className="mc-file-header">
                 <text className="mc-file-index">#{String(i + 1)}</text>
                 {file.mediaType ? (
-                  <text className="mc-file-badge">{file.mediaType}</text>
+                  <text className="mc-file-badge">{file.mediaType === 1 ? 'image' : file.mediaType === 2 ? 'video' : file.mediaType}</text>
                 ) : null}
                 {file.mimeType ? (
                   <text className="mc-file-badge mc-file-badge--mime">{file.mimeType}</text>
