@@ -1,36 +1,36 @@
-# iOS JSB 迁移兼容记录
+# iOS JSB Migration Compatibility Notes
 
-基准：公开仓库 `tiktok/sparkling` 的 `c4ce8d25c5ea277e13752d68ff1f2a66f5704240`，包含 `packages/methods/*/ios` 及 Playground 的 RouterServiceImpl、StorageServiceImpl。`80d52eb` 是本地框架替换实验提交，不作为原版基准。
+The behavior baseline is commit `c4ce8d25c5ea277e13752d68ff1f2a66f5704240` of the public `tiktok/sparkling` repository. It includes `packages/methods/*/ios` and the Playground implementations of `RouterServiceImpl` and `StorageServiceImpl`. The baseline predates the runtime replacement experiment.
 
-## 迁移原则
+## Migration scope
 
-保留原开源实现的参数、业务分支与回调语义，只适配 SPKMethod 的注册、模型和调用接口。旧实现未生效的选项不在本次补齐；旧问题单独记录。宏注册继续使用 `@SPKGlobalMethod`。
+Preserve the public implementations' parameters, control flow, and callback behavior. Adapt only their registration, models, and invocation interfaces to SPKMethod. Options that did not work in the baseline are outside this migration; existing issues are listed separately. Global methods continue to use `@SPKGlobalMethod`.
 
-## 本轮恢复
+## Behavior preserved
 
-| 方法 | 处理 |
+| Methods | Compatibility work |
 | --- | --- |
-| router.open / router.close | 调用前通过现有 invocation hook 将发起请求的 LynxView 弱引用写入参数模型上下文。路由继续使用原 SPKRouter；恢复 replace 的三种时序和先关闭再回调的顺序。移除通过窗口查找当前页面的迁移逻辑。没有调用方上下文时不猜测容器。 |
-| storage.setItem / getItem / removeItem | 继续使用原 Playground 的 `com.SPK.custom.userdefault` suite，直接使用原 key。恢复直接写入和原 AnyCodableValue 的返回值过滤规则，不新增校验、TTL、biz 分区。JS 包已有检查保留。 |
-| media.chooseMedia | 恢复原 SPKDefaultMediaPicker（UIImagePickerController）、相册/相机权限流程、提示、取消、图片压缩、文件生成及结果字段。移除 PHPicker 和多选实现。恢复原 20 个 JSON 映射；compressImage、needBase64Data、saveToPhotoAlbum 保留原属性但不增加映射；isMultiSelect 继续只是 JS 侧选项。 |
-| media.saveDataURL | 恢复原 base64 解析、文件命名/写入、相册授权和回调流程，撤回迁移新增的文件名校验。 |
-| media.downloadFile / uploadFile / uploadImage | 撤回新增 formDataBody 处理和 HTTP 非 2xx 自动判失败的外层分支；恢复原参数映射、逐方法响应字段、无扩展名文件命名和下载保存相册流程。仅网络传输保留 URLSession 适配。 |
+| `router.open` / `router.close` | The existing invocation hook places a weak reference to the calling `LynxView` in the parameter model's context before invocation. Navigation continues to use the original `SPKRouter`. The three `replace` sequences and the close-before-callback order are preserved. The migration's window-based lookup of the current page was removed. When caller context is missing, no container is inferred. |
+| `storage.setItem` / `getItem` / `removeItem` | Continue using the Playground's `com.SPK.custom.userdefault` suite and the original key directly. Restore direct writes and the original `AnyCodableValue` filtering of returned values. No new validation, TTL, or business partitioning is added. Existing checks in the JavaScript package remain. |
+| `media.chooseMedia` | Restore `SPKDefaultMediaPicker` (`UIImagePickerController`), photo-library and camera permission flows, prompts, cancellation, image compression, file creation, and result fields. Remove the added `PHPicker` and multiple-selection implementation. Restore the original 20 JSON mappings. Keep `compressImage`, `needBase64Data`, and `saveToPhotoAlbum` as properties without adding mappings; `isMultiSelect` remains a JavaScript-side option only. |
+| `media.saveDataURL` | Restore the original Base64 parsing, file naming and writing, photo-library authorization, and callback flow. Remove the file-name validation added during migration. |
+| `media.downloadFile` / `uploadFile` / `uploadImage` | Remove the added `formDataBody` handling and the outer branch that automatically treats non-2xx HTTP responses as failures. Restore the original parameter mappings, method-specific response fields, extensionless file naming, and download-to-album flow. Only network transport uses a `URLSession` adapter. |
 
-容器入口恢复旧链路默认主线程、显式 `threadType=CURRENT_THREAD` 使用当前线程的规则。通用运行时没有新增业务分发流程。容器上下文适配在 Sparkling SDK 中，通过 SPKMethodCallRouter.hooksProvider / willInvoke 完成，不修改内部 TikTok 工程。
+The container entry point again uses the main thread by default and the current thread when `threadType=CURRENT_THREAD` is specified. The shared runtime adds no business dispatch flow. Sparkling SDK adapts container context through `SPKMethodCallRouter.hooksProvider` / `willInvoke`; the internal TikTok project is not changed.
 
-## 不能声明完全等价的边界
+## Limits of equivalence
 
-1. 原媒体源码引用 TTNetworkManager、SPKHttpResponse 等，但公开基准没有对应网络实现。当前使用 URLSession；请求编码、超时、错误码、公共参数注入无法与缺失后端逐项对照。needCommonParams 仅保留参数，不伪造公共参数。原外层代码没有按 HTTP 状态分支，但旧网络后端是否会把非 2xx 转成 error 无法确认。
-2. 原媒体代码使用的 `spk_stringByStrippingSandboxPath` / `spk_stringFromProcessFile` 在公开基准没有实现。当前仍使用可读取的绝对路径，上传保留已有 file URL 解析；不自行猜测原路径协议。
-3. 原服务查找通过旧框架 DIProvider；本实验保留原 Playground 的具体路由和存储实现，直接接到新 SPKMethod。没有恢复旧框架的服务替换 API。
-4. SPKMethod 模型现在由 Mantle 处理，通用参数错误、空值序列化和状态码仍服从新框架。业务流程恢复不等于两个框架的所有边界输入输出完全一致。
+1. The former media sources referenced networking APIs that are unavailable in the public baseline. The current `URLSession` adapter cannot be compared with that missing implementation for request encoding, timeouts, error codes, or common-parameter injection. `needCommonParams` remains a parameter but does not fabricate common parameters. The former outer code did not branch on HTTP status; whether its network backend converted non-2xx responses into errors is unknown.
+2. The former media sources used `spk_stringByStrippingSandboxPath` and `spk_stringFromProcessFile`, neither of which has an implementation in the public baseline. The current code continues to return readable absolute paths and retains the existing file-URL parsing for uploads. It does not assume an undocumented path format.
+3. The former service lookup used the old framework's `DIProvider`. This experiment connects the Playground's existing navigation and storage implementations directly to SPKMethod. It does not restore the old service-replacement API.
+4. Mantle now handles SPKMethod models. Generic parameter errors, null serialization, and status codes follow the new framework. Preserving business flows does not establish equivalence for every input and output at the framework boundary.
 
-## 保留的原版问题
+## Existing issue retained
 
-`SPKResponder.isTopViewController(viewController:)` 在公开基准中忽略传入参数，比较自身的 topViewController。覆盖页面场景因此可能仍关闭导航栈顶。本轮只修复迁移遗漏的调用方上下文，不改原 SPKRouter / SPKResponder。回归测试核对上下文身份，并将结果与直接调用原 SPKRouter 做差分比较，不把旧路由行为写成已修复。
+In the public baseline, `SPKResponder.isTopViewController(viewController:)` ignores its argument and compares its own `topViewController`. An overlaid page may therefore still cause the top page of the navigation stack to close. This migration fixes the missing caller context but does not change `SPKRouter` or `SPKResponder`. Regression tests check context identity and compare the result with a direct call to the original `SPKRouter`; they do not report the old routing behavior as fixed.
 
-## 验证
+## Verification
 
-`SparklingGoTests/JSBParameterCompatibilityTests.swift` 覆盖调用方页面被另一页覆盖时的上下文和旧路由行为一致性、上下文弱引用、缺失上下文不猜测页面、原 picker 类型和未映射字段、参数默认值、压缩、已有存储数据、base64、响应字段及 URLSession 适配请求。
+`SparklingGoTests/JSBParameterCompatibilityTests.swift` covers caller context when another page overlays it, equivalence with the old routing behavior, weak context references, missing context, the original picker type and unmapped fields, parameter defaults, compression, stored data, Base64 handling, response fields, and requests through the `URLSession` adapter.
 
-运行 SparklingGo scheme 的 `-only-testing:SparklingGoTests/JSBParameterCompatibilityTests`。网络测试只访问本机回环服务，不访问外部网络。真机相机和权限提示的手工验证仍需在设备上完成。
+Run the SparklingGo scheme with `-only-testing:SparklingGoTests/JSBParameterCompatibilityTests`. Network tests use a local loopback server only. Camera and permission prompts still require manual verification on a physical device.
