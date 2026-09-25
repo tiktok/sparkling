@@ -16,7 +16,6 @@
     copy.invokeMethodName = self.invokeMethodName;
     copy.callbackMethodName = self.callbackMethodName;
     copy.protocolVersion = self.protocolVersion;
-    copy.messageProtocolIdentifier = self.messageProtocolIdentifier;
     copy.callMessageClass = self.callMessageClass;
     return copy;
 }
@@ -130,8 +129,7 @@
 {
     SPKMethodCallMessage *message = [self callMessageWithBody:scriptMessage.body
                                                     container:scriptMessage.webView ?: self.webView
-                                                    invokeURL:scriptMessage.webView.URL ?: self.webView.URL
-                                                      authURL:scriptMessage.frameInfo.request.URL];
+                                                    invokeURL:scriptMessage.webView.URL ?: self.webView.URL];
     if (!message) {
         return;
     }
@@ -153,7 +151,6 @@
 - (SPKMethodCallMessage *)callMessageWithBody:(id)body
                                      container:(WKWebView *)container
                                      invokeURL:(NSURL *)invokeURL
-                                       authURL:(NSURL *)authURL
 {
     NSDictionary *rawData = [self dictionaryFromMessageBody:body];
     if (!rawData) {
@@ -167,19 +164,11 @@
     SPKMethodCallMessage *message = [messageClass new];
     message.methodName = rawData[@"func"];
     message.methodNamespace = rawData[@"namespace"];
-    message.methodType = rawData[@"__msg_type"];
     message.callbackID = rawData[@"__callback_id"];
-    message.iframeURLString = rawData[@"__iframe_url"];
-    message.secureToken = rawData[@"_secure_token"];
-    message.JSSDKVersion = rawData[@"JSSDK"];
-    message.protocolVersion = self.configuration.messageProtocolIdentifier ?: self.configuration.protocolVersion;
-    message.sendTimeStamp = rawData[@"__timestamp"];
-    message.receivedTimeStamp = @((long long)(NSDate.date.timeIntervalSince1970 * 1000));
-    message.requestDecodeDuration = @0;
+    message.protocolVersion = self.configuration.protocolVersion;
     message.rawData = rawData;
     message.container = container;
     message.invokeURL = invokeURL;
-    message.authURL = authURL;
     message.engineType = SPKMethodEngineTypeWeb;
 
     id params = rawData[@"params"];

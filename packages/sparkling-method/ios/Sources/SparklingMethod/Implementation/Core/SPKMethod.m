@@ -4,9 +4,6 @@
 
 #import "SPKMethod.h"
 
-NSString * const SPKMethodMetaInfoVersionKey = @"IDLVersion";
-NSString * const SPKMethodMetaInfoUIDKey = @"UID";
-
 static NSString * const SPKMethodCallHandlerKey = @"SPKMethodCallHandlerKey";
 
 @implementation SPKMethod
@@ -40,11 +37,6 @@ static NSString * const SPKMethodCallHandlerKey = @"SPKMethodCallHandlerKey";
     return nil;
 }
 
-- (BOOL)isDevelopmentMethod
-{
-    return NO;
-}
-
 - (SPKMethodContext *)context
 {
     if (!_context) {
@@ -56,26 +48,6 @@ static NSString * const SPKMethodCallHandlerKey = @"SPKMethodCallHandlerKey";
 - (Class)paramModelClass
 {
     return nil;
-}
-
-- (nullable SPKMethodModel *)paramsModelInstanceWithParams:(NSDictionary *_Nullable)params {
-    SPKMethodModel *paramModel = nil;
-    if (self.paramModelClass) {
-        NSMutableDictionary *mergedParams = [params mutableCopy];
-
-        // merge default values
-        NSDictionary *defaultValues = [self.paramModelClass defaultValues];
-
-        [defaultValues enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-            if (!mergedParams[key]) {
-                [mergedParams setValue:obj forKey:key];
-            }
-        }];
-
-        NSError *error = nil;
-        paramModel = [MTLJSONAdapter modelOfClass:self.paramModelClass fromJSONDictionary:mergedParams error:&error];
-    }
-    return paramModel;
 }
 
 - (Class)resultModelClass

@@ -63,7 +63,6 @@ static void *SPKMethodLynxTransportAssociationKey = &SPKMethodLynxTransportAssoc
     if (!message.invokeURL) {
         message.invokeURL = [NSURL URLWithString:lynxView.url ?: @""];
     }
-    message.receivedTimeStamp = @((long long)(NSDate.date.timeIntervalSince1970 * 1000));
     message.engineType = SPKMethodEngineTypeLynx;
     [self.messageHandler handleCallMessage:message resultHandler:resultHandler];
 }

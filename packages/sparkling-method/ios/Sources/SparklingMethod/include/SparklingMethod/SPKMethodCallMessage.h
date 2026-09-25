@@ -12,21 +12,12 @@
 
 @property (nonatomic, copy, nullable) NSString *methodName;
 @property (nonatomic, copy, nullable) NSString *methodNamespace;
-@property (nonatomic, copy, nullable) NSString *methodType;
 @property (nonatomic, copy, nullable) NSDictionary *params;
 @property (nonatomic, copy, nullable) NSString *callbackID;
-@property (nonatomic, copy, nullable) NSString *JSSDKVersion;
 @property (nonatomic, copy, nullable) NSString *protocolVersion;
-@property (nonatomic, copy, nullable) NSString *iframeURLString;
 @property (nonatomic, strong, nullable) NSURL *invokeURL;
-@property (nonatomic, strong, nullable) NSURL *authURL;
 @property (nonatomic, strong, nullable) NSDictionary *rawData;
 @property (nonatomic, weak, nullable) id container;
 @property (nonatomic, assign) SPKMethodEngineType engineType;
-
-@property (nonatomic, copy, nullable) NSNumber *sendTimeStamp;
-@property (nonatomic, copy, nullable) NSNumber *receivedTimeStamp;
-@property (nonatomic, copy, nullable) NSNumber *requestDecodeDuration;
-@property (nonatomic, copy, nullable) NSString *secureToken;
 
 @end

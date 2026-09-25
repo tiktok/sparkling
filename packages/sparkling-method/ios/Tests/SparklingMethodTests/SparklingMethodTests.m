@@ -190,20 +190,6 @@
     [self waitForExpectations:@[completion] timeout:1];
 }
 
-- (void)testCallRouterPreservesHostDispatchResponse
-{
-    SPKMethodCallRouter *router = [[SPKMethodCallRouter alloc] initWithRuntime:[SPKMethodRuntime new]];
-    router.hostCallHandler = ^(SPKMethodCallMessage *message, SPKMethodResponseBlock resultHandler) {
-        XCTAssertEqualObjects(message.methodName, @"legacy.method");
-        resultHandler(@{ @"code" : @7, @"msg" : @"legacy" });
-    };
-    SPKMethodCallMessage *message = [SPKMethodCallMessage new];
-    message.methodName = @"legacy.method";
-    [router handleCallMessage:message resultHandler:^(NSDictionary *response) {
-        XCTAssertEqualObjects(response, (@{ @"code" : @7, @"msg" : @"legacy" }));
-    }];
-}
-
 - (void)testWebBridgeOwnsStandaloneCallRouter
 {
     SPKMethodWebBridgeConfiguration *configuration = [SPKMethodWebBridgeConfiguration new];
@@ -218,7 +204,7 @@
     SPKMethodWebBridge *bridge = [[SPKMethodWebBridge alloc] initWithRuntime:runtime configuration:configuration];
     SPKMethodCallMessage *message = [bridge callMessageWithBody:@{ @"func" : @"public.echo",
                                                                    @"params" : @{ @"payload" : @{ @"value" : @"web" } } }
-                                                       container:nil invokeURL:nil authURL:nil];
+                                                       container:nil invokeURL:nil];
     XCTAssertNotNil(bridge.messageHandler);
     XCTestExpectation *completion = [self expectationWithDescription:@"standalone web entry"];
     [bridge.messageHandler handleCallMessage:message resultHandler:^(NSDictionary *response) {
@@ -252,7 +238,6 @@
     configuration.invokeMethodName = @"invoke";
     configuration.callbackMethodName = @"callback";
     configuration.protocolVersion = @"4.0";
-    configuration.messageProtocolIdentifier = @"HostBridge";
     configuration.callMessageClass = SPKPublicWebCallMessage.class;
 
     SPKMethodWebBridge *bridge = [[SPKMethodWebBridge alloc] initWithConfiguration:configuration];
@@ -264,13 +249,12 @@
     };
     SPKMethodCallMessage *message = [bridge callMessageWithBody:body
                                                       container:nil
-                                                      invokeURL:[NSURL URLWithString:@"https://example.com/page"]
-                                                        authURL:[NSURL URLWithString:@"https://example.com/frame"]];
+                                                      invokeURL:[NSURL URLWithString:@"https://example.com/page"]];
     XCTAssertEqualObjects(message.methodName, @"public.echo");
     XCTAssertEqualObjects(message.methodNamespace, @"public");
     XCTAssertEqualObjects(message.params, (@{ @"value" : @1 }));
     XCTAssertTrue([message isKindOfClass:SPKPublicWebCallMessage.class]);
-    XCTAssertEqualObjects(message.protocolVersion, @"HostBridge");
+    XCTAssertEqualObjects(message.protocolVersion, @"4.0");
     XCTAssertEqual(message.engineType, SPKMethodEngineTypeWeb);
 
     NSString *callback = [bridge callbackJavaScriptWithResponse:@{ @"code" : @1 } forMessage:message];

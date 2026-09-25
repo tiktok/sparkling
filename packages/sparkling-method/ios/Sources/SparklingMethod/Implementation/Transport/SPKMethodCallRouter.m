@@ -19,11 +19,6 @@
 
 - (void)handleCallMessage:(SPKMethodCallMessage *)message resultHandler:(SPKMethodResponseBlock)resultHandler
 {
-    SPKMethodHostCallHandler hostCallHandler = self.hostCallHandler;
-    if (hostCallHandler) {
-        hostCallHandler(message, resultHandler);
-        return;
-    }
     SPKMethodInvocationHooks *hooks = self.hooksProvider ? self.hooksProvider(message) : nil;
     [self.runtime invokeMethodNamed:message.methodName
                             params:message.params

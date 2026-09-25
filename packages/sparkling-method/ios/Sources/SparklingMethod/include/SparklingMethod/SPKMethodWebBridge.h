@@ -17,9 +17,6 @@
 @property (nonatomic, copy, nonnull) NSString *invokeMethodName;
 @property (nonatomic, copy, nonnull) NSString *callbackMethodName;
 @property (nonatomic, copy, nonnull) NSString *protocolVersion;
-/// Optional transport identifier used by compatibility layers. When omitted,
-/// protocolVersion is stored on the call message.
-@property (nonatomic, copy, nullable) NSString *messageProtocolIdentifier;
 /// SPKMethodCallMessage subclass created for each invocation.
 @property (nonatomic, assign, nullable) Class callMessageClass;
 
@@ -47,8 +44,7 @@
 /// installing an additional WKScriptMessageHandler.
 - (nullable SPKMethodCallMessage *)callMessageWithBody:(nullable id)body
                                               container:(nullable WKWebView *)container
-                                              invokeURL:(nullable NSURL *)invokeURL
-                                                authURL:(nullable NSURL *)authURL;
+                                              invokeURL:(nullable NSURL *)invokeURL;
 
 /// Builds JavaScript using the same wire format as the directly attached
 /// transport. Compatibility adapters can evaluate it with their own lifecycle
