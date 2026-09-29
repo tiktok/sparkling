@@ -5,6 +5,7 @@ package com.tiktok.sparkling
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -13,17 +14,60 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.tiktok.sparkling.Sparkling.Companion.SPARKLING_CONTEXT_CONTAINER_ID
+import com.tiktok.sparkling.Sparkling.Companion.SPARKLING_CONTEXT_INIT_DATA
+import com.tiktok.sparkling.Sparkling.Companion.SPARKLING_CONTEXT_SCHEME
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
+import com.tiktok.sparkling.utils.SchemeParser
 
 class SparklingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val containerId = intent.getStringExtra(SPARKLING_CONTEXT_CONTAINER_ID)
-        val sparklingContext = SparklingContextTransferStation.getSparklingContext(containerId)
+        val sparklingContext =
+            SparklingContextTransferStation.getSparklingContext(containerId)
+                ?: restoreSparklingContext(containerId)
         initStatusBar(sparklingContext)
         setContentView(R.layout.activity_sparkling)
         initToolBar(sparklingContext)
         initSparklingFragment(sparklingContext)
+    }
+
+    /**
+     * Rebuilds the context for a container that came back without one.
+     *
+     * [SparklingContextTransferStation] is an in-memory map, so it is empty in a new process,
+     * while the task Android restores around it is not. Every container in that task then looks up
+     * an id that is no longer there, gets nothing, and renders as a blank page under the default
+     * toolbar - the scheme said to hide it, and the scheme was in the context that is gone.
+     *
+     * [Sparkling.navigate] puts the scheme and the init data on the Intent, which is restored with
+     * the task, so they are here to build a context from. What cannot cross the process - the
+     * [SparklingContext.sparklingUIProvider] and [SparklingContext.lifecycleDelegate], which are
+     * objects the host passed in - does not come back, and the container loads without them.
+     *
+     * Returns null when there is no scheme to rebuild from, which leaves the previous behaviour
+     * for a container that was never opened through [Sparkling.navigate].
+     */
+    private fun restoreSparklingContext(containerId: String?): SparklingContext? {
+        val scheme = intent.getStringExtra(SPARKLING_CONTEXT_SCHEME)
+        if (containerId.isNullOrEmpty() || scheme.isNullOrEmpty()) {
+            return null
+        }
+        val restored =
+            SparklingContext().apply {
+                this.containerId = containerId
+                this.scheme = scheme
+                intent.getStringExtra(SPARKLING_CONTEXT_INIT_DATA)?.let { withInitData(it) }
+                hybridSchemeParam =
+                    try {
+                        SchemeParser.parseScheme(scheme)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to parse the restored scheme: ${e.message}")
+                        null
+                    }
+            }
+        SparklingContextTransferStation.saveSparklingContext(restored)
+        return restored
     }
 
     private fun initStatusBar(sparklingContext: SparklingContext?) {
@@ -125,5 +169,9 @@ class SparklingActivity : AppCompatActivity() {
         } else {
             super.onBackPressed()
         }
+    }
+
+    private companion object {
+        const val TAG = "SparklingActivity"
     }
 }

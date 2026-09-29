@@ -17,6 +17,15 @@ class Sparkling private constructor(
 
         const val SPARKLING_CONTEXT_CONTAINER_ID = "SparklingContextContainerId"
 
+        /**
+         * The scheme the container was opened with, carried on the Intent so the container can be
+         * rebuilt after the process is killed. See [SparklingActivity.sparklingContext].
+         */
+        const val SPARKLING_CONTEXT_SCHEME = "SparklingContextScheme"
+
+        /** The init data the container was opened with, carried for the same reason. */
+        const val SPARKLING_CONTEXT_INIT_DATA = "SparklingContextInitData"
+
         const val TYPE_PAGE = 1
         const val TYPE_POPUP = 2 // not implemented yet
         const val TYPE_CARD = 3
@@ -48,6 +57,12 @@ class Sparkling private constructor(
             processSparklingContext(sparklingContext)
             val intent = Intent(context, SparklingActivity::class.java)
             intent.putExtra(SPARKLING_CONTEXT_CONTAINER_ID, sparklingContext.containerId)
+            // SparklingContextTransferStation is held in memory, so it does not survive the
+            // process while the task does. These two strings are what a context is made of, and
+            // the Intent is restored with the task, so a container that comes back without its
+            // context can rebuild one.
+            intent.putExtra(SPARKLING_CONTEXT_SCHEME, sparklingContext.scheme)
+            intent.putExtra(SPARKLING_CONTEXT_INIT_DATA, sparklingContext.initData())
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             SparklingContextTransferStation.saveSparklingContext(sparklingContext)
             context.startActivity(intent)

@@ -193,4 +193,23 @@ class SparklingTest {
         assertNotNull(startedIntent)
         assertTrue(startedIntent!!.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0)
     }
+
+    @Test
+    fun navigateCarriesTheContextOnTheIntent() {
+        sparklingContext.withInitData("{\"initial_data\":{}}")
+        val sparkling = Sparkling.build(application, sparklingContext)
+
+        sparkling.navigate()
+
+        val startedIntent: Intent? = shadowOf(application).nextStartedActivity
+        assertNotNull(startedIntent)
+        assertEquals(
+            sparklingContext.scheme,
+            startedIntent!!.getStringExtra(Sparkling.SPARKLING_CONTEXT_SCHEME),
+        )
+        assertEquals(
+            "{\"initial_data\":{}}",
+            startedIntent.getStringExtra(Sparkling.SPARKLING_CONTEXT_INIT_DATA),
+        )
+    }
 }
