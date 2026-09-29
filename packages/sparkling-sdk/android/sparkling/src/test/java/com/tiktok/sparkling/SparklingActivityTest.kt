@@ -7,7 +7,9 @@ import android.app.Application
 import com.tiktok.sparkling.hybridkit.scheme.HybridSchemeParam
 import com.tiktok.sparkling.hybridkit.utils.ColorUtil
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -214,5 +216,38 @@ class SparklingActivityTest {
                 hybridSchemeParam = HybridSchemeParam(transStatusBar = true, showNavBarInTransStatusBar = false)
             },
         )
+    }
+
+    @Test
+    fun onCreateRebuildsAContextLostWithTheProcess() {
+        // The task survived a process death: the Intent is restored, the transfer station is not.
+        val intent = android.content.Intent(application, SparklingActivity::class.java)
+        intent.putExtra(Sparkling.SPARKLING_CONTEXT_CONTAINER_ID, "container-restored")
+        intent.putExtra(
+            Sparkling.SPARKLING_CONTEXT_SCHEME,
+            "hybrid://lynxview_page?bundle=test_bundle&hide_nav_bar=1&title=Restored",
+        )
+        intent.putExtra(Sparkling.SPARKLING_CONTEXT_INIT_DATA, "{\"initial_data\":{}}")
+
+        val activity = Robolectric.buildActivity(SparklingActivity::class.java, intent).create().get()
+
+        assertNotNull(activity)
+        val restored = SparklingContextTransferStation.getSparklingContext("container-restored")
+        assertNotNull(restored)
+        assertEquals("{\"initial_data\":{}}", restored!!.initData())
+        assertEquals(true, restored.hybridSchemeParam?.hideNavBar)
+        // The scheme said to hide it, which is the part a missing context used to lose.
+        assertEquals(false, activity.supportActionBar?.isShowing)
+    }
+
+    @Test
+    fun onCreateWithoutASchemeKeepsTheEmptyContainer() {
+        val intent = android.content.Intent(application, SparklingActivity::class.java)
+        intent.putExtra(Sparkling.SPARKLING_CONTEXT_CONTAINER_ID, "container-no-scheme")
+
+        val activity = Robolectric.buildActivity(SparklingActivity::class.java, intent).create().get()
+
+        assertNotNull(activity)
+        assertNull(SparklingContextTransferStation.getSparklingContext("container-no-scheme"))
     }
 }
