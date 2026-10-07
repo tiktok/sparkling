@@ -4,6 +4,7 @@
 
 import Foundation
 import Lynx
+import SparklingMethod
 
 /// Protocol defining the interface for hybrid parameter objects.
 ///
@@ -57,10 +58,8 @@ open class SPKHybridContext: NSObject, NSCopying {
     /// Timestamp captured when the Sparkling container starts initializing.
     public var containerInitTime: NSNumber?
 
-    /// Namespace for pipe method communication.
-    ///
-    /// Defines the namespace used for JavaScript bridge communication.
-    /// Defaults to "host" for standard host-to-guest communication.
+    /// Retained for source compatibility; the method runtime does not use this value.
+    @available(*, deprecated, message: "The method runtime does not use pipe namespaces.")
     public var pipeNameSpace: String = "host"
 
     /// Scheme parameters containing URL-based configuration.
@@ -77,11 +76,8 @@ open class SPKHybridContext: NSObject, NSCopying {
     /// Outer scheme string with missing merged query keys appended (Spark `getFullUrl` semantics). Filled when building Lynx params.
     public var fullURL: String?
 
-    /// Array of pipe method instances for JavaScript bridge communication.
-    ///
-    /// Contains method handlers that can be called from JavaScript
-    /// to interact with native functionality.
-    public var pipeMethodInstances: [Any]?
+    /// Local methods registered in this container's runtime.
+    public var pipeMethodInstances: [SPKMethod]?
 
     // MARK: - Lynx Engine Configuration
 
@@ -300,7 +296,7 @@ open class SPKHybridContext: NSObject, NSCopying {
             Self.merge(
                 withProp: context.pipeMethodInstances,
                 to: self.pipeMethodInstances,
-                isOverride: isOverride) as? [Any]
+                isOverride: isOverride) as? [SPKMethod]
 
         self.widthMode =
             Self.merge(

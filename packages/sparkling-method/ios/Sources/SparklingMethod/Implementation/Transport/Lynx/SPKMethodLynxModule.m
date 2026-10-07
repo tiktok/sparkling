@@ -73,7 +73,7 @@
 
 - (id<SPKMethodCallMessageHandler>)messageHandlerForContainerID:(NSString *)containerID
 {
-    return [SPKMethodLynxTransportPool transportForContainerID:containerID];
+    return [SPKMethodLynxTransportPool transportForContainerID:containerID moduleName:self.class.name];
 }
 
 @end

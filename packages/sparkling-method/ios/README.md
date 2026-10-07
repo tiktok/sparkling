@@ -57,9 +57,14 @@ integration is delivered by CocoaPods because it depends on the Lynx framework.
 `SPKMethodWebBridge` accepts any WebKit-based hybrid container, including a
 `WKWebView` subclass owned by HybridKit. Create it with
 `initWithRuntime:configuration:` and attach it with `setupWithContainer:`;
-the bridge retains its CallRouter and Runtime. `SPKMethodLynxModule` is the direct
+the bridge retains its CallRouter and Runtime. The Web codec preserves the legacy
+object initialization check and callback/event script templates.
+`SPKMethodLynxModule` is the direct
 public Lynx entry. Lynx hosts connect its transport to `SPKMethodCallRouter`.
-Hosts choose one entry transport per container.
+Lynx transports are scoped by module name and container identifier. The default
+public route is `spkPipe`. Compatibility transports override `+moduleName` to
+match their module's `+name`; their routes and attachment lifetimes remain
+separate from the public route.
 
 Before publishing a release, compile the exported Objective-C package with:
 
@@ -71,3 +76,17 @@ pod lib lint SparklingMethod.podspec --allow-warnings --skip-tests
 
 SparklingMethod is available under the Apache License 2.0. See `LICENSE` and
 `NOTICE` for attribution and source lineage.
+
+## Container method configuration
+
+`SPKHybridContext.pipeMethodInstances` accepts `[SPKMethod]`. These methods
+are registered locally in the container's runtime. Other object types are
+rejected by the Swift type checker.
+
+`pipeNameSpace` is deprecated and retained for source compatibility. It does
+not affect method lookup in the current runtime.
+
+The Sparkling Lynx SDK scans global method declarations once on first
+container creation. Each container has its own local runtime and transport,
+while global methods share the default registry. Hosts using custom registries
+can still call `registerDeclaredGlobalMethodsLazily:` explicitly.

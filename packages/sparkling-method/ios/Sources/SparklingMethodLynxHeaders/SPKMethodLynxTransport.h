@@ -7,12 +7,16 @@
 #import "SPKMethodTransport.h"
 
 /// Lynx transport that associates one container identifier with one LynxView.
-/// Register SPKMethodLynxModule with the same identifier in the Lynx config.
+/// Register the module named by +moduleName with the same identifier in the Lynx config.
 @interface SPKMethodLynxTransport : NSObject <SPKMethodTransport, SPKMethodCallMessageHandler>
 
 @property (nonatomic, weak, nullable) id<SPKMethodCallMessageHandler> messageHandler;
 @property (nonatomic, weak, readonly, nullable) LynxView *lynxView;
 @property (nonatomic, copy, readonly, nonnull) NSString *containerID;
+
+/// Defaults to SPKMethodLynxModule.name. Compatibility transports override this
+/// to keep their module route separate from the public entry.
++ (nonnull NSString *)moduleName;
 
 - (nonnull instancetype)initWithLynxView:(nonnull LynxView *)lynxView
                              containerID:(nonnull NSString *)containerID NS_DESIGNATED_INITIALIZER;

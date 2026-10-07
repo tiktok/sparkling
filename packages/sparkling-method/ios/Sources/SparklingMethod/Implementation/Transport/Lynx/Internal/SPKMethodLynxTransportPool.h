@@ -8,8 +8,10 @@
 
 @interface SPKMethodLynxTransportPool : NSObject
 
-+ (nullable SPKMethodLynxTransport *)transportForContainerID:(nullable NSString *)containerID;
++ (nullable SPKMethodLynxTransport *)transportForContainerID:(nullable NSString *)containerID
+                                               moduleName:(nonnull NSString *)moduleName;
 + (void)setTransport:(nullable SPKMethodLynxTransport *)transport
-      forContainerID:(nullable NSString *)containerID;
+      forContainerID:(nullable NSString *)containerID
+          moduleName:(nonnull NSString *)moduleName;
 
 @end

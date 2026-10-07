@@ -3,7 +3,8 @@
 // LICENSE file in the root directory of this source tree.
 
 #import "SPKMethodLynxTransport.h"
-#import "SPKMethodCallMessage.h"
+#import <SparklingMethod/SPKMethodCallMessage.h>
+#import <SparklingMethod/SPKMethodLynxModule.h>
 #import "SPKMethodLynxTransportPool.h"
 #import <objc/runtime.h>
 
@@ -17,6 +18,11 @@ static void *SPKMethodLynxTransportAssociationKey = &SPKMethodLynxTransportAssoc
 @end
 
 @implementation SPKMethodLynxTransport
+
++ (NSString *)moduleName
+{
+    return SPKMethodLynxModule.name;
+}
 
 - (instancetype)initWithLynxView:(LynxView *)lynxView containerID:(NSString *)containerID
 {
@@ -32,8 +38,8 @@ static void *SPKMethodLynxTransportAssociationKey = &SPKMethodLynxTransportAssoc
 
 - (void)dealloc
 {
-    if ([SPKMethodLynxTransportPool transportForContainerID:self.containerID] == self) {
-        [SPKMethodLynxTransportPool setTransport:nil forContainerID:self.containerID];
+    if ([SPKMethodLynxTransportPool transportForContainerID:self.containerID moduleName:self.class.moduleName] == self) {
+        [SPKMethodLynxTransportPool setTransport:nil forContainerID:self.containerID moduleName:self.class.moduleName];
     }
 }
 
@@ -43,17 +49,26 @@ static void *SPKMethodLynxTransportAssociationKey = &SPKMethodLynxTransportAssoc
     if (![container isKindOfClass:LynxView.class]) {
         return;
     }
+    NSString *moduleName = self.class.moduleName;
+    NSParameterAssert(moduleName.length > 0);
     LynxView *previousView = self.lynxView;
-    if (previousView && previousView != container &&
-        objc_getAssociatedObject(previousView, SPKMethodLynxTransportAssociationKey) == self) {
-        objc_setAssociatedObject(previousView, SPKMethodLynxTransportAssociationKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    NSMutableDictionary<NSString *, SPKMethodLynxTransport *> *previousTransports =
+        objc_getAssociatedObject(previousView, SPKMethodLynxTransportAssociationKey);
+    if (previousView && previousView != container && previousTransports[moduleName] == self) {
+        [previousTransports removeObjectForKey:moduleName];
     }
     self.lynxView = container;
-    objc_setAssociatedObject(container,
-                             SPKMethodLynxTransportAssociationKey,
-                             self,
-                             OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    [SPKMethodLynxTransportPool setTransport:self forContainerID:self.containerID];
+    NSMutableDictionary<NSString *, SPKMethodLynxTransport *> *transports =
+        objc_getAssociatedObject(container, SPKMethodLynxTransportAssociationKey);
+    if (!transports) {
+        transports = [NSMutableDictionary dictionary];
+        objc_setAssociatedObject(container,
+                                 SPKMethodLynxTransportAssociationKey,
+                                 transports,
+                                 OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    transports[moduleName] = self;
+    [SPKMethodLynxTransportPool setTransport:self forContainerID:self.containerID moduleName:moduleName];
 }
 
 - (void)handleCallMessage:(SPKMethodCallMessage *)message resultHandler:(SPKMethodResponseBlock)resultHandler

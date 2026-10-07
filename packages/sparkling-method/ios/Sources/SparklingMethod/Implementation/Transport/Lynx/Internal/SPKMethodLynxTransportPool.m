@@ -7,36 +7,41 @@
 
 @implementation SPKMethodLynxTransportPool
 
-+ (NSMapTable<NSString *, SPKMethodLynxTransport *> *)transportMap
++ (NSMutableDictionary<NSString *, NSMapTable<NSString *, SPKMethodLynxTransport *> *> *)transportMaps
 {
-    static NSMapTable<NSString *, SPKMethodLynxTransport *> *transportMap;
+    static NSMutableDictionary<NSString *, NSMapTable<NSString *, SPKMethodLynxTransport *> *> *maps;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        transportMap = [NSMapTable strongToWeakObjectsMapTable];
+        maps = [NSMutableDictionary dictionary];
     });
-    return transportMap;
+    return maps;
 }
 
-+ (SPKMethodLynxTransport *)transportForContainerID:(NSString *)containerID
++ (SPKMethodLynxTransport *)transportForContainerID:(NSString *)containerID moduleName:(NSString *)moduleName
 {
-    if (containerID.length == 0) {
+    if (containerID.length == 0 || moduleName.length == 0) {
         return nil;
     }
-    @synchronized(self.transportMap) {
-        return [self.transportMap objectForKey:containerID];
+    @synchronized(self.transportMaps) {
+        return [self.transportMaps[moduleName] objectForKey:containerID];
     }
 }
 
-+ (void)setTransport:(SPKMethodLynxTransport *)transport forContainerID:(NSString *)containerID
++ (void)setTransport:(SPKMethodLynxTransport *)transport forContainerID:(NSString *)containerID moduleName:(NSString *)moduleName
 {
-    if (containerID.length == 0) {
+    if (containerID.length == 0 || moduleName.length == 0) {
         return;
     }
-    @synchronized(self.transportMap) {
+    @synchronized(self.transportMaps) {
+        NSMapTable<NSString *, SPKMethodLynxTransport *> *map = self.transportMaps[moduleName];
         if (transport) {
-            [self.transportMap setObject:transport forKey:containerID];
+            if (!map) {
+                map = [NSMapTable strongToWeakObjectsMapTable];
+                self.transportMaps[moduleName] = map;
+            }
+            [map setObject:transport forKey:containerID];
         } else {
-            [self.transportMap removeObjectForKey:containerID];
+            [map removeObjectForKey:containerID];
         }
     }
 }

@@ -117,7 +117,7 @@
     NSString *handlerName = self.configuration.messageHandlerName;
     NSString *invokeName = self.configuration.invokeMethodName;
     NSString *source = [NSString stringWithFormat:
-        @"(function(){try{window.%@=window.%@||{};window.%@.%@=function(params){if(typeof params==='string'){window.webkit.messageHandlers.%@.postMessage(params);}};}catch(e){}})();",
+        @"try { if (typeof %@ !== 'object') { %@ = {}; } %@.%@ = function(params) { if (typeof params === 'string') { webkit.messageHandlers.%@.postMessage(params); } }; } catch (e) {}",
         objectName, objectName, objectName, invokeName, handlerName];
     return [[WKUserScript alloc] initWithSource:source
                                   injectionTime:WKUserScriptInjectionTimeAtDocumentStart
@@ -241,7 +241,7 @@
     }
     NSString *objectName = self.configuration.javascriptObjectName;
     NSString *callbackName = self.configuration.callbackMethodName;
-    return [NSString stringWithFormat:@"window.%@&&window.%@.%@&&window.%@.%@(%@)",
+    return [NSString stringWithFormat:@";window.%@ && %@.%@ && %@.%@(%@)",
                                       objectName, objectName, callbackName, objectName, callbackName, JSON];
 }
 

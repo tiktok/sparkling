@@ -68,6 +68,10 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
     /// Runtime instance for JavaScript-native communication.
     public var anyMethodPipe: Any?
 
+    private static let globalMethodsRegistration: Void = {
+        SPKMethodRuntime().registerDeclaredGlobalMethodsLazily(true)
+    }()
+
     private var methodCallRouter: SPKMethodCallRouter?
     private var methodMessageHandler: SPKMethodHostHandler?
     private var methodLynxTransport: SPKMethodLynxTransport?
@@ -209,12 +213,10 @@ open class SPKWrapperLynxView: LynxView, SPKWrapperLynxViewProtocol {
     /// Connects the Lynx transport to a per-view method runtime.
     /// Global declarations and local method instances are registered before loading.
     private func setupMethodRuntime() {
+        let _ = Self.globalMethodsRegistration
         let runtime = SPKMethodRuntime()
-        runtime.registerDeclaredGlobalMethodsLazily(true)
-        self.params?.context?.pipeMethodInstances?.forEach { instance in
-            if let method = instance as? SPKMethod {
-                runtime.registerLocalMethod(method)
-            }
+        self.params?.context?.pipeMethodInstances?.forEach { method in
+            runtime.registerLocalMethod(method)
         }
         let router = SPKMethodCallRouter(runtime: runtime)
         router.hooksProvider = { [weak self] _ in self?.methodInvocationHooks() }
