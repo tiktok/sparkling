@@ -75,6 +75,37 @@ android {
 }
 
 dependencies {
+    implementation(libs.lynx) {
+        version {
+            strictly(libs.versions.lynxSdk.get())
+        }
+        because("Lynx library codegen must compile against its matching runtime")
+    }
+    constraints {
+        listOf(
+            libs.lynx.jssdk,
+            libs.lynx.trace,
+            libs.lynx.service.image,
+            libs.lynx.service.log,
+            libs.lynx.service.http,
+            libs.lynx.service.devtool,
+            libs.lynx.devtool,
+        ).forEach { lynxDependency ->
+            implementation(lynxDependency) {
+                version {
+                    strictly(libs.versions.lynxSdk.get())
+                }
+                because("Keep the template on one Lynx SDK version")
+            }
+        }
+        implementation(libs.primjs) {
+            version {
+                strictly(libs.versions.primjs.get())
+            }
+            because("Keep PrimJS aligned with the template Lynx runtime")
+        }
+    }
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
