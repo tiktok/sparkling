@@ -1,4 +1,4 @@
-platform :ios, '14.0'
+platform :ios, '15.0'
 
 use_modular_headers!
 
@@ -146,6 +146,11 @@ post_integrate do |_installer|
     pods_project = Xcodeproj::Project.open(project_path)
     pods_project.targets.each do |target|
       target.build_configurations.each do |config|
+        # Xcode 27 requires an iOS 15 minimum for simulator builds.
+        deployment_target = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        if Gem::Version.new(deployment_target || '0') < Gem::Version.new('15.0')
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+        end
         config.build_settings['SWIFT_ENABLE_EXPLICIT_MODULES'] = 'NO'
         if ['Sparkling-Router', 'Sparkling-Storage', 'Sparkling-Media'].include?(target.name)
           config.build_settings['SPK_METHOD_MACRO_PLUGIN'] = File.expand_path(
