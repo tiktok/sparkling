@@ -4,6 +4,7 @@
 import path from 'node:path';
 import { createTempLynxConfig, loadAppConfig } from '../config';
 import { runCommand } from '../utils/exec';
+import { resolveRspeedyCommand } from '../utils/rspeedy';
 import { ui } from '../utils/ui';
 import { isVerboseEnabled, verboseLog } from '../utils/verbose';
 import { copyAssets } from './copy-assets';
@@ -17,16 +18,20 @@ export interface BuildOptions {
 export async function buildProject(options: BuildOptions): Promise<void> {
   const configPath = path.resolve(options.cwd, options.configFile ?? 'app.config.ts');
   const tempConfigPath = createTempLynxConfig(options.cwd, configPath);
-  const rspeedyBin = 'rspeedy';
+  const rspeedy = resolveRspeedyCommand();
 
   if (isVerboseEnabled()) {
     verboseLog(`App config path: ${configPath}`);
     verboseLog(`Temp Lynx config: ${tempConfigPath}`);
-    verboseLog(`rspeedy binary: ${rspeedyBin}`);
+    verboseLog(`Rspeedy binary: ${rspeedy.args[0]}`);
   }
 
   console.log(ui.headline(`Building Lynx bundle with config from ${path.relative(options.cwd, configPath)}`));
-  await runCommand(rspeedyBin, ['build', '--config', tempConfigPath], { cwd: options.cwd });
+  await runCommand(
+    rspeedy.command,
+    [...rspeedy.args, 'build', '--config', tempConfigPath],
+    { cwd: options.cwd },
+  );
 
   const shouldCopy = options.skipCopy !== true; // default to no copy
   if (shouldCopy) {
