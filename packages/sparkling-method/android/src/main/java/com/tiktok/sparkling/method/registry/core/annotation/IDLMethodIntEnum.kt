@@ -4,9 +4,7 @@
 
 package com.tiktok.sparkling.method.registry.core.annotation
 
-/**
- * Desc:
- */
+/** The int values a field accepts, when the IDL declared it as an enum. */
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.PROPERTY_SETTER, AnnotationTarget.PROPERTY_GETTER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class IDLMethodIntEnum(

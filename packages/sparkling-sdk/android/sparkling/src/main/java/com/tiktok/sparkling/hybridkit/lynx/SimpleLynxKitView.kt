@@ -21,7 +21,6 @@ import com.tiktok.sparkling.hybridkit.utils.GlobalPropsUtils
 import com.tiktok.sparkling.hybridkit.utils.LogLevel
 import com.tiktok.sparkling.hybridkit.utils.LogUtils
 import com.tiktok.sparkling.hybridkit.utils.ViewEventUtils
-import com.tiktok.sparkling.method.registry.api.SparklingMethodInvocationCenter
 import org.json.JSONObject
 
 @SuppressLint("ViewConstructor")
@@ -263,11 +262,11 @@ class SimpleLynxKitView :
         eventName: String,
         params: List<Any>?,
     ) {
-        SparklingMethodInvocationCenter.notifyNativeToJsEvent(
-            name = eventName,
-            params = params,
-            containerId = hybridContext.containerId,
-        )
+        val payload = if (params == null) null else JSONObject().put("params", org.json.JSONArray(params))
+        hybridContext.bridge?.getBridgeContext()?.monitor?.forEach { monitor ->
+            // A failed debug monitor must not block other monitors or JS delivery.
+            runCatching { monitor.onBridgeEvent(eventName, payload) }
+        }
         val data =
             if (params != null) {
                 JavaOnlyArray.from(params)

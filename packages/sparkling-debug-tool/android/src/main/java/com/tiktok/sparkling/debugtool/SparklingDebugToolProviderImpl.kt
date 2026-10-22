@@ -15,9 +15,15 @@ import com.tiktok.sparkling.debugtool.inspect.MethodInvocationStore
 import com.tiktok.sparkling.debugtool.inspect.SparklingDebugAutoWiring
 import com.tiktok.sparkling.hybridkit.base.IKitView
 import com.tiktok.sparkling.hybridkit.config.RuntimeInfo
+import com.tiktok.sparkling.method.protocol.impl.monitor.IBridgeMonitor
+import com.tiktok.sparkling.method.protocol.impl.monitor.MonitorEntity
 import com.tiktok.sparkling.method.registry.api.SparklingMethodInvocationCenter
+import org.json.JSONObject
 
-class SparklingDebugToolProviderImpl : SparklingDebugToolProvider {
+class SparklingDebugToolProviderImpl :
+    SparklingDebugToolProvider,
+    IBridgeMonitor,
+    SparklingMethodInvocationCenter.Observer {
     override fun openInspectorPanel(activity: FragmentActivity) {
         SparklingDebugTool.openInspectorPanel(activity)
     }
@@ -38,12 +44,40 @@ class SparklingDebugToolProviderImpl : SparklingDebugToolProvider {
         GlobalPropsRegistry.notifyChanged()
     }
 
-    override fun onMethodInvocationStart(event: SparklingMethodInvocationCenter.Event) {
-        MethodInvocationStore.add(event.toMethodInvocation(isEnd = false))
+    // Dispatcher events cover mock replacements and calls dispatched during release.
+    // Their ID remains stable even when the BridgeCall object changes.
+    override fun onStart(event: SparklingMethodInvocationCenter.Event) {
+        runCatching { MethodInvocationStore.add(event.toMethodInvocation(isEnd = false)) }
     }
 
-    override fun onMethodInvocationEnd(event: SparklingMethodInvocationCenter.Event) {
-        MethodInvocationStore.update(event.toMethodInvocation(isEnd = true))
+    override fun onEnd(event: SparklingMethodInvocationCenter.Event) {
+        // Update only: clearing/evicting a record must not let a late callback restore it.
+        // Native-to-JS events without a start are recorded separately by onBridgeEvent.
+        runCatching { MethodInvocationStore.update(event.toMethodInvocation(isEnd = true)) }
+    }
+
+    // JSB completion is recorded by the dispatcher observer, not by the monitor.
+    override fun onBridgeResolved(entity: MonitorEntity) = Unit
+
+    override fun onBridgeRejected(entity: MonitorEntity) = Unit
+
+    override fun onBridgeEvent(eventName: String, data: JSONObject?) {
+        val now = System.currentTimeMillis()
+        MethodInvocationStore.add(
+            MethodInvocation(
+                name = eventName,
+                namespace = "native-to-js",
+                platform = MethodInvocation.PLATFORM_LYNX,
+                params = MethodInvocation.formatPayload(data),
+                result = MethodInvocation.formatPayload(
+                    mapOf("status" to "sent", "direction" to "Native -> JS"),
+                ),
+                code = 1,
+                success = true,
+                startTimeMs = now,
+                endTimeMs = now,
+            ),
+        )
     }
 
     override fun setGlobalPropsCollector(collector: () -> Map<String, IKitView>) {

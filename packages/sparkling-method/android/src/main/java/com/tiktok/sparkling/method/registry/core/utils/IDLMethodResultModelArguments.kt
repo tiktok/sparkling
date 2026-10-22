@@ -4,11 +4,8 @@
 
 package com.tiktok.sparkling.method.registry.core.utils
 
-import com.tiktok.sparkling.method.registry.core.IDLMethodRegistryCacheManager
 import com.lynx.react.bridge.PiperData
-import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodIntEnum
-import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodParamField
-import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodStringEnum
+import com.tiktok.sparkling.method.registry.core.IDLParamField
 import com.tiktok.sparkling.method.registry.core.exception.IllegalInputParamException
 import com.tiktok.sparkling.method.registry.core.exception.IllegalOperationException
 import com.tiktok.sparkling.method.registry.core.exception.IllegalOutputParamException
@@ -20,7 +17,8 @@ import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
 /**
- * Desc:
+ * Creates result-model proxies using a configurable annotation reader. Existing overloads
+ * use [DefaultIDLResultModelReader] to preserve the Sparkling annotations and cache.
  */
 object IDLMethodResultModelArguments {
     /**
@@ -29,7 +27,18 @@ object IDLMethodResultModelArguments {
     fun <T> createModel(
         clazz: Class<T>,
         containerID: String?,
-    ): T where T : IDLMethodBaseModel = createModelWithContainerID(clazz, containerID)
+    ): T where T : IDLMethodBaseModel = createModel(clazz, containerID, DefaultIDLResultModelReader)
+
+    /**
+     * Builds a result model, reading its fields through [reader].
+     *
+     * A host whose method classes carry another annotation set passes its own reader.
+     */
+    fun <T> createModel(
+        clazz: Class<T>,
+        containerID: String?,
+        reader: IDLResultModelReader,
+    ): T where T : IDLMethodBaseModel = createModelWithContainerID(clazz, containerID, reader)
 
     /**
      * This method has no containerID info.
@@ -39,11 +48,12 @@ object IDLMethodResultModelArguments {
         "This method has no containerID info. " +
             "Please use createModel(clazz: Class<T>, containerID: String) to create.",
     )
-    fun <T> createModel(clazz: Class<T>): T where T : IDLMethodBaseModel = createModelWithContainerID(clazz, null)
+    fun <T> createModel(clazz: Class<T>): T where T : IDLMethodBaseModel = createModel(clazz, null)
 
     private fun <T> createModelWithContainerID(
         clazz: Class<T>,
         containerID: String?,
+        reader: IDLResultModelReader,
     ) where T : IDLMethodBaseModel =
         Proxy.newProxyInstance(
             clazz.classLoader,
@@ -56,10 +66,7 @@ object IDLMethodResultModelArguments {
                     method: Method,
                     args: Array<out Any>?,
                 ): Any? {
-                    val pool =
-                        (IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(containerID))?.getAnnotationDataByResultClass(
-                            clazz,
-                        )
+                    val pool = reader.findResultAnnotationData(containerID, clazz)
                     if (pool != null) {
                         if (method.name == "convert") {
                             IDLMethodResultModelHelper.convertToMapByCache(pool, contentMap)
@@ -70,7 +77,7 @@ object IDLMethodResultModelArguments {
                     println("idl Model->Map. no cache")
                     if (method.name == "convert") {
                         // do ModelValidation, find all getters
-                        convertToMap(clazz, contentMap)
+                        convertToMap(clazz, contentMap, reader)
                         return contentMap
                     }
                     // toString
@@ -78,18 +85,15 @@ object IDLMethodResultModelArguments {
                         return contentMap.toString()
                     }
 
-                    val annotationModel = method.getAnnotation(IDLMethodParamField::class.java)
+                    val annotationModel = reader.readField(method)
                     if (annotationModel != null && annotationModel.isGetter) {
                         // getter method
-                        val annotation = method.getAnnotation(IDLMethodParamField::class.java)
-                        return contentMap[annotation.keyPath]
+                        return contentMap[annotationModel.keyPath]
                     } else if (annotationModel != null) {
                         // setter method
-                        val annotation = method.getAnnotation(IDLMethodParamField::class.java)
-
                         val arg = args?.firstOrNull()
                         // todo: typecast
-                        contentMap[annotation.keyPath] = arg
+                        contentMap[annotationModel.keyPath] = arg
                         return Unit
                     }
                     throw IllegalOperationException("Unsupported method invocation in result model")
@@ -100,50 +104,19 @@ object IDLMethodResultModelArguments {
     private fun <T> convertToMap(
         clazz: Class<T>,
         contentMap: MutableMap<String, Any?>,
+        reader: IDLResultModelReader,
     ) where T : IDLMethodBaseModel {
-        val getters = clazz.declaredMethods.filter { it.getAnnotation(IDLMethodParamField::class.java)?.isGetter == true }
+        val getters = clazz.declaredMethods.filter { reader.readField(it)?.isGetter == true }
         getters.forEach { getterMethod ->
-            val annotationModel = getterMethod.getAnnotation(IDLMethodParamField::class.java)
+            val annotationModel =
+                reader.readField(getterMethod)
+                    ?: return@forEach
             val keyPath = annotationModel.keyPath
             val required = annotationModel.required
             val returnType = getterMethod.returnType
             val isEnum = annotationModel.isEnum
-            val enumModel =
-                if (isEnum && returnType == Number::class.java) {
-                    getterMethod.getAnnotation(IDLMethodIntEnum::class.java)
-                } else if (isEnum && returnType == String::class.java) {
-                    getterMethod.getAnnotation(IDLMethodStringEnum::class.java)
-                } else if (isEnum && returnType == List::class.java) {
-                    when (annotationModel.primitiveClassType) {
-                        Number::class -> {
-                            getterMethod.getAnnotation(IDLMethodIntEnum::class.java)
-                        }
-
-                        String::class -> {
-                            getterMethod.getAnnotation(IDLMethodStringEnum::class.java)
-                        }
-
-                        else -> {
-                            null
-                        }
-                    }
-                } else if (isEnum && returnType == Map::class.java) {
-                    when (annotationModel.primitiveClassType) {
-                        Number::class -> {
-                            getterMethod.getAnnotation(IDLMethodIntEnum::class.java)
-                        }
-
-                        String::class -> {
-                            getterMethod.getAnnotation(IDLMethodStringEnum::class.java)
-                        }
-
-                        else -> {
-                            null
-                        }
-                    }
-                } else {
-                    null
-                }
+            val stringEnum = readStringEnum(isEnum, returnType, annotationModel, getterMethod, reader)
+            val intEnum = readIntEnum(isEnum, returnType, annotationModel, getterMethod, reader)
             val fieldValue = contentMap[keyPath]
             if (fieldValue == null && required) {
                 throw IllegalOutputParamException("$keyPath is missing from output")
@@ -152,7 +125,7 @@ object IDLMethodResultModelArguments {
             when (returnType) {
                 Number::class.java -> {
                     fieldValue?.let { actualFieldValue ->
-                        checkEnum(isEnum, enumModel, actualFieldValue, keyPath)
+                        checkEnum(isEnum, stringEnum, intEnum, actualFieldValue, keyPath)
                         if (actualFieldValue !is Int && actualFieldValue !is Double && actualFieldValue !is Long && actualFieldValue !is Float) {
                             throw IllegalOutputParamException("$keyPath is of invalid return type")
                         }
@@ -164,7 +137,7 @@ object IDLMethodResultModelArguments {
                         throw IllegalOutputParamException("$keyPath is missing from output")
                     }
                     fieldValue?.let { actualFieldValue ->
-                        checkEnum(isEnum, enumModel, actualFieldValue, keyPath)
+                        checkEnum(isEnum, stringEnum, intEnum, actualFieldValue, keyPath)
                         if (actualFieldValue !is String) {
                             throw IllegalOutputParamException("$keyPath is of invalid return type")
                         }
@@ -190,7 +163,7 @@ object IDLMethodResultModelArguments {
                         if (actualFieldValue !is List<*>) {
                             throw IllegalOutputParamException("$keyPath is of invalid return type")
                         }
-                        checkEnum(isEnum, enumModel, actualFieldValue, keyPath)
+                        checkEnum(isEnum, stringEnum, intEnum, actualFieldValue, keyPath)
                     }
                 }
 
@@ -202,7 +175,7 @@ object IDLMethodResultModelArguments {
                         if (actualFieldValue !is Map<*, *>) {
                             throw IllegalOutputParamException("$keyPath is of invalid return type")
                         }
-                        checkEnum(isEnum, enumModel, actualFieldValue.values, keyPath)
+                        checkEnum(isEnum, stringEnum, intEnum, actualFieldValue.values, keyPath)
                     }
                 }
 
@@ -213,32 +186,78 @@ object IDLMethodResultModelArguments {
                 }
 
                 else -> {
-                    if (fieldValue != null && fieldValue !is IDLMethodBaseModel) {
+                    if (fieldValue != null && !reader.isNestedModel(fieldValue)) {
                         throw IllegalInputParamException("Failed to parse type ${returnType.name},$fieldValue must be sub class of XBaseModel")
                     }
                 }
             }
 
-            //                        convert to map
-            //                        val arg = contentMap[annotationModel.keyPath]
-            val objectInstance = IDLMethodBaseModel::class.java
-            val result = getValue(fieldValue, objectInstance, returnType)
+            val result = getValue(fieldValue, reader.modelClass, returnType)
             contentMap[annotationModel.keyPath] = result
         }
     }
 
+    private fun readStringEnum(
+        isEnum: Boolean,
+        returnType: Class<*>,
+        annotationModel: IDLParamField,
+        getterMethod: Method,
+        reader: IDLResultModelReader,
+    ): Array<out String>? {
+        if (!isEnum || !usesStringEnum(returnType, annotationModel)) {
+            return null
+        }
+        return reader.readStringEnumOptions(getterMethod)
+    }
+
+    private fun readIntEnum(
+        isEnum: Boolean,
+        returnType: Class<*>,
+        annotationModel: IDLParamField,
+        getterMethod: Method,
+        reader: IDLResultModelReader,
+    ): IntArray? {
+        if (!isEnum || !usesIntEnum(returnType, annotationModel)) {
+            return null
+        }
+        return reader.readIntEnumOptions(getterMethod)
+    }
+
+    private fun usesIntEnum(
+        returnType: Class<*>,
+        annotationModel: IDLParamField,
+    ): Boolean {
+        if (returnType == Number::class.java) {
+            return true
+        }
+        return (returnType == List::class.java || returnType == Map::class.java) &&
+            annotationModel.primitiveClassType == Number::class
+    }
+
+    private fun usesStringEnum(
+        returnType: Class<*>,
+        annotationModel: IDLParamField,
+    ): Boolean {
+        if (returnType == String::class.java) {
+            return true
+        }
+        return (returnType == List::class.java || returnType == Map::class.java) &&
+            annotationModel.primitiveClassType == String::class
+    }
+
     private fun checkEnum(
         isEnum: Boolean,
-        enumModel: Annotation?,
+        stringEnum: Array<out String>?,
+        intEnum: IntArray?,
         actualFieldValue: Any,
         keyPath: String,
     ) {
         if (isEnum) {
             val failCheck =
                 if (actualFieldValue is Collection<*>) {
-                    actualFieldValue.any { checkEnumBasic(enumModel, it) }
+                    actualFieldValue.any { checkEnumBasic(stringEnum, intEnum, it) }
                 } else {
-                    checkEnumBasic(enumModel, actualFieldValue)
+                    checkEnumBasic(stringEnum, intEnum, actualFieldValue)
                 }
             if (failCheck) {
                 throw IllegalOutputParamException("$keyPath is not valid")
@@ -247,16 +266,17 @@ object IDLMethodResultModelArguments {
     }
 
     private fun checkEnumBasic(
-        enumModel: Annotation?,
+        stringEnum: Array<out String>?,
+        intEnum: IntArray?,
         actualFieldValue: Any?,
     ): Boolean =
-        when (enumModel) {
-            is IDLMethodStringEnum -> {
-                actualFieldValue !in enumModel.option
+        when {
+            stringEnum != null -> {
+                actualFieldValue !in stringEnum
             }
 
-            is IDLMethodIntEnum -> {
-                actualFieldValue as Int !in enumModel.option
+            intEnum != null -> {
+                actualFieldValue as Int !in intEnum
             }
 
             else -> {

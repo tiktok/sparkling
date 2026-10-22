@@ -6,6 +6,8 @@ package com.tiktok.sparkling.debug
 import androidx.fragment.app.FragmentActivity
 import com.tiktok.sparkling.hybridkit.KitViewManager
 import com.tiktok.sparkling.hybridkit.base.IKitView
+import com.tiktok.sparkling.method.protocol.impl.monitor.IBridgeMonitor
+import com.tiktok.sparkling.method.registry.api.SparklingBridge
 import com.tiktok.sparkling.method.registry.api.SparklingMethodInvocationCenter
 import java.util.ServiceLoader
 import java.util.concurrent.atomic.AtomicBoolean
@@ -44,12 +46,13 @@ object SparklingDebugToolRegistry {
         providers().forEach { runCatching { it.onKitViewDestroyed(containerId, kitView) } }
     }
 
-    fun notifyMethodStart(event: SparklingMethodInvocationCenter.Event) {
-        providers().forEach { runCatching { it.onMethodInvocationStart(event) } }
-    }
-
-    fun notifyMethodEnd(event: SparklingMethodInvocationCenter.Event) {
-        providers().forEach { runCatching { it.onMethodInvocationEnd(event) } }
+    /** Attaches native-to-JS event monitoring; JSB records come from the dispatcher observer. */
+    fun attachBridge(bridge: SparklingBridge) {
+        providers().forEach { provider ->
+            (provider as? IBridgeMonitor)?.let { monitor ->
+                runCatching { bridge.registerMonitor(monitor) }
+            }
+        }
     }
 
     private fun providers(): List<SparklingDebugToolProvider> {
@@ -84,11 +87,19 @@ object SparklingDebugToolRegistry {
         SparklingMethodInvocationCenter.addObserver(
             object : SparklingMethodInvocationCenter.Observer {
                 override fun onStart(event: SparklingMethodInvocationCenter.Event) {
-                    notifyMethodStart(event)
+                    providers().forEach { provider ->
+                        (provider as? SparklingMethodInvocationCenter.Observer)?.let { observer ->
+                            runCatching { observer.onStart(event) }
+                        }
+                    }
                 }
 
                 override fun onEnd(event: SparklingMethodInvocationCenter.Event) {
-                    notifyMethodEnd(event)
+                    providers().forEach { provider ->
+                        (provider as? SparklingMethodInvocationCenter.Observer)?.let { observer ->
+                            runCatching { observer.onEnd(event) }
+                        }
+                    }
                 }
             },
         )

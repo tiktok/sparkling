@@ -11,7 +11,8 @@ interface IContextProvider<out T> : IReleasable {
     fun provideInstance(): T?
 }
 
-class ContextHolder<out T>(
+/** Holds a strong reference and allows host compatibility classes to reuse its lifecycle. */
+open class ContextHolder<out T>(
     t: T?,
 ) : IContextProvider<T> {
     private var ref: T? = t
@@ -23,7 +24,8 @@ class ContextHolder<out T>(
     }
 }
 
-class WeakContextHolder<out T>(
+/** Holds a weak reference and allows host compatibility classes to reuse its lifecycle. */
+open class WeakContextHolder<out T>(
     t: T?,
 ) : IContextProvider<T> {
     private var ref =

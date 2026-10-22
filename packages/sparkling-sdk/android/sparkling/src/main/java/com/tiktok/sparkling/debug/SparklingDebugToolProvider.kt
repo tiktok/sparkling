@@ -5,7 +5,6 @@ package com.tiktok.sparkling.debug
 
 import androidx.fragment.app.FragmentActivity
 import com.tiktok.sparkling.hybridkit.base.IKitView
-import com.tiktok.sparkling.method.registry.api.SparklingMethodInvocationCenter
 
 /**
  * SPI implemented by optional debug-tool packages.
@@ -25,10 +24,6 @@ interface SparklingDebugToolProvider {
         containerId: String,
         kitView: IKitView?,
     ) = Unit
-
-    fun onMethodInvocationStart(event: SparklingMethodInvocationCenter.Event) = Unit
-
-    fun onMethodInvocationEnd(event: SparklingMethodInvocationCenter.Event) = Unit
 
     fun setGlobalPropsCollector(collector: () -> Map<String, IKitView>) = Unit
 }

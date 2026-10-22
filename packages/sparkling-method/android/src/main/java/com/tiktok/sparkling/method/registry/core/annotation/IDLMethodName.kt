@@ -4,6 +4,10 @@
 
 package com.tiktok.sparkling.method.registry.core.annotation
 
+/**
+ * Carries the name a generated IDL method answers to, so the registry can read it without
+ * instantiating the class.
+ */
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class IDLMethodName(

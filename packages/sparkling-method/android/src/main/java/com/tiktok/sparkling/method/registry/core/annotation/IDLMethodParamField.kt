@@ -5,14 +5,13 @@
 package com.tiktok.sparkling.method.registry.core.annotation
 
 import androidx.annotation.Keep
-import com.tiktok.sparkling.method.registry.core.IDLDefaultValue
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseModel
 import kotlin.reflect.KClass
 
 /**
- * Desc:
+ * Describes one field of a param or result model: where it sits in the payload, whether it is
+ * required, and what to fall back to when the caller leaves it out.
  */
-
 @Target(AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class IDLMethodParamField(
@@ -25,6 +24,7 @@ annotation class IDLMethodParamField(
     val defaultValue: MethodParamDefaultValue = MethodParamDefaultValue(),
 )
 
+/** Which of [MethodParamDefaultValue]'s value slots carries the default, if any. */
 @Keep
 enum class DefaultType {
     STRING,
@@ -35,6 +35,10 @@ enum class DefaultType {
     NONE,
 }
 
+/**
+ * A default held as one slot per primitive type, because an annotation member cannot be typed as a
+ * union. [type] says which slot to read.
+ */
 @Target(AnnotationTarget.ANNOTATION_CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class MethodParamDefaultValue(

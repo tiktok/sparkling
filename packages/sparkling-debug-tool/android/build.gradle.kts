@@ -37,6 +37,9 @@ android {
 }
 
 dependencies {
+    testImplementation(libs.junit)
+    testImplementation("org.robolectric:robolectric:4.11.1")
+
     implementation(libs.androidx.appcompat)
     implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
@@ -53,8 +56,10 @@ dependencies {
     val localSparkling = rootProject.findProject(":sparkling")
     if (localSparkling != null) {
         compileOnly(localSparkling)
+        testImplementation(localSparkling)
     } else {
         compileOnly("com.tiktok.sparkling:sparkling:$sparklingVersion")
+        testImplementation("com.tiktok.sparkling:sparkling:$sparklingVersion")
     }
     val localSparklingMethod = rootProject.findProject(":sparkling-method")
     if (localSparklingMethod != null) {

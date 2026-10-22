@@ -15,6 +15,7 @@ import com.lynx.tasm.behavior.Behavior
 import com.lynx.tasm.behavior.BehaviorBundle
 import com.lynx.tasm.service.LynxServiceCenter
 import com.tiktok.sparkling.SparklingContext
+import com.tiktok.sparkling.debug.SparklingDebugToolRegistry
 import com.tiktok.sparkling.hybridkit.HybridCommon
 import com.tiktok.sparkling.hybridkit.HybridContext
 import com.tiktok.sparkling.hybridkit.base.IHybridKitLifeCycle
@@ -117,6 +118,7 @@ object HybridLynxKit {
             BridgeProtocolConstants.BRIDGE_LYNX_PROTOCOL,
         )
         hybridContext.bridge = bridge
+        SparklingDebugToolRegistry.attachBridge(bridge)
         sparklingContext?.lynxViewCreatedListener?.onCreated(lynxView)
 
         lifeCycle?.onPostKitCreated(lynxView)

@@ -4,6 +4,7 @@
 
 package com.tiktok.sparkling.method.registry.core.annotation
 
+/** Marks the nested model class that describes a method's parameters. */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class IDLMethodParamModel
