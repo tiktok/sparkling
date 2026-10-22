@@ -8,34 +8,20 @@ import com.tiktok.sparkling.method.registry.api.BridgeSettings
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Desc:
+ * Registers method classes and providers by platform and name.
+ * Hosts can customize name resolution while sharing registration and lookup behavior.
  */
-class IDLMethodRegistry(
-    private val isLocalBridgeRegistry: Boolean = false,
-    private val bridgeContext: IBridgeContext? = null,
+open class IDLMethodRegistry(
+    protected val isLocalBridgeRegistry: Boolean = false,
+    protected val bridgeContext: IBridgeContext? = null,
     private val inferMethodNameFromInstance: Boolean = isLocalBridgeRegistry,
 ) {
     companion object {
+        /** Copies the namespace and registrations into a new global registry. */
         @JvmStatic
         fun copyWith(bridgeRegistry: IDLMethodRegistry): IDLMethodRegistry =
             IDLMethodRegistry().apply {
-                namespace = bridgeRegistry.namespace
-                bridgeRegistry.methodMap.entries.forEach { outerEntry ->
-                    val platformType = outerEntry.key
-                    val innerMap =
-                        ConcurrentHashMap<String, IDLMethodProvider>().apply {
-                            this.putAll(outerEntry.value)
-                        }
-                    this.methodMap[platformType] = innerMap
-                }
-                bridgeRegistry.methodClassMap.entries.forEach { outerEntry ->
-                    val platformType = outerEntry.key
-                    val innerMap =
-                        ConcurrentHashMap<String, Class<out IDLBridgeMethod>>().apply {
-                            this.putAll(outerEntry.value)
-                        }
-                    this.methodClassMap[platformType] = innerMap
-                }
+                copyFrom(bridgeRegistry)
             }
     }
 
@@ -43,7 +29,7 @@ class IDLMethodRegistry(
 
     private val methodMap: ConcurrentHashMap<BridgePlatformType, ConcurrentHashMap<String, IDLMethodProvider>> =
         ConcurrentHashMap()
-    private val methodClassMap: ConcurrentHashMap<BridgePlatformType, ConcurrentHashMap<String, Class<out IDLBridgeMethod>>> =
+    protected val methodClassMap: ConcurrentHashMap<BridgePlatformType, ConcurrentHashMap<String, Class<out IDLBridgeMethod>>> =
         ConcurrentHashMap()
     private var methodRegistryCache: IDLMethodRegistryCache? = null
 
@@ -65,12 +51,13 @@ class IDLMethodRegistry(
         clazz: Class<out IDLBridgeMethod>,
         scope: BridgePlatformType,
     ) {
-        val name = methodNameFor(clazz)
+        val name = resolveMethodName(clazz)
         if (!name.isNullOrEmpty()) {
             innerRegisterMethod(name, methodProviderFor(clazz), scope, clazz)
         }
     }
 
+    /** Registers a class on the requested platforms after resolving its method name. */
     fun registerMethod(
         clazz: Class<out IDLBridgeMethod>,
         scope: BridgePlatformType = BridgePlatformType.ALL,
@@ -90,7 +77,7 @@ class IDLMethodRegistry(
                 innerRegisterMethod(clazz, it)
             }
         } else {
-            val name = methodNameFor(clazz)
+            val name = resolveMethodName(clazz)
             if (!name.isNullOrEmpty()) {
                 (
                     if (scope == BridgePlatformType.ALL) {
@@ -117,6 +104,7 @@ class IDLMethodRegistry(
         innerRegisterMethod(name, methodProviderFor(clazz), scope, clazz)
     }
 
+    /** Registers a factory, optionally associating a class for metadata and class lookups. */
     fun registerMethodProvider(
         name: String,
         methodProvider: IDLMethodProvider,
@@ -164,6 +152,7 @@ class IDLMethodRegistry(
         }
     }
 
+    /** Returns the registered class, or null for an unknown method or the NONE platform. */
     fun findMethodClass(
         platformType: BridgePlatformType,
         name: String,
@@ -177,6 +166,7 @@ class IDLMethodRegistry(
         }
     }
 
+    /** Returns the registered factory, or null for an unknown method or the NONE platform. */
     fun findMethodProvider(
         platformType: BridgePlatformType,
         name: String,
@@ -190,11 +180,13 @@ class IDLMethodRegistry(
         }
     }
 
+    /** Whether either a provider or a class is registered for this name and platform. */
     fun isMethodExists(
         name: String,
         platformType: BridgePlatformType = BridgePlatformType.ALL,
     ): Boolean = findMethodProvider(platformType, name) != null || findMethodClass(platformType, name) != null
 
+    /** Returns the live class table for a platform, excluding NONE. */
     fun getMethodList(platformType: BridgePlatformType): MutableMap<String, Class<out IDLBridgeMethod>>? {
         if (platformType == BridgePlatformType.NONE) {
             return null
@@ -203,7 +195,31 @@ class IDLMethodRegistry(
         return methodClassMap[platformType]
     }
 
-    private fun methodNameFor(clazz: Class<out IDLBridgeMethod>): String? {
+    /**
+     * Copies the namespace and replaces both tables on every platform present in [other].
+     * Platforms absent from the source are retained. The new maps share their provider objects
+     * and class values with the source.
+     */
+    fun copyFrom(other: IDLMethodRegistry) {
+        namespace = other.namespace
+        (other.methodMap.keys + other.methodClassMap.keys).forEach { platform ->
+            val providers = other.methodMap[platform]
+            val classes = other.methodClassMap[platform]
+            if (providers != null) {
+                methodMap[platform] = ConcurrentHashMap(providers)
+            } else {
+                methodMap.remove(platform)
+            }
+            if (classes != null) {
+                methodClassMap[platform] = ConcurrentHashMap(classes)
+            } else {
+                methodClassMap.remove(platform)
+            }
+        }
+    }
+
+    /** Resolves cached annotations first, then uses an instance only when configured to do so. */
+    protected open fun resolveMethodName(clazz: Class<out IDLBridgeMethod>): String? {
         val cache =
             if (!isLocalBridgeRegistry) {
                 IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(null)
