@@ -32,6 +32,9 @@ import com.tiktok.sparkling.debugtool.inspect.MethodInvocation
 import com.tiktok.sparkling.debugtool.inspect.MethodInvocationStore
 import com.tiktok.sparkling.debugtool.inspect.SparklingDebugAutoWiring
 import com.tiktok.sparkling.debugtool.inspector.SparklingInspectorFragment
+import com.tiktok.sparkling.debugtool.getDevUrl.GetDevUrlMethod
+import com.tiktok.sparkling.debugtool.setDevUrl.SetDevUrlMethod
+import com.tiktok.sparkling.method.registry.core.SparklingBridgeManager
 
 /**
  * Entry point for the Sparkling debug tool. The host typically only needs to
@@ -93,6 +96,7 @@ object SparklingDebugTool {
         if (!isDebuggableApp(application) && !config.enableInNonDebuggableApp) {
             return
         }
+        registerDevUrlMethods(application)
         // Always apply the all-on debug flag set when running under the debug
         // tool: switches are no longer user-visible. Hosts that need a custom
         // subset can still call [setFlags] explicitly.
@@ -332,6 +336,21 @@ object SparklingDebugTool {
     }
 
     private fun prefs(context: Context) = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+    private fun registerDevUrlMethods(application: Application) {
+        SparklingBridgeManager.registerIDLMethod(
+            "debugtool.getDevUrl",
+            clazz = GetDevUrlMethod::class.java,
+        ) {
+            GetDevUrlMethod(application)
+        }
+        SparklingBridgeManager.registerIDLMethod(
+            "debugtool.setDevUrl",
+            clazz = SetDevUrlMethod::class.java,
+        ) {
+            SetDevUrlMethod(application)
+        }
+    }
 
     private fun isDebuggableApp(context: Context): Boolean = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 

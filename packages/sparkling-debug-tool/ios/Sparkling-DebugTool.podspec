@@ -15,6 +15,13 @@ Pod::Spec.new do |s|
     'Sources/**/*.{h,m,swift}'
   ]
 
+  s.test_spec 'Tests' do |tests|
+    tests.requires_app_host = false
+    tests.source_files = [
+      'SparklingMethodTests/**/*.{h,m,swift}'
+    ]
+  end
+
   s.resource_bundles = {
     'SparklingDebugToolAssets' => [
       'packages/sparkling-debug-tool/ios/Resources/**/*.{png,xcassets,json}',
@@ -27,4 +34,5 @@ Pod::Spec.new do |s|
   s.dependency 'LynxService/Devtool', '~> 3.9.0'
   s.dependency 'LynxDevtool/Framework', '~> 3.9.0'
   s.dependency 'DebugRouter'
+  s.dependency 'SparklingMethod/Core'
 end
