@@ -101,11 +101,15 @@ SparklingRouter.open(context, "hybrid://lynxview_page?bundle=detail.lynx.bundle&
 
 **iOS (Swift)**：
 ```swift
-SparklingRouter.open("hybrid://lynxview_page?bundle=detail.lynx.bundle&title=Detail")
+let scheme = try SPKHybridSchemeParam.buildLynxPageScheme(
+    resource: .bundle("detail.lynx.bundle"),
+    queryItems: [URLQueryItem(name: "title", value: "Detail")]
+)
+SPKRouter.open(withURL: scheme.absoluteString, context: nil)
 ```
 
 ## 编码提示
 
-- 始终对参数值进行 URL 编码。在 JS 中使用 `URLSearchParams`，Android 上使用 `Uri.Builder`，iOS 上使用 `URLComponents`。
+- 始终对参数值进行 URL 编码。在 JS 中使用 `URLSearchParams`，Android 上使用 `Uri.Builder`，iOS 上使用 `SPKHybridSchemeParam.buildLynxPageScheme`。
 - 十六进制颜色必须将 `#` 编码为 `%23` —— 否则浏览器会将 `#` 之后的内容当作 URL fragment。
 - 使用 6 位 `#RRGGBB` 颜色。Android 和 iOS 对 8 位十六进制的解析方式不同。

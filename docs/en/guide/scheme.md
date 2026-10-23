@@ -99,11 +99,15 @@ SparklingRouter.open(context, "hybrid://lynxview_page?bundle=detail.lynx.bundle&
 
 **iOS (Swift)**:
 ```swift
-SparklingRouter.open("hybrid://lynxview_page?bundle=detail.lynx.bundle&title=Detail")
+let scheme = try SPKHybridSchemeParam.buildLynxPageScheme(
+    resource: .bundle("detail.lynx.bundle"),
+    queryItems: [URLQueryItem(name: "title", value: "Detail")]
+)
+SPKRouter.open(withURL: scheme.absoluteString, context: nil)
 ```
 
 ## Encoding tips
 
-- Always URL-encode parameter values. Use `URLSearchParams` in JS, `Uri.Builder` on Android, or `URLComponents` on iOS.
+- Always URL-encode parameter values. Use `URLSearchParams` in JS, `Uri.Builder` on Android, or `SPKHybridSchemeParam.buildLynxPageScheme` on iOS.
 - Hex colors must encode `#` as `%23` — otherwise the browser treats everything after `#` as a URL fragment.
 - Stick to 6-digit `#RRGGBB` colors. Android and iOS interpret 8-digit hex differently.

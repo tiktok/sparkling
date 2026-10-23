@@ -281,4 +281,81 @@ struct SPKHybridSchemeParamTests {
         #expect(param.extra.count >= 1000)
         #expect(endTime - startTime < 1.0)  // Should complete within 1 second
     }
+
+    // MARK: - Canonical Scheme Builder Tests
+
+    @Test func testBuildLynxPageBundleSchemePreservesOrderedQueryItems() throws {
+        let url = try SPKHybridSchemeParam.buildLynxPageScheme(
+            resource: .bundle("nav-basic.lynx.bundle"),
+            queryItems: [
+                URLQueryItem(name: "title", value: "Navigation & routing"),
+                URLQueryItem(name: "experiment", value: "first"),
+                URLQueryItem(name: "experiment", value: "second")
+            ])
+
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        #expect(components?.scheme == "hybrid")
+        #expect(components?.host == "lynxview_page")
+        #expect(components?.queryItems?.map(\.name) == ["bundle", "title", "experiment", "experiment"])
+        #expect(
+            components?.queryItems?.map(\.value) == [
+                "nav-basic.lynx.bundle", "Navigation & routing", "first", "second"
+            ])
+
+        let resolved = SPKHybridSchemeParam.resolver(withScheme: url)
+        #expect(resolved.engineType == .SPKHybridEngineTypeLynx)
+        #expect(resolved.containerType == .SPKHybridContainerTypePage)
+    }
+
+    @Test func testBuildLynxPageURLSchemeEncodesTargetOnce() throws {
+        let resource = "https://example.com/main.lynx.bundle?message=A%20B&comparison=a=b"
+        let url = try SPKHybridSchemeParam.buildLynxPageScheme(
+            resource: .url(resource),
+            queryItems: [URLQueryItem(name: "title", value: "A & B = C")])
+
+        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        #expect(components?.queryItems?.first?.name == "url")
+        #expect(components?.queryItems?.first?.value == resource)
+        #expect(components?.queryItems?.last?.value == "A & B = C")
+
+        let resolved = SPKHybridSchemeParam.resolver(withScheme: url)
+        #expect(resolved.url == resource)
+        #expect(resolved.engineType == .SPKHybridEngineTypeLynx)
+        #expect(resolved.containerType == .SPKHybridContainerTypePage)
+    }
+
+    @Test func testBuildLynxPageSchemeRejectsReservedTargets() {
+        var caughtError: SPKHybridSchemeBuilderError?
+        do {
+            _ = try SPKHybridSchemeParam.buildLynxPageScheme(
+                resource: .bundle("main.lynx.bundle"),
+                queryItems: [URLQueryItem(name: "url", value: "https://example.com")])
+        } catch let error as SPKHybridSchemeBuilderError {
+            caughtError = error
+        } catch {}
+
+        #expect(caughtError == .reservedQueryItem("url"))
+    }
+
+    @Test func testBuildLynxPageSchemeRejectsEmptyResource() {
+        var caughtError: SPKHybridSchemeBuilderError?
+        do {
+            _ = try SPKHybridSchemeParam.buildLynxPageScheme(resource: .bundle("  \n"))
+        } catch let error as SPKHybridSchemeBuilderError {
+            caughtError = error
+        } catch {}
+
+        #expect(caughtError == .emptyResource)
+    }
+
+    @Test func testBuildLynxPageSchemeRejectsRelativeURLResource() {
+        var caughtError: SPKHybridSchemeBuilderError?
+        do {
+            _ = try SPKHybridSchemeParam.buildLynxPageScheme(resource: .url("relative/main.lynx.bundle"))
+        } catch let error as SPKHybridSchemeBuilderError {
+            caughtError = error
+        } catch {}
+
+        #expect(caughtError == .invalidResourceURL("relative/main.lynx.bundle"))
+    }
 }

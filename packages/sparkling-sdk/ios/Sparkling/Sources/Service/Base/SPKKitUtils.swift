@@ -43,4 +43,33 @@ open class SPKKitUtils: NSObject {
         }
         return
     }
+
+    /// Adds container defaults below any page-provided global properties.
+    ///
+    /// Existing values always win so stable container metadata cannot replace
+    /// launch or page data. Both supported global-prop representations retain
+    /// their original representation.
+    class func addDefaultGlobalProps(withContext context: SPKHybridContext?, defaultGlobalProps: [String: Any]?) {
+        guard let context = context else {
+            return
+        }
+        let defaults = defaultGlobalProps ?? [:]
+        if context.globalProps == nil {
+            context.globalProps = defaults
+            return
+        }
+
+        if let existing = context.globalProps as? [String: Any] {
+            var merged = defaults
+            merged.merge(existing) { _, pageValue in pageValue }
+            context.globalProps = merged
+            return
+        }
+
+        if let existing = context.globalProps as? LynxTemplateData {
+            let merged = LynxTemplateData(dictionary: defaults)
+            merged?.update(with: existing)
+            context.globalProps = merged
+        }
+    }
 }

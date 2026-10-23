@@ -234,6 +234,8 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     weak var originalNavigationControllerDelegate: UINavigationControllerDelegate?
     weak var oldDelegate: UIGestureRecognizerDelegate?
 
+    private var hostInteractivePopInFlight = false
+
     private var containerFrame: CGRect = UIScreen.main.bounds
 
     /// Used to refresh SnapKit constraints when safe-area insets become valid after the first layout (SwiftUI / multi-scene).
@@ -363,9 +365,12 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.oldDelegate = self.navigationController?.interactivePopGestureRecognizer?.delegate
-        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
         self.originControllerPopGestureRecongnizerEnabled =
             self.navigationController?.interactivePopGestureRecognizer?.isEnabled ?? self.originControllerPopGestureRecongnizerEnabled
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+        if (self.context as? SPKContext)?.interactivePopGestureDelegate != nil {
+            self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+        }
 
         self.originStatusBarStyle = self.statusBarStyle
         self.updateStatusBarStatus()
@@ -385,15 +390,18 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
     /// - Parameter animated: Whether the disappearance is animated
     public override func viewWillDisappear(_ animated: Bool) {
         self.transitionCoordinator?.notifyWhenInteractionChanges { [weak self] context in
-            if context.isCancelled {
+            guard let self else {
                 return
             }
-            self?.send(
-                event: SPKEvent.Back.finishBack,
-                params: [
-                    SPKEvent.Common.containerIdKey: self?.containerID ?? "",
-                    SPKEvent.Back.actionFromKey: SPKEvent.Back.actionTypeSwipe,
-                ], callback: nil)
+            if !context.isCancelled {
+                self.send(
+                    event: SPKEvent.Back.finishBack,
+                    params: [
+                        SPKEvent.Common.containerIdKey: self.containerID,
+                        SPKEvent.Back.actionFromKey: SPKEvent.Back.actionTypeSwipe,
+                    ], callback: nil)
+            }
+            self.notifyHostInteractivePopDidEnd(completed: !context.isCancelled)
         }
 
         self.navigationController?.interactivePopGestureRecognizer?.delegate = self.oldDelegate
@@ -597,6 +605,12 @@ open class SPKViewController: UIViewController, SPKContainerProtocol {
                 SPKEvent.Common.containerIdKey: self.containerID,
                 SPKEvent.Back.actionFromKey: SPKEvent.Back.actionTypeNavBarBackPress,
             ])
+
+        if let navigationBarBackHandler = (self.context as? SPKContext)?.navigationBarBackHandler,
+            navigationBarBackHandler(self)
+        {
+            return
+        }
 
         if self.navigationController?.viewControllers.count ?? 0 > 1 {
             //MARK: currently only support lynx
@@ -952,7 +966,7 @@ extension SPKViewController: SPKContainerLifecycleProtocol {
             self?.handleErrorViewReload()
         })
 
-        return nil
+        return loadFailedView
     }
 
     func handleErrorViewReload() {
@@ -1023,10 +1037,29 @@ extension SPKViewController: UINavigationControllerDelegate {
 extension SPKViewController: UIGestureRecognizerDelegate {
 
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer === self.navigationController?.interactivePopGestureRecognizer,
+            let delegate = (self.context as? SPKContext)?.interactivePopGestureDelegate
+        {
+            let shouldBegin = delegate.containerShouldBeginInteractivePop?(self) ?? true
+            guard shouldBegin else {
+                return false
+            }
+            self.hostInteractivePopInFlight = true
+        }
         if !self.panToCloseGestureControlByExternal {
             self.reportPangestureEvent()
         }
         return true
+    }
+
+    func notifyHostInteractivePopDidEnd(completed: Bool) {
+        guard self.hostInteractivePopInFlight else {
+            return
+        }
+        self.hostInteractivePopInFlight = false
+        (self.context as? SPKContext)?.interactivePopGestureDelegate?.container?(
+            self,
+            didEndInteractivePopCompleted: completed)
     }
 
     func reportPangestureEvent() {

@@ -290,9 +290,9 @@ open class SPKContainerView: UIView, SPKContainerProtocol {
     /// This method updates the global properties with essential container information
     /// including the SPK framework version for proper initialization and tracking.
     public func addContainerDefaultGlobalProps() {
-        SPKKitUtils.updateGlobalProps(
+        SPKKitUtils.addDefaultGlobalProps(
             withContext: self.context,
-            newGlobalProps: [
+            defaultGlobalProps: [
                 "SPK_version": SPKVersion.SPKVersion()
             ])
         return
