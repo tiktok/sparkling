@@ -15,15 +15,14 @@ import java.lang.reflect.Method
  * Where [IDLMethodResultModelArguments] reads a result model from when the annotation cache has no
  * entry, and which cache it asks first.
  *
- * Hosts can carry result models annotated with their own set. [DefaultIDLResultModelReader]
- * reads the Sparkling annotations and [IDLMethodRegistryCacheManager].
+ * Deviation from open source: upstream reads `IDLMethodParamField` and
+ * [IDLMethodRegistryCacheManager] inline. A host can carry result models annotated with its own
+ * set, so those reads come through here. [DefaultIDLResultModelReader] is what upstream does.
  */
 interface IDLResultModelReader {
+
     /** What the annotation cache of [containerID] holds for the method that produces [clazz]. */
-    fun findResultAnnotationData(
-        containerID: String?,
-        clazz: Class<*>,
-    ): IDLAnnotationData?
+    fun findResultAnnotationData(containerID: String?, clazz: Class<*>): IDLAnnotationData?
 
     /** The field annotation on [method], or null when it carries none. */
     fun readField(method: Method): IDLParamField?
@@ -41,21 +40,23 @@ interface IDLResultModelReader {
     val modelClass: Class<out IDLMethodBaseModel>
 }
 
-/** Reads result models through the Sparkling annotations and cache. */
+/** Reads result models the way upstream does: the open-source annotations and cache. */
 object DefaultIDLResultModelReader : IDLResultModelReader {
-    override fun findResultAnnotationData(
-        containerID: String?,
-        clazz: Class<*>,
-    ): IDLAnnotationData? =
-        IDLMethodRegistryCacheManager
-            .provideIDLMethodRegistryCache(containerID)
+
+    override fun findResultAnnotationData(containerID: String?, clazz: Class<*>): IDLAnnotationData? {
+        return IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(containerID)
             ?.getAnnotationDataByResultClass(clazz)
+    }
 
     override fun readField(method: Method): IDLParamField? = DefaultIDLParamModelReader.readParamField(method)
 
-    override fun readStringEnumOptions(method: Method): Array<out String>? = DefaultIDLParamModelReader.readStringEnumOptions(method)
+    override fun readStringEnumOptions(method: Method): Array<out String>? {
+        return DefaultIDLParamModelReader.readStringEnumOptions(method)
+    }
 
-    override fun readIntEnumOptions(method: Method): IntArray? = DefaultIDLParamModelReader.readIntEnumOptions(method)
+    override fun readIntEnumOptions(method: Method): IntArray? {
+        return DefaultIDLParamModelReader.readIntEnumOptions(method)
+    }
 
     override fun isNestedModel(value: Any): Boolean = value is IDLMethodBaseModel
 

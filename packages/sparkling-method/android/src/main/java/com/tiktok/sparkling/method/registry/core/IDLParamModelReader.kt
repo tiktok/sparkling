@@ -19,11 +19,9 @@ import kotlin.reflect.KClass
  * annotations of this package.
  */
 interface IDLParamModelReader {
+
     /** What the annotation cache of [containerID] holds for [clazz], or null when it holds nothing. */
-    fun findAnnotationData(
-        containerID: String?,
-        clazz: Class<out IDLBridgeMethod>,
-    ): IDLAnnotationData?
+    fun findAnnotationData(containerID: String?, clazz: Class<out IDLBridgeMethod>): IDLAnnotationData?
 
     /** The param model [clazz] declares, or null when it declares none. */
     fun retrieveParamModel(clazz: Class<out IDLBridgeMethod>): Class<out IDLMethodBaseParamModel>?

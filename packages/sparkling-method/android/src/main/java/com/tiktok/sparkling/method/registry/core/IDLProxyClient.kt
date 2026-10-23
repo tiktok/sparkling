@@ -16,8 +16,10 @@ import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseParamMod
  * that takes it, because this is an `object` and cannot be subclassed.
  */
 object IDLProxyClient {
+
     /** The param model [clazz] declares, read through [IDLMethodParamModel]. */
-    fun retrieveParamModel(clazz: Class<out IDLBridgeMethod>): Class<out IDLMethodBaseParamModel>? = retrieveParamModel(clazz, IDLMethodParamModel::class.java)
+    fun retrieveParamModel(clazz: Class<out IDLBridgeMethod>): Class<out IDLMethodBaseParamModel>? =
+        retrieveParamModel(clazz, IDLMethodParamModel::class.java)
 
     /**
      * The param model [clazz] declares, read through [annotation].

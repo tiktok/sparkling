@@ -17,23 +17,34 @@ import kotlin.reflect.KClass
  * and the caches of [IDLMethodRegistryCacheManager].
  */
 object DefaultIDLParamModelReader : IDLParamModelReader {
+
     override fun findAnnotationData(
         containerID: String?,
         clazz: Class<out IDLBridgeMethod>,
-    ): IDLAnnotationData? = IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(containerID)?.BRIDGE_ANNOTATION_MAP?.get(clazz)
+    ): IDLAnnotationData? {
+        return IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(containerID)?.BRIDGE_ANNOTATION_MAP?.get(clazz)
+    }
 
-    override fun retrieveParamModel(clazz: Class<out IDLBridgeMethod>): Class<out IDLMethodBaseParamModel>? = IDLProxyClient.retrieveParamModel(clazz)
+    override fun retrieveParamModel(clazz: Class<out IDLBridgeMethod>): Class<out IDLMethodBaseParamModel>? {
+        return IDLProxyClient.retrieveParamModel(clazz)
+    }
 
     override fun readParamField(method: Method): IDLParamField? {
         val annotation = method.getAnnotation(IDLMethodParamField::class.java) ?: return null
         return toIDLParamField(annotation, method.returnType)
     }
 
-    override fun readStringEnumOptions(method: Method): Array<out String>? = method.getAnnotation(IDLMethodStringEnum::class.java)?.option
+    override fun readStringEnumOptions(method: Method): Array<out String>? {
+        return method.getAnnotation(IDLMethodStringEnum::class.java)?.option
+    }
 
-    override fun readIntEnumOptions(method: Method): IntArray? = method.getAnnotation(IDLMethodIntEnum::class.java)?.option
+    override fun readIntEnumOptions(method: Method): IntArray? {
+        return method.getAnnotation(IDLMethodIntEnum::class.java)?.option
+    }
 
-    override fun isDefaultNestedType(type: KClass<*>?): Boolean = type == IDLMethodBaseModel.Default::class
+    override fun isDefaultNestedType(type: KClass<*>?): Boolean {
+        return type == IDLMethodBaseModel.Default::class
+    }
 
     /** [annotation] in the shape the cache and the processors share. [IDLMethodRegistryCache] passes the enum options. */
     internal fun toIDLParamField(

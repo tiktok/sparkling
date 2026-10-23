@@ -11,7 +11,9 @@ interface IContextProvider<out T> : IReleasable {
     fun provideInstance(): T?
 }
 
-/** Holds a strong reference and allows host compatibility classes to reuse its lifecycle. */
+// Deviation from open source: `open` so that the legacy XContextHolder class path, which a
+// second-party artifact instantiates directly, can be kept as a thin subclass instead of a
+// duplicate implementation. To be pushed upstream.
 open class ContextHolder<out T>(
     t: T?,
 ) : IContextProvider<T> {
@@ -24,7 +26,8 @@ open class ContextHolder<out T>(
     }
 }
 
-/** Holds a weak reference and allows host compatibility classes to reuse its lifecycle. */
+// Deviation from open source: `open` for the same reason as [ContextHolder], so that the legacy
+// XWeakContextHolder class path can be kept as a thin subclass. To be pushed upstream.
 open class WeakContextHolder<out T>(
     t: T?,
 ) : IContextProvider<T> {

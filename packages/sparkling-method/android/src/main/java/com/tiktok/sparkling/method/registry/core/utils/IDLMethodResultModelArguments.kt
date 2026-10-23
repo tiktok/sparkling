@@ -17,8 +17,11 @@ import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
 /**
- * Creates result-model proxies using a configurable annotation reader. Existing overloads
- * use [DefaultIDLResultModelReader] to preserve the Sparkling annotations and cache.
+ * Desc:
+ *
+ * Deviation from open source: [createModel] takes an [IDLResultModelReader]. Upstream reads
+ * `IDLMethodParamField` and its own cache inline; the two-argument overloads still do that, through
+ * [DefaultIDLResultModelReader].
  */
 object IDLMethodResultModelArguments {
     /**
@@ -32,7 +35,8 @@ object IDLMethodResultModelArguments {
     /**
      * Builds a result model, reading its fields through [reader].
      *
-     * A host whose method classes carry another annotation set passes its own reader.
+     * A host whose method classes carry another annotation set passes its own reader. The TikTok
+     * `XBridgeResultModelArguments` does.
      */
     fun <T> createModel(
         clazz: Class<T>,
@@ -108,9 +112,8 @@ object IDLMethodResultModelArguments {
     ) where T : IDLMethodBaseModel {
         val getters = clazz.declaredMethods.filter { reader.readField(it)?.isGetter == true }
         getters.forEach { getterMethod ->
-            val annotationModel =
-                reader.readField(getterMethod)
-                    ?: return@forEach
+            val annotationModel = reader.readField(getterMethod)
+                ?: return@forEach
             val keyPath = annotationModel.keyPath
             val required = annotationModel.required
             val returnType = getterMethod.returnType
@@ -223,10 +226,7 @@ object IDLMethodResultModelArguments {
         return reader.readIntEnumOptions(getterMethod)
     }
 
-    private fun usesIntEnum(
-        returnType: Class<*>,
-        annotationModel: IDLParamField,
-    ): Boolean {
+    private fun usesIntEnum(returnType: Class<*>, annotationModel: IDLParamField): Boolean {
         if (returnType == Number::class.java) {
             return true
         }
@@ -234,10 +234,7 @@ object IDLMethodResultModelArguments {
             annotationModel.primitiveClassType == Number::class
     }
 
-    private fun usesStringEnum(
-        returnType: Class<*>,
-        annotationModel: IDLParamField,
-    ): Boolean {
+    private fun usesStringEnum(returnType: Class<*>, annotationModel: IDLParamField): Boolean {
         if (returnType == String::class.java) {
             return true
         }
