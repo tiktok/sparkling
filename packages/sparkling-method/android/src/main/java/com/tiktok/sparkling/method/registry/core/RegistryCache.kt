@@ -7,33 +7,20 @@ package com.tiktok.sparkling.method.registry.core
 import com.tiktok.sparkling.method.registry.core.annotation.DefaultType
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseModel
 import java.lang.reflect.Method
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
-/**
- * Desc:
+/*
+ * What [IDLMethodRegistryCache] reads off a method class once, so that every later call can bind
+ * its payload without touching reflection again.
+ *
+ * Deviation from open source: upstream also declares an `IDLRegistryCache` singleton here holding
+ * one process-wide cache. That singleton is not mirrored yet because the process-wide instance has
+ * to be the TikTok subclass, which is the only one that can read the annotations prebuilt method
+ * classes carry; a second singleton typed to this base would silently shadow it. TikTok therefore
+ * keeps owning the global holder for now.
  */
 
-object IDLRegistryCache {
-    const val TAG = "IDLRegistryCache"
-
-    private val IDLMethodRegistryCache = IDLMethodRegistryCache()
-    val BRIDGE_ANNOTATION_MAP: ConcurrentHashMap<Class<out IDLBridgeMethod>, IDLAnnotationData>
-        get() = IDLMethodRegistryCache.BRIDGE_ANNOTATION_MAP
-    val BRIDGE_RESULT_MAP: ConcurrentHashMap<Class<*>, Class<*>>
-        get() = IDLMethodRegistryCache.BRIDGE_RESULT_MAP
-
-    fun getRealIDLRegistryCache(): IDLMethodRegistryCache = IDLMethodRegistryCache
-
-    @JvmStatic
-    fun find(clazz: Class<out IDLBridgeMethod>): String = IDLMethodRegistryCache.find(clazz)
-
-    fun getAnnotationDataByResultClass(resultModelClazz: Class<*>): IDLAnnotationData? {
-        val clazz = BRIDGE_RESULT_MAP[resultModelClazz] ?: return null
-        return BRIDGE_ANNOTATION_MAP[clazz]
-    }
-}
-
+/** Everything known about one method class: its two model classes and their fields. */
 data class IDLAnnotationData(
     val paramClass: Class<*>,
     val resultClass: Class<*>,
@@ -42,11 +29,13 @@ data class IDLAnnotationData(
     val models: Map<Class<out IDLMethodBaseModel>, IDLAnnotationModel> = hashMapOf(),
 )
 
+/** One model class's fields, indexed both by getter and by the key they sit under. */
 data class IDLAnnotationModel(
     val methodModel: HashMap<Method, IDLParamField> = hashMapOf(),
     val stringModel: HashMap<String, IDLParamField> = hashMapOf(),
 )
 
+/** One field of a model class, read off its annotations. */
 data class IDLParamField(
     val required: Boolean = false,
     val keyPath: String = "",
@@ -60,6 +49,7 @@ data class IDLParamField(
     val intEnum: List<Int> = listOf(),
 )
 
+/** A field's default, held as one slot per primitive type. [type] says which slot to read. */
 data class IDLDefaultValue(
     val type: DefaultType = DefaultType.NONE,
     val doubleValue: Double = 0.0,
