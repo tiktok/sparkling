@@ -83,7 +83,17 @@ open class SPKGlobalPropsUtils: NSObject {
             "isAppBackground": UIApplication.shared.applicationState == .background,
             "screenOrientation": self.screenOrientationString(),
             "deviceModel": UIDevice.spk.hwModel?.lowercased() ?? "",
+            "theme": self.systemTheme(),
+            SPKThemePreferenceManager.globalPropsKey: SPKThemePreferenceManager.shared.preference.rawValue,
         ]
+    }
+
+    static func systemTheme(for style: UIUserInterfaceStyle? = nil) -> String {
+        let resolvedStyle =
+            style
+            ?? UIApplication.spk.mainWindow?.traitCollection.userInterfaceStyle
+            ?? UIScreen.main.traitCollection.userInterfaceStyle
+        return resolvedStyle == .dark ? "dark" : "light"
     }
 
     /// Returns the current screen orientation as a string representation.

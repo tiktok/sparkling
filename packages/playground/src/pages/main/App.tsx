@@ -191,19 +191,12 @@ function HomePage(props: { showPage: boolean; topInset: number }) {
 
   const handleItemTap = (bundle: string, title: string) => {
     'background only'
-    // Pass the current resolved theme so sub-pages inherit the user's choice
-    const dark = resolved === 'dark'
     navigate({
       path: bundle,
       options: {
         params: {
           title,
           hide_nav_bar: 0,
-          container_bg_color: dark ? '#000000' : '#f0f2f5',
-          nav_bar_color: dark ? '#000000' : '#ffffff',
-          title_color: dark ? '#FFFFFF' : '#000000',
-          loading_bg_color: dark ? '#000000' : '#f0f2f5',
-          force_theme_style: resolved,
         },
       },
     }, () => {})

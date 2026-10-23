@@ -12,6 +12,7 @@ import com.tiktok.sparkling.hybridkit.base.HybridLoadSession
 import com.tiktok.sparkling.hybridkit.base.Theme
 import com.tiktok.sparkling.hybridkit.config.RuntimeInfo
 import com.tiktok.sparkling.hybridkit.scheme.SparklingUriParser
+import com.tiktok.sparkling.hybridkit.theme.ThemePreferenceManager
 import androidx.core.net.toUri
 import java.util.concurrent.ConcurrentHashMap
 
@@ -232,6 +233,12 @@ class GlobalPropsUtils {
                 put("screenOrientation", if (isPortrait) "Portrait" else "Landscape")
                 put("orientation", if (isPortrait) 0 else 1)
                 put("theme", if (hybridContext.getTheme(context) == Theme.DARK) "dark" else "light")
+                context?.let {
+                    put(
+                        ThemePreferenceManager.GLOBAL_PROPS_KEY,
+                        ThemePreferenceManager.getPreference(it).value,
+                    )
+                }
             }
             putAll(unstableMap)
         }
