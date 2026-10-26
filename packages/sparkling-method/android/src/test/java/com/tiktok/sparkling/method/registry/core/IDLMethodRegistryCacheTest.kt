@@ -5,6 +5,7 @@
 package com.tiktok.sparkling.method.registry.core
 
 import com.tiktok.sparkling.method.protocol.impl.errors.JSBErrorReportModel
+import com.tiktok.sparkling.method.registry.api.SparklingBridge
 import com.tiktok.sparkling.method.registry.api.util.ThreadPool
 import com.tiktok.sparkling.method.registry.core.annotation.DefaultType
 import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodIntEnum
@@ -33,8 +34,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowLog
 
-/** Default contracts shared by the original cache and its extensible replacement. */
+/** Contracts for deferred parsing, failure hooks, and cache publication. */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], manifest = Config.NONE)
 class IDLMethodRegistryCacheTest {
@@ -138,12 +140,134 @@ class IDLMethodRegistryCacheTest {
     }
 
     @Test
-    fun failedNameLookupStillReturnsEmptyAndReportsTheRegistrationError() {
+    fun failedNameLookupLogsAndReturnsEmptyWithoutChangingErrorContext() {
         val cache = IDLMethodRegistryCache()
-        // An interface has no superclass: the original lookup reports this invalid method class.
-        assertEquals("", cache.find(IDLBridgeMethod::class.java))
-        val message = errors["register_error_${IDLBridgeMethod::class.java.name}"] as String
-        assertTrue(message.startsWith("IDLMethodRegistryCache.find failed,clazz == ${IDLBridgeMethod::class.java.name}, e == "))
+        errors["existing_context"] = "keep"
+        val previousDebugEnv = SparklingBridge.isDebugEnv
+        try {
+            SparklingBridge.isDebugEnv = true
+            // An interface has no superclass: preserve the existing lookup failure and debug log.
+            assertEquals("", cache.find(IDLBridgeMethod::class.java))
+            assertEquals(mapOf("existing_context" to "keep"), errors)
+            assertTrue(ShadowLog.getLogsForTag("IDLMethodRegistryCache").any {
+                it.msg.startsWith("IDLMethodRegistryCache.find failed,clazz == ${IDLBridgeMethod::class.java.name}, e == ")
+            })
+        } finally {
+            SparklingBridge.isDebugEnv = previousDebugEnv
+        }
+    }
+
+    @Test
+    fun subclassesReceiveFailureDetailsAndCallingSuperDoesNotReport() {
+        val failure = IllegalStateException("name reader failed")
+        val cache = object : IDLMethodRegistryCache() {
+            override val TAG = "CustomCache"
+            var reportedError: Throwable? = null
+            var reportedMessage: String? = null
+            var failureCount = 0
+
+            override fun readMethodName(clazz: Class<out IDLBridgeMethod>): String? = throw failure
+
+            override fun onFindFailed(clazz: Class<out IDLBridgeMethod>, errorMsg: String, e: Throwable) {
+                reportedError = e
+                reportedMessage = errorMsg
+                failureCount++
+                super.onFindFailed(clazz, errorMsg, e)
+            }
+        }
+        val method = OwnMethod::class.java
+        assertEquals("", cache.find(method))
+        assertSame(failure, cache.reportedError)
+        assertEquals(
+            "CustomCache.find failed,clazz == ${method.name}, e == name reader failed",
+            cache.reportedMessage,
+        )
+        assertEquals(1, cache.failureCount)
+        assertTrue(errors.isEmpty())
+        assertEquals(1, executor.pendingCount)
+    }
+
+    @Test
+    fun rejectedSchedulingPropagatesFromCacheAndFindReturnsEmptyWithoutReporting() {
+        executor.shutdown()
+        val cache = IDLMethodRegistryCache()
+        val method = OwnMethod::class.java
+        assertTrue(runCatching { cache.cacheMethodClass(method) }.exceptionOrNull() is RejectedExecutionException)
+        assertEquals("", cache.find(method))
+        assertTrue(errors.isEmpty())
+        assertTrue(cache.BRIDGE_ANNOTATION_MAP.isEmpty())
+        assertTrue(cache.BRIDGE_RESULT_MAP.isEmpty())
+    }
+
+    @Test
+    fun backgroundParsingFailureDoesNotTurnAResolvedNameIntoARegistrationFailure() {
+        val failure = IllegalStateException("model reader failed")
+        val cache = object : IDLMethodRegistryCache() {
+            override fun findParamModelClass(clazz: Class<out IDLBridgeMethod>): Class<*>? = throw failure
+        }
+        assertEquals("own", cache.find(OwnMethod::class.java))
+        assertEquals(1, executor.pendingCount)
+        val executionFailure = runCatching { executor.runPending() }.exceptionOrNull()
+        assertTrue(executionFailure is java.util.concurrent.ExecutionException)
+        assertSame(failure, executionFailure?.cause)
+        assertTrue(errors.isEmpty())
+        assertTrue(cache.BRIDGE_ANNOTATION_MAP.isEmpty())
+        assertTrue(cache.BRIDGE_RESULT_MAP.isEmpty())
+    }
+
+    @Test
+    fun hostOverridesCanReplaceDefaultSchedulingAndHandleFailures() {
+        val failure = IllegalStateException("host name reader failed")
+        val cache = object : IDLMethodRegistryCache() {
+            var reportedError: Throwable? = null
+
+            override fun cacheMethodClass(clazz: Class<out IDLBridgeMethod>) {
+                addAnnotationCache(clazz)
+            }
+
+            override fun readMethodName(clazz: Class<out IDLBridgeMethod>): String? = throw failure
+
+            override fun onFindFailed(clazz: Class<out IDLBridgeMethod>, errorMsg: String, e: Throwable) {
+                reportedError = e
+            }
+        }
+        assertEquals("", cache.find(OwnMethod::class.java))
+        assertSame(failure, cache.reportedError)
+        assertEquals(0, executor.pendingCount)
+        assertTrue(cache.BRIDGE_ANNOTATION_MAP.containsKey(OwnMethod::class.java))
+        assertTrue(errors.isEmpty())
+    }
+
+    @Test
+    fun globalAndContainerRegistriesRetainDeferredModelCaching() {
+        val container = "cache-registry-test"
+        val field = IDLMethodRegistryCacheManager::class.java.getDeclaredField("processWideCache")
+            .apply { isAccessible = true }
+        val previous = field.get(null)
+        field.set(null, null)
+        try {
+            val context = BridgeContextWrapper().apply { setContainerID(container) }
+            val localRegistry = IDLMethodRegistry(true, context, false)
+            val globalRegistry = IDLMethodRegistry()
+            val provider = IDLMethodProvider { error("Registration must not instantiate the method") }
+            val method = OwnMethod::class.java
+            globalRegistry.registerMethodProvider("global", provider, BridgePlatformType.LYNX, method)
+            localRegistry.registerMethodProvider("local", provider, BridgePlatformType.LYNX, method)
+            val global = requireNotNull(IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(null))
+            val local = requireNotNull(IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(container))
+            assertTrue(global !== local)
+            assertEquals(2, executor.pendingCount)
+            assertTrue(global.BRIDGE_ANNOTATION_MAP.isEmpty())
+            assertTrue(local.BRIDGE_ANNOTATION_MAP.isEmpty())
+            executor.runPending()
+            assertTrue(global.BRIDGE_ANNOTATION_MAP.containsKey(method))
+            assertTrue(local.BRIDGE_ANNOTATION_MAP.containsKey(method))
+            assertSame(global.BRIDGE_ANNOTATION_MAP[method], global.getAnnotationDataByResultClass(OwnMethod.Result::class.java))
+            assertSame(local.BRIDGE_ANNOTATION_MAP[method], local.getAnnotationDataByResultClass(OwnMethod.Result::class.java))
+        } finally {
+            IDLMethodRegistryCacheManager.unregisterIDLMethodRegistryCache(container)
+            field.set(null, previous)
+        }
     }
 
     abstract class ParentMethod : IDLBridgeMethod {

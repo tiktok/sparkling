@@ -1,10 +1,9 @@
-// Copyright (c) 2022 TikTok Pte. Ltd.
+// Copyright (c) 2023 TikTok Pte. Ltd.
 // Licensed under the Apache License Version 2.0 that can be found in the
 // LICENSE file in the root directory of this source tree.
 
 package com.tiktok.sparkling.method.registry.core
 
-import com.tiktok.sparkling.method.protocol.impl.errors.JSBErrorReportModel
 import com.tiktok.sparkling.method.protocol.utils.LogUtils
 import com.tiktok.sparkling.method.registry.api.util.ThreadPool
 import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodIntEnum
@@ -22,8 +21,10 @@ import kotlin.reflect.KClass
  * Reads a method class once through reflection and remembers it: the name it answers to, and the
  * shape of its param and result models.
  *
- * Hosts can override annotation lookup for their own generated method classes while sharing
- * model traversal and caching. The default implementation reads Sparkling annotations.
+ * Every read of an annotation goes through a protected seam, because a host can carry method
+ * classes annotated with its own annotation set. TikTok does: its prebuilt method classes name
+ * `com.bytedance.sdk.xbridge.registry.core.annotation` in their bytecode, so those classes are
+ * invisible to the annotations this class reads, and the TikTok subclass reads both.
  */
 open class IDLMethodRegistryCache {
 
@@ -68,10 +69,8 @@ open class IDLMethodRegistryCache {
     }
 
     /**
-     * Reads and stores the model shapes of [clazz].
-     *
-     * Keeps the existing background scheduling. Hosts can override this method to choose when
-     * to call [addAnnotationCache].
+     * Reads and stores the model shapes of [clazz] on the configured background executor,
+     * including when a caller uses the shared base cache directly.
      */
     open fun cacheMethodClass(clazz: Class<out IDLBridgeMethod>) {
         ThreadPool.runInBackGround(Runnable { addAnnotationCache(clazz) })
@@ -83,7 +82,6 @@ open class IDLMethodRegistryCache {
         return BRIDGE_ANNOTATION_MAP[clazz]
     }
 
-    /** Builds and stores one method's annotation metadata on the caller's thread. */
     protected fun addAnnotationCache(clazz: Class<out IDLBridgeMethod>) {
         val annotationData = annotationCache(clazz)
         if (annotationData != null) {
@@ -100,31 +98,27 @@ open class IDLMethodRegistryCache {
     }
 
     /**
-     * Optional host fallback when no annotation carries a name. The default does not instantiate
-     * method classes and leaves unresolved names empty.
+     * Last resort when no annotation carried a name. Returns null here; TikTok instantiates the
+     * class and asks it.
      */
     protected open fun onNameUnresolved(clazz: Class<out IDLBridgeMethod>): String? = null
 
-    /** Reports lookup failures after [find] has logged them; hosts can customize reporting. */
+    /** Called after [find] has already logged. TikTok also reports the failure. */
     protected open fun onFindFailed(
         clazz: Class<out IDLBridgeMethod>,
         errorMsg: String,
         e: Throwable,
-    ) {
-        JSBErrorReportModel.putGlobalExtension("register_error_${clazz.name}", errorMsg)
-    }
+    ) = Unit
 
     /** Whether [type] is the sentinel meaning "this field holds no nested model". */
     protected open fun isDefaultNestedType(type: KClass<out IDLMethodBaseModel>): Boolean {
         return type == IDLMethodBaseModel.Default::class
     }
 
-    /** Finds the generated parameter model using Sparkling annotations by default. */
     protected open fun findParamModelClass(clazz: Class<out IDLBridgeMethod>): Class<*>? {
         return findModelClassByAnnotation(clazz, IDLMethodParamModel::class.java)
     }
 
-    /** Finds the generated result model using Sparkling annotations by default. */
     protected open fun findResultModelClass(clazz: Class<out IDLBridgeMethod>): Class<*>? {
         return findModelClassByAnnotation(clazz, IDLMethodResultModel::class.java)
     }
