@@ -6,6 +6,7 @@ package com.tiktok.sparkling.method.protocol.impl.monitor
 
 import org.json.JSONObject
 
+/** One finished bridge call, or the payload a monitor recorded for it. */
 class MonitorEntity {
     var name: String? = null
     var code: Int? = null

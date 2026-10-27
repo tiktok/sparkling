@@ -7,6 +7,9 @@ package com.tiktok.sparkling.method.protocol.impl.monitor
 import android.util.Log
 import org.json.JSONObject
 
+/**
+ * Observes one bridge container: each finished call and each event sent to the front end.
+ */
 interface IBridgeMonitor {
     fun onBridgeRejected(entity: MonitorEntity)
 

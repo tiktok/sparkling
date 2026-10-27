@@ -4,6 +4,9 @@
 
 package com.tiktok.sparkling.method.registry.api.util
 
+/**
+ * Bit flags selecting which JSB protocols a bridge injects on init.
+ */
 class BridgeProtocolConstants {
     companion object {
         const val BRIDGE_LYNX_PROTOCOL = 1 shl 4

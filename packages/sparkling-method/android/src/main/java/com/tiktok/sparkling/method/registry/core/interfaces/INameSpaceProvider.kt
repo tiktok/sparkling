@@ -5,7 +5,7 @@
 package com.tiktok.sparkling.method.registry.core.interfaces
 
 /**
- * Desc:
+ * Provides the bridge namespace of the current container.
  */
 interface INameSpaceProvider {
     fun getNameSpace(): String

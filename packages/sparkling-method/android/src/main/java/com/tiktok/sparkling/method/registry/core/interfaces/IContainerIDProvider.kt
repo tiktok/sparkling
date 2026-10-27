@@ -5,7 +5,7 @@
 package com.tiktok.sparkling.method.registry.core.interfaces
 
 /**
- * Desc:
+ * Provides the ID of the container a bridge call comes from.
  */
 interface IContainerIDProvider {
     fun provideContainerID(): String?

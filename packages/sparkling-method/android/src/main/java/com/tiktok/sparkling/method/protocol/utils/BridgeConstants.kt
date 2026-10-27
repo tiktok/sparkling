@@ -4,6 +4,7 @@
 
 package com.tiktok.sparkling.method.protocol.utils
 
+/** Result codes shared by the bridge protocol runtime. */
 internal object BridgeConstants {
     const val BRIDGE_CALL_SUCCESS = 1
     const val BRIDGE_CALL_FAIL = 0

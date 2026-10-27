@@ -4,6 +4,9 @@
 
 package com.tiktok.sparkling.method.protocol.interfaces
 
+/**
+ * Callback through which a bridge handler returns its raw result payload to the protocol layer.
+ */
 interface IBridgeMethodCallback {
     fun onBridgeResult(parcel: Any)
 }
