@@ -1,4 +1,5 @@
-platform :ios, '12.0'
+# Keep CocoaPods aligned with the generated app's deployment target.
+platform :ios, '15.6'
 
 source 'https://cdn.cocoapods.org/'
 
@@ -114,6 +115,17 @@ target 'SparklingGoInHouse' do
 end
 
 post_install do |installer|
+  minimum_ios_version = Gem::Version.new('15.6')
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      deployment_target = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+      next unless deployment_target
+      next unless Gem::Version.new(deployment_target) < minimum_ios_version
+
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = minimum_ios_version.to_s
+    end
+  end
+
   project = Xcodeproj::Project.open(File.join(__dir__, 'SparklingGo.xcodeproj'))
   ensure_embed_pods_frameworks_phase(project, 'SparklingGo', 'Pods-SparklingGo')
   ensure_embed_pods_frameworks_phase(project, 'SparklingGoInHouse', 'Pods-SparklingGoInHouse')
