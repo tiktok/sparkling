@@ -5,7 +5,6 @@
 package com.tiktok.sparkling.method.protocol.impl.lynx
 
 import com.tiktok.sparkling.method.protocol.BridgeContext
-import com.tiktok.sparkling.method.protocol.impl.monitor.BridgeSDKMonitor
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeCallback
 import com.tiktok.sparkling.method.protocol.utils.BridgeConverter
 import com.tiktok.sparkling.method.protocol.utils.LogUtils
@@ -103,13 +102,11 @@ class RealLynxBridgeDelegate(
                         override fun onBridgeResult(
                             result: BridgeResult,
                             call: BridgeCall?,
-                            monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?,
                         ) {
                             onLynxBridgeResult(result, call, obj, isInMainThread, callback)
                         }
                     },
                     obj,
-                    null,
                 )
             }
         }

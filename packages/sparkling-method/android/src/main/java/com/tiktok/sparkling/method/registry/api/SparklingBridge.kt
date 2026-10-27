@@ -368,7 +368,6 @@ class SparklingBridge : IReleasable {
                     override fun onBridgeResult(
                         result: BridgeResult,
                         call: BridgeCall?,
-                        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?,
                     ) {
                         LogUtils.d(
                             TAG,
@@ -377,7 +376,6 @@ class SparklingBridge : IReleasable {
                     }
                 },
                 getBridgeContext()!!,
-                null,
             )
         }
     }

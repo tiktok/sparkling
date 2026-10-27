@@ -6,12 +6,11 @@ package com.tiktok.sparkling.method.protocol.interfaces
 
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
 import com.tiktok.sparkling.method.protocol.entity.BridgeResult
-import com.tiktok.sparkling.method.protocol.impl.monitor.BridgeSDKMonitor
 
+/** Receives the result of a bridge call from the protocol runtime. */
 interface IBridgeCallback {
     fun onBridgeResult(
         result: BridgeResult,
         call: BridgeCall?,
-        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?,
     )
 }

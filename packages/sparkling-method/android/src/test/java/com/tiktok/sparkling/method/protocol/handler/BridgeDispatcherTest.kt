@@ -69,7 +69,7 @@ class BridgeDispatcherTest {
         val mockResult = BridgeResult(JSONObject())
         `when`(mockBridgeMockInterceptor.invokeBridgeResult(mockBridgeCall)).thenReturn(mockResult)
         bridgeDispatcher.onDispatchBridgeMethod(mockBridgeCall, mockBridgeCallback, mockBridgeContext)
-        verify(mockBridgeCallback).onBridgeResult(mockResult, mockBridgeCall, null)
+        verify(mockBridgeCallback).onBridgeResult(mockResult, mockBridgeCall)
     }
 
     @Test

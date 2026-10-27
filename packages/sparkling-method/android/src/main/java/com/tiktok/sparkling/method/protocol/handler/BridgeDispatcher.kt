@@ -10,7 +10,6 @@ import android.widget.Toast
 import com.tiktok.sparkling.method.protocol.BridgeContext
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
 import com.tiktok.sparkling.method.protocol.entity.BridgeResult
-import com.tiktok.sparkling.method.protocol.impl.monitor.BridgeSDKMonitor
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeCallback
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeHandler
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeMethodCallback
@@ -36,20 +35,18 @@ class BridgeDispatcher {
         bridgeHandler = handler
     }
 
-    @JvmOverloads
     fun onDispatchBridgeMethod(
         call: BridgeCall,
         callback: IBridgeCallback,
         context: BridgeContext,
-        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder? = null,
     ) {
         if (context.jsbMockInterceptor != null) {
-            if (!shouldInvokeResult(context, call, callback, monitorBuilder)) {
+            if (!shouldInvokeResult(context, call, callback)) {
                 val bridgeCall = context.jsbMockInterceptor!!.interceptBridgeCall(call)
-                realDispatchBridgeMethod(bridgeCall, callback, context, monitorBuilder)
+                realDispatchBridgeMethod(bridgeCall, callback, context)
             }
         } else {
-            realDispatchBridgeMethod(call, callback, context, monitorBuilder)
+            realDispatchBridgeMethod(call, callback, context)
         }
     }
 
@@ -57,14 +54,13 @@ class BridgeDispatcher {
         context: BridgeContext,
         call: BridgeCall,
         callback: IBridgeCallback,
-        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?,
     ): Boolean {
         val result = context.jsbMockInterceptor!!.invokeBridgeResult(call)
         result?.let {
             val invocation = MethodInvocationSnapshot.from(context, call)
             invocation.notifyStart(call)
             invocation.notifyEnd(call, it)
-            callback.onBridgeResult(it, call, monitorBuilder)
+            callback.onBridgeResult(it, call)
             return true
         }
         return false
@@ -74,7 +70,6 @@ class BridgeDispatcher {
         call: BridgeCall,
         callback: IBridgeCallback,
         context: BridgeContext,
-        monitorBuilder: BridgeSDKMonitor.MonitorModel.Builder?,
     ) {
         LogUtils.d(TAG, "realDispatchBridgeMethod: ${Thread.currentThread()} and call is \n$call")
 
@@ -96,7 +91,7 @@ class BridgeDispatcher {
             client.onBridgeCallback()
             val callbackResult = context.jsbMockInterceptor?.interceptBridgeResult(call, result) ?: result
             invocation.notifyEnd(call, callbackResult)
-            callback.onBridgeResult(callbackResult, call, monitorBuilder)
+            callback.onBridgeResult(callbackResult, call)
             if (getToastSetting()) toastJsbError(call, result.toJSONObject(), context)
             return
         }
@@ -111,7 +106,7 @@ class BridgeDispatcher {
                     null,
                 )
             invocation.notifyEnd(call, callbackResult)
-            callback.onBridgeResult(callbackResult, call, monitorBuilder)
+            callback.onBridgeResult(callbackResult, call)
             return
         }
 
@@ -123,7 +118,7 @@ class BridgeDispatcher {
                         context.jsbMockInterceptor?.interceptBridgeResult(call, BridgeResult(parcel))
                             ?: BridgeResult(parcel)
                     invocation.notifyEnd(call, bridgeResult)
-                    callback.onBridgeResult(bridgeResult, call, monitorBuilder)
+                    callback.onBridgeResult(bridgeResult, call)
                     if (getToastSetting()) toastJsbError(call, bridgeResult.toJSONObject(), context)
                 }
             }
@@ -153,7 +148,7 @@ class BridgeDispatcher {
                 call,
                 object : IBridgeMethodCallback {
                     override fun onBridgeResult(parcel: Any) {
-                        callback.onBridgeResult(BridgeResult(parcel), call, null)
+                        callback.onBridgeResult(BridgeResult(parcel), call)
                     }
                 },
             )

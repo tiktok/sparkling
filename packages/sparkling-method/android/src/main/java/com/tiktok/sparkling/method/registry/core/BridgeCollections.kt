@@ -4,6 +4,8 @@
 
 package com.tiktok.sparkling.method.registry.core
 
+import android.annotation.SuppressLint
+
 interface XReadableMap {
     fun hasKey(name: String): Boolean
 
@@ -258,6 +260,9 @@ interface XKeyIterator {
     fun nextKey(): String
 }
 
+// Deviation from open source: the internal CI lint rule requires enum entries to be
+// all-uppercase, but renaming them would break the JSB protocol payloads.
+@SuppressLint("CI_ByteDanceKotlinRules_Enum_Fields_All_Uppercase")
 enum class XReadableType {
     Null,
     Boolean,

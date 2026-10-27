@@ -15,8 +15,8 @@ import org.json.JSONObject
 /**
  *  default implementation
  */
-class DefaultBridgeClientImp(
-    val bridgeContext: BridgeContext,
+open class DefaultBridgeClientImp(
+    open val bridgeContext: BridgeContext,
 ) : IBridgeClient {
     private val TAG = "DefaultBridgeClientImp"
 
