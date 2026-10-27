@@ -148,10 +148,32 @@ class JsonUtilsTest {
     }
 
     @Test
-    fun jsonToMapDefaultsUnknownTypesToNull() {
+    fun jsonToMapMapsJsonNullToNull() {
         val payload = JSONObject().apply { put("nullable", JSONObject.NULL) }
         val map = JsonUtils.jsonToMap(payload)
+        assertTrue(map.containsKey("nullable"))
         assertNull(map["nullable"])
+    }
+
+    @Test
+    fun jsonToMapAndListKeepUnknownTypesAsStrings() {
+        val payload =
+            JSONObject().apply {
+                put("ratio", 1.5f)
+                put("tags", listOf("a", "b"))
+            }
+        val map = JsonUtils.jsonToMap(payload)
+        assertEquals("1.5", map["ratio"])
+        assertEquals("[a, b]", map["tags"])
+
+        val array =
+            JSONArray().apply {
+                put(1.5f)
+                put(JSONObject.NULL)
+            }
+        val list = JsonUtils.jsonToList(array)
+        assertEquals("1.5", list[0])
+        assertNull(list[1])
     }
 
     @Test

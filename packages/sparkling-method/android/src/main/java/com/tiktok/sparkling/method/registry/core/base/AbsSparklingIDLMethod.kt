@@ -314,11 +314,6 @@ abstract class AbsSparklingIDLMethod<INPUT, OUTPUT> : IDLBridgeMethod where INPU
                 val resultMap = data?.convert() ?: mutableMapOf()
                 this@AbsSparklingIDLMethod.onFailure(callback, code, msg, resultMap)
             }
-
-            override fun onRawSuccess(data: OUTPUT?) {
-                val resultMap = data?.convert() ?: mutableMapOf()
-                callback.invoke(resultMap)
-            }
         }
 
     protected fun getHybridUrl(type: BridgePlatformType): String? =

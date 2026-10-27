@@ -19,9 +19,11 @@ fun <T : IDLMethodBaseModel> Class<T>.createXModel(): T = IDLMethodResultModelAr
 )
 fun <T : IDLMethodBaseModel> KClass<T>.createXModel(): T = IDLMethodResultModelArguments.createModel(this.java)
 
-fun <T : IDLMethodBaseModel> Class<T>.createXModel(containerID: String?): T = IDLMethodResultModelArguments.createModel(this, containerID)
+fun <T : IDLMethodBaseModel> Class<T>.createXModel(containerID: String?): T =
+    IDLMethodResultModelArguments.createModel(this, containerID)
 
-fun <T : IDLMethodBaseModel> KClass<T>.createXModel(containerID: String?): T = IDLMethodResultModelArguments.createModel(this.java, containerID)
+fun <T : IDLMethodBaseModel> KClass<T>.createXModel(containerID: String?): T =
+    IDLMethodResultModelArguments.createModel(this.java, containerID)
 
 /**
  * when the data is a pure map or list(every item is basic type)

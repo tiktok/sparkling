@@ -5,9 +5,18 @@
 package com.tiktok.sparkling.method.registry.core
 
 /**
- * Desc:
+ * Shared contract for the open-source and downstream platform type sets, so that code which does
+ * not care where a platform was declared can name a single type.
+ *
+ * It is deliberately a bare marker: the concrete sets are enums, and an enum cannot satisfy a
+ * `name` property because `Enum.name` is final.
  */
-enum class BridgePlatformType {
+interface IBridgePlatformType
+
+/**
+ * Desc: platform types supported by the minimum bridge runtime.
+ */
+enum class BridgePlatformType : IBridgePlatformType {
     WEB,
     LYNX,
     NONE,

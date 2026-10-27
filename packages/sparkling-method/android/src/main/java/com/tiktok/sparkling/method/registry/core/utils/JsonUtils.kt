@@ -133,6 +133,9 @@ object JsonUtils {
         return jsonArray
     }
 
+    // Values whose runtime type is outside the seven types handled below (for example a Float
+    // put programmatically) keep their string form instead of being dropped to null, so no data
+    // is lost. JSONObject.NULL still becomes null.
     fun jsonToMap(json: JSONObject): Map<String, Any?> =
         mutableMapOf<String, Any?>().apply {
             val iterator = json.keys()
@@ -146,7 +149,13 @@ object JsonUtils {
                     is JSONObject -> put(key, jsonToMap(json.optJSONObject(key)))
                     is JSONArray -> put(key, jsonToList(json.optJSONArray(key)))
                     is Boolean -> put(key, json.optBoolean(key))
-                    else -> put(key, null)
+                    else -> {
+                        if (json.opt(key) == JSONObject.NULL) {
+                            put(key, null)
+                        } else {
+                            put(key, json.opt(key)?.toString())
+                        }
+                    }
                 }
             }
         }
@@ -163,7 +172,13 @@ object JsonUtils {
                     is JSONObject -> add(jsonToMap(json.optJSONObject(index)))
                     is JSONArray -> add(jsonToList(json.optJSONArray(index)))
                     is Boolean -> add(json.optBoolean(index))
-                    else -> add(null)
+                    else -> {
+                        if (json.opt(index) == JSONObject.NULL) {
+                            add(null)
+                        } else {
+                            add(json.opt(index).toString())
+                        }
+                    }
                 }
             }
         }

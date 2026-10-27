@@ -166,8 +166,6 @@ class RouterMethodUnitTest {
             failureCode = code
             failureMsg = msg
         }
-
-        override fun onRawSuccess(data: AbsRouterOpenMethodIDL.IDLMethodOpenResultModel?) = Unit
     }
 
     private class CloseCallbackRecorder : CompletionBlock<AbsRouterCloseMethodIDL.IDLMethodCloseResultModel> {
@@ -190,7 +188,5 @@ class RouterMethodUnitTest {
             failureCode = code
             failureMsg = msg
         }
-
-        override fun onRawSuccess(data: AbsRouterCloseMethodIDL.IDLMethodCloseResultModel?) = Unit
     }
 }

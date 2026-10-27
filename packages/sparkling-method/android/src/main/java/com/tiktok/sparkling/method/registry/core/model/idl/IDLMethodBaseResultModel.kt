@@ -10,4 +10,9 @@ import androidx.annotation.Keep
  * Desc:
  */
 @Keep
-interface IDLMethodBaseResultModel : IDLMethodBaseModel
+interface IDLMethodBaseResultModel : IDLMethodBaseModel {
+    /**
+     * Names of the fields this model returns, reported by `canIUse`.
+     */
+    fun provideResultList(): List<String> = emptyList()
+}

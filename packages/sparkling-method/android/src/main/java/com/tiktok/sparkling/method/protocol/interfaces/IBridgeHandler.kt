@@ -7,11 +7,18 @@ package com.tiktok.sparkling.method.protocol.interfaces
 import com.tiktok.sparkling.method.protocol.BridgeContext
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
 
+/**
+ * Dispatch boundary between the bridge protocol and the method registry that resolves and invokes
+ * a call, reports its result through [IBridgeMethodCallback], and owns the registry lifecycle.
+ *
+ * Hosts can extend [BridgeContext] with platform-specific state without changing this dispatch
+ * contract.
+ */
 interface IBridgeHandler {
     fun handle(
         bridgeContext: BridgeContext,
         call: BridgeCall,
-        callback: IBridgeMethodCallback,
+        callback: IBridgeMethodCallback
     )
 
     fun onRelease()

@@ -4,14 +4,19 @@
 
 package com.tiktok.sparkling.method.protocol.utils
 
-import com.tiktok.sparkling.method.registry.api.stringify
+import com.tiktok.sparkling.method.protocol.utils.LogUtils
 import com.lynx.react.bridge.JavaOnlyArray
 import com.lynx.react.bridge.JavaOnlyMap
 import com.lynx.react.bridge.PiperData
 import com.lynx.react.bridge.ReadableType
+import com.tiktok.sparkling.method.registry.api.stringify
 import org.json.JSONArray
 import org.json.JSONObject
 
+/**
+ * Converts bridge payloads between the Lynx readable containers and the JSON types
+ * used by the bridge protocol layer.
+ */
 object BridgeConverter {
     private const val TAG = "BridgeConverter"
 

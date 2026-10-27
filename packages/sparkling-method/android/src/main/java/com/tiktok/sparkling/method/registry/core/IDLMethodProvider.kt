@@ -5,7 +5,10 @@
 package com.tiktok.sparkling.method.registry.core
 
 /**
- * Desc:
+ * Supplies a bridge method instance on demand, so a registration can carry how to build the method
+ * rather than only which class it is.
+ *
+ * Declared as a `fun interface` so that a registration can pass a lambda.
  */
 fun interface IDLMethodProvider {
     fun provideMethod(): IDLBridgeMethod

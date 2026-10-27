@@ -561,8 +561,6 @@ class RouterCoverageTest {
             failureCode = code
             failureMsg = msg
         }
-
-        override fun onRawSuccess(data: AbsRouterOpenMethodIDL.IDLMethodOpenResultModel?) = Unit
     }
 
     private class CloseCallbackRecorder : CompletionBlock<AbsRouterCloseMethodIDL.IDLMethodCloseResultModel> {
@@ -585,8 +583,6 @@ class RouterCoverageTest {
             failureCode = code
             failureMsg = msg
         }
-
-        override fun onRawSuccess(data: AbsRouterCloseMethodIDL.IDLMethodCloseResultModel?) = Unit
     }
 
     // endregion

@@ -5,15 +5,22 @@
 package com.tiktok.sparkling.method.registry.core
 
 /**
- * Desc:
+ * A flat table of bridge methods keyed by name alone.
+ *
+ * Unlike [IDLMethodRegistry] this carries no platform and no namespace, and it holds providers
+ * rather than classes, so a registration here says how to build the method rather than which class
+ * it is. A container that dispatches by name only needs nothing more than this.
  */
 interface IRegister {
+    /** The provider registered for [name], or null when nothing is registered. */
     fun findIDLMethod(name: String): IDLMethodProvider?
 
+    /** Registers [methodProvider] under [name], replacing whatever was registered before. */
     fun registerMethod(
         name: String,
         methodProvider: IDLMethodProvider,
     )
 
+    /** A snapshot of every registration held. */
     fun getIDLMethodList(): Map<String, IDLMethodProvider>
 }

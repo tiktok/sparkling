@@ -838,8 +838,6 @@ class MediaMethodUnitTest {
             failureCode = code
             failureMsg = msg
         }
-
-        override fun onRawSuccess(data: AbsChooseMediaMethodIDL.ChooseMediaResultModel?) = Unit
     }
 
     private class SaveDataURLCallbackRecorder : CompletionBlock<AbsSaveDataURLMethodIDL.SaveDataURLResultModel> {
@@ -862,8 +860,6 @@ class MediaMethodUnitTest {
             failureCode = code
             failureMsg = msg
         }
-
-        override fun onRawSuccess(data: AbsSaveDataURLMethodIDL.SaveDataURLResultModel?) = Unit
     }
 
     private class UploadFileCallbackRecorder : CompletionBlock<AbsUploadFileMethodIDL.UploadFileResultModel> {
@@ -886,8 +882,6 @@ class MediaMethodUnitTest {
             failureCode = code
             failureMsg = msg
         }
-
-        override fun onRawSuccess(data: AbsUploadFileMethodIDL.UploadFileResultModel?) = Unit
     }
 
     private class UploadImageCallbackRecorder : CompletionBlock<AbsUploadImageMethodIDL.UploadImageResultModel> {
@@ -910,8 +904,6 @@ class MediaMethodUnitTest {
             failureCode = code
             failureMsg = msg
         }
-
-        override fun onRawSuccess(data: AbsUploadImageMethodIDL.UploadImageResultModel?) = Unit
     }
 
     private class DownloadFileCallbackRecorder : CompletionBlock<AbsDownloadFileMethodIDL.DownloadFileResultModel> {
@@ -934,7 +926,5 @@ class MediaMethodUnitTest {
             failureCode = code
             failureMsg = msg
         }
-
-        override fun onRawSuccess(data: AbsDownloadFileMethodIDL.DownloadFileResultModel?) = Unit
     }
 }

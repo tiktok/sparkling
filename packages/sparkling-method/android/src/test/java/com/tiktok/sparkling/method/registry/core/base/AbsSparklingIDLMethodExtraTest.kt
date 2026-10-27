@@ -120,7 +120,7 @@ class AbsSparklingIDLMethodExtraTest {
     }
 
     @Test
-    fun completionBlockProxyForwardsSuccessFailureAndRawSuccess() {
+    fun completionBlockProxyForwardsSuccessAndFailure() {
         val proxy =
             method.createCompletionBlockProxy<TestMethod.TestResultModel>(
                 this::class.java.classLoader!!,
@@ -128,27 +128,22 @@ class AbsSparklingIDLMethodExtraTest {
             )
         proxy.onSuccess(TestMethod.TestResultModel("ok"), "done")
         proxy.onFailure(7, "boom", TestMethod.TestResultModel("nope"))
-        proxy.onRawSuccess(TestMethod.TestResultModel("raw"))
 
-        assertEquals(3, collected.size)
+        assertEquals(2, collected.size)
         assertEquals(IDLBridgeMethod.SUCCESS, collected[0][IDLBridgeMethod.PARAM_CODE])
         assertEquals(7, collected[1][IDLBridgeMethod.PARAM_CODE])
-        assertEquals("raw", collected[2]["result"])
     }
 
     @Test
-    fun completionBlockProxyHandlesNullDataInFailureAndRawSuccess() {
+    fun completionBlockProxyHandlesNullDataInFailure() {
         val proxy =
             method.createCompletionBlockProxy<TestMethod.TestResultModel>(
                 this::class.java.classLoader!!,
                 callbackOf(),
             )
         proxy.onFailure(99, "explode", null)
-        proxy.onRawSuccess(null)
-        assertEquals(2, collected.size)
+        assertEquals(1, collected.size)
         assertEquals(99, collected[0][IDLBridgeMethod.PARAM_CODE])
-        // raw success with null data is delivered as an empty map
-        assertTrue((collected[1] as Map<*, *>).isEmpty())
     }
 
     @Test

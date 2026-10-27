@@ -7,7 +7,7 @@ package com.tiktok.sparkling.method.registry.core.model.idl
 import androidx.annotation.Keep
 
 /**
- * Desc:
+ * Callback a bridge method uses to report success or failure.
  */
 @Keep
 interface CompletionBlock<S> where S : IDLMethodBaseResultModel {
@@ -21,12 +21,4 @@ interface CompletionBlock<S> where S : IDLMethodBaseResultModel {
         msg: String = "",
         data: S? = null,
     )
-
-    /**
-     * just for old bridge.
-     * if the bridge is a new one,and it has code and data property.it should use [onSuccess]
-     *
-     */
-    @Deprecated("just for compatibility with old bridge", level = DeprecationLevel.WARNING)
-    fun onRawSuccess(data: S? = null)
 }

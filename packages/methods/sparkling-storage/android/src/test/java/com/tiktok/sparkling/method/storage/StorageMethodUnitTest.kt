@@ -127,8 +127,6 @@ class StorageMethodUnitTest {
             failureCode = code
             failureMsg = msg
         }
-
-        override fun onRawSuccess(data: AbsStorageSetItemMethodIDL.IDLMethodSetStorageItemResultModel?) = Unit
     }
 
     private class GetCallbackRecorder : CompletionBlock<AbsStorageGetItemMethodIDL.IDLMethodGetStorageItemResultModel> {
@@ -151,8 +149,6 @@ class StorageMethodUnitTest {
             failureCode = code
             failureMsg = msg
         }
-
-        override fun onRawSuccess(data: AbsStorageGetItemMethodIDL.IDLMethodGetStorageItemResultModel?) = Unit
     }
 
     private class RemoveCallbackRecorder : CompletionBlock<AbsStorageRemoveItemMethodIDL.IDLMethodRemoveStorageItemResultModel> {
@@ -170,7 +166,5 @@ class StorageMethodUnitTest {
             msg: String,
             data: AbsStorageRemoveItemMethodIDL.IDLMethodRemoveStorageItemResultModel?,
         ) = Unit
-
-        override fun onRawSuccess(data: AbsStorageRemoveItemMethodIDL.IDLMethodRemoveStorageItemResultModel?) = Unit
     }
 }

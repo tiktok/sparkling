@@ -14,7 +14,12 @@ import com.tiktok.sparkling.method.registry.core.optInt
  * Desc:
  */
 @Keep
-interface IDLMethodBaseParamModel : IDLMethodBaseModel
+interface IDLMethodBaseParamModel : IDLMethodBaseModel {
+    /**
+     * Names of the parameters this model accepts, reported by `canIUse`.
+     */
+    fun provideParamList(): List<String> = emptyList()
+}
 
 fun IDLMethodBaseParamModel.getIntValue(
     params: XReadableMap,
