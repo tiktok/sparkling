@@ -8,6 +8,12 @@ import UIKit
 
 @testable import Sparkling
 
+@MainActor
+private final class MockPipeContainer: UIView, PipeContainer {
+    // swift-format-ignore: AlwaysUseLowerCamelCase
+    var spk_containerID: String?
+}
+
 //TODO: DIContainer injection problem
 @MainActor
 struct SPKRouterTests {
@@ -118,6 +124,26 @@ struct SPKRouterTests {
         SPKRouter.openInSystemBrowser(withURL: invalidURL)
 
         #expect(true)  // Test passes if no crash occurs
+    }
+
+    @Test func closeNonTopContainerKeepsOpenedContainer() {
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        let opener = UIViewController()
+        let opened = UIViewController()
+        let container = MockPipeContainer()
+        opener.view.addSubview(container)
+
+        let navigationController = UINavigationController(rootViewController: opener)
+        navigationController.pushViewController(opened, animated: false)
+        window.rootViewController = navigationController
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+
+        #expect(!SPKResponder.isTopViewController(viewController: opener))
+        #expect(SPKResponder.isTopViewController(viewController: opened))
+        #expect(SPKRouter.close(container: container))
+        #expect(navigationController.viewControllers.count == 1)
+        #expect(navigationController.topViewController === opened)
     }
 
     @Test func closeTopViewController() {

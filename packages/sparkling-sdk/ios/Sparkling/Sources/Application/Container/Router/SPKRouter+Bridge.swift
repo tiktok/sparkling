@@ -23,11 +23,24 @@ extension SPKRouter {
                     naviVC.popViewController(animated: true)
                 }
             } else {
-                var stack = naviVC.viewControllers ?? []
-                if let index = stack.firstIndex(of: targetVC) {
-                    stack.remove(at: index)
-                    targetVC.removeFromParent()
-                    targetVC.navigationController?.setViewControllers(stack, animated: true)
+                let removeTargetFromStack = {
+                    let currentStack = naviVC.viewControllers
+                    let stack = currentStack.filter { $0 !== targetVC }
+                    guard stack.count != currentStack.count else { return }
+                    naviVC.setViewControllers(stack, animated: false)
+                }
+
+                if let transitionCoordinator = naviVC.transitionCoordinator {
+                    // Route replacement can close the source while the push is animating.
+                    let transitionScheduled = transitionCoordinator.animate(alongsideTransition: nil) { context in
+                        guard !context.isCancelled else { return }
+                        removeTargetFromStack()
+                    }
+                    if !transitionScheduled {
+                        removeTargetFromStack()
+                    }
+                } else {
+                    removeTargetFromStack()
                 }
             }
         } else {
