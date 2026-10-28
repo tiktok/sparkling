@@ -39,7 +39,7 @@ class LynxDataProcessorForMapNestedTest {
             }
         val params = hashMapOf<String, Any>("nested" to nestedMap)
 
-        val res = LynxDataProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = LynxDataProcessorForMap().getJavaOnlyMapParams(params, data)
         val proxy = res?.get("nested") as NestedModel
         assertEquals("alice", proxy.getName())
         assertEquals(7, proxy.getCount())
@@ -69,7 +69,7 @@ class LynxDataProcessorForMapNestedTest {
             }
         val params = hashMapOf<String, Any>("items" to arr)
 
-        val res = LynxDataProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = LynxDataProcessorForMap().getJavaOnlyMapParams(params, data)
 
         @Suppress("UNCHECKED_CAST")
         val list = res?.get("items") as List<NestedModel>
@@ -142,7 +142,7 @@ class LynxDataProcessorForMapNestedTest {
             hashMapOf<String, Any>(
                 "nested" to JavaOnlyMap().apply { putString("name", "x") },
             )
-        val res = LynxDataProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = LynxDataProcessorForMap().getJavaOnlyMapParams(params, data)
         assertNull(res?.get("nested"))
     }
 
@@ -150,7 +150,7 @@ class LynxDataProcessorForMapNestedTest {
     fun preCheckSeedsNestedDefaults() {
         val data = nestedAnnotationDataWithDefaults()
         val params = hashMapOf<String, Any>("nested" to JavaOnlyMap())
-        val res = LynxDataProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = LynxDataProcessorForMap().getJavaOnlyMapParams(params, data)
         val proxy = res?.get("nested") as NestedModel
         assertEquals("default-name", proxy.getName())
         assertEquals(99, proxy.getCount())

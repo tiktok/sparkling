@@ -28,7 +28,7 @@ class LynxDataProcessorForMapExtraTest {
             )
         val ex =
             runCatching {
-                LynxDataProcessorForMap.getJavaOnlyMapParams(hashMapOf("v" to 123), data)
+                LynxDataProcessorForMap().getJavaOnlyMapParams(hashMapOf("v" to 123), data)
             }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
@@ -41,7 +41,7 @@ class LynxDataProcessorForMapExtraTest {
             )
         val ex =
             runCatching {
-                LynxDataProcessorForMap.getJavaOnlyMapParams(hashMapOf("n" to "not"), data)
+                LynxDataProcessorForMap().getJavaOnlyMapParams(hashMapOf("n" to "not"), data)
             }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
@@ -54,7 +54,7 @@ class LynxDataProcessorForMapExtraTest {
             )
         val ex =
             runCatching {
-                LynxDataProcessorForMap.getJavaOnlyMapParams(hashMapOf("b" to "true"), data)
+                LynxDataProcessorForMap().getJavaOnlyMapParams(hashMapOf("b" to "true"), data)
             }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
@@ -67,7 +67,7 @@ class LynxDataProcessorForMapExtraTest {
             )
         val ex =
             runCatching {
-                LynxDataProcessorForMap.getJavaOnlyMapParams(hashMapOf("m" to "not"), data)
+                LynxDataProcessorForMap().getJavaOnlyMapParams(hashMapOf("m" to "not"), data)
             }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
@@ -80,7 +80,7 @@ class LynxDataProcessorForMapExtraTest {
             )
         val ex =
             runCatching {
-                LynxDataProcessorForMap.getJavaOnlyMapParams(hashMapOf("l" to "not"), data)
+                LynxDataProcessorForMap().getJavaOnlyMapParams(hashMapOf("l" to "not"), data)
             }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
@@ -102,7 +102,7 @@ class LynxDataProcessorForMapExtraTest {
                         defaultValue = IDLDefaultValue(type = DefaultType.STRING, stringValue = "x"),
                     ),
             )
-        val res = LynxDataProcessorForMap.getJavaOnlyMapParams(hashMapOf(), data)
+        val res = LynxDataProcessorForMap().getJavaOnlyMapParams(hashMapOf(), data)
         assertEquals(true, res?.get("b"))
         assertEquals("x", res?.get("s"))
     }
@@ -128,7 +128,7 @@ class LynxDataProcessorForMapExtraTest {
                                 ),
                         ),
                 )
-            val res = LynxDataProcessorForMap.getJavaOnlyMapParams(hashMapOf(), data)
+            val res = LynxDataProcessorForMap().getJavaOnlyMapParams(hashMapOf(), data)
             val seed = res?.get("v")
             when (type) {
                 DefaultType.INT -> assertEquals(7, (seed as Number).toInt())
@@ -153,7 +153,7 @@ class LynxDataProcessorForMapExtraTest {
             )
         val ex =
             runCatching {
-                LynxDataProcessorForMap.getJavaOnlyMapParams(hashMapOf("n" to 5), data)
+                LynxDataProcessorForMap().getJavaOnlyMapParams(hashMapOf("n" to 5), data)
             }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
@@ -170,7 +170,7 @@ class LynxDataProcessorForMapExtraTest {
                         stringEnum = listOf("a", "b"),
                     ),
             )
-        val res = LynxDataProcessorForMap.getJavaOnlyMapParams(hashMapOf("mode" to "a"), data)
+        val res = LynxDataProcessorForMap().getJavaOnlyMapParams(hashMapOf("mode" to "a"), data)
         assertEquals("a", res?.get("mode"))
     }
 
@@ -188,7 +188,7 @@ class LynxDataProcessorForMapExtraTest {
             )
         val ex =
             runCatching {
-                LynxDataProcessorForMap.getJavaOnlyMapParams(
+                LynxDataProcessorForMap().getJavaOnlyMapParams(
                     hashMapOf("m" to hashMapOf("k" to "off")),
                     data,
                 )
@@ -210,7 +210,7 @@ class LynxDataProcessorForMapExtraTest {
             )
         val ex =
             runCatching {
-                LynxDataProcessorForMap.getJavaOnlyMapParams(
+                LynxDataProcessorForMap().getJavaOnlyMapParams(
                     hashMapOf("m" to hashMapOf("k" to 9)),
                     data,
                 )
@@ -231,7 +231,7 @@ class LynxDataProcessorForMapExtraTest {
                     ),
             )
         val res =
-            LynxDataProcessorForMap.getJavaOnlyMapParams(
+            LynxDataProcessorForMap().getJavaOnlyMapParams(
                 hashMapOf("m" to hashMapOf("k" to "on")),
                 data,
             )

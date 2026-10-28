@@ -4,27 +4,42 @@
 
 package com.tiktok.sparkling.method.registry.api.processor
 
-import com.tiktok.sparkling.method.registry.api.Utils
-import com.tiktok.sparkling.method.registry.api.map
 import com.tiktok.sparkling.method.registry.core.IDLAnnotationData
 import com.tiktok.sparkling.method.registry.core.IDLAnnotationModel
 import com.tiktok.sparkling.method.registry.core.IDLParamField
 import com.tiktok.sparkling.method.registry.core.annotation.DefaultType
+import com.tiktok.sparkling.method.registry.api.Utils
+import com.tiktok.sparkling.method.registry.api.util.map
 import com.tiktok.sparkling.method.registry.core.exception.IllegalInputParamException
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseModel
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.reflect.Proxy
+import kotlin.reflect.KClass
 
 /**
+ * @author txr
  * @since 2021/10/13
  * @desc
+ *
+ * Binds a Web JSON object through what the annotation cache holds for a method.
+ *
+ * Deviation from open source: a class rather than an object, so that each
+ * [WebPlatformDataProcessor] passes in its own rules instead of a host replacing global ones.
+ *
+ * @param isDefaultNestedType whether a field's nested type is the "no nested model" sentinel.
+ * @param jsonToList turns a [JSONArray] that is not a list of nested models into a plain list.
+ * @param jsonToMap turns a [JSONObject] that is not a nested model into a plain map.
  */
-object WebProcessorForMap {
-    fun getJavaOnlyMapParams(
-        params: JSONObject,
-        clazz: IDLAnnotationData,
-    ): Map<String, Any?>? {
+class WebProcessorForMap(
+    private val isDefaultNestedType: (KClass<out IDLMethodBaseModel>) -> Boolean = {
+        it == IDLMethodBaseModel.Default::class
+    },
+    private val jsonToList: (JSONArray) -> List<Any?> = Utils::jsonToList,
+    private val jsonToMap: (JSONObject) -> Map<String, Any?> = Utils::jsonToMap,
+) {
+
+    fun getJavaOnlyMapParams(params: JSONObject, clazz: IDLAnnotationData): Map<String, Any?>? {
         val classMap = preCheck(clazz.methodParamModel, params) ?: return null
         return params.mapValues {
             val annotation = classMap.stringModel[it.first]
@@ -42,11 +57,7 @@ object WebProcessorForMap {
     }
 
     @Throws(IllegalInputParamException::class)
-    private fun proxyValue(
-        clazz: Class<out IDLMethodBaseModel>?,
-        map: JSONObject,
-        data: IDLAnnotationData,
-    ): Any? {
+    private fun proxyValue(clazz: Class<out IDLMethodBaseModel>?, map: JSONObject, data: IDLAnnotationData): Any? {
         if (clazz == null) return null
         val clazzMap = preCheck(data.models[clazz], map) ?: return null
         return Proxy.newProxyInstance(clazz.classLoader, arrayOf(clazz)) { _, method, _ ->
@@ -62,45 +73,40 @@ object WebProcessorForMap {
         }
     }
 
-    private fun convertValueWithAnnotation(
-        value: Any?,
-        annotation: IDLParamField?,
-        data: IDLAnnotationData,
-    ): Any? {
-        val result =
-            if (isNestClass(value, annotation)) {
-                proxyValue(annotation?.nestedClassType?.java, value as JSONObject, data)
-            } else if (isNestListClass(value, annotation)) {
-                (value as JSONArray).map {
+    private fun convertValueWithAnnotation(value: Any?, annotation: IDLParamField?, data: IDLAnnotationData): Any? {
+        val result = if (isNestClass(value, annotation)) {
+            proxyValue(annotation?.nestedClassType?.java, value as JSONObject, data)
+        }else if (isNestListClass(value, annotation)) {
+            (value as JSONArray).map {
+                if (it is JSONObject) {
                     proxyValue(annotation?.nestedClassType?.java, it as JSONObject, data)
-                }
-            } else {
-                when (value) {
-                    is JSONArray -> {
-                        Utils.jsonToList(value)
-                    }
-
-                    is JSONObject -> {
-                        Utils.jsonToMap(value)
-                    }
-
-                    JSONObject.NULL -> {
-                        null
-                    }
-
-                    else -> {
-                        value
-                    }
+                } else {
+                    value
                 }
             }
+        } else {
+            when (value) {
+                is JSONArray -> {
+                    jsonToList(value)
+                }
+                is JSONObject -> {
+                    jsonToMap(value)
+                }
+                JSONObject.NULL->{
+                    null
+                }
+                else -> {
+                    value
+                }
+            }
+        }
         return result
     }
 
-    private fun checkValue(
-        classMap: IDLAnnotationModel,
-        params: JSONObject,
-    ) {
-        // Check value.
+    private fun checkValue(classMap: IDLAnnotationModel, params: JSONObject) {
+        /**
+         * check value
+         */
         classMap.stringModel.forEach {
             val field = it.key
             val method = it.value
@@ -111,31 +117,27 @@ object WebProcessorForMap {
             when (method.returnType) {
                 String::class.java -> {
                     if (value != null && value != JSONObject.NULL && value !is String) {
-                        throw IllegalInputParamException("${it.key} param has wrong declared type. except string,but ${value.javaClass}")
+                        throw  IllegalInputParamException("${it.key} param has wrong declared type. except string,but ${value.javaClass}")
                     }
                 }
-
                 Number::class.java -> {
                     if (value != null && value != JSONObject.NULL && value !is Number) {
-                        throw IllegalInputParamException("${it.key} param has wrong declared type. except number,but ${value.javaClass}")
+                        throw  IllegalInputParamException("${it.key} param has wrong declared type. except number,but ${value.javaClass}")
                     }
                 }
-
                 java.lang.Boolean::class.java, Boolean::class.java -> {
                     if (value != null && value != JSONObject.NULL && value !is Boolean) {
-                        throw IllegalInputParamException("${it.key} param has wrong declared type. except boolean,but ${value.javaClass}")
+                        throw  IllegalInputParamException("${it.key} param has wrong declared type. except boolean,but ${value.javaClass}")
                     }
                 }
-
                 List::class.java -> {
                     if (value != null && value != JSONObject.NULL && value !is JSONArray) {
-                        throw IllegalInputParamException("${it.key} param has wrong declared type. except List ,but ${value.javaClass}")
+                        throw  IllegalInputParamException("${it.key} param has wrong declared type. except List ,but ${value.javaClass}")
                     }
                 }
-
                 Map::class.java -> {
                     if (value != null && value != JSONObject.NULL && value !is JSONObject) {
-                        throw IllegalInputParamException("${it.key} param has wrong declared type. except Map ,but ${value.javaClass}")
+                        throw  IllegalInputParamException("${it.key} param has wrong declared type. except Map ,but ${value.javaClass}")
                     }
                 }
             }
@@ -147,14 +149,12 @@ object WebProcessorForMap {
                             throw IllegalInputParamException("${it.key} has wrong type.should be one of $option but got $value")
                         }
                     }
-
                     Number::class.java -> {
                         val option = method.intEnum
                         if (!option.contains(getInt(value))) {
                             throw IllegalInputParamException("${it.key} has wrong value.should be one of $option but got $value")
                         }
                     }
-
                     Map::class.java -> {
                         val stringEnum = method.stringEnum
                         if (stringEnum.isNotEmpty()) {
@@ -193,21 +193,16 @@ object WebProcessorForMap {
         throw IllegalInputParamException("the key is not a number")
     }
 
-    private fun isNestClass(
-        value: Any?,
-        annotation: IDLParamField?,
-    ) = value is JSONObject && annotation?.nestedClassType != IDLMethodBaseModel.Default::class
 
-    private fun isNestListClass(
-        value: Any?,
-        annotation: IDLParamField?,
-    ) = value is JSONArray && annotation?.nestedClassType != IDLMethodBaseModel.Default::class
+    private fun isNestClass(value: Any?, annotation: IDLParamField?) = value is JSONObject && annotation?.nestedClassType?.let { !isDefaultNestedType(it) } ?: true
 
-    private fun preCheck(
-        classMap: IDLAnnotationModel?,
-        map: JSONObject,
-    ): IDLAnnotationModel? {
-        // Init default value.
+    private fun isNestListClass(value: Any?, annotation: IDLParamField?) =
+        value is JSONArray && annotation?.nestedClassType?.let { !isDefaultNestedType(it) } ?: true
+
+    private fun preCheck(classMap: IDLAnnotationModel?, map: JSONObject): IDLAnnotationModel? {
+        /**
+         * init default value
+         */
         if (classMap == null) return null
         classMap.stringModel.filter { (map.opt(it.key) == null || map.opt(it.key) == JSONObject.NULL) && it.value.defaultValue.type != DefaultType.NONE }.forEach {
             val idlParamField = it.value
@@ -217,52 +212,37 @@ object WebProcessorForMap {
         return classMap
     }
 
-    private fun parseStringByReturnType(
-        returnType: Class<*>,
-        annotation: IDLParamField,
-    ) = when (returnType) {
-        Number::class.java -> {
-            when (annotation.defaultValue.type) {
-                DefaultType.DOUBLE -> annotation.defaultValue.doubleValue
-                DefaultType.LONG -> annotation.defaultValue.longValue
-                DefaultType.INT -> annotation.defaultValue.intValue
-                else -> annotation.defaultValue.intValue
-            }
+    private fun parseStringByReturnType(returnType: Class<*>, annotation: IDLParamField) = when (returnType) {
+        Number::class.java -> when (annotation.defaultValue.type) {
+            DefaultType.DOUBLE -> annotation.defaultValue.doubleValue
+            DefaultType.LONG -> annotation.defaultValue.longValue
+            DefaultType.INT -> annotation.defaultValue.intValue
+            else -> annotation.defaultValue.intValue
         }
-
-        Boolean::class.java, java.lang.Boolean::class.java -> {
-            annotation.defaultValue.boolValue
-        }
-
-        else -> {
-            annotation.defaultValue.stringValue
-        }
+        Boolean::class.java, java.lang.Boolean::class.java -> annotation.defaultValue.boolValue
+        else -> annotation.defaultValue.stringValue
     }
 
-    private fun getMapWithDefault(
-        map: JSONObject,
-        model: IDLAnnotationModel?,
-        data: IDLAnnotationData,
-    ): JSONObject? {
+    private fun getMapWithDefault(map: JSONObject, model: IDLAnnotationModel?, data: IDLAnnotationData): JSONObject? {
         if (model == null) return null
         val stringModel = model.stringModel
-        return JSONObject(
-            stringModel.mapValues {
-                val value = map.opt(it.value.keyPath)
-                // Init default value.
-                if ((value == null || value == JSONObject.NULL) && it.value.defaultValue.type != DefaultType.NONE) {
-                    val defaultValue = parseStringByReturnType(it.value.returnType, it.value)
-                    map.put(it.value.keyPath, defaultValue)
-                }
+        return JSONObject(stringModel.mapValues {
+            val value = map.opt(it.value.keyPath)
+            /**
+             * init default value
+             */
+            if ((value == null || value == JSONObject.NULL)&& it.value.defaultValue.type != DefaultType.NONE) {
+                val defaultValue = parseStringByReturnType(it.value.returnType, it.value)
+                map.put(it.value.keyPath, defaultValue)
+            }
 
-                if (it.value.nestedClassType != IDLMethodBaseModel.Default::class && value is JSONObject) {
-                    getMapWithDefault(value, data.models[it.value.nestedClassType.java]!!, data)
-                } else if (it.value.nestedClassType != IDLMethodBaseModel.Default::class && value is JSONArray) {
-                    value.map { v -> getMapWithDefault(v as JSONObject, data.models[it.value.nestedClassType.java]!!, data) }
-                } else {
-                    map.opt(it.value.keyPath)
-                }
-            },
-        )
+            if (!isDefaultNestedType(it.value.nestedClassType) && value is JSONObject) {
+                getMapWithDefault(value, data.models[it.value.nestedClassType.java]!!, data)
+            } else if (!isDefaultNestedType(it.value.nestedClassType) && value is JSONArray) {
+                value.map { v -> getMapWithDefault(v as JSONObject, data.models[it.value.nestedClassType.java]!!, data) }
+            } else {
+                map.opt(it.value.keyPath)
+            }
+        })
     }
 }

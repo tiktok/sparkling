@@ -35,7 +35,7 @@ class WebProcessorForMapExtraTest {
                 "v" to IDLParamField(keyPath = "v", returnType = String::class.java),
             )
         val params = JSONObject().put("v", 123)
-        val ex = runCatching { WebProcessorForMap.getJavaOnlyMapParams(params, data) }.exceptionOrNull()
+        val ex = runCatching { WebProcessorForMap().getJavaOnlyMapParams(params, data) }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
 
@@ -46,7 +46,7 @@ class WebProcessorForMapExtraTest {
                 "n" to IDLParamField(keyPath = "n", returnType = Number::class.java),
             )
         val params = JSONObject().put("n", "not-a-number")
-        val ex = runCatching { WebProcessorForMap.getJavaOnlyMapParams(params, data) }.exceptionOrNull()
+        val ex = runCatching { WebProcessorForMap().getJavaOnlyMapParams(params, data) }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
 
@@ -57,7 +57,7 @@ class WebProcessorForMapExtraTest {
                 "b" to IDLParamField(keyPath = "b", returnType = Boolean::class.java),
             )
         val params = JSONObject().put("b", "true")
-        val ex = runCatching { WebProcessorForMap.getJavaOnlyMapParams(params, data) }.exceptionOrNull()
+        val ex = runCatching { WebProcessorForMap().getJavaOnlyMapParams(params, data) }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
 
@@ -68,7 +68,7 @@ class WebProcessorForMapExtraTest {
                 "l" to IDLParamField(keyPath = "l", returnType = List::class.java),
             )
         val params = JSONObject().put("l", "not-a-list")
-        val ex = runCatching { WebProcessorForMap.getJavaOnlyMapParams(params, data) }.exceptionOrNull()
+        val ex = runCatching { WebProcessorForMap().getJavaOnlyMapParams(params, data) }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
 
@@ -79,7 +79,7 @@ class WebProcessorForMapExtraTest {
                 "m" to IDLParamField(keyPath = "m", returnType = Map::class.java),
             )
         val params = JSONObject().put("m", "not-a-map")
-        val ex = runCatching { WebProcessorForMap.getJavaOnlyMapParams(params, data) }.exceptionOrNull()
+        val ex = runCatching { WebProcessorForMap().getJavaOnlyMapParams(params, data) }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
 
@@ -90,7 +90,7 @@ class WebProcessorForMapExtraTest {
                 "n" to IDLParamField(required = true, keyPath = "n", returnType = String::class.java),
             )
         val params = JSONObject()
-        val ex = runCatching { WebProcessorForMap.getJavaOnlyMapParams(params, data) }.exceptionOrNull()
+        val ex = runCatching { WebProcessorForMap().getJavaOnlyMapParams(params, data) }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
 
@@ -101,7 +101,7 @@ class WebProcessorForMapExtraTest {
                 "n" to IDLParamField(keyPath = "n", returnType = String::class.java),
             )
         val params = JSONObject().put("n", JSONObject.NULL)
-        val res = WebProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = WebProcessorForMap().getJavaOnlyMapParams(params, data)
         assertNotNull(res)
         assertNull(res!!["n"])
     }
@@ -113,7 +113,7 @@ class WebProcessorForMapExtraTest {
                 "n" to IDLParamField(required = true, keyPath = "n", returnType = String::class.java),
             )
         val params = JSONObject().put("n", JSONObject.NULL)
-        val ex = runCatching { WebProcessorForMap.getJavaOnlyMapParams(params, data) }.exceptionOrNull()
+        val ex = runCatching { WebProcessorForMap().getJavaOnlyMapParams(params, data) }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
 
@@ -129,7 +129,7 @@ class WebProcessorForMapExtraTest {
                     ),
             )
         val params = JSONObject()
-        val res = WebProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = WebProcessorForMap().getJavaOnlyMapParams(params, data)
         assertEquals(true, res?.get("b"))
     }
 
@@ -144,7 +144,7 @@ class WebProcessorForMapExtraTest {
                         defaultValue = IDLDefaultValue(type = DefaultType.LONG, longValue = 123L),
                     ),
             )
-        val resLong = WebProcessorForMap.getJavaOnlyMapParams(JSONObject(), longData)
+        val resLong = WebProcessorForMap().getJavaOnlyMapParams(JSONObject(), longData)
         assertEquals(123L, (resLong?.get("v") as Number).toLong())
 
         val dblData =
@@ -156,7 +156,7 @@ class WebProcessorForMapExtraTest {
                         defaultValue = IDLDefaultValue(type = DefaultType.DOUBLE, doubleValue = 1.5),
                     ),
             )
-        val resDbl = WebProcessorForMap.getJavaOnlyMapParams(JSONObject(), dblData)
+        val resDbl = WebProcessorForMap().getJavaOnlyMapParams(JSONObject(), dblData)
         assertEquals(1.5, (resDbl?.get("v") as Number).toDouble(), 0.0001)
     }
 
@@ -171,7 +171,7 @@ class WebProcessorForMapExtraTest {
                         defaultValue = IDLDefaultValue(type = DefaultType.STRING, stringValue = "fallback"),
                     ),
             )
-        val res = WebProcessorForMap.getJavaOnlyMapParams(JSONObject(), data)
+        val res = WebProcessorForMap().getJavaOnlyMapParams(JSONObject(), data)
         assertEquals("fallback", res?.get("s"))
     }
 
@@ -189,7 +189,7 @@ class WebProcessorForMapExtraTest {
             )
         val ex =
             runCatching {
-                WebProcessorForMap.getJavaOnlyMapParams(JSONObject().put("n", 5), data)
+                WebProcessorForMap().getJavaOnlyMapParams(JSONObject().put("n", 5), data)
             }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
@@ -206,7 +206,7 @@ class WebProcessorForMapExtraTest {
                         intEnum = listOf(1, 2, 3),
                     ),
             )
-        val res = WebProcessorForMap.getJavaOnlyMapParams(JSONObject().put("n", 2), data)
+        val res = WebProcessorForMap().getJavaOnlyMapParams(JSONObject().put("n", 2), data)
         assertEquals(2, (res?.get("n") as Number).toInt())
     }
 
@@ -223,7 +223,7 @@ class WebProcessorForMapExtraTest {
                     ),
             )
         val params = JSONObject().put("m", JSONObject().put("flag", "unknown"))
-        val ex = runCatching { WebProcessorForMap.getJavaOnlyMapParams(params, data) }.exceptionOrNull()
+        val ex = runCatching { WebProcessorForMap().getJavaOnlyMapParams(params, data) }.exceptionOrNull()
         assertTrue(ex is IllegalInputParamException)
     }
 
@@ -240,7 +240,7 @@ class WebProcessorForMapExtraTest {
                     ),
             )
         val params = JSONObject().put("m", JSONObject().put("a", 1))
-        val res = WebProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = WebProcessorForMap().getJavaOnlyMapParams(params, data)
         assertNotNull(res)
     }
 
@@ -251,7 +251,7 @@ class WebProcessorForMapExtraTest {
                 "items" to IDLParamField(keyPath = "items", returnType = List::class.java),
             )
         val params = JSONObject().put("items", JSONArray("[1, \"two\", true]"))
-        val res = WebProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = WebProcessorForMap().getJavaOnlyMapParams(params, data)
         val list = res?.get("items") as List<*>
         assertEquals(3, list.size)
         assertEquals("two", list[1])
@@ -264,7 +264,7 @@ class WebProcessorForMapExtraTest {
                 "obj" to IDLParamField(keyPath = "obj", returnType = Map::class.java),
             )
         val params = JSONObject().put("obj", JSONObject().put("k", 1))
-        val res = WebProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = WebProcessorForMap().getJavaOnlyMapParams(params, data)
         val map = res?.get("obj") as Map<*, *>
         assertEquals(1, (map["k"] as Number).toInt())
     }

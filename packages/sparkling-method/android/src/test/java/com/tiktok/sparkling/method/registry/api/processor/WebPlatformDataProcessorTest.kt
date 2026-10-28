@@ -6,6 +6,8 @@ import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
 import com.tiktok.sparkling.method.registry.core.model.context.ContextProviderFactory
 import com.tiktok.sparkling.method.registry.core.annotation.DefaultType
 import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodParamField
+import com.tiktok.sparkling.method.registry.core.DefaultIDLParamModelReader
+import com.tiktok.sparkling.method.registry.core.IDLParamField
 import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodStringEnum
 import com.tiktok.sparkling.method.registry.core.annotation.MethodParamDefaultValue
 import com.tiktok.sparkling.method.registry.core.exception.IllegalInputParamException
@@ -67,11 +69,11 @@ class WebPlatformDataProcessorTest {
             WebPlatformDataProcessor::class.java.getDeclaredMethod(
                 "convertValueWithAnnotation",
                 Any::class.java,
-                IDLMethodParamField::class.java,
+                IDLParamField::class.java,
             )
         convertMethod.isAccessible = true
 
-        val annotation = ParentParamModel::class.java.getMethod("getNested").getAnnotation(IDLMethodParamField::class.java)
+        val annotation = DefaultIDLParamModelReader.readParamField(ParentParamModel::class.java.getMethod("getNested"))
         val nestedJson = JSONObject("{\"id\":\"n1\"}")
         val proxyObj = convertMethod.invoke(processor, nestedJson, annotation)
         assertNotNull(proxyObj)
@@ -88,14 +90,11 @@ class WebPlatformDataProcessorTest {
             WebPlatformDataProcessor::class.java.getDeclaredMethod(
                 "convertValueWithAnnotation",
                 Any::class.java,
-                IDLMethodParamField::class.java,
+                IDLParamField::class.java,
             )
         convertMethod.isAccessible = true
 
-        val safeAnnotation =
-            DemoParamModel::class.java
-                .getMethod("getCount")
-                .getAnnotation(IDLMethodParamField::class.java)
+        val safeAnnotation = DefaultIDLParamModelReader.readParamField(DemoParamModel::class.java.getMethod("getCount"))
 
         val convertedArray = convertMethod.invoke(processor, JSONArray("[1,{\"k\":\"v\"}]"), safeAnnotation)
         assertTrue(convertedArray is List<*>)

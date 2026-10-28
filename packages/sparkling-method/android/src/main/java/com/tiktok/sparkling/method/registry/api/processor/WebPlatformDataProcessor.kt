@@ -5,16 +5,15 @@
 package com.tiktok.sparkling.method.registry.api.processor
 
 import com.tiktok.sparkling.method.registry.api.Utils
-import com.tiktok.sparkling.method.registry.api.map
+import com.tiktok.sparkling.method.registry.api.util.map
+import com.tiktok.sparkling.method.registry.core.DefaultIDLParamModelReader
 import com.tiktok.sparkling.method.registry.core.IBridgeContext
 import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
-import com.tiktok.sparkling.method.registry.core.IDLMethodRegistryCacheManager
 import com.tiktok.sparkling.method.registry.core.BridgePlatformType
-import com.tiktok.sparkling.method.registry.core.IDLProxyClient
+import com.tiktok.sparkling.method.registry.core.IBridgePlatformType
+import com.tiktok.sparkling.method.registry.core.IDLParamField
+import com.tiktok.sparkling.method.registry.core.IDLParamModelReader
 import com.tiktok.sparkling.method.registry.core.annotation.DefaultType
-import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodIntEnum
-import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodParamField
-import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodStringEnum
 import com.tiktok.sparkling.method.registry.core.interfaces.IPlatformDataProcessor
 import com.tiktok.sparkling.method.registry.core.exception.IllegalInputParamException
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseModel
@@ -23,27 +22,53 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
+import kotlin.reflect.KClass
 
-class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
-    override fun matchPlatformType(platformType: BridgePlatformType) = platformType == BridgePlatformType.WEB
+/**
+ * Binds a Web [JSONObject] to a method's param model, and renders a result map back as one.
+ *
+ * Every annotation read goes through [reader], so a host whose method classes carry their own
+ * annotation set supplies a reader rather than a copy of this class. The protected members are the
+ * remaining host seams: which sentinel a cached field may carry and how JSON containers are converted.
+ */
+open class WebPlatformDataProcessor(
+    private val reader: IDLParamModelReader = DefaultIDLParamModelReader,
+) : IPlatformDataProcessor<JSONObject> {
+    override fun matchPlatformType(platformType: IBridgePlatformType) = platformType == BridgePlatformType.WEB
 
     var context: IBridgeContext? = null
+
+    private val cachedBinding: WebProcessorForMap by lazy {
+        WebProcessorForMap(::isCachedDefaultNestedType, ::jsonToList, ::jsonToMap)
+    }
 
     override fun transformPlatformDataToMap(
         params: JSONObject,
         clazz: Class<out IDLBridgeMethod>,
     ): Map<String, Any?>? {
-        val pool =
-            (IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(context?.containerID))?.BRIDGE_ANNOTATION_MAP?.get(
-                clazz,
-            )
+        val pool = reader.findAnnotationData(context?.containerID, clazz)
         if (pool != null) {
-            return WebProcessorForMap.getJavaOnlyMapParams(params, pool)
+            return cachedBinding.getJavaOnlyMapParams(params, pool)
         } else {
-            val modelClazz = IDLProxyClient.retrieveParamModel(clazz) ?: return null
+            val modelClazz = reader.retrieveParamModel(clazz) ?: return null
             return getJsonObjectParams(params, modelClazz)
         }
     }
+
+    /**
+     * Whether a field read from the annotation cache has no nested model.
+     *
+     * Separate from [IDLParamModelReader.isDefaultNestedType] because the cache may hold fields
+     * declared with annotations the reader does not read, which carry their own sentinel.
+     */
+    protected open fun isCachedDefaultNestedType(type: KClass<out IDLMethodBaseModel>): Boolean =
+        type == IDLMethodBaseModel.Default::class
+
+    /** Converts a [JSONArray] value that is not a list of nested models. */
+    protected open fun jsonToList(value: JSONArray): List<Any?> = Utils.jsonToList(value)
+
+    /** Converts a [JSONObject] value that is not a nested model. */
+    protected open fun jsonToMap(value: JSONObject): Map<String, Any?> = Utils.jsonToMap(value)
 
     private fun getJsonObjectParams(
         params: JSONObject,
@@ -60,12 +85,12 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
     private fun preCheck(
         clazz: Class<out IDLMethodBaseModel>?,
         params: JSONObject,
-    ): HashMap<String, Pair<Method, IDLMethodParamField>>? {
+    ): HashMap<String, Pair<Method, IDLParamField>>? {
         val classMap =
-            clazz?.declaredMethods?.fold(hashMapOf<String, Pair<Method, IDLMethodParamField>>()) { map, method ->
-                val annotation = method.getAnnotation(IDLMethodParamField::class.java)
+            clazz?.declaredMethods?.fold(hashMapOf<String, Pair<Method, IDLParamField>>()) { map, method ->
+                val annotation = reader.readParamField(method)
                 if (annotation != null) {
-                    map[annotation.keyPath] = Pair<Method, IDLMethodParamField>(method, annotation)
+                    map[annotation.keyPath] = Pair<Method, IDLParamField>(method, annotation)
                 }
                 map
             } ?: return null
@@ -79,7 +104,7 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
     }
 
     private fun checkValue(
-        classMap: HashMap<String, Pair<Method, IDLMethodParamField>>,
+        classMap: HashMap<String, Pair<Method, IDLParamField>>,
         params: JSONObject,
     ) {
         // Check value.
@@ -124,34 +149,32 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
             if (value != null && value != JSONObject.NULL && field.isEnum) {
                 when (method.returnType) {
                     String::class.java -> {
-                        val stringEnum = method.getAnnotation(IDLMethodStringEnum::class.java)
-                        val option = stringEnum.option
+                        val option = requireStringEnumOptions(method)
                         if (!option.contains(value)) {
                             throw IllegalInputParamException("${it.key} has wrong type.should be one of ${option.asList()} but got $value")
                         }
                     }
 
                     Number::class.java -> {
-                        val stringEnum = method.getAnnotation(IDLMethodIntEnum::class.java)
-                        val option = stringEnum.option
+                        val option = requireIntEnumOptions(method)
                         if (!option.contains(getInt(value))) {
                             throw IllegalInputParamException("${it.key} has wrong value.should be one of ${option.asList()} but got $value")
                         }
                     }
 
                     Map::class.java -> {
-                        val stringEnum = method.getAnnotation(IDLMethodStringEnum::class.java)
-                        if (stringEnum != null) {
-                            val option = stringEnum.option
+                        val stringOption = reader.readStringEnumOptions(method)
+                        if (stringOption != null) {
+                            val option = stringOption
                             (value as JSONObject).mapValues { item ->
                                 if (!option.contains(item.second)) {
                                     throw IllegalInputParamException("${it.key} has wrong value.should be one of ${option.asList()} but got $value")
                                 }
                             }
                         } else {
-                            val intEnum = method.getAnnotation(IDLMethodIntEnum::class.java)
-                            if (intEnum != null) {
-                                val option = intEnum.option
+                            val intOption = reader.readIntEnumOptions(method)
+                            if (intOption != null) {
+                                val option = intOption
                                 (value as JSONObject).mapValues { item ->
                                     if (!option.contains(getInt(item.second))) {
                                         throw IllegalInputParamException("${it.key} has wrong value.should be one of ${option.asList()} but got $value")
@@ -200,7 +223,7 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
             if (method.name == "toString") {
                 return@newProxyInstance map.toString()
             }
-            val annotation = method.getAnnotation(IDLMethodParamField::class.java)
+            val annotation = requireParamField(method)
             val value = map.opt(annotation.keyPath)
             return@newProxyInstance convertValueWithAnnotation(value, annotation)
         }
@@ -208,7 +231,7 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
 
     private fun convertValueWithAnnotation(
         value: Any?,
-        annotation: IDLMethodParamField?,
+        annotation: IDLParamField?,
     ) = if (isNestClass(value, annotation)) {
         proxyValue(annotation?.nestedClassType?.java, value as JSONObject)
     } else if (isNestListClass(value, annotation)) {
@@ -218,11 +241,11 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
     } else {
         when (value) {
             is JSONArray -> {
-                Utils.jsonToList(value)
+                jsonToList(value)
             }
 
             is JSONObject -> {
-                Utils.jsonToMap(value)
+                jsonToMap(value)
             }
 
             JSONObject.NULL -> {
@@ -237,21 +260,21 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
 
     private fun isNestClass(
         value: Any?,
-        annotation: IDLMethodParamField?,
-    ) = value is JSONObject && annotation?.nestedClassType != IDLMethodBaseModel.Default::class
+        annotation: IDLParamField?,
+    ) = value is JSONObject && !reader.isDefaultNestedType(annotation?.nestedClassType)
 
     private fun isNestListClass(
         value: Any?,
-        annotation: IDLMethodParamField?,
-    ) = value is JSONArray && annotation?.nestedClassType != IDLMethodBaseModel.Default::class
+        annotation: IDLParamField?,
+    ) = value is JSONArray && !reader.isDefaultNestedType(annotation?.nestedClassType)
 
     private fun getMapWithDefault(
         clazz: Class<out IDLMethodBaseModel>?,
         json: JSONObject,
     ): JSONObject {
-        val methods = clazz?.declaredMethods?.filter { it.getAnnotation(IDLMethodParamField::class.java)?.isGetter == true }
+        val methods = clazz?.declaredMethods?.filter { reader.readParamField(it)?.isGetter == true }
         return methods?.fold(JSONObject()) { acc, method ->
-            val annotation = method.getAnnotation(IDLMethodParamField::class.java)
+            val annotation = requireParamField(method)
 
             val value = json.opt(annotation.keyPath)
 
@@ -263,9 +286,9 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
             val nestedClassType = annotation.nestedClassType
             acc.put(
                 annotation.keyPath,
-                if (annotation.nestedClassType != IDLMethodBaseModel.Default::class && value is JSONObject) {
+                if (!reader.isDefaultNestedType(annotation.nestedClassType) && value is JSONObject) {
                     getMapWithDefault(nestedClassType.java, value)
-                } else if (annotation.nestedClassType != IDLMethodBaseModel.Default::class && value is JSONArray) {
+                } else if (!reader.isDefaultNestedType(annotation.nestedClassType) && value is JSONArray) {
                     value.map { getMapWithDefault(nestedClassType.java, it as JSONObject) }
                 } else {
                     json.opt(annotation.keyPath)
@@ -276,9 +299,9 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
     }
 
     private fun MutableMap<String, Any>.initDefaultValue(getters: List<Method>) {
-        val defaultMethods = getters.filter { it.getAnnotation(IDLMethodParamField::class.java).defaultValue.type != DefaultType.NONE }
+        val defaultMethods = getters.filter { requireParamField(it).defaultValue.type != DefaultType.NONE }
         defaultMethods.forEach {
-            val annotation = it.getAnnotation(IDLMethodParamField::class.java)
+            val annotation = requireParamField(it)
             put(
                 annotation.keyPath,
                 parseStringByReturnType(it, annotation),
@@ -290,9 +313,9 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
         clazz: Class<out IDLMethodBaseModel>?,
         map: JSONObject,
     ): JSONObject? {
-        val methods = clazz?.declaredMethods?.filter { it.getAnnotation(IDLMethodParamField::class.java)?.isGetter == true }
+        val methods = clazz?.declaredMethods?.filter { reader.readParamField(it)?.isGetter == true }
         return methods?.fold(JSONObject()) { acc, method ->
-            val annotation = method.getAnnotation(IDLMethodParamField::class.java)
+            val annotation = requireParamField(method)
 
             val value = map.opt(annotation.keyPath)
 
@@ -304,7 +327,7 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
 
             acc.put(
                 annotation.keyPath,
-                if (annotation.nestedClassType != IDLMethodBaseModel.Default::class && value != null && value != JSONObject.NULL) {
+                if (!reader.isDefaultNestedType(annotation.nestedClassType) && value != null && value != JSONObject.NULL) {
                     val nestedClassType = annotation.nestedClassType
                     getJsonWithDefault(nestedClassType.java, value as JSONObject)
                 } else {
@@ -317,7 +340,7 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
 
     private fun parseStringByReturnType(
         method: Method,
-        annotation: IDLMethodParamField,
+        annotation: IDLParamField,
     ) = when (method.returnType) {
         Number::class.java -> {
             when (annotation.defaultValue.type) {
@@ -335,6 +358,26 @@ class WebPlatformDataProcessor : IPlatformDataProcessor<JSONObject> {
         else -> {
             annotation.defaultValue.stringValue
         }
+    }
+
+    /*
+     * The three reads below fail the way reading a missing annotation directly does: with a
+     * NullPointerException, which the caller reports as an unknown error.
+     */
+
+    private fun requireParamField(method: Method): IDLParamField {
+        return reader.readParamField(method)
+            ?: throw NullPointerException("${method.name} carries no param field annotation")
+    }
+
+    private fun requireStringEnumOptions(method: Method): Array<out String> {
+        return reader.readStringEnumOptions(method)
+            ?: throw NullPointerException("${method.name} carries no string enum annotation")
+    }
+
+    private fun requireIntEnumOptions(method: Method): IntArray {
+        return reader.readIntEnumOptions(method)
+            ?: throw NullPointerException("${method.name} carries no int enum annotation")
     }
 
     override fun transformMapToPlatformData(

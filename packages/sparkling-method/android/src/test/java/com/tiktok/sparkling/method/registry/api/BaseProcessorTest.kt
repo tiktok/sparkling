@@ -5,6 +5,7 @@ package com.tiktok.sparkling.method.registry.api
 
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeMethodCallback
 import com.tiktok.sparkling.method.registry.core.BridgePlatformType
+import com.tiktok.sparkling.method.registry.core.IBridgePlatformType
 import com.tiktok.sparkling.method.registry.core.IBridgeContext
 import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
 import com.tiktok.sparkling.method.registry.core.exception.IllegalInputParamException
@@ -60,7 +61,7 @@ class BaseProcessorTest {
         var inputCalls = 0
         var outputCalls = 0
 
-        override fun matchPlatformType(platformType: BridgePlatformType): Boolean = true
+        override fun matchPlatformType(platformType: IBridgePlatformType): Boolean = true
 
         override fun transformPlatformDataToMap(
             params: Map<String, Any?>,

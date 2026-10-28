@@ -7,15 +7,14 @@ package com.tiktok.sparkling.method.registry.api.processor
 import com.tiktok.sparkling.method.registry.api.Utils
 import com.lynx.react.bridge.ReadableArray
 import com.lynx.react.bridge.ReadableMap
+import com.tiktok.sparkling.method.registry.core.DefaultIDLParamModelReader
 import com.tiktok.sparkling.method.registry.core.IBridgeContext
 import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
-import com.tiktok.sparkling.method.registry.core.IDLMethodRegistryCacheManager
 import com.tiktok.sparkling.method.registry.core.BridgePlatformType
-import com.tiktok.sparkling.method.registry.core.IDLProxyClient
+import com.tiktok.sparkling.method.registry.core.IBridgePlatformType
+import com.tiktok.sparkling.method.registry.core.IDLParamField
+import com.tiktok.sparkling.method.registry.core.IDLParamModelReader
 import com.tiktok.sparkling.method.registry.core.annotation.DefaultType
-import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodIntEnum
-import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodParamField
-import com.tiktok.sparkling.method.registry.core.annotation.IDLMethodStringEnum
 import com.tiktok.sparkling.method.registry.core.interfaces.IPlatformDataProcessor
 import com.tiktok.sparkling.method.registry.core.exception.IllegalInputParamException
 import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseModel
@@ -23,26 +22,52 @@ import com.tiktok.sparkling.method.registry.core.model.idl.IDLMethodBaseParamMod
 import org.json.JSONObject
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
+import kotlin.reflect.KClass
 
-class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
+/**
+ * Binds a Lynx [ReadableMap] to a method's param model, and renders a result map back as one.
+ *
+ * Every annotation read goes through [reader], so a host whose method classes carry their own
+ * annotation set supplies a reader rather than a copy of this class. The protected members are the
+ * remaining host seams: which sentinel a cached field may carry and how a plain value is converted.
+ */
+open class LynxPlatformDataProcessor(
+    private val reader: IDLParamModelReader = DefaultIDLParamModelReader,
+) : IPlatformDataProcessor<ReadableMap> {
     var context: IBridgeContext? = null
 
-    override fun matchPlatformType(platformType: BridgePlatformType) = platformType == BridgePlatformType.LYNX
+    private val cachedBinding: LynxDataProcessorForMap by lazy {
+        LynxDataProcessorForMap(::isCachedDefaultNestedType, ::convertValue)
+    }
+
+    override fun matchPlatformType(platformType: IBridgePlatformType) = platformType == BridgePlatformType.LYNX
 
     @Throws(IllegalInputParamException::class)
     override fun transformPlatformDataToMap(
         params: ReadableMap,
         clazz: Class<out IDLBridgeMethod>,
     ): Map<String, Any?>? {
-        val pool = (IDLMethodRegistryCacheManager.provideIDLMethodRegistryCache(context?.containerID))?.BRIDGE_ANNOTATION_MAP?.get(clazz)
+        val pool = reader.findAnnotationData(context?.containerID, clazz)
         return if (pool != null) {
-            LynxDataProcessorForMap.getJavaOnlyMapParams(params.toHashMap(), pool)
+            cachedBinding.getJavaOnlyMapParams(params.toHashMap(), pool)
         } else {
             println("idl ReadableMap->Map. no cache")
-            val modelClazz = IDLProxyClient.retrieveParamModel(clazz) ?: return null
+            val modelClazz = reader.retrieveParamModel(clazz) ?: return null
             getJavaOnlyMapParams(params.toHashMap(), modelClazz)
         }
     }
+
+    /**
+     * Whether a field read from the annotation cache has no nested model.
+     *
+     * Separate from [IDLParamModelReader.isDefaultNestedType] because the cache may hold fields
+     * declared with annotations the reader does not read, which carry their own sentinel.
+     */
+    protected open fun isCachedDefaultNestedType(type: KClass<out IDLMethodBaseModel>): Boolean =
+        type == IDLMethodBaseModel.Default::class
+
+    /** Converts a value that is not a nested model. */
+    protected open fun convertValue(value: Any?): Any? = Utils.getValue(value)
 
     private fun getJavaOnlyMapParams(
         params: HashMap<String, Any>,
@@ -71,7 +96,7 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
             if (method.name == "toString") {
                 return@newProxyInstance map.toString()
             }
-            val annotation = method.getAnnotation(IDLMethodParamField::class.java)
+            val annotation = requireParamField(method)
             val value = map[annotation.keyPath]
             return@newProxyInstance convertValueWithAnnotation(value, annotation)
         }
@@ -79,7 +104,7 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
 
     private fun convertValueWithAnnotation(
         value: Any?,
-        annotation: IDLMethodParamField?,
+        annotation: IDLParamField?,
     ): Any? {
         val result =
             if (isNestClass(value, annotation)) {
@@ -89,13 +114,13 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
                     proxyValue(annotation?.nestedClassType?.java, (it as ReadableMap).toHashMap())
                 }
             } else {
-                Utils.getValue(value)
+                convertValue(value)
             }
         return result
     }
 
     private fun checkValue(
-        classMap: HashMap<String, Pair<Method, IDLMethodParamField>>,
+        classMap: HashMap<String, Pair<Method, IDLParamField>>,
         params: HashMap<String, Any>,
     ) {
         // Check value.
@@ -140,32 +165,30 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
             if (value != null && field.isEnum) {
                 when (method.returnType) {
                     String::class.java -> {
-                        val stringEnum = method.getAnnotation(IDLMethodStringEnum::class.java)
-                        val option = stringEnum.option
+                        val option = requireStringEnumOptions(method)
                         if (!option.contains(value)) {
                             throw IllegalInputParamException("${it.key} has wrong type.should be one of ${option.asList()} but got $value")
                         }
                     }
 
                     Number::class.java -> {
-                        val intEnum = method.getAnnotation(IDLMethodIntEnum::class.java)
-                        val option = intEnum.option
+                        val option = requireIntEnumOptions(method)
                         if (!option.contains(getInt(value))) {
                             throw IllegalInputParamException("${it.key} has wrong value.should be one of ${option.asList()} but got $value")
                         }
                     }
 
                     Map::class.java -> {
-                        val stringEnum = method.getAnnotation(IDLMethodStringEnum::class.java)
-                        if (stringEnum != null) {
-                            val option = stringEnum.option
+                        val stringOption = reader.readStringEnumOptions(method)
+                        if (stringOption != null) {
+                            val option = stringOption
                             if ((value as Map<String, Any>).any { item -> !option.contains(item.value) }) {
                                 throw IllegalInputParamException("${it.key} has wrong type.should be one of ${option.asList()} but got $value")
                             }
                         } else {
-                            val intEnum = method.getAnnotation(IDLMethodIntEnum::class.java)
-                            if (intEnum != null) {
-                                val option = intEnum.option
+                            val intOption = reader.readIntEnumOptions(method)
+                            if (intOption != null) {
+                                val option = intOption
                                 if ((value as Map<String, Any>).any { item -> !option.contains(getInt(item.value)) }) {
                                     throw IllegalInputParamException("${it.key} has wrong value.should be one of ${option.asList()} but got $value")
                                 }
@@ -193,23 +216,23 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
 
     private fun isNestClass(
         value: Any?,
-        annotation: IDLMethodParamField?,
-    ) = value is Map<*, *> && annotation?.nestedClassType != IDLMethodBaseModel.Default::class
+        annotation: IDLParamField?,
+    ) = value is Map<*, *> && !reader.isDefaultNestedType(annotation?.nestedClassType)
 
     private fun isNestListClass(
         value: Any?,
-        annotation: IDLMethodParamField?,
-    ) = value is List<*> && annotation?.nestedClassType != IDLMethodBaseModel.Default::class
+        annotation: IDLParamField?,
+    ) = value is List<*> && !reader.isDefaultNestedType(annotation?.nestedClassType)
 
     private fun preCheck(
         clazz: Class<out IDLMethodBaseModel>?,
         map: HashMap<String, Any>,
-    ): HashMap<String, Pair<Method, IDLMethodParamField>>? {
+    ): HashMap<String, Pair<Method, IDLParamField>>? {
         val classMap =
-            clazz?.declaredMethods?.fold(hashMapOf<String, Pair<Method, IDLMethodParamField>>()) { _map, method ->
-                val annotation = method.getAnnotation(IDLMethodParamField::class.java)
+            clazz?.declaredMethods?.fold(hashMapOf<String, Pair<Method, IDLParamField>>()) { _map, method ->
+                val annotation = reader.readParamField(method)
                 if (annotation != null) {
-                    _map[annotation.keyPath] = Pair<Method, IDLMethodParamField>(method, annotation)
+                    _map[annotation.keyPath] = Pair<Method, IDLParamField>(method, annotation)
                 }
                 _map
             } ?: return null
@@ -224,7 +247,7 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
 
     private fun parseStringByReturnType(
         method: Method,
-        annotation: IDLMethodParamField,
+        annotation: IDLParamField,
     ) = when (method.returnType) {
         Number::class.java -> {
             when (annotation.defaultValue.type) {
@@ -248,9 +271,9 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
         clazz: Class<out IDLMethodBaseModel>?,
         map: HashMap<String, Any>,
     ): HashMap<String, Any?>? {
-        val methods = clazz?.declaredMethods?.filter { it.getAnnotation(IDLMethodParamField::class.java)?.isGetter == true }
+        val methods = clazz?.declaredMethods?.filter { reader.readParamField(it)?.isGetter == true }
         return methods?.fold(hashMapOf()) { acc, method ->
-            val annotation = method.getAnnotation(IDLMethodParamField::class.java)
+            val annotation = requireParamField(method)
             val value = map[annotation.keyPath]
             // Init default value.
             if (value == null && annotation.defaultValue.type != DefaultType.NONE) {
@@ -259,16 +282,36 @@ class LynxPlatformDataProcessor : IPlatformDataProcessor<ReadableMap> {
             }
 
             acc[annotation.keyPath] =
-                if (annotation.nestedClassType != IDLMethodBaseModel.Default::class && value is ReadableMap) {
+                if (!reader.isDefaultNestedType(annotation.nestedClassType) && value is ReadableMap) {
                     val nestedClassType = annotation.nestedClassType
                     getMapWithDefault(nestedClassType.java, value.toHashMap())
-                } else if (annotation.nestedClassType != IDLMethodBaseModel.Default::class && value is ReadableArray) {
+                } else if (!reader.isDefaultNestedType(annotation.nestedClassType) && value is ReadableArray) {
                     value.toArrayList().map { getMapWithDefault(annotation.nestedClassType.java, (it as ReadableMap).toHashMap()) }
                 } else {
                     map[annotation.keyPath]
                 }
             acc
         }
+    }
+
+    /*
+     * The three reads below fail the way reading a missing annotation directly does: with a
+     * NullPointerException, which the caller reports as an unknown error.
+     */
+
+    private fun requireParamField(method: Method): IDLParamField {
+        return reader.readParamField(method)
+            ?: throw NullPointerException("${method.name} carries no param field annotation")
+    }
+
+    private fun requireStringEnumOptions(method: Method): Array<out String> {
+        return reader.readStringEnumOptions(method)
+            ?: throw NullPointerException("${method.name} carries no string enum annotation")
+    }
+
+    private fun requireIntEnumOptions(method: Method): IntArray {
+        return reader.readIntEnumOptions(method)
+            ?: throw NullPointerException("${method.name} carries no int enum annotation")
     }
 
     override fun transformMapToPlatformData(

@@ -26,7 +26,7 @@ class LynxDataProcessorForMapTest {
                 "items" to listOf(1, 2, 3),
             )
 
-        val result = LynxDataProcessorForMap.getJavaOnlyMapParams(params, data)
+        val result = LynxDataProcessorForMap().getJavaOnlyMapParams(params, data)
 
         assertEquals("sparkling", result?.get("name"))
         assertEquals(5, (result?.get("count") as Number).toInt())
@@ -45,7 +45,7 @@ class LynxDataProcessorForMapTest {
 
         val throwable =
             runCatching {
-                LynxDataProcessorForMap.getJavaOnlyMapParams(invalid, data)
+                LynxDataProcessorForMap().getJavaOnlyMapParams(invalid, data)
             }.exceptionOrNull()
 
         assertTrue(throwable is IllegalInputParamException)
@@ -58,7 +58,7 @@ class LynxDataProcessorForMapTest {
 
         val throwable =
             runCatching {
-                LynxDataProcessorForMap.getJavaOnlyMapParams(missing, data)
+                LynxDataProcessorForMap().getJavaOnlyMapParams(missing, data)
             }.exceptionOrNull()
 
         assertTrue(throwable is IllegalInputParamException)

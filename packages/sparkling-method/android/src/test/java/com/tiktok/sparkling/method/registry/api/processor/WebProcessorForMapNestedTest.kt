@@ -35,7 +35,7 @@ class WebProcessorForMapNestedTest {
         val nestedJson = JSONObject().put("name", "alice").put("count", 7)
         val params = JSONObject().put("nested", nestedJson)
 
-        val res = WebProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = WebProcessorForMap().getJavaOnlyMapParams(params, data)
         val proxy = res?.get("nested") as NestedModel
 
         assertEquals("alice", proxy.getName())
@@ -56,7 +56,7 @@ class WebProcessorForMapNestedTest {
                 .put(JSONObject().put("name", "b").put("count", 2))
         val params = JSONObject().put("items", arr)
 
-        val res = WebProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = WebProcessorForMap().getJavaOnlyMapParams(params, data)
 
         @Suppress("UNCHECKED_CAST")
         val list = res?.get("items") as List<NestedModel>
@@ -85,7 +85,7 @@ class WebProcessorForMapNestedTest {
                 models = mapOf(IDLMethodBaseModel.Default::class.java to IDLAnnotationModel()),
             )
         val params = JSONObject().put("nested", JSONObject().put("name", "x"))
-        val res = WebProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = WebProcessorForMap().getJavaOnlyMapParams(params, data)
         assertNull(res?.get("nested"))
     }
 
@@ -93,7 +93,7 @@ class WebProcessorForMapNestedTest {
     fun preCheckSeedsNestedDefaultValues() {
         val data = nestedAnnotationDataWithDefaults()
         val params = JSONObject().put("nested", JSONObject())
-        val res = WebProcessorForMap.getJavaOnlyMapParams(params, data)
+        val res = WebProcessorForMap().getJavaOnlyMapParams(params, data)
         val proxy = res?.get("nested") as NestedModel
 
         // Defaults from the nested model should be applied via preCheck.

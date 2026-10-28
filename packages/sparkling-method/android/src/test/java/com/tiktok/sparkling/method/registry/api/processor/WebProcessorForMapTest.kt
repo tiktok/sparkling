@@ -33,7 +33,7 @@ class WebProcessorForMapTest {
                 """.trimIndent(),
             )
 
-        val result = WebProcessorForMap.getJavaOnlyMapParams(params, data)
+        val result = WebProcessorForMap().getJavaOnlyMapParams(params, data)
 
         assertEquals("sparkling", result?.get("name"))
         assertEquals(5, (result?.get("count") as Number).toInt())
@@ -49,7 +49,7 @@ class WebProcessorForMapTest {
 
         val throwable =
             runCatching {
-                WebProcessorForMap.getJavaOnlyMapParams(invalid, data)
+                WebProcessorForMap().getJavaOnlyMapParams(invalid, data)
             }.exceptionOrNull()
 
         assertTrue(throwable is IllegalInputParamException)
