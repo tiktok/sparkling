@@ -7,25 +7,23 @@ package com.tiktok.sparkling.method.protocol.interfaces
 import com.tiktok.sparkling.method.protocol.BridgeContext
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
 
+/**
+ * The bridge protocol contract shared by the minimum runtime and its container implementations.
+ *
+ * Hosts can extend [BridgeContext] with platform-specific state while protocol implementations
+ * continue to depend only on the minimum runtime contract.
+ */
 abstract class IBridgeProtocol(
-    context: BridgeContext,
+    open val mContext: BridgeContext
 ) {
-    val mContext = context
-
     /**
      * params: JSONObject or JavaOnlyArray
      */
-    abstract fun sendEvent(
-        name: String,
-        params: Any?,
-    )
+    abstract fun sendEvent(name: String, params: Any?)
 
     abstract fun init()
 
     abstract fun createBridgeCall(msg: String): BridgeCall
 
-    open fun sendJSRuntimeEvent(
-        name: String,
-        params: Any?,
-    ) {}
+    open fun sendJSRuntimeEvent(name: String, params: Any?) {}
 }

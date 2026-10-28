@@ -11,13 +11,20 @@ import com.lynx.react.bridge.Callback
 import com.lynx.react.bridge.ReadableMap
 
 /**
+ * Lynx module that receives JSB calls from a Lynx background runtime and hands them to
+ * [RealLynxBridgeDelegate].
+ *
+ * Lynx only collects `@LynxMethod` methods declared on the registered class itself, so a subclass
+ * registered with Lynx must override [call] and annotate it again.
  */
-class LynxRuntimeBridgeDelegateModule(
+open class LynxRuntimeBridgeDelegateModule protected constructor(
     val context: Context,
     val obj: Any?,
+    private val realLynxBridgeDelegate: RealLynxBridgeDelegate,
 ) : LynxModule(context, obj) {
+    constructor(context: Context, obj: Any?) : this(context, obj, RealLynxBridgeDelegate(obj))
+
     private val TAG = "LynxRuntimeBridgeDelegateModule"
-    private val realLynxBridgeDelegate: RealLynxBridgeDelegate = RealLynxBridgeDelegate(obj)
 
     companion object {
         // here is the protocol of the front end of lynx, don't change it casually
@@ -25,11 +32,7 @@ class LynxRuntimeBridgeDelegateModule(
     }
 
     @LynxMethod
-    fun call(
-        bridgeName: String,
-        params: ReadableMap? = null,
-        callback: Callback? = null,
-    ) {
+    open fun call(bridgeName: String, params: ReadableMap? = null, callback: Callback? = null) {
         realLynxBridgeDelegate.call(bridgeName, params, callback, "LynxRuntime")
     }
 }

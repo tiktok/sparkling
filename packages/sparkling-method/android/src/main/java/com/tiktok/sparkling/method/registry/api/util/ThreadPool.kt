@@ -8,10 +8,15 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.tiktok.sparkling.method.runtime.depend.CommonDependsProvider
-import com.tiktok.sparkling.method.registry.api.util.ThreadPool.runInBackGround
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+/**
+ * Shared pool for bridge work that must leave the calling thread.
+ *
+ * [configExecutorService] replaces the executor directly. Otherwise [ensureExecutorNotNull] uses
+ * [CommonDependsProvider.hostThreadPoolExecutorDepend], then [createDefault].
+ */
 object ThreadPool {
     private const val TAG = "ThreadPool"
 
@@ -32,8 +37,7 @@ object ThreadPool {
      * run task on background thread
      */
     fun runInBackGround(runnable: Runnable) {
-        ensureExecutorNotNull()
-        executor!!.submit(runnable)
+        ensureExecutorNotNull().submit(runnable)
     }
 
     /**
@@ -45,16 +49,17 @@ object ThreadPool {
         executor = outerExecutors
     }
 
-    fun getExecutorService(): ExecutorService {
-        ensureExecutorNotNull()
-        return executor!!
-    }
+    fun getExecutorService(): ExecutorService = ensureExecutorNotNull()
 
-    private fun ensureExecutorNotNull() {
-        if (executor == null) {
-            executor = CommonDependsProvider.hostThreadPoolExecutorDepend?.getNormalThreadExecutor()
-                ?: createDefault()
+    private fun ensureExecutorNotNull(): ExecutorService {
+        val current = executor
+        if (current != null) {
+            return current
         }
+        val created = CommonDependsProvider.hostThreadPoolExecutorDepend?.getNormalThreadExecutor()
+            ?: createDefault()
+        executor = created
+        return created
     }
 
     private fun createDefault(): ExecutorService {
