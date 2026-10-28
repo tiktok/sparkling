@@ -4,6 +4,7 @@
 
 package com.tiktok.sparkling.method.registry.api
 
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.lynx.react.bridge.JavaOnlyMap
 import com.lynx.react.bridge.ReadableMap
 import com.tiktok.sparkling.method.protocol.BridgeContext
@@ -48,7 +49,7 @@ class DefaultCallHandlerBehaviorTest {
             CapturingMethod("lynx")
         }
         val bridgeContext = context(BridgePlatformType.WEB)
-        val request = call(bridgeContext, "platform.method", JSONObject().put("value", 3), BridgeCall.PlatForm.Lynx)
+        val request = call(bridgeContext, "platform.method", JSONObject().put("value", 3), Platform.Lynx)
         val callback = CapturingCallback()
 
         handler.handle(bridgeContext, request, callback)
@@ -78,9 +79,9 @@ class DefaultCallHandlerBehaviorTest {
         val json = JSONObject().put("data", JSONObject().put("value", "json")).put("outer", "kept")
         val callback = CapturingCallback()
 
-        handler.handle(bridgeContext, call(bridgeContext, "payload", wrapped, BridgeCall.PlatForm.Lynx), callback)
-        handler.handle(bridgeContext, call(bridgeContext, "payload", direct, BridgeCall.PlatForm.Lynx), callback)
-        handler.handle(bridgeContext, call(bridgeContext, "payload", json, BridgeCall.PlatForm.Web), callback)
+        handler.handle(bridgeContext, call(bridgeContext, "payload", wrapped, Platform.Lynx), callback)
+        handler.handle(bridgeContext, call(bridgeContext, "payload", direct, Platform.Lynx), callback)
+        handler.handle(bridgeContext, call(bridgeContext, "payload", json, Platform.Web), callback)
 
         assertEquals(mapOf("value" to "nested"), method.inputs[0])
         assertEquals(mapOf("value" to "direct"), method.inputs[1])
@@ -145,7 +146,7 @@ class DefaultCallHandlerBehaviorTest {
         handler.handle(bridgeContext, call(bridgeContext, "no.model", JSONObject()), jsonCallback)
         handler.handle(
             bridgeContext,
-            call(bridgeContext, "no.model", JavaOnlyMap(), BridgeCall.PlatForm.Lynx),
+            call(bridgeContext, "no.model", JavaOnlyMap(), Platform.Lynx),
             lynxCallback,
         )
 
@@ -209,7 +210,7 @@ class DefaultCallHandlerBehaviorTest {
         context: BridgeContext,
         name: String,
         params: Any?,
-        platform: BridgeCall.PlatForm = BridgeCall.PlatForm.Web,
+        platform: Platform = Platform.Web,
     ): BridgeCall = BridgeCall(context).apply {
         bridgeName = name
         this.params = params

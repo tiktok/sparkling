@@ -12,10 +12,10 @@ import com.lynx.tasm.LynxViewBuilder
 import com.tiktok.sparkling.method.protocol.BridgeContext
 import com.tiktok.sparkling.method.protocol.InnerBridge
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.tiktok.sparkling.method.protocol.entity.BridgeResult
 import com.tiktok.sparkling.method.protocol.handler.BridgeFactoryManager
 import com.tiktok.sparkling.method.protocol.handler.BridgeThreadDispatcher
-import com.tiktok.sparkling.method.protocol.impl.errors.JSBErrorReportModel
 import com.tiktok.sparkling.method.protocol.impl.interceptor.BridgeMockInterceptor
 import com.tiktok.sparkling.method.protocol.impl.monitor.BridgeSDKMonitor
 import com.tiktok.sparkling.method.protocol.impl.monitor.IBridgeMonitor
@@ -83,8 +83,6 @@ class SparklingBridge : IReleasable {
             BridgeManager.attachInitListener(listener)
         }
     }
-
-    fun getErrorReportModel(): JSBErrorReportModel = innerBridge.getBridgeContext().errorReportModel
 
     /**
      * prepareLynxJSRuntime
@@ -330,7 +328,6 @@ class SparklingBridge : IReleasable {
         dealWithCloseEvent()
         innerBridge.getBridgeContext().defaultCallHandler.onRelease()
         innerBridge.getBridgeContext().businessCallHandler?.onRelease()
-        innerBridge.getBridgeContext().errorReportModel.putJsbExtension("release", "true")
         BridgeManager.remove(this)
         bridgeSdkContext.containerID?.let {
             IDLMethodRegistryCacheManager.unregisterIDLMethodRegistryCache(
@@ -344,15 +341,15 @@ class SparklingBridge : IReleasable {
             val curPlatform =
                 when (getBridgeContext().platform) {
                     BridgePlatformType.LYNX -> {
-                        BridgeCall.PlatForm.Lynx
+                        Platform.Lynx
                     }
 
                     BridgePlatformType.WEB -> {
-                        BridgeCall.PlatForm.Web
+                        Platform.Web
                     }
 
                     else -> {
-                        BridgeCall.PlatForm.Other
+                        Platform.Other
                     }
                 }
 

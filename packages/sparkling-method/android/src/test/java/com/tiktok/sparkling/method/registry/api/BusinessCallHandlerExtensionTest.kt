@@ -4,6 +4,7 @@
 
 package com.tiktok.sparkling.method.registry.api
 
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.lynx.react.bridge.JavaOnlyMap
 import com.lynx.react.bridge.ReadableMap
 import com.tiktok.sparkling.method.protocol.BridgeContext
@@ -78,7 +79,7 @@ class BusinessCallHandlerExtensionTest {
             params = JavaOnlyMap().apply {
                 putMap("data", JavaOnlyMap().apply { putString("value", "host") })
             }
-            platform = BridgeCall.PlatForm.Lynx
+            platform = Platform.Lynx
         }
         var result: Any? = null
         handler.handle(context, call, object : IBridgeMethodCallback {

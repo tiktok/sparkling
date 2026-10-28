@@ -12,5 +12,4 @@ object BridgeSettings {
     var bridgeRegistryOptimize: Boolean = false
     var bridgeDisableLongToDouble: Boolean = false
     var bridgeNewInputNumberTypeChange: Boolean = false
-    var bridgeCallToStringOptimization: Boolean = false
 }

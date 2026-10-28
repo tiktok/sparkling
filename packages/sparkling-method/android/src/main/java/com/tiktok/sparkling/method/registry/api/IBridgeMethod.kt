@@ -7,6 +7,8 @@ package com.tiktok.sparkling.method.registry.api
 import com.lynx.react.bridge.JavaOnlyMap
 import com.lynx.react.bridge.ReadableMap
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
+import com.tiktok.sparkling.method.protocol.entity.IPlatform
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeMethodCallback
 import com.tiktok.sparkling.method.registry.core.IBridgeContext
 import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
@@ -25,7 +27,7 @@ class JsonProcessor
     constructor(
         bridge: IDLBridgeMethod,
         data: JSONObject,
-        val platForm: BridgeCall.PlatForm = BridgeCall.PlatForm.Web,
+        val platForm: IPlatform = Platform.Web,
     ) : BaseProcessor<JSONObject>(bridge, data) {
         var context: IBridgeContext? = null
 

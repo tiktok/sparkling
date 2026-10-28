@@ -3,6 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.debugtool
 
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.lynx.react.bridge.Callback
 import com.lynx.react.bridge.JavaOnlyMap
 import com.tiktok.sparkling.debug.SparklingDebugToolRegistry
@@ -442,7 +443,7 @@ class SparklingDebugToolProviderImplTest {
                 override fun init() = Unit
                 override fun createBridgeCall(msg: String): BridgeCall = BridgeCall(mContext).apply {
                     bridgeName = msg
-                    platform = BridgeCall.PlatForm.Lynx
+                    platform = Platform.Lynx
                 }
             })
             bridge.sendEvent("fixture.nativeEvent", payload)

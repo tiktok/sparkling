@@ -4,6 +4,7 @@
 
 package com.tiktok.sparkling.method.registry.api
 
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.lynx.react.bridge.JavaOnlyMap
 import com.lynx.react.bridge.ReadableMap
 import com.tiktok.sparkling.method.protocol.BridgeContext
@@ -203,7 +204,7 @@ class BusinessCallHandlerBehaviorTest {
     private fun call(context: BridgeContext, name: String, params: Any?): BridgeCall = BridgeCall(context).apply {
         bridgeName = name
         this.params = params
-        platform = BridgeCall.PlatForm.Lynx
+        platform = Platform.Lynx
     }
 
     private class CapturingCallback : IBridgeMethodCallback {

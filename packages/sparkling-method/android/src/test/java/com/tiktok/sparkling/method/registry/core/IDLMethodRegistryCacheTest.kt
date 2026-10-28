@@ -4,7 +4,6 @@
 
 package com.tiktok.sparkling.method.registry.core
 
-import com.tiktok.sparkling.method.protocol.impl.errors.JSBErrorReportModel
 import com.tiktok.sparkling.method.registry.api.SparklingBridge
 import com.tiktok.sparkling.method.registry.api.util.ThreadPool
 import com.tiktok.sparkling.method.registry.core.annotation.DefaultType
@@ -43,28 +42,18 @@ class IDLMethodRegistryCacheTest {
     private val executorField = ThreadPool::class.java.getDeclaredField("executor").apply { isAccessible = true }
     private var previousExecutor: Any? = null
     private lateinit var executor: QueuedExecutor
-    private lateinit var errors: MutableMap<String, Any>
-    private lateinit var previousErrors: Map<String, Any>
 
     @Before
     fun setUp() {
         previousExecutor = executorField.get(null)
         executor = QueuedExecutor()
         ThreadPool.configExecutorService(executor)
-        val field = JSBErrorReportModel::class.java.getDeclaredField("globalExtension").apply { isAccessible = true }
-        @Suppress("UNCHECKED_CAST")
-        val values = field.get(null) as MutableMap<String, Any>
-        errors = values
-        previousErrors = errors.toMap()
-        errors.clear()
     }
 
     @After
     fun tearDown() {
         executor.shutdownNow()
         executorField.set(null, previousExecutor)
-        errors.clear()
-        errors.putAll(previousErrors)
     }
 
     @Test
@@ -140,15 +129,13 @@ class IDLMethodRegistryCacheTest {
     }
 
     @Test
-    fun failedNameLookupLogsAndReturnsEmptyWithoutChangingErrorContext() {
+    fun failedNameLookupLogsAndReturnsEmpty() {
         val cache = IDLMethodRegistryCache()
-        errors["existing_context"] = "keep"
         val previousDebugEnv = SparklingBridge.isDebugEnv
         try {
             SparklingBridge.isDebugEnv = true
             // An interface has no superclass: preserve the existing lookup failure and debug log.
             assertEquals("", cache.find(IDLBridgeMethod::class.java))
-            assertEquals(mapOf("existing_context" to "keep"), errors)
             assertTrue(ShadowLog.getLogsForTag("IDLMethodRegistryCache").any {
                 it.msg.startsWith("IDLMethodRegistryCache.find failed,clazz == ${IDLBridgeMethod::class.java.name}, e == ")
             })
@@ -183,7 +170,6 @@ class IDLMethodRegistryCacheTest {
             cache.reportedMessage,
         )
         assertEquals(1, cache.failureCount)
-        assertTrue(errors.isEmpty())
         assertEquals(1, executor.pendingCount)
     }
 
@@ -194,7 +180,6 @@ class IDLMethodRegistryCacheTest {
         val method = OwnMethod::class.java
         assertTrue(runCatching { cache.cacheMethodClass(method) }.exceptionOrNull() is RejectedExecutionException)
         assertEquals("", cache.find(method))
-        assertTrue(errors.isEmpty())
         assertTrue(cache.BRIDGE_ANNOTATION_MAP.isEmpty())
         assertTrue(cache.BRIDGE_RESULT_MAP.isEmpty())
     }
@@ -210,7 +195,6 @@ class IDLMethodRegistryCacheTest {
         val executionFailure = runCatching { executor.runPending() }.exceptionOrNull()
         assertTrue(executionFailure is java.util.concurrent.ExecutionException)
         assertSame(failure, executionFailure?.cause)
-        assertTrue(errors.isEmpty())
         assertTrue(cache.BRIDGE_ANNOTATION_MAP.isEmpty())
         assertTrue(cache.BRIDGE_RESULT_MAP.isEmpty())
     }
@@ -235,7 +219,6 @@ class IDLMethodRegistryCacheTest {
         assertSame(failure, cache.reportedError)
         assertEquals(0, executor.pendingCount)
         assertTrue(cache.BRIDGE_ANNOTATION_MAP.containsKey(OwnMethod::class.java))
-        assertTrue(errors.isEmpty())
     }
 
     @Test

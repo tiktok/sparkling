@@ -3,6 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.method.protocol
 
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.tiktok.sparkling.method.registry.core.BridgePlatformType
 import com.tiktok.sparkling.method.registry.api.BusinessCallHandler
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
@@ -52,7 +53,7 @@ class BridgeContextTest {
         bridgeContext.businessCallHandler = businessCallHandler
         val bridgeCall = BridgeCall(bridgeContext)
         bridgeCall.bridgeName = "testBridge"
-        bridgeCall.platform = BridgeCall.PlatForm.Web
+        bridgeCall.platform = Platform.Web
 
         // Mock the getNameSpace method which is called by getNamespace()
         every { businessCallHandler.nameSpace } returns "testNamespace"
@@ -67,7 +68,7 @@ class BridgeContextTest {
         bridgeContext.registerIBridgeLifeClient(lifeClient)
 
         val bridgeCall = BridgeCall(bridgeContext)
-        bridgeCall.platform = BridgeCall.PlatForm.Web // Initialize platform
+        bridgeCall.platform = Platform.Web // Initialize platform
 
         every { lifeClient.onBridgeCalledStart(any(), any()) } just Runs
 

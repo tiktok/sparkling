@@ -3,6 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.method.registry.api
 
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.lynx.react.bridge.JavaOnlyMap
 import com.tiktok.sparkling.method.protocol.BridgeContext
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
@@ -90,7 +91,7 @@ class CallHandlersTest {
             BridgeCall(BridgeContext()).apply {
                 bridgeName = "missing.bridge"
                 params = JSONObject()
-                platform = BridgeCall.PlatForm.Web
+                platform = Platform.Web
             }
 
         handler.handle(newBridgeContext(BridgePlatformType.WEB), call, callback)
@@ -113,7 +114,7 @@ class CallHandlersTest {
             BridgeCall(ctx).apply {
                 bridgeName = "stub.compatible.bridge"
                 params = JSONObject().put("k", "v")
-                platform = BridgeCall.PlatForm.Web
+                platform = Platform.Web
             }
 
         handler.handle(ctx, call, callback)
@@ -142,7 +143,7 @@ class CallHandlersTest {
             BridgeCall(ctx).apply {
                 bridgeName = "stub.compatible.bridge"
                 this.params = params
-                platform = BridgeCall.PlatForm.Lynx
+                platform = Platform.Lynx
             }
 
         handler.handle(ctx, call, callback)
@@ -166,7 +167,7 @@ class CallHandlersTest {
             BridgeCall(ctx).apply {
                 bridgeName = "stub.compatible.bridge"
                 this.params = "ignored"
-                platform = BridgeCall.PlatForm.Other
+                platform = Platform.Other
             }
 
         handler.handle(ctx, call, callback)
@@ -207,7 +208,7 @@ class CallHandlersTest {
             BridgeCall(ctx).apply {
                 bridgeName = "missing.bridge"
                 params = JSONObject()
-                platform = BridgeCall.PlatForm.Web
+                platform = Platform.Web
             }
 
         handler.handle(ctx, call, callback)
@@ -226,7 +227,7 @@ class CallHandlersTest {
             BridgeCall(ctx).apply {
                 bridgeName = "stub.compatible.bridge"
                 this.params = 42
-                platform = BridgeCall.PlatForm.Other
+                platform = Platform.Other
             }
 
         handler.handle(ctx, call, callback)

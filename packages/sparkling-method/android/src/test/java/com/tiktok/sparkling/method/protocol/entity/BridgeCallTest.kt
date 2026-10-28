@@ -3,6 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.method.protocol.entity
 
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.tiktok.sparkling.method.protocol.BridgeContext
 import com.tiktok.sparkling.method.registry.api.BridgeSettings
 import org.junit.Assert.*
@@ -20,16 +21,7 @@ class BridgeCallTest {
     }
 
     @Test
-    fun testToStringWithOptimization() {
-        BridgeSettings.bridgeCallToStringOptimization = true
-        bridgeCall.callbackId = "123"
-        bridgeCall.bridgeName = "testBridge"
-        assertEquals("BridgeCall(callbackId='123', bridgeName='testBridge')", bridgeCall.toString())
-    }
-
-    @Test
     fun testToStringWithoutOptimization() {
-        BridgeSettings.bridgeCallToStringOptimization = false
         bridgeCall.callbackId = "123"
         bridgeCall.bridgeName = "testBridge"
         bridgeCall.hitBusinessHandler = true
@@ -52,9 +44,9 @@ class BridgeCallTest {
     }
 
     @Test
-    fun testPlatFormEnum() {
-        assertEquals(BridgeCall.PlatForm.Lynx, BridgeCall.PlatForm.valueOf("Lynx"))
-        assertEquals(BridgeCall.PlatForm.Web, BridgeCall.PlatForm.valueOf("Web"))
-        assertEquals(BridgeCall.PlatForm.Other, BridgeCall.PlatForm.valueOf("Other"))
+    fun testPlatformEnum() {
+        assertEquals(Platform.Lynx, Platform.valueOf("Lynx"))
+        assertEquals(Platform.Web, Platform.valueOf("Web"))
+        assertEquals(Platform.Other, Platform.valueOf("Other"))
     }
 }

@@ -12,7 +12,6 @@ import com.lynx.tasm.LynxBackgroundRuntime
 import com.lynx.tasm.LynxView
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
 import com.tiktok.sparkling.method.protocol.handler.BridgeDispatcher
-import com.tiktok.sparkling.method.protocol.impl.errors.JSBErrorReportModel
 import com.tiktok.sparkling.method.protocol.impl.interceptor.BridgeMockInterceptor
 import com.tiktok.sparkling.method.protocol.impl.monitor.IBridgeMonitor
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeLifeClient
@@ -43,11 +42,6 @@ class BridgeContext {
     var businessCallHandler: BusinessCallHandler? = null
     var jsbMockInterceptor: BridgeMockInterceptor? = null // for JSB Mock
     var platform: BridgePlatformType = BridgePlatformType.ALL
-
-    /**
-     * force on context error, only record view level message in jsbExtension
-     */
-    val errorReportModel: JSBErrorReportModel = JSBErrorReportModel()
 
     fun registerProtocol(protocol: IBridgeProtocol) {
         protocols.add(protocol)

@@ -3,6 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.method.registry.api
 
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.lynx.react.bridge.JavaOnlyMap
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
 import com.tiktok.sparkling.method.registry.core.BridgePlatformType
@@ -35,7 +36,7 @@ class JsonAndReadableMapProcessorTest {
 
     @Test
     fun jsonProcessorPlatformTypeAndErrorPayload() {
-        val processor = JsonProcessor(StubBridge(), JSONObject(), BridgeCall.PlatForm.Web)
+        val processor = JsonProcessor(StubBridge(), JSONObject(), Platform.Web)
         assertEquals(BridgePlatformType.WEB, processor.getPlatformType())
 
         val err = processor.onError(IDLBridgeMethod.INVALID_PARAM, "bad")
@@ -44,7 +45,7 @@ class JsonAndReadableMapProcessorTest {
 
         // Default platform parameter should also be Web.
         val defaulted = JsonProcessor(StubBridge(), JSONObject())
-        assertEquals(BridgeCall.PlatForm.Web, defaulted.platForm)
+        assertEquals(Platform.Web, defaulted.platForm)
     }
 
     @Test

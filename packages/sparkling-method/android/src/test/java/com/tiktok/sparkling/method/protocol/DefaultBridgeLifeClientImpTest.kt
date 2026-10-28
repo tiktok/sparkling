@@ -3,11 +3,10 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.method.protocol
 
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
 import com.tiktok.sparkling.method.protocol.entity.BridgeResult
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeLifeClient
-import com.tiktok.sparkling.method.protocol.impl.errors.JSBErrorReportModel
-import com.tiktok.sparkling.method.protocol.impl.lifecycle.fe.FeCallMonitorModel
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -17,20 +16,14 @@ class DefaultBridgeLifeClientImpTest {
     private lateinit var lifeClient: DefaultBridgeLifeClientImp
     private lateinit var mockBridgeContext: BridgeContext
     private lateinit var mockBridgeCall: BridgeCall
-    private lateinit var mockErrorReportModel: JSBErrorReportModel
-    private lateinit var mockFeCallMonitorModel: FeCallMonitorModel
 
     @Before
     fun setUp() {
         mockBridgeContext = Mockito.mock(BridgeContext::class.java)
         mockBridgeCall = Mockito.mock(BridgeCall::class.java)
-        mockErrorReportModel = Mockito.mock(JSBErrorReportModel::class.java)
-        mockFeCallMonitorModel = Mockito.mock(FeCallMonitorModel::class.java)
 
         // Set up the BridgeCall mock
         Mockito.`when`(mockBridgeCall.context).thenReturn(mockBridgeContext)
-        Mockito.`when`(mockBridgeCall.jsbSDKErrorReportModel).thenReturn(mockErrorReportModel)
-        Mockito.`when`(mockBridgeCall.feCallMonitorModel).thenReturn(mockFeCallMonitorModel)
 
         lifeClient = DefaultBridgeLifeClientImp(mockBridgeContext)
     }
@@ -52,18 +45,13 @@ class DefaultBridgeLifeClientImpTest {
 
     @Test
     fun testOnBridgeCalledStart() {
-        Mockito.`when`(mockBridgeCall.platform).thenReturn(BridgeCall.PlatForm.Other)
-        Mockito.`when`(mockBridgeCall.url).thenReturn("http://test.com")
-        Mockito.`when`(mockBridgeCall.bridgeName).thenReturn("testBridge")
-        Mockito.`when`(mockBridgeCall.jsbEngine).thenReturn("testEngine")
+        val child = Mockito.mock(IBridgeLifeClient::class.java)
+        lifeClient.registerIBridgeLifeClient(child)
+        Mockito.`when`(mockBridgeCall.platform).thenReturn(Platform.Other)
 
         lifeClient.onBridgeCalledStart(mockBridgeCall, mockBridgeContext)
 
-        // Verify the error report model was set up
-        Mockito.verify(mockErrorReportModel).setJsbBridgeSdk("SparklingBridge")
-        Mockito.verify(mockErrorReportModel).setJsbUrl("http://test.com")
-        Mockito.verify(mockErrorReportModel).setJsbMethodName("testBridge")
-        Mockito.verify(mockErrorReportModel).setJsbEngine("testEngine")
+        Mockito.verify(child).onBridgeCalledStart(mockBridgeCall, mockBridgeContext)
     }
 
     @Test
@@ -81,7 +69,7 @@ class DefaultBridgeLifeClientImpTest {
     @Test
     fun testOnBridgeCallbackCallStart() {
         val mockResult = Mockito.mock(BridgeResult::class.java)
-        Mockito.`when`(mockBridgeCall.platform).thenReturn(BridgeCall.PlatForm.Other)
+        Mockito.`when`(mockBridgeCall.platform).thenReturn(Platform.Other)
         lifeClient.onBridgeCallbackCallStart(mockResult, mockBridgeCall, mockBridgeContext)
         // No assertion, just ensuring no exception is thrown
     }
@@ -89,7 +77,7 @@ class DefaultBridgeLifeClientImpTest {
     @Test
     fun testOnBridgeCallbackInvokeStart() {
         val mockResult = Mockito.mock(BridgeResult::class.java)
-        Mockito.`when`(mockBridgeCall.platform).thenReturn(BridgeCall.PlatForm.Other)
+        Mockito.`when`(mockBridgeCall.platform).thenReturn(Platform.Other)
         lifeClient.onBridgeCallbackInvokeStart(mockResult, mockBridgeCall)
         // No assertion, just ensuring no exception is thrown
     }
@@ -107,14 +95,13 @@ class DefaultBridgeLifeClientImpTest {
     }
 
     @Test
-    fun testOnBridgeCalledEndUpdatesMonitorAndDelegates() {
+    fun testOnBridgeCalledEndDelegates() {
         val child = Mockito.mock(IBridgeLifeClient::class.java)
         lifeClient.registerIBridgeLifeClient(child)
-        Mockito.`when`(mockBridgeCall.platform).thenReturn(BridgeCall.PlatForm.Other)
+        Mockito.`when`(mockBridgeCall.platform).thenReturn(Platform.Other)
 
         lifeClient.onBridgeCalledEnd(mockBridgeCall, mockBridgeContext)
 
         Mockito.verify(child).onBridgeCalledEnd(mockBridgeCall, mockBridgeContext)
-        Mockito.verify(mockFeCallMonitorModel).reportFeCallInfo()
     }
 }

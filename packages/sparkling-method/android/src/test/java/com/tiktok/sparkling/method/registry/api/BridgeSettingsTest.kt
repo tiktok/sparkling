@@ -14,7 +14,6 @@ class BridgeSettingsTest {
         BridgeSettings.bridgeRegistryOptimize = false
         BridgeSettings.bridgeDisableLongToDouble = false
         BridgeSettings.bridgeNewInputNumberTypeChange = false
-        BridgeSettings.bridgeCallToStringOptimization = false
     }
 
     @Test
@@ -22,7 +21,6 @@ class BridgeSettingsTest {
         assertFalse(BridgeSettings.bridgeRegistryOptimize)
         assertFalse(BridgeSettings.bridgeDisableLongToDouble)
         assertFalse(BridgeSettings.bridgeNewInputNumberTypeChange)
-        assertFalse(BridgeSettings.bridgeCallToStringOptimization)
     }
 
     @Test
@@ -30,19 +28,15 @@ class BridgeSettingsTest {
         BridgeSettings.bridgeRegistryOptimize = true
         BridgeSettings.bridgeDisableLongToDouble = true
         BridgeSettings.bridgeNewInputNumberTypeChange = true
-        BridgeSettings.bridgeCallToStringOptimization = true
         assertTrue(BridgeSettings.bridgeRegistryOptimize)
         assertTrue(BridgeSettings.bridgeDisableLongToDouble)
         assertTrue(BridgeSettings.bridgeNewInputNumberTypeChange)
-        assertTrue(BridgeSettings.bridgeCallToStringOptimization)
 
         BridgeSettings.bridgeRegistryOptimize = false
         BridgeSettings.bridgeDisableLongToDouble = false
         BridgeSettings.bridgeNewInputNumberTypeChange = false
-        BridgeSettings.bridgeCallToStringOptimization = false
         assertFalse(BridgeSettings.bridgeRegistryOptimize)
         assertFalse(BridgeSettings.bridgeDisableLongToDouble)
         assertFalse(BridgeSettings.bridgeNewInputNumberTypeChange)
-        assertFalse(BridgeSettings.bridgeCallToStringOptimization)
     }
 }

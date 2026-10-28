@@ -9,16 +9,23 @@ import com.lynx.jsbridge.LynxMethod
 import com.lynx.react.bridge.Callback
 import com.lynx.react.bridge.ReadableMap
 import com.lynx.tasm.behavior.LynxContext
+import com.tiktok.sparkling.method.protocol.BridgeContext
 
-class LynxBridgeDelegateModule(
+/**
+ * Lynx module that receives JSB calls from a LynxView and hands them to [RealLynxBridgeDelegate].
+ *
+ * Lynx only collects `@LynxMethod` methods declared on the registered class itself, so a subclass
+ * registered with Lynx must override [call] and annotate it again.
+ */
+open class LynxBridgeDelegateModule protected constructor(
     val context: LynxContext,
     val obj: Any?,
+    private val realLynxBridgeDelegate: RealLynxBridgeDelegate,
 ) : LynxContextModule(context, obj) {
+    constructor(context: LynxContext, obj: Any?) : this(context, obj, RealLynxBridgeDelegate(obj))
     constructor(context: LynxContext) : this(context, null)
 
     private val TAG = "LynxBridgeDelegateModule"
-
-    private val realLynxBridgeDelegate: RealLynxBridgeDelegate = RealLynxBridgeDelegate(obj)
 
     companion object {
         // here is the protocol of the front end of lynx, don't change it casually
@@ -26,11 +33,15 @@ class LynxBridgeDelegateModule(
     }
 
     @LynxMethod
-    fun call(
-        bridgeName: String,
-        params: ReadableMap? = null,
-        callback: Callback? = null,
-    ) {
+    open fun call(bridgeName: String, params: ReadableMap? = null, callback: Callback? = null) {
+        if (context.isEmbeddedModeOn) {
+            resolveEmbeddedBridgeContext()?.let {
+                realLynxBridgeDelegate.setBridgeContext(it)
+            }
+        }
         realLynxBridgeDelegate.call(bridgeName, params, callback, "Lynx")
     }
+
+    /** Context of the container that owns the current LynxView in embedded mode, if any. */
+    protected open fun resolveEmbeddedBridgeContext(): BridgeContext? = null
 }

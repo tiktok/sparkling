@@ -3,6 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.method.protocol.entity
 
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.lynx.react.bridge.JavaOnlyMap
 import com.tiktok.sparkling.method.protocol.BridgeContext
 import com.tiktok.sparkling.method.registry.api.BridgeSettings
@@ -24,7 +25,6 @@ import org.robolectric.annotation.Config
 class BridgeCallAndResultTest {
     @After
     fun tearDown() {
-        BridgeSettings.bridgeCallToStringOptimization = false
         SparklingBridge.isDebugEnv = false
     }
 
@@ -42,11 +42,11 @@ class BridgeCallAndResultTest {
         assertEquals(CancelCallbackType.NONE, call.cancelCallBack)
         assertEquals("DEFAULT", BridgeCall.DEFAULT_NAMESPACE)
 
-        // Touch every PlatForm enum value.
-        assertEquals(3, BridgeCall.PlatForm.values().size)
-        assertEquals(BridgeCall.PlatForm.Lynx, BridgeCall.PlatForm.valueOf("Lynx"))
-        assertEquals(BridgeCall.PlatForm.Web, BridgeCall.PlatForm.valueOf("Web"))
-        assertEquals(BridgeCall.PlatForm.Other, BridgeCall.PlatForm.valueOf("Other"))
+        // Touch every Platform enum value.
+        assertEquals(3, Platform.values().size)
+        assertEquals(Platform.Lynx, Platform.valueOf("Lynx"))
+        assertEquals(Platform.Web, Platform.valueOf("Web"))
+        assertEquals(Platform.Other, Platform.valueOf("Other"))
 
         // CancelCallbackType enum.
         assertEquals(3, CancelCallbackType.values().size)
@@ -56,7 +56,6 @@ class BridgeCallAndResultTest {
 
     @Test
     fun bridgeCallToStringIncludesAllFieldsByDefault() {
-        BridgeSettings.bridgeCallToStringOptimization = false
         val call =
             BridgeCall(BridgeContext()).apply {
                 callbackId = "cb1"
@@ -73,22 +72,6 @@ class BridgeCallAndResultTest {
         assertTrue(s.contains("test.method"))
         assertTrue(s.contains("frame"))
         assertTrue(s.contains("hitBusinessHandler='true'"))
-    }
-
-    @Test
-    fun bridgeCallToStringRespectsOptimizationFlag() {
-        BridgeSettings.bridgeCallToStringOptimization = true
-        val call =
-            BridgeCall(BridgeContext()).apply {
-                callbackId = "id"
-                bridgeName = "fn"
-                url = "url"
-            }
-        val s = call.toString()
-        assertTrue(s.contains("id"))
-        assertTrue(s.contains("fn"))
-        // Optimised toString omits url and other fields.
-        assertFalse(s.contains("url='url'"))
     }
 
     @Test

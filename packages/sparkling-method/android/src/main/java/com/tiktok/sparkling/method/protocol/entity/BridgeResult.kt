@@ -4,16 +4,20 @@
 
 package com.tiktok.sparkling.method.protocol.entity
 
+import com.lynx.react.bridge.JavaOnlyMap
 import com.tiktok.sparkling.method.protocol.utils.BridgeConverter
-import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
 import com.tiktok.sparkling.method.registry.api.SparklingBridge
 import com.tiktok.sparkling.method.registry.api.Utils
-import com.lynx.react.bridge.JavaOnlyMap
+import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
 import org.json.JSONObject
 
-class BridgeResult(
-    val parcel: Any,
-) {
+/**
+ * Base of what a bridge method hands back to the front end: the raw payload plus the shaping and
+ * inspection the minimum runtime needs. A host may extend it, for example to mark results or to
+ * convert map payloads its own way.
+ */
+open class BridgeResult(val parcel: Any) {
+
     override fun toString(): String {
         if (SparklingBridge.isDebugEnv) {
             return toJSONObject().toString()
@@ -23,18 +27,23 @@ class BridgeResult(
     }
 
     companion object {
-        fun toJsonResult(
-            code: Int,
-            msg: String = "",
-            data: JSONObject? = null,
-        ): BridgeResult {
+        fun toJsonResult(code: Int, msg: String = "", data: JSONObject? = null): BridgeResult {
+            return BridgeResult(newResultJson(code, msg, data))
+        }
+
+        /**
+         * Shared with the factories of host subclasses, which have to return their own type and so
+         * cannot reuse [toJsonResult]. Keeping the payload shape in one place stops the factories
+         * from drifting apart.
+         */
+        internal fun newResultJson(code: Int, msg: String, data: JSONObject?): JSONObject {
             val json = JSONObject()
             json.apply {
                 put("code", code)
                 put("msg", msg)
                 put("data", data)
             }
-            return BridgeResult(json)
+            return json
         }
     }
 
@@ -44,10 +53,16 @@ class BridgeResult(
             return BridgeConverter.revertJavaOnlyMap2JSONObject(parcel)
         }
         if (parcel is Map<*, *>) {
-            return Utils.mapToJSON(parcel as Map<String, Any?>)
+            return mapToJSON(parcel as Map<String, Any?>)
         }
         return JSONObject()
     }
+
+    /**
+     * Converts a map payload to JSON. A host subclass may override it to convert through its own
+     * utilities.
+     */
+    protected open fun mapToJSON(map: Map<String, Any?>): JSONObject = Utils.mapToJSON(map)
 
     fun isSuccessResult(): Boolean {
         try {
@@ -60,16 +75,13 @@ class BridgeResult(
         }
     }
 
-    fun toJSONObject(call: BridgeCall?): JSONObject =
-        (
-            if (parcel is JSONObject) {
-                parcel
-            } else if (parcel is Map<*, *>) {
-                Utils.mapToJSON(parcel as Map<String, Any?>)
-            } else if (parcel is JavaOnlyMap) {
-                BridgeConverter.revertJavaOnlyMap2JSONObject(parcel)
-            } else {
-                JSONObject()
-            }
-        )
+    open fun toJSONObject(call: BridgeCall?): JSONObject {
+        return if (parcel is JSONObject) {
+            parcel
+        } else if (parcel is Map<*, *>) {
+            mapToJSON(parcel as Map<String, Any?>)
+        } else if (parcel is JavaOnlyMap) {
+            BridgeConverter.revertJavaOnlyMap2JSONObject(parcel)
+        } else JSONObject()
+    }
 }

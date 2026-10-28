@@ -15,7 +15,6 @@ import com.tiktok.sparkling.method.protocol.impl.monitor.BridgeSDKMonitor
 import com.tiktok.sparkling.method.protocol.impl.monitor.IBridgeMonitor
 import com.tiktok.sparkling.method.protocol.impl.interceptor.BridgeMockInterceptor
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeLifeClient
-import com.tiktok.sparkling.method.protocol.impl.errors.JSBErrorReportModel
 import com.tiktok.sparkling.method.registry.core.model.context.ContextProviderFactory
 import com.tiktok.sparkling.method.registry.core.BridgePlatformType
 import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
@@ -74,7 +73,6 @@ class SparklingBridgeTest {
         every { sparklingBridge.getBridgeContext() } returns mockBridgeContext
         every { mockBridgeContext.defaultCallHandler } returns mockk(relaxed = true)
         every { mockBridgeContext.businessCallHandler } returns null
-        every { mockBridgeContext.errorReportModel } returns mockk(relaxed = true)
         every { mockBridgeContext.platform } returns BridgePlatformType.WEB
         every { mockBridgeContext.dispatcher } returns mockk(relaxed = true)
     }
@@ -365,20 +363,6 @@ class SparklingBridgeTest {
 
         // Then
         assertEquals("Should return inner bridge context", mockBridgeContext, context)
-    }
-
-    @Test
-    fun testGetErrorReportModel() {
-        // Given
-        val realBridgeContext = BridgeContext()
-        every { sparklingBridge.getBridgeContext() } returns realBridgeContext
-
-        // When
-        val errorModel = sparklingBridge.getErrorReportModel()
-
-        // Then
-        assertNotNull("Should return error report model", errorModel)
-        assertTrue("Should be instance of JSBErrorReportModel", errorModel is JSBErrorReportModel)
     }
 
     @Test

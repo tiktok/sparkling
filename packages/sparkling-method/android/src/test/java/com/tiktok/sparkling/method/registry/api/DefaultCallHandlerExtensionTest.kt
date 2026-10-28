@@ -4,6 +4,7 @@
 
 package com.tiktok.sparkling.method.registry.api
 
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.lynx.react.bridge.JavaOnlyMap
 import com.lynx.react.bridge.ReadableMap
 import com.tiktok.sparkling.method.protocol.BridgeContext
@@ -53,7 +54,7 @@ class DefaultCallHandlerExtensionTest {
         val call = BridgeCall(context).apply {
             bridgeName = "factory"
             params = JSONObject().put("value", "host")
-            platform = BridgeCall.PlatForm.Web
+            platform = Platform.Web
         }
         val callback = CapturingCallback()
         handler.handle(context, call, callback)
@@ -85,7 +86,7 @@ class DefaultCallHandlerExtensionTest {
         val call = BridgeCall(context).apply {
             bridgeName = "custom"
             params = JavaOnlyMap().apply { putMap("data", nested) }
-            platform = BridgeCall.PlatForm.Lynx
+            platform = Platform.Lynx
         }
         val callback = CapturingCallback()
 

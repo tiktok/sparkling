@@ -3,6 +3,7 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.method.protocol.handler
 
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.tiktok.sparkling.method.protocol.BridgeContext
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
 import com.tiktok.sparkling.method.protocol.entity.BridgeResult
@@ -80,7 +81,7 @@ class BridgeDispatcherTest {
                 bridgeName = "storage.getItem"
                 nameSpace = ""
                 params = JSONObject().put("key", "foo")
-                platform = BridgeCall.PlatForm.Lynx
+                platform = Platform.Lynx
             }
         val dispatcher = BridgeDispatcher()
         dispatcher.registerHandler(
