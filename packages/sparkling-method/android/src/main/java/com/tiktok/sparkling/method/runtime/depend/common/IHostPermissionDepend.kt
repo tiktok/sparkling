@@ -5,22 +5,27 @@
 package com.tiktok.sparkling.method.runtime.depend.common
 
 import android.app.Activity
+import androidx.annotation.Keep
 
+@Keep
 interface OnPermissionGrantCallback {
     fun onAllGranted()
 
     fun onNotGranted()
 }
 
+@Keep
 interface OnPermissionsGrantCallback {
     fun onResult(onPermissionsGrantResults: Array<OnPermissionsGrantResult>)
 }
 
+@Keep
 class OnPermissionsGrantResult(
     val permission: String,
     val result: Int,
 )
 
+@Keep
 interface IHostPermissionDepend {
     fun hasPermission(
         activity: Activity,

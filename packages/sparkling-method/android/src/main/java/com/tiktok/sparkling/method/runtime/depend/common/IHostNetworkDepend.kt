@@ -3,11 +3,13 @@
 // LICENSE file in the root directory of this source tree.
 package com.tiktok.sparkling.method.runtime.depend.common
 
+import androidx.annotation.Keep
 import com.tiktok.sparkling.method.runtime.depend.network.AbsStreamConnection
 import com.tiktok.sparkling.method.runtime.depend.network.AbsStringConnection
 import com.tiktok.sparkling.method.runtime.depend.network.HttpRequest
 import com.tiktok.sparkling.method.runtime.depend.network.RequestMethod
 
+@Keep
 interface IHostNetworkDepend {
     fun getAPIParams(): Map<String, Any>? = null
 
