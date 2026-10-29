@@ -17,7 +17,7 @@ import com.tiktok.sparkling.method.protocol.impl.monitor.IBridgeMonitor
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeLifeClient
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeProtocol
 
-class BridgeContext {
+open class BridgeContext {
     companion object {
         fun getPlatformByBridgeContext(bridgeContext: BridgeContext): BridgePlatformType =
             if (bridgeContext.platform == BridgePlatformType.LYNX) {
@@ -39,8 +39,16 @@ class BridgeContext {
     var protocols: MutableList<IBridgeProtocol> = mutableListOf()
     var monitor: MutableSet<IBridgeMonitor> = mutableSetOf()
     val defaultCallHandler: DefaultCallHandler = DefaultCallHandler()
+
+    /**
+     * Runs the methods of the business namespace this container is bound to. A call it can serve
+     * goes to it instead of [defaultCallHandler]; see [shouldHandleWithBusinessHandler].
+     */
     var businessCallHandler: BusinessCallHandler? = null
-    var jsbMockInterceptor: BridgeMockInterceptor? = null // for JSB Mock
+
+    /** Debug hook that can rewrite or answer this container's calls; unset in production. */
+    var jsbMockInterceptor: BridgeMockInterceptor? = null
+
     var platform: BridgePlatformType = BridgePlatformType.ALL
 
     fun registerProtocol(protocol: IBridgeProtocol) {
@@ -49,7 +57,13 @@ class BridgeContext {
 
     fun getNamespace() = businessCallHandler?.nameSpace
 
-    fun shouldHandleWithBusinessHandler(call: BridgeCall): Boolean =
+    /**
+     * Whether [call] goes to [businessCallHandler]: the call names the bound namespace or none, and
+     * that namespace registers the method.
+     *
+     * Open so that a host whose handler looks methods up in its own way can answer with that lookup.
+     */
+    open fun shouldHandleWithBusinessHandler(call: BridgeCall): Boolean =
         if (businessCallHandler != null && (call.nameSpace == getNamespace() || call.nameSpace.isEmpty())) {
             businessCallHandler?.getBridge(this, call.bridgeName) != null
         } else {

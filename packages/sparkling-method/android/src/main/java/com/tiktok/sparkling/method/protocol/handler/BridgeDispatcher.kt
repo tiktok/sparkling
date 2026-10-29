@@ -23,50 +23,58 @@ import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
 import org.json.JSONObject
 import java.util.UUID
 
-class BridgeDispatcher {
+open class BridgeDispatcher {
     companion object {
         val TAG = "BridgeDispatcher"
         val handler = Handler(Looper.getMainLooper())
     }
 
-    private var bridgeHandler: IBridgeHandler? = null
+    protected var bridgeHandler: IBridgeHandler? = null
 
+    /** Binds the handler that resolves and invokes a registered bridge method. */
     fun registerHandler(handler: IBridgeHandler) {
         bridgeHandler = handler
     }
 
-    fun onDispatchBridgeMethod(
+    /**
+     * Shared JSB entry. When the context has a mock interceptor, a mocked result answers the call
+     * without running it; otherwise the call the interceptor returns is the one dispatched.
+     */
+    open fun onDispatchBridgeMethod(
         call: BridgeCall,
         callback: IBridgeCallback,
         context: BridgeContext,
     ) {
-        if (context.jsbMockInterceptor != null) {
-            if (!shouldInvokeResult(context, call, callback)) {
-                val bridgeCall = context.jsbMockInterceptor!!.interceptBridgeCall(call)
-                realDispatchBridgeMethod(bridgeCall, callback, context)
-            }
-        } else {
-            realDispatchBridgeMethod(call, callback, context)
+        val mockInterceptor = context.jsbMockInterceptor
+        if (mockInterceptor == null) {
+            dispatchBridgeMethod(call, callback, context)
+            return
         }
+        if (invokeMockResult(call, callback, context)) {
+            return
+        }
+        dispatchBridgeMethod(mockInterceptor.interceptBridgeCall(call), callback, context)
     }
 
-    private fun shouldInvokeResult(
-        context: BridgeContext,
+    /**
+     * Answers [call] with the mock interceptor's result if it has one, and returns whether it did.
+     * Only called when the context has a mock interceptor.
+     */
+    protected open fun invokeMockResult(
         call: BridgeCall,
         callback: IBridgeCallback,
+        context: BridgeContext,
     ): Boolean {
-        val result = context.jsbMockInterceptor!!.invokeBridgeResult(call)
-        result?.let {
-            val invocation = MethodInvocationSnapshot.from(context, call)
-            invocation.notifyStart(call)
-            invocation.notifyEnd(call, it)
-            callback.onBridgeResult(it, call)
-            return true
-        }
-        return false
+        val mockResult = context.jsbMockInterceptor?.invokeBridgeResult(call) ?: return false
+        val invocation = MethodInvocationSnapshot.from(context, call)
+        invocation.notifyStart(call)
+        invocation.notifyEnd(call, mockResult)
+        callback.onBridgeResult(mockResult, call)
+        return true
     }
 
-    private fun realDispatchBridgeMethod(
+    /** After the mock interceptor: the factory hook, auth and life-client checks, then dispatch. */
+    protected open fun dispatchBridgeMethod(
         call: BridgeCall,
         callback: IBridgeCallback,
         context: BridgeContext,
@@ -110,30 +118,69 @@ class BridgeDispatcher {
             return
         }
 
-        val callbackHandler =
-            object : IBridgeMethodCallback {
-                override fun onBridgeResult(parcel: Any) {
-                    client.onBridgeCallback()
-                    val bridgeResult =
-                        context.jsbMockInterceptor?.interceptBridgeResult(call, BridgeResult(parcel))
-                            ?: BridgeResult(parcel)
-                    invocation.notifyEnd(call, bridgeResult)
-                    callback.onBridgeResult(bridgeResult, call)
-                    if (getToastSetting()) toastJsbError(call, bridgeResult.toJSONObject(), context)
+        // Records the end of the invocation before the result reaches the caller.
+        val invocationCallback =
+            object : IBridgeCallback {
+                override fun onBridgeResult(
+                    result: BridgeResult,
+                    call: BridgeCall?,
+                ) {
+                    call?.let { invocation.notifyEnd(it, result) }
+                    callback.onBridgeResult(result, call)
                 }
             }
+        dispatchToBridgeHandler(call, invocationCallback, context)
+    }
 
-        if (context.shouldHandleWithBusinessHandler(call)) {
+    /**
+     * Invokes the context's business handler when it serves [call], [bridgeHandler] otherwise, and
+     * records which one in [BridgeCall.hitBusinessHandler]. Fails the call if that handler is unset.
+     */
+    protected open fun dispatchToBridgeHandler(
+        call: BridgeCall,
+        callback: IBridgeCallback,
+        context: BridgeContext,
+    ) {
+        val jsbHandler = if (context.shouldHandleWithBusinessHandler(call)) {
             call.hitBusinessHandler = true
-            context.businessCallHandler!!.handle(context, call, callbackHandler)
-            LogUtils.d(
-                TAG,
-                "[JSBHit] Business JSB Handler(${context.businessCallHandler?.nameSpace}), $call",
-            )
+            context.businessCallHandler
         } else {
             call.hitBusinessHandler = false
-            bridgeHandler!!.handle(context, call, callbackHandler)
+            bridgeHandler
+        }
+        if (jsbHandler == null) {
+            callback.onBridgeResult(
+                createBridgeResult(
+                    BridgeResult.newResultJson(IDLBridgeMethod.UNKNOWN_ERROR, "JSB handler is empty", null),
+                ),
+                call,
+            )
+            return
+        }
+        jsbHandler.handle(context, call, createMethodCallback(call, callback, context))
+        if (call.hitBusinessHandler) {
+            LogUtils.d(TAG, "[JSBHit] Business JSB Handler(${context.businessCallHandler?.nameSpace}), $call")
+        } else {
             LogUtils.d(TAG, "[JSBHit] Default JSB Handler, $call")
+        }
+    }
+
+    /**
+     * The callback [dispatchToBridgeHandler] hands the handler: it passes each result, as rewritten
+     * by the mock interceptor if any, on to [callback], with the bridge client notified before and
+     * the debug toast shown after.
+     */
+    protected open fun createMethodCallback(
+        call: BridgeCall,
+        callback: IBridgeCallback,
+        context: BridgeContext,
+    ): IBridgeMethodCallback = object : IBridgeMethodCallback {
+        override fun onBridgeResult(parcel: Any) {
+            context.bridgeClient.onBridgeCallback()
+            val result = createBridgeResult(parcel)
+            val bridgeResult = context.jsbMockInterceptor?.interceptBridgeResult(call, result) ?: result
+            callback.onBridgeResult(bridgeResult, call)
+            if (getToastSetting()) toastJsbError(call, bridgeResult.toJSONObject(), context)
         }
     }
 
@@ -148,7 +195,7 @@ class BridgeDispatcher {
                 call,
                 object : IBridgeMethodCallback {
                     override fun onBridgeResult(parcel: Any) {
-                        callback.onBridgeResult(BridgeResult(parcel), call)
+                        callback.onBridgeResult(createBridgeResult(parcel), call)
                     }
                 },
             )
@@ -157,6 +204,9 @@ class BridgeDispatcher {
             LogUtils.i(TAG, "handleRawJSBCall ${call.bridgeName} fail, msg: ${it.message}")
         }
     }
+
+    /** The result type the host's callbacks expect to receive. */
+    protected open fun createBridgeResult(parcel: Any): BridgeResult = BridgeResult(parcel)
 
     private fun toastJsbError(
         call: BridgeCall,
