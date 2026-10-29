@@ -4,9 +4,6 @@
 
 package com.tiktok.sparkling.method.protocol.handler
 
-import android.os.Handler
-import android.os.Looper
-import android.widget.Toast
 import com.tiktok.sparkling.method.protocol.BridgeContext
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
 import com.tiktok.sparkling.method.protocol.entity.BridgeResult
@@ -16,17 +13,14 @@ import com.tiktok.sparkling.method.protocol.interfaces.IBridgeMethodCallback
 import com.tiktok.sparkling.method.protocol.utils.BridgeConstants
 import com.tiktok.sparkling.method.protocol.utils.LogUtils
 import com.tiktok.sparkling.method.registry.api.SparklingBridge
-import com.tiktok.sparkling.method.registry.api.SparklingBridge.Companion.getToastSetting
 import com.tiktok.sparkling.method.registry.api.SparklingMethodInvocationCenter
 import com.tiktok.sparkling.method.registry.core.BridgePlatformType
 import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
-import org.json.JSONObject
 import java.util.UUID
 
 open class BridgeDispatcher {
     companion object {
         val TAG = "BridgeDispatcher"
-        val handler = Handler(Looper.getMainLooper())
     }
 
     protected var bridgeHandler: IBridgeHandler? = null
@@ -100,7 +94,6 @@ open class BridgeDispatcher {
             val callbackResult = context.jsbMockInterceptor?.interceptBridgeResult(call, result) ?: result
             invocation.notifyEnd(call, callbackResult)
             callback.onBridgeResult(callbackResult, call)
-            if (getToastSetting()) toastJsbError(call, result.toJSONObject(), context)
             return
         }
 
@@ -167,8 +160,7 @@ open class BridgeDispatcher {
 
     /**
      * The callback [dispatchToBridgeHandler] hands the handler: it passes each result, as rewritten
-     * by the mock interceptor if any, on to [callback], with the bridge client notified before and
-     * the debug toast shown after.
+     * by the mock interceptor if any, on to [callback]. The bridge client is notified first.
      */
     protected open fun createMethodCallback(
         call: BridgeCall,
@@ -180,7 +172,6 @@ open class BridgeDispatcher {
             val result = createBridgeResult(parcel)
             val bridgeResult = context.jsbMockInterceptor?.interceptBridgeResult(call, result) ?: result
             callback.onBridgeResult(bridgeResult, call)
-            if (getToastSetting()) toastJsbError(call, bridgeResult.toJSONObject(), context)
         }
     }
 
@@ -207,75 +198,6 @@ open class BridgeDispatcher {
 
     /** The result type the host's callbacks expect to receive. */
     protected open fun createBridgeResult(parcel: Any): BridgeResult = BridgeResult(parcel)
-
-    private fun toastJsbError(
-        call: BridgeCall,
-        json: JSONObject,
-        context: BridgeContext,
-    ) {
-        val appContext = context.lynxView?.context
-        appContext?.let {
-            handler.post {
-                if (json.length() == 0) {
-                    Toast
-                        .makeText(
-                            it,
-                            "bridgeName: ${call.bridgeName}, callback info is null, check it!",
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                }
-
-                val code = json.optInt("code", -2345)
-                if (code != -1234 && code != BridgeConstants.BRIDGE_CALL_SUCCESS) {
-                    when (code) {
-                        BridgeConstants.BRIDGE_CALL_FAIL -> {
-                            Toast
-                                .makeText(
-                                    it,
-                                    "${call.bridgeName}, code=$code, bridge call fail",
-                                    Toast.LENGTH_SHORT,
-                                ).show()
-                        }
-
-                        BridgeConstants.ERROR_BRIDGE_NO_AUTHORITY -> {
-                            Toast
-                                .makeText(
-                                    it,
-                                    "${call.bridgeName}, code=$code, no authority",
-                                    Toast.LENGTH_SHORT,
-                                ).show()
-                        }
-
-                        BridgeConstants.BRIDGE_NOT_FOUND -> {
-                            Toast
-                                .makeText(
-                                    it,
-                                    "${call.bridgeName}, code=$code, bridge not found",
-                                    Toast.LENGTH_SHORT,
-                                ).show()
-                        }
-
-                        else -> {
-                            Toast
-                                .makeText(
-                                    it,
-                                    "${call.bridgeName}, code=$code, may not success, check it.",
-                                    Toast.LENGTH_SHORT,
-                                ).show()
-                        }
-                    }
-                }
-                if (code == -2345) {
-                    Toast
-                        .makeText(
-                            it,
-                            "${call.bridgeName}, seems no code callback",
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                }
-            }
-        }
-    }
 
     private data class MethodInvocationSnapshot(
         val id: String,

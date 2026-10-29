@@ -68,17 +68,6 @@ class SparklingBridge : IReleasable {
         val cancelCallbackConfig: CancelCallbackConfig =
             CancelCallbackConfig().apply { enable = false }
 
-        /**
-         * switch enableToast to true will invoke a toast when jsb callback with an error code
-         */
-        private var enableToast = false
-
-        fun enableToast(isEnable: Boolean) {
-            enableToast = isEnable
-        }
-
-        fun getToastSetting(): Boolean = enableToast
-
         fun attachInitListener(listener: BridgeInitListener) {
             BridgeManager.attachInitListener(listener)
         }

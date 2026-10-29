@@ -378,18 +378,6 @@ class SparklingBridgeTest {
     }
 
     @Test
-    fun testStaticToastSettings() {
-        // Given & When
-        SparklingBridge.enableToast(true)
-
-        // Then
-        assertTrue("Toast should be enabled", SparklingBridge.getToastSetting())
-
-        // Cleanup
-        SparklingBridge.enableToast(false)
-    }
-
-    @Test
     fun testStaticJSBErrorReportBlockList() {
         // Given
         val jsbName = "blockedJSB"
