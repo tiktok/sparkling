@@ -67,7 +67,7 @@ open class BridgeDispatcher {
         return true
     }
 
-    /** After the mock interceptor: the factory hook, auth and life-client checks, then dispatch. */
+    /** After the mock interceptor: records the invocation for the debug tool, then dispatches. */
     protected open fun dispatchBridgeMethod(
         call: BridgeCall,
         callback: IBridgeCallback,
@@ -77,39 +77,6 @@ open class BridgeDispatcher {
 
         val invocation = MethodInvocationSnapshot.from(context, call)
         invocation.notifyStart(call)
-
-        SparklingBridge.bridgeFactoryManager?.checkAndInitBridge(context, call)
-
-        val client = context.bridgeClient
-        client.onBridgeDispatched(call)
-        val result = client.shouldInterceptRequest(call)
-
-        if (result != null && (
-                result
-                    .toJSONObject()
-                    .optInt("code") == BridgeConstants.ERROR_BRIDGE_NO_AUTHORITY
-            )
-        ) {
-            client.onBridgeCallback()
-            val callbackResult = context.jsbMockInterceptor?.interceptBridgeResult(call, result) ?: result
-            invocation.notifyEnd(call, callbackResult)
-            callback.onBridgeResult(callbackResult, call)
-            return
-        }
-
-        val shouldHandleBridgeCallResultModel =
-            context.bridgeLifeClientImp.shouldHandleBridgeCall(call, context)
-        if (!shouldHandleBridgeCallResultModel.shouldHandleBridgeCall) {
-            val callbackResult =
-                BridgeResult.toJsonResult(
-                    IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED,
-                    IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED_MSG + ", reason: " + shouldHandleBridgeCallResultModel.reason,
-                    null,
-                )
-            invocation.notifyEnd(call, callbackResult)
-            callback.onBridgeResult(callbackResult, call)
-            return
-        }
 
         // Records the end of the invocation before the result reaches the caller.
         val invocationCallback =
@@ -122,7 +89,63 @@ open class BridgeDispatcher {
                     callback.onBridgeResult(result, call)
                 }
             }
-        dispatchToBridgeHandler(call, invocationCallback, context)
+        dispatchAfterRegistration(call, invocationCallback, context)
+    }
+
+    /** Lazily creates the named method, then gates the call and invokes the handler. */
+    protected open fun dispatchAfterRegistration(
+        call: BridgeCall,
+        callback: IBridgeCallback,
+        context: BridgeContext,
+    ) {
+        SparklingBridge.bridgeFactoryManager?.checkAndInitBridge(context, call)
+        if (shouldRejectDispatch(call, callback, context)) {
+            return
+        }
+        dispatchToBridgeHandler(call, callback, context)
+    }
+
+    /**
+     * Gate after the factory hook: asks the context's bridge client, then its
+     * [BridgeContext.bridgeLifeClientImp], whether to run the call. The default bridge client lets
+     * every call through.
+     *
+     * Return true if this call already produced a result and must not reach [dispatchToBridgeHandler].
+     */
+    protected open fun shouldRejectDispatch(
+        call: BridgeCall,
+        callback: IBridgeCallback,
+        context: BridgeContext,
+    ): Boolean {
+        val client = context.bridgeClient
+        client.onBridgeDispatched(call)
+        val result = client.shouldInterceptRequest(call)
+
+        if (result != null && (
+                result
+                    .toJSONObject()
+                    .optInt("code") == BridgeConstants.ERROR_BRIDGE_NO_AUTHORITY
+            )
+        ) {
+            client.onBridgeCallback()
+            val callbackResult = context.jsbMockInterceptor?.interceptBridgeResult(call, result) ?: result
+            callback.onBridgeResult(callbackResult, call)
+            return true
+        }
+
+        val shouldHandleBridgeCallResultModel =
+            context.bridgeLifeClientImp.shouldHandleBridgeCall(call, context)
+        if (!shouldHandleBridgeCallResultModel.shouldHandleBridgeCall) {
+            val callbackResult =
+                BridgeResult.toJsonResult(
+                    IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED,
+                    IDLBridgeMethod.BRIDGE_CALL_BE_INTERCEPTED_MSG + ", reason: " + shouldHandleBridgeCallResultModel.reason,
+                    null,
+                )
+            callback.onBridgeResult(callbackResult, call)
+            return true
+        }
+        return false
     }
 
     /**
@@ -160,7 +183,8 @@ open class BridgeDispatcher {
 
     /**
      * The callback [dispatchToBridgeHandler] hands the handler: it passes each result, as rewritten
-     * by the mock interceptor if any, on to [callback]. The bridge client is notified first.
+     * by the mock interceptor if any, on to [callback]. The bridge client is notified first. A host
+     * overrides it to do its own work around each result.
      */
     protected open fun createMethodCallback(
         call: BridgeCall,

@@ -31,7 +31,9 @@ open class BridgeContext {
 
     var sparklingBridge: SparklingBridge? = null
     var dispatcher: BridgeDispatcher? = null
-    var bridgeClient = DefaultBridgeClientImp(this)
+
+    /** Sees each call before it runs and may refuse it; hears when its result returns. */
+    var bridgeClient: DefaultBridgeClientImp = DefaultBridgeClientImp(this)
     val bridgeLifeClientImp = DefaultBridgeLifeClientImp(this)
     var lynxView: LynxView? = null
     var lynxBackgroundRuntime: LynxBackgroundRuntime? = null
