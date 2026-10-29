@@ -21,6 +21,7 @@ import com.tiktok.sparkling.method.registry.core.BridgePlatformType
 import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -112,6 +113,63 @@ class BridgeDispatcherTest {
         assertEquals(observer.starts.single().id, observer.ends.single().id)
         assertEquals("storage.getItem", observer.ends.single().name)
         assertEquals(IDLBridgeMethod.SUCCESS, observer.ends.single().code)
+        // The platform comes from the call, not from a context field a host may leave unset.
+        assertEquals(BridgePlatformType.LYNX, observer.ends.single().platform)
+    }
+
+    @Test
+    fun testOnDispatchBridgeMethodReportsEachEventFromItsOwnCall() {
+        val context = BridgeContext()
+        val originalCall =
+            BridgeCall(context).apply {
+                bridgeName = "a.method"
+                nameSpace = "nsA"
+                params = JSONObject()
+                platform = Platform.Web
+            }
+        val rewrittenCall =
+            BridgeCall(context).apply {
+                bridgeName = "b.method"
+                nameSpace = "nsB"
+                params = JSONObject()
+                platform = Platform.Web
+            }
+        context.jsbMockInterceptor =
+            object : BridgeMockInterceptor() {
+                override fun interceptBridgeCall(originCall: BridgeCall): BridgeCall = rewrittenCall
+            }
+        val dispatcher = BridgeDispatcher()
+        dispatcher.registerHandler(
+            object : IBridgeHandler {
+                override fun handle(
+                    bridgeContext: BridgeContext,
+                    call: BridgeCall,
+                    callback: IBridgeMethodCallback,
+                ) {
+                    callback.onBridgeResult(JSONObject().put(IDLBridgeMethod.PARAM_CODE, IDLBridgeMethod.SUCCESS))
+                }
+
+                override fun onRelease() = Unit
+
+                override fun isReleased(): Boolean = false
+            },
+        )
+        val observer = RecordingInvocationObserver()
+        SparklingMethodInvocationCenter.addObserver(observer)
+        try {
+            dispatcher.onDispatchBridgeMethod(originalCall, mockBridgeCallback, context)
+        } finally {
+            SparklingMethodInvocationCenter.removeObserver(observer)
+        }
+
+        val start = observer.starts.single()
+        val end = observer.ends.single()
+        assertEquals(start.id, end.id)
+        assertEquals("a.method", start.name)
+        assertEquals("nsA", start.namespace)
+        assertEquals("b.method", end.name)
+        assertEquals("nsB", end.namespace)
+        assertEquals(BridgePlatformType.WEB, end.platform)
     }
 
     @Test
@@ -138,6 +196,25 @@ class BridgeDispatcherTest {
                 .toString()
                 .contains("blocked"),
         )
+    }
+
+    @Test
+    fun testOnDispatchBridgeMethodDeliversResultThatCannotBeReported() {
+        // NaN makes the JSON conversion throw; the observer must not keep the result from its caller.
+        val mockResult = BridgeResult(mapOf("code" to 1, "value" to Double.NaN))
+        `when`(mockBridgeMockInterceptor.invokeBridgeResult(mockBridgeCall)).thenReturn(mockResult)
+        val observer = RecordingInvocationObserver()
+
+        SparklingMethodInvocationCenter.addObserver(observer)
+        try {
+            bridgeDispatcher.onDispatchBridgeMethod(mockBridgeCall, mockBridgeCallback, mockBridgeContext)
+        } finally {
+            SparklingMethodInvocationCenter.removeObserver(observer)
+        }
+
+        verify(mockBridgeCallback).onBridgeResult(mockResult, mockBridgeCall)
+        assertEquals(1, observer.ends.size)
+        assertNull(observer.ends.single().code)
     }
 
     // @Test TODO: Fix test - NullPointerException at line 78

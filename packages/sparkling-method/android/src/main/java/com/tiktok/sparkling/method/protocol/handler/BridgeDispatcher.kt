@@ -7,6 +7,7 @@ package com.tiktok.sparkling.method.protocol.handler
 import com.tiktok.sparkling.method.protocol.BridgeContext
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
 import com.tiktok.sparkling.method.protocol.entity.BridgeResult
+import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeCallback
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeHandler
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeMethodCallback
@@ -18,9 +19,25 @@ import com.tiktok.sparkling.method.registry.core.BridgePlatformType
 import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
 import java.util.UUID
 
+/**
+ * Dispatches the bridge calls of a container.
+ *
+ * Pipeline: [onDispatchBridgeMethod] (mock answer or rewrite) → [dispatchBridgeMethod] →
+ * [ensureBridgeRegistered] once → [dispatchAfterRegistration] (lazy method creation, then
+ * [shouldRejectDispatch], then [dispatchToBridgeHandler]). A host subclass extends it by
+ * overriding these steps.
+ *
+ * Each call's start and end are reported to [SparklingMethodInvocationCenter] while it has
+ * observers, such as a debug tool.
+ */
 open class BridgeDispatcher {
     companion object {
         val TAG = "BridgeDispatcher"
+
+        internal val bridgeRegisterLock = Any()
+        @Volatile
+        internal var bridgeRegisterCompleted = false
+        internal var bridgeRegisterRunningThread: Thread? = null
     }
 
     protected var bridgeHandler: IBridgeHandler? = null
@@ -33,21 +50,25 @@ open class BridgeDispatcher {
     /**
      * Shared JSB entry. When the context has a mock interceptor, a mocked result answers the call
      * without running it; otherwise the call the interceptor returns is the one dispatched.
+     *
+     * The invocation is recorded here, the step every host goes through, so that a host overriding
+     * the later steps is still observed.
      */
     open fun onDispatchBridgeMethod(
         call: BridgeCall,
         callback: IBridgeCallback,
         context: BridgeContext,
     ) {
+        val recordingCallback = recordInvocation(call, callback, context)
         val mockInterceptor = context.jsbMockInterceptor
         if (mockInterceptor == null) {
-            dispatchBridgeMethod(call, callback, context)
+            dispatchBridgeMethod(call, recordingCallback, context)
             return
         }
-        if (invokeMockResult(call, callback, context)) {
+        if (invokeMockResult(call, recordingCallback, context)) {
             return
         }
-        dispatchBridgeMethod(mockInterceptor.interceptBridgeCall(call), callback, context)
+        dispatchBridgeMethod(mockInterceptor.interceptBridgeCall(call), recordingCallback, context)
     }
 
     /**
@@ -60,36 +81,70 @@ open class BridgeDispatcher {
         context: BridgeContext,
     ): Boolean {
         val mockResult = context.jsbMockInterceptor?.invokeBridgeResult(call) ?: return false
-        val invocation = MethodInvocationSnapshot.from(context, call)
-        invocation.notifyStart(call)
-        invocation.notifyEnd(call, mockResult)
         callback.onBridgeResult(mockResult, call)
         return true
     }
 
-    /** After the mock interceptor: records the invocation for the debug tool, then dispatches. */
+    /** After the mock interceptor: register IDL once, then dispatch. */
     protected open fun dispatchBridgeMethod(
         call: BridgeCall,
         callback: IBridgeCallback,
         context: BridgeContext,
     ) {
         LogUtils.d(TAG, "realDispatchBridgeMethod: ${Thread.currentThread()} and call is \n$call")
+        ensureBridgeRegistered()
+        dispatchAfterRegistration(call, callback, context)
+    }
 
-        val invocation = MethodInvocationSnapshot.from(context, call)
+    /**
+     * Reports the start of [call] now and its end when the result reaches [callback]. Returns
+     * [callback] itself when nothing observes invocations.
+     */
+    private fun recordInvocation(
+        call: BridgeCall,
+        callback: IBridgeCallback,
+        context: BridgeContext,
+    ): IBridgeCallback {
+        val invocation = MethodInvocationSnapshot.from(context) ?: return callback
         invocation.notifyStart(call)
-
-        // Records the end of the invocation before the result reaches the caller.
-        val invocationCallback =
-            object : IBridgeCallback {
-                override fun onBridgeResult(
-                    result: BridgeResult,
-                    call: BridgeCall?,
-                ) {
-                    call?.let { invocation.notifyEnd(it, result) }
-                    callback.onBridgeResult(result, call)
-                }
+        return object : IBridgeCallback {
+            override fun onBridgeResult(
+                result: BridgeResult,
+                call: BridgeCall?,
+            ) {
+                call?.let { invocation.notifyEnd(it, result) }
+                callback.onBridgeResult(result, call)
             }
-        dispatchAfterRegistration(call, invocationCallback, context)
+        }
+    }
+
+    /**
+     * Invokes [SparklingBridge.bridgeRegister] at most once.
+     *
+     * A missing hook is not treated as completed: the host may still bind one. Re-entrant calls
+     * from [tryToRegister] on the same thread return without registering again.
+     */
+    protected open fun ensureBridgeRegistered() {
+        if (bridgeRegisterCompleted) {
+            return
+        }
+        synchronized(bridgeRegisterLock) {
+            if (bridgeRegisterCompleted) {
+                return
+            }
+            if (bridgeRegisterRunningThread === Thread.currentThread()) {
+                LogUtils.e(TAG, "bridge registration re-entered on the running thread")
+                return
+            }
+            val bridgeRegister = SparklingBridge.bridgeRegister ?: return
+            bridgeRegisterRunningThread = Thread.currentThread()
+            try {
+                bridgeRegister.tryToRegister()
+                bridgeRegisterCompleted = true
+            } finally {
+                bridgeRegisterRunningThread = null
+            }
+        }
     }
 
     /** Lazily creates the named method, then gates the call and invokes the handler. */
@@ -199,6 +254,7 @@ open class BridgeDispatcher {
         }
     }
 
+    /** Invokes [bridgeHandler] without the protocol intercept chain. */
     fun handleRawJSBCall(
         call: BridgeCall,
         context: BridgeContext,
@@ -223,18 +279,22 @@ open class BridgeDispatcher {
     /** The result type the host's callbacks expect to receive. */
     protected open fun createBridgeResult(parcel: Any): BridgeResult = BridgeResult(parcel)
 
-    private data class MethodInvocationSnapshot(
-        val id: String,
-        val namespace: String?,
-        val platform: BridgePlatformType,
-        val startTimeMs: Long,
+    /**
+     * One call as [SparklingMethodInvocationCenter] reports it; [from] makes none while nothing
+     * observes. The name, namespace and platform of each event come from the call it is given, so
+     * an end event describes the call as the mock interceptor rewrote it.
+     */
+    private class MethodInvocationSnapshot(
+        private val id: String,
+        private val context: BridgeContext,
+        private val startTimeMs: Long,
     ) {
         fun notifyStart(call: BridgeCall) {
             SparklingMethodInvocationCenter.notifyStart(
                 id = id,
                 call = call,
-                namespace = namespace,
-                platform = platform,
+                namespace = namespaceOf(call),
+                platform = platformOf(call),
                 startTimeMs = startTimeMs,
             )
         }
@@ -247,30 +307,45 @@ open class BridgeDispatcher {
             SparklingMethodInvocationCenter.notifyEnd(
                 id = id,
                 call = call,
-                namespace = namespace,
-                platform = platform,
+                namespace = namespaceOf(call),
+                platform = platformOf(call),
                 startTimeMs = startTimeMs,
                 endTimeMs = endTimeMs,
                 result = result.parcel,
+                // A result that cannot be converted, such as one holding NaN, is reported without a
+                // code rather than keeping the result from its caller.
                 code =
-                    result
-                        .toJSONObject()
-                        .takeIf { it.has(IDLBridgeMethod.PARAM_CODE) }
-                        ?.optInt(IDLBridgeMethod.PARAM_CODE),
+                    runCatching {
+                        result
+                            .toJSONObject()
+                            .takeIf { it.has(IDLBridgeMethod.PARAM_CODE) }
+                            ?.optInt(IDLBridgeMethod.PARAM_CODE)
+                    }.getOrNull(),
             )
         }
 
+        private fun namespaceOf(call: BridgeCall): String =
+            call.nameSpace.takeIf { it.isNotBlank() } ?: context.getNamespace() ?: "bridge-dispatcher"
+
+        /** The platform the call came from; a call whose platform is not set yet counts as [BridgePlatformType.ALL]. */
+        private fun platformOf(call: BridgeCall): BridgePlatformType =
+            when (runCatching { call.platform }.getOrNull()) {
+                Platform.Lynx -> BridgePlatformType.LYNX
+                Platform.Web -> BridgePlatformType.WEB
+                else -> BridgePlatformType.ALL
+            }
+
         companion object {
-            fun from(
-                context: BridgeContext,
-                call: BridgeCall,
-            ): MethodInvocationSnapshot =
-                MethodInvocationSnapshot(
+            fun from(context: BridgeContext): MethodInvocationSnapshot? {
+                if (!SparklingMethodInvocationCenter.hasObservers()) {
+                    return null
+                }
+                return MethodInvocationSnapshot(
                     id = UUID.randomUUID().toString(),
-                    namespace = call.nameSpace.takeIf { it.isNotBlank() } ?: context.getNamespace() ?: "bridge-dispatcher",
-                    platform = BridgeContext.getPlatformByBridgeContext(context),
+                    context = context,
                     startTimeMs = System.currentTimeMillis(),
                 )
+            }
         }
     }
 }

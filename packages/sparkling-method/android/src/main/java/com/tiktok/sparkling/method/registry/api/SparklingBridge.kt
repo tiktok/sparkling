@@ -45,6 +45,9 @@ class SparklingBridge : IReleasable {
     private val bridgeSdkContext = BridgeContextWrapper()
 
     companion object {
+        /** Host hook that registers IDL methods. Invoked once before the first dispatch. */
+        var bridgeRegister: BridgeRegister? = null
+
         var bridgeFactoryManager: BridgeFactoryManager? = null
 
         private var _bridgeThreadDispatcher: BridgeThreadDispatcher? = null
