@@ -4,68 +4,67 @@
 
 package com.tiktok.sparkling.method.protocol
 
-import com.tiktok.sparkling.method.registry.core.IDLBridgeMethod
-import com.tiktok.sparkling.method.registry.api.containsPiperData
 import com.lynx.react.bridge.JavaOnlyMap
 import com.tiktok.sparkling.method.protocol.entity.BridgeCall
-import com.tiktok.sparkling.method.protocol.entity.Platform
 import com.tiktok.sparkling.method.protocol.entity.BridgeResult
 import com.tiktok.sparkling.method.protocol.impl.monitor.MonitorEntity
 import com.tiktok.sparkling.method.protocol.interfaces.IBridgeLifeClient
 import com.tiktok.sparkling.method.protocol.interfaces.ShouldHandleBridgeCallResultModel
 import com.tiktok.sparkling.method.protocol.utils.BridgeConstants
 import com.tiktok.sparkling.method.protocol.utils.BridgeConverter
+import org.json.JSONObject
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
+ * The life client a container holds: it passes every callback on to the clients registered with it,
+ * in registration order, and lets the first client that refuses a call decide its result.
+ *
+ * A client is registered at most once, and a client may register while the list is being visited.
+ * Each call's result is also reported to the container's [BridgeContext.bridgeMonitors].
  */
-class DefaultBridgeLifeClientImp(
-    bridgeContext: BridgeContext,
-) : IBridgeLifeClient() {
-    private var bridgeLifeClients = ArrayList<IBridgeLifeClient>()
+class DefaultBridgeLifeClientImp(bridgeContext: BridgeContext) : IBridgeLifeClient() {
+
+    private val bridgeLifeClients = CopyOnWriteArrayList<IBridgeLifeClient>()
+
+    /**
+     * The registered clients in registration order, for a host that has to visit them itself.
+     *
+     * TikTok does, for [shouldHandleBridgeCall]: it reports which client refused a call by an id
+     * this base type does not have.
+     */
+    val registeredClients: List<IBridgeLifeClient>
+        get() = bridgeLifeClients
 
     fun registerIBridgeLifeClient(bridgeLifeClient: IBridgeLifeClient) {
-        bridgeLifeClients.add(bridgeLifeClient)
+        bridgeLifeClients.addIfAbsent(bridgeLifeClient)
     }
 
     override fun shouldHandleBridgeCall(
         call: BridgeCall,
-        bridgeContext: BridgeContext,
+        bridgeContext: BridgeContext
     ): ShouldHandleBridgeCallResultModel {
-        // call other lifeClient
         bridgeLifeClients.forEach {
             val currentHandleModel = it.shouldHandleBridgeCall(call, bridgeContext)
             if (!currentHandleModel.shouldHandleBridgeCall) {
-                // TODO
+                return currentHandleModel
             }
         }
         return ShouldHandleBridgeCallResultModel(true, null)
     }
 
-    override fun onBridgeCalledStart(
-        bridgeCall: BridgeCall,
-        bridgeContext: BridgeContext,
-    ) {
-        // call other lifeClient
+    override fun onBridgeCalledStart(call: BridgeCall, bridgeContext: BridgeContext) {
         bridgeLifeClients.forEach {
-            it.onBridgeCalledStart(bridgeCall, bridgeContext)
+            it.onBridgeCalledStart(call, bridgeContext)
         }
     }
 
-    override fun onBridgeImplHandleStart(
-        call: BridgeCall?,
-        bridgeContext: BridgeContext,
-    ) {
-        // call other lifeClient
+    override fun onBridgeImplHandleStart(call: BridgeCall?, bridgeContext: BridgeContext) {
         bridgeLifeClients.forEach {
             it.onBridgeImplHandleStart(call, bridgeContext)
         }
     }
 
-    override fun onBridgeImplHandleEnd(
-        call: BridgeCall?,
-        bridgeContext: BridgeContext,
-    ) {
-        // call other lifeClient
+    override fun onBridgeImplHandleEnd(call: BridgeCall?, bridgeContext: BridgeContext) {
         bridgeLifeClients.forEach {
             it.onBridgeImplHandleEnd(call, bridgeContext)
         }
@@ -74,118 +73,80 @@ class DefaultBridgeLifeClientImp(
     override fun onBridgeCallbackCallStart(
         result: BridgeResult,
         call: BridgeCall,
-        mContext: BridgeContext,
+        mContext: BridgeContext
     ) {
-        when (call.platform) {
-            Platform.Web -> {
-                // TODO
-            }
-
-            Platform.Lynx -> {
-            }
-
-            else -> {}
-        }
-
-        // call other lifeClient
         bridgeLifeClients.forEach {
             it.onBridgeCallbackCallStart(result, call, mContext)
         }
     }
 
-    override fun onBridgeCallbackInvokeStart(
-        result: BridgeResult,
-        call: BridgeCall,
-    ) {
-        when (call.platform) {
-            Platform.Web -> {
-                // TODO
-            }
-
-            Platform.Lynx -> {
-                call.lynxCallbackMap?.let { map ->
-                    val monitor =
-                        MonitorEntity().apply {
-                            name = call?.bridgeName
-                            url = call?.url
-                            beginTime = call?.timestamp
-                            endTime = System.currentTimeMillis()
-                            if (map.hasKey("code")) {
-                                val code = map.getInt("code", IDLBridgeMethod.UNKNOWN_ERROR)
-                                if (code != IDLBridgeMethod.UNKNOWN_ERROR) this.code = code
-                            }
-                            message = map.getString("msg", "")
-
-                            rawResult =
-                                BridgeConverter.revertJavaOnlyMap2JSONObject(map).apply {
-                                    put("usePiperData", map.containsPiperData())
-                                    put("bridgeCallThreadType", call.bridgeCallThreadType)
-                                }
-                            call.params?.let {
-                                rawRequest =
-                                    BridgeConverter.revertJavaOnlyMap2JSONObject(call.params as JavaOnlyMap)
-                            }
-                            hitBusinessHandler = call?.hitBusinessHandler ?: false
-                            nameSpace = call?.nameSpace
-                            isRunInMainThread = call.isInMainThread
-                        }
-                    if (monitor.code == BridgeConstants.BRIDGE_CALL_SUCCESS) {
-                        call.context.bridgeMonitors.forEach {
-                            it.onBridgeResolved(monitor)
-                        }
-                    } else {
-                        call.context.bridgeMonitors.forEach {
-                            it.onBridgeRejected(monitor)
-                        }
-                    }
-                }
-            }
-
-            else -> {}
-        }
-
-        // call other lifeClient
+    override fun onBridgeCallbackInvokeStart(result: BridgeResult, call: BridgeCall) {
         bridgeLifeClients.forEach {
             it.onBridgeCallbackInvokeStart(result, call)
         }
+        notifyBridgeMonitors(result, call)
     }
 
-    override fun onBridgeCalledEnd(
-        call: BridgeCall,
-        bridgeContext: BridgeContext,
-    ) {
-        when (call.platform) {
-            Platform.Web -> {
-                // TODO
-            }
-
-            else -> {}
-        }
-
-        // call other lifeClient
+    override fun onBridgeCalledEnd(call: BridgeCall, bridgeContext: BridgeContext) {
         bridgeLifeClients.forEach {
             it.onBridgeCalledEnd(call, bridgeContext)
         }
     }
 
-    // Event
-    override fun onBridgeEventStart(
-        eventName: String,
-        data: Any?,
-    ) {
-        // call other lifeClient
+    override fun onBridgeEventStart(eventName: String, data: Any?) {
         bridgeLifeClients.forEach {
             it.onBridgeEventStart(eventName, data)
         }
     }
 
-    override fun onBridgeEventEnd(
-        eventName: String,
-        data: Any?,
-    ) {
-        // call other lifeClient
+    override fun onBridgeEventEnd(eventName: String, data: Any?) {
         bridgeLifeClients.forEach {
             it.onBridgeEventEnd(eventName, data)
         }
+    }
+
+    private fun notifyBridgeMonitors(result: BridgeResult, call: BridgeCall) {
+        val monitors = call.context.bridgeMonitors
+        if (monitors.isEmpty()) {
+            return
+        }
+        val json = result.toJSONObject()
+        val entity = MonitorEntity().apply {
+            name = call.bridgeName
+            url = call.url
+            beginTime = call.timestamp
+            endTime = System.currentTimeMillis()
+            code = json.opt("code") as? Int
+            message = json.optString("msg")
+            rawResult = json
+            rawRequest = call.invocationJson
+                ?: rawRequestOrNull(call.rawReq)
+                ?: lynxParamsToJson(call.params)
+            hitBusinessHandler = call.hitBusinessHandler
+            nameSpace = call.nameSpace
+            isRunInMainThread = call.isInMainThread
+        }
+        val resolved = entity.code == BridgeConstants.BRIDGE_CALL_SUCCESS
+        monitors.forEach { monitor ->
+            runCatching {
+                if (resolved) {
+                    monitor.onBridgeResolved(entity)
+                } else {
+                    monitor.onBridgeRejected(entity)
+                }
+            }
+        }
+    }
+
+    private fun rawRequestOrNull(rawReq: String): JSONObject? {
+        if (rawReq.isEmpty()) {
+            return null
+        }
+        return runCatching { JSONObject(rawReq) }.getOrNull()
+    }
+
+    private fun lynxParamsToJson(params: Any?): JSONObject? {
+        val map = params as? JavaOnlyMap ?: return null
+        return BridgeConverter.revertJavaOnlyMap2JSONObject(map)
     }
 }
