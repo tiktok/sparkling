@@ -73,7 +73,7 @@ class SparklingBridgeTest {
         every { sparklingBridge.getBridgeContext() } returns mockBridgeContext
         every { mockBridgeContext.defaultCallHandler } returns mockk(relaxed = true)
         every { mockBridgeContext.businessCallHandler } returns null
-        every { mockBridgeContext.platform } returns BridgePlatformType.WEB
+        every { mockBridgeContext.platformType } returns BridgePlatformType.WEB
         every { mockBridgeContext.dispatcher } returns mockk(relaxed = true)
     }
 

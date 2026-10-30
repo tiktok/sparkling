@@ -46,7 +46,7 @@ class DefaultCallHandlerExtensionTest {
         handler.registerLocalIDLMethod(TrackingMethod::class.java, BridgePlatformType.WEB)
         val fromFactory = TrackingMethod()
         handler.registerLocalIDLMethod("factory", BridgePlatformType.WEB) { fromFactory }
-        val context = BridgeContext().apply { platform = BridgePlatformType.WEB }
+        val context = BridgeContext().apply { platformType = BridgePlatformType.WEB }
         val fromClass = requireNotNull(handler.getBridge(context, "host.class")) as TrackingMethod
         assertSame(fromClass, pool.getBridge("host.class", BridgePlatformType.WEB))
         assertSame(fromFactory, handler.getBridge(context, "factory"))
@@ -81,7 +81,7 @@ class DefaultCallHandlerExtensionTest {
             }
         }
         val handler = HostHandler(pool)
-        val context = BridgeContext().apply { platform = BridgePlatformType.LYNX }
+        val context = BridgeContext().apply { platformType = BridgePlatformType.LYNX }
         val nested = JavaOnlyMap().apply { putString("value", "injected") }
         val call = BridgeCall(context).apply {
             bridgeName = "custom"

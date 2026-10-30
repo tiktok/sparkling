@@ -396,7 +396,7 @@ class SparklingDebugToolProviderImplTest {
 
         init {
             bridge.getBridgeContext().apply {
-                platform = BridgePlatformType.LYNX
+                platformType = BridgePlatformType.LYNX
                 containerId = "pending-test"
                 sparklingBridge = bridge
                 requireNotNull(dispatcher).registerHandler(handler)

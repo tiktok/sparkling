@@ -331,7 +331,7 @@ class SparklingBridge : IReleasable {
     private fun dealWithCloseEvent() {
         closedSubscribers.forEach { pair ->
             val curPlatform =
-                when (getBridgeContext().platform) {
+                when (getBridgeContext().platformType) {
                     BridgePlatformType.LYNX -> {
                         Platform.Lynx
                     }

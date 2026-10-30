@@ -74,7 +74,7 @@ class InnerBridgeTest {
     fun testRegisterMonitor() {
         val monitor = Mockito.mock(IBridgeMonitor::class.java)
         innerBridge.registerMonitor(monitor)
-        assertTrue(innerBridge.getBridgeContext().monitor.contains(monitor))
+        assertTrue(innerBridge.getBridgeContext().bridgeMonitors.contains(monitor))
     }
 
     @Test

@@ -157,7 +157,7 @@ class BusinessCallHandlerExtensionTest {
         assertSame(direct, handler.unwrap(wrapped))
     }
 
-    private fun context(platform: BridgePlatformType): BridgeContext = BridgeContext().apply { this.platform = platform }
+    private fun context(platform: BridgePlatformType): BridgeContext = BridgeContext().apply { this.platformType = platform }
 
     private class HostRegistry : IDLMethodRegistry() {
         var nameLookups = 0

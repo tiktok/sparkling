@@ -130,11 +130,11 @@ class DefaultBridgeLifeClientImp(
                             isRunInMainThread = call.isInMainThread
                         }
                     if (monitor.code == BridgeConstants.BRIDGE_CALL_SUCCESS) {
-                        call.context.monitor.forEach {
+                        call.context.bridgeMonitors.forEach {
                             it.onBridgeResolved(monitor)
                         }
                     } else {
-                        call.context.monitor.forEach {
+                        call.context.bridgeMonitors.forEach {
                             it.onBridgeRejected(monitor)
                         }
                     }

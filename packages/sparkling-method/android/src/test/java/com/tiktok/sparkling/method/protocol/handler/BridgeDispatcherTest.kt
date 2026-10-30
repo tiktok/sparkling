@@ -54,7 +54,7 @@ class BridgeDispatcherTest {
         `when`(mockBridgeContext.bridgeClient).thenReturn(mockBridgeClient)
         `when`(mockBridgeContext.bridgeLifeClientImp).thenReturn(mockBridgeLifeClient)
         `when`(mockBridgeContext.businessCallHandler).thenReturn(mockBusinessCallHandler)
-        `when`(mockBridgeContext.platform).thenReturn(BridgePlatformType.LYNX)
+        `when`(mockBridgeContext.platformType).thenReturn(BridgePlatformType.LYNX)
         `when`(mockBridgeContext.getNamespace()).thenReturn(null)
         `when`(mockBridgeCall.bridgeName).thenReturn("test.method")
         `when`(mockBridgeCall.nameSpace).thenReturn("")

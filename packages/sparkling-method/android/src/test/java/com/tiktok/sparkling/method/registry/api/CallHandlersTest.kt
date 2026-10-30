@@ -61,7 +61,7 @@ class CallHandlersTest {
         }
     }
 
-    private fun newBridgeContext(platform: BridgePlatformType = BridgePlatformType.ALL): BridgeContext = BridgeContext().apply { this.platform = platform }
+    private fun newBridgeContext(platform: BridgePlatformType = BridgePlatformType.ALL): BridgeContext = BridgeContext().apply { this.platformType = platform }
 
     @Test
     fun defaultCallHandlerLifecycleAndRegistration() {

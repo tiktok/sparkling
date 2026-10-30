@@ -199,7 +199,7 @@ class BusinessCallHandlerBehaviorTest {
         assertTrue(created.all { it.releaseCalls == 0 })
     }
 
-    private fun context(platform: BridgePlatformType): BridgeContext = BridgeContext().apply { this.platform = platform }
+    private fun context(platform: BridgePlatformType): BridgeContext = BridgeContext().apply { this.platformType = platform }
 
     private fun call(context: BridgeContext, name: String, params: Any?): BridgeCall = BridgeCall(context).apply {
         bridgeName = name

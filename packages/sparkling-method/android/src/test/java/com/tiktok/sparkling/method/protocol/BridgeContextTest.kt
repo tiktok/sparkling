@@ -30,13 +30,13 @@ class BridgeContextTest {
 
     @Test
     fun testGetPlatformByBridgeContext() {
-        bridgeContext.platform = BridgePlatformType.LYNX
+        bridgeContext.platformType = BridgePlatformType.LYNX
         assertEquals(BridgePlatformType.LYNX, BridgeContext.getPlatformByBridgeContext(bridgeContext))
 
-        bridgeContext.platform = BridgePlatformType.WEB
+        bridgeContext.platformType = BridgePlatformType.WEB
         assertEquals(BridgePlatformType.WEB, BridgeContext.getPlatformByBridgeContext(bridgeContext))
 
-        bridgeContext.platform = BridgePlatformType.ALL
+        bridgeContext.platformType = BridgePlatformType.ALL
         assertEquals(BridgePlatformType.ALL, BridgeContext.getPlatformByBridgeContext(bridgeContext))
     }
 

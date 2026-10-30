@@ -263,7 +263,7 @@ class SimpleLynxKitView :
         params: List<Any>?,
     ) {
         val payload = if (params == null) null else JSONObject().put("params", org.json.JSONArray(params))
-        hybridContext.bridge?.getBridgeContext()?.monitor?.forEach { monitor ->
+        hybridContext.bridge?.getBridgeContext()?.bridgeMonitors?.forEach { monitor ->
             // A failed debug monitor must not block other monitors or JS delivery.
             runCatching { monitor.onBridgeEvent(eventName, payload) }
         }

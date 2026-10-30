@@ -65,7 +65,7 @@ internal class InnerBridge {
     ) {
         if (view is LynxView) {
             mBridgeContext.lynxView = view
-            mBridgeContext.platform = BridgePlatformType.LYNX
+            mBridgeContext.platformType = BridgePlatformType.LYNX
             mBridgeContext.registerProtocol(LynxBridgeProtocol(mBridgeContext))
         } else if (view is WebView) {
             // TODO
@@ -83,7 +83,7 @@ internal class InnerBridge {
         sparklingBridge: SparklingBridge,
     ) {
         mBridgeContext.sparklingBridge = sparklingBridge
-        mBridgeContext.platform = BridgePlatformType.LYNX
+        mBridgeContext.platformType = BridgePlatformType.LYNX
         mBridgeContext.registerProtocol(LynxBridgeProtocol(mBridgeContext))
         mBridgeContext.protocols.forEach {
             it.init()
@@ -120,7 +120,7 @@ internal class InnerBridge {
     fun getBridgeContext(): BridgeContext = mBridgeContext
 
     fun registerMonitor(monitor: IBridgeMonitor) {
-        mBridgeContext.monitor.add(monitor)
+        mBridgeContext.bridgeMonitors.add(monitor)
     }
 
     fun sendEvent(
@@ -132,7 +132,7 @@ internal class InnerBridge {
             params = data,
             containerId = mBridgeContext.containerId,
         )
-        mBridgeContext.monitor.forEach {
+        mBridgeContext.bridgeMonitors.forEach {
             runCatching {
                 it.onBridgeEvent(event, data)
             }.onFailure {
@@ -153,7 +153,7 @@ internal class InnerBridge {
             params = data,
             containerId = mBridgeContext.containerId,
         )
-        mBridgeContext.monitor.forEach {
+        mBridgeContext.bridgeMonitors.forEach {
             runCatching {
                 it.onBridgeEvent(event, data)
             }.onFailure {

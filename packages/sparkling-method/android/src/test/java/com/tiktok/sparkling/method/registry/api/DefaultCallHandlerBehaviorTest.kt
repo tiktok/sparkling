@@ -204,7 +204,7 @@ class DefaultCallHandlerBehaviorTest {
         every { it.containerID } returns null
     }
 
-    private fun context(platform: BridgePlatformType): BridgeContext = BridgeContext().apply { this.platform = platform }
+    private fun context(platform: BridgePlatformType): BridgeContext = BridgeContext().apply { this.platformType = platform }
 
     private fun call(
         context: BridgeContext,
