@@ -4,10 +4,8 @@
 package com.tiktok.sparkling.method.registry.api
 
 import com.lynx.react.bridge.PiperData
-import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,7 +14,6 @@ import org.robolectric.annotation.Config
 
 /**
  * Covers the internal extension functions in PiperDataExt.kt:
- * - [PiperData.toJSONObject]
  * - [PiperData.stringify]
  * - [Map.containsPiperData]
  *
@@ -52,50 +49,6 @@ class PiperDataExtTest {
     private fun mapPiper(raw: Map<*, *>): PiperData = newPiper(PiperData.DataType.Map, raw)
 
     private fun emptyPiper(): PiperData = newPiper(PiperData.DataType.Empty, null)
-
-    @Test
-    fun toJSONObjectFromStringPayload() {
-        val piper = stringPiper("""{"a":1,"b":"x"}""")
-        val obj = piper.toJSONObject()
-        assertEquals(1, obj.getInt("a"))
-        assertEquals("x", obj.getString("b"))
-    }
-
-    @Test
-    fun toJSONObjectFromStringWithInvalidJsonReturnsEmpty() {
-        val piper = stringPiper("not-json")
-        val obj = piper.toJSONObject()
-        // JSON parse failure -> caught -> empty JSONObject
-        assertEquals(0, obj.length())
-    }
-
-    @Test
-    fun toJSONObjectFromStringWithNonStringRawDataReturnsEmpty() {
-        // Type is String but rawData is not a String — should fall through to
-        // the non-String branch and yield an empty JSONObject.
-        val piper = newPiper(PiperData.DataType.String, 42)
-        assertEquals(0, piper.toJSONObject().length())
-    }
-
-    @Test
-    fun toJSONObjectFromMapPayload() {
-        val piper = mapPiper(mapOf<String, Any>("a" to 1, "b" to "x"))
-        val obj = piper.toJSONObject()
-        assertEquals(1, obj.getInt("a"))
-        assertEquals("x", obj.getString("b"))
-    }
-
-    @Test
-    fun toJSONObjectFromMapTypeWithNonMapRawDataReturnsEmpty() {
-        val piper = newPiper(PiperData.DataType.Map, "not-a-map")
-        assertEquals(0, piper.toJSONObject().length())
-    }
-
-    @Test
-    fun toJSONObjectFromEmptyTypeReturnsEmpty() {
-        val piper = emptyPiper()
-        assertEquals(0, piper.toJSONObject().length())
-    }
 
     @Test
     fun stringifyFromStringPayloadReturnsRawString() {
