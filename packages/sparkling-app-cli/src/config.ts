@@ -235,7 +235,10 @@ function loadAppConfigViaEsm(cwd: string, configPath: string, originalError?: un
   const tempDir = path.resolve(cwd, '.sparkling');
   fs.mkdirSync(tempDir, { recursive: true });
   const readerScript = path.join(tempDir, 'read-app-config.mjs');
-  const fileUrl = pathToFileURL(configPath).href;
+  // On Windows with Node.js v24, pathToFileURL has a bug with backslash paths
+  // Convert to forward slashes before passing to pathToFileURL
+  const normalizedPath = configPath.split(path.sep).join('/');
+  const fileUrl = pathToFileURL(normalizedPath).href;
   const script = [
     `const url = ${JSON.stringify(fileUrl)};`,
     'const mod = await import(url);',
@@ -259,6 +262,7 @@ function loadAppConfigViaEsm(cwd: string, configPath: string, originalError?: un
     cwd,
     stdio: ['ignore', 'pipe', 'pipe'],
     env: process.env,
+    shell: process.platform === 'win32' ? true : false,
   });
 
   if (res.status !== 0) {
