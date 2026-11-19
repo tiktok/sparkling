@@ -1,3 +1,5 @@
+import { withBase } from '@rspress/core/runtime';
+
 # Debug Panel
 
 Sparkling Debug Panel 是 Sparkling debug 构建里的端内调试面板。你可以不用连接
@@ -21,7 +23,7 @@ Sparkling Go 和默认应用模板已经在 debug-only 的宿主代码里完成�
 
 打开方式：点击屏幕最左下角蓝色的 `sparkling` 标签。
 
-<img src="/guide/sparkling-go/debug-panel-entry.png" width="300" alt="左下角 sparkling debugTag 入口" />
+<img src={withBase('/guide/sparkling-go/debug-panel-entry.png')} width="300" alt="左下角 sparkling debugTag 入口" />
 
 Release 构建不会显示这个标签。Sparkling 也不再安装双指长按入口，因此这个点击入口
 不会和 Lynx 自己的原生调试手势竞争。
@@ -117,7 +119,7 @@ SparklingDebugTool.setFloatingBallEnabled(true)
 
 **Log** 页签展示当前 Lynx 页面产生的 JS console 输出。
 
-<img src="/guide/sparkling-go/debug-panel-log.png" width="320" alt="Sparkling Debug Panel Log 页签" />
+<img src={withBase('/guide/sparkling-go/debug-panel-log.png')} width="320" alt="Sparkling Debug Panel Log 页签" />
 
 你可以用它：
 
@@ -131,7 +133,7 @@ SparklingDebugTool.setFloatingBallEnabled(true)
 
 **Sparkling Method** 页签记录 JS 到 native 的 method 调用。
 
-<img src="/guide/sparkling-go/debug-panel-method.png" width="320" alt="Sparkling Debug Panel Sparkling Method 页签" />
+<img src={withBase('/guide/sparkling-go/debug-panel-method.png')} width="320" alt="Sparkling Debug Panel Sparkling Method 页签" />
 
 你可以用它：
 
@@ -145,7 +147,7 @@ SparklingDebugTool.setFloatingBallEnabled(true)
 
 **GlobalProps** 页签展示当前 live LynxView 的最新运行时快照。
 
-<img src="/guide/sparkling-go/debug-panel-globalprops.png" width="320" alt="Sparkling Debug Panel GlobalProps 页签" />
+<img src={withBase('/guide/sparkling-go/debug-panel-globalprops.png')} width="320" alt="Sparkling Debug Panel GlobalProps 页签" />
 
 你可以用它：
 
