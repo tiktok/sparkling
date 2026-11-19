@@ -168,16 +168,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
+
+      # pnpm/action-setup is not on the tiktok org's allowed-actions list, so
+      # install pnpm through Corepack (version from package.json's
+      # packageManager) and cache the pnpm store with actions/cache.
+      - name: Setup pnpm
+        shell: bash
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          corepack enable
+          actual="$(pnpm --version)"
+          if [ "$actual" != "$PNPM_VERSION" ]; then
+            echo "::error::pnpm $actual from package.json packageManager does not match PNPM_VERSION $PNPM_VERSION"
+            exit 1
+          fi
+          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -202,16 +220,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
+
+      # pnpm/action-setup is not on the tiktok org's allowed-actions list, so
+      # install pnpm through Corepack (version from package.json's
+      # packageManager) and cache the pnpm store with actions/cache.
+      - name: Setup pnpm
+        shell: bash
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          corepack enable
+          actual="$(pnpm --version)"
+          if [ "$actual" != "$PNPM_VERSION" ]; then
+            echo "::error::pnpm $actual from package.json packageManager does not match PNPM_VERSION $PNPM_VERSION"
+            exit 1
+          fi
+          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -246,16 +282,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
+
+      # pnpm/action-setup is not on the tiktok org's allowed-actions list, so
+      # install pnpm through Corepack (version from package.json's
+      # packageManager) and cache the pnpm store with actions/cache.
+      - name: Setup pnpm
+        shell: bash
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          corepack enable
+          actual="$(pnpm --version)"
+          if [ "$actual" != "$PNPM_VERSION" ]; then
+            echo "::error::pnpm $actual from package.json packageManager does not match PNPM_VERSION $PNPM_VERSION"
+            exit 1
+          fi
+          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -306,16 +360,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
+
+      # pnpm/action-setup is not on the tiktok org's allowed-actions list, so
+      # install pnpm through Corepack (version from package.json's
+      # packageManager) and cache the pnpm store with actions/cache.
+      - name: Setup pnpm
+        shell: bash
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          corepack enable
+          actual="$(pnpm --version)"
+          if [ "$actual" != "$PNPM_VERSION" ]; then
+            echo "::error::pnpm $actual from package.json packageManager does not match PNPM_VERSION $PNPM_VERSION"
+            exit 1
+          fi
+          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -346,16 +418,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
+
+      # pnpm/action-setup is not on the tiktok org's allowed-actions list, so
+      # install pnpm through Corepack (version from package.json's
+      # packageManager) and cache the pnpm store with actions/cache.
+      - name: Setup pnpm
+        shell: bash
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          corepack enable
+          actual="$(pnpm --version)"
+          if [ "$actual" != "$PNPM_VERSION" ]; then
+            echo "::error::pnpm $actual from package.json packageManager does not match PNPM_VERSION $PNPM_VERSION"
+            exit 1
+          fi
+          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
