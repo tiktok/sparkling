@@ -1,3 +1,5 @@
+import { withBase } from '@rspress/core/runtime';
+
 # Debug Panel
 
 The Sparkling Debug Panel is the in-app inspector for Sparkling debug builds. Use
@@ -23,7 +25,7 @@ host wiring.
 To open the panel, tap the blue `sparkling` tag pinned to the bottom-left edge of
 the screen:
 
-<img src="/guide/sparkling-go/debug-panel-entry.png" width="300" alt="Bottom-left sparkling debugTag entry" />
+<img src={withBase('/guide/sparkling-go/debug-panel-entry.png')} width="300" alt="Bottom-left sparkling debugTag entry" />
 
 Release builds do not show the tag. Sparkling also no longer installs a
 two-finger long-press entry, so this click target does not compete with Lynx's
@@ -123,7 +125,7 @@ Debug Panel.
 
 The **Log** tab shows JS console output emitted by the current Lynx page.
 
-<img src="/guide/sparkling-go/debug-panel-log.png" width="320" alt="Sparkling Debug Panel Log tab" />
+<img src={withBase('/guide/sparkling-go/debug-panel-log.png')} width="320" alt="Sparkling Debug Panel Log tab" />
 
 Use it to:
 
@@ -137,7 +139,7 @@ Use it to:
 
 The **Sparkling Method** tab records JS-to-native method invocations.
 
-<img src="/guide/sparkling-go/debug-panel-method.png" width="320" alt="Sparkling Debug Panel Sparkling Method tab" />
+<img src={withBase('/guide/sparkling-go/debug-panel-method.png')} width="320" alt="Sparkling Debug Panel Sparkling Method tab" />
 
 Use it to:
 
@@ -151,7 +153,7 @@ Use it to:
 
 The **GlobalProps** tab shows the latest runtime snapshot for the live LynxView.
 
-<img src="/guide/sparkling-go/debug-panel-globalprops.png" width="320" alt="Sparkling Debug Panel GlobalProps tab" />
+<img src={withBase('/guide/sparkling-go/debug-panel-globalprops.png')} width="320" alt="Sparkling Debug Panel GlobalProps tab" />
 
 Use it to:
 
