@@ -36,7 +36,8 @@ runs:
       run: |
         corepack enable
         corepack install --global "pnpm@${PNPM_VERSION}"
-        echo "pnpm $(pnpm --version)"
+        pnpm_version=$(pnpm --version)
+        echo "pnpm $pnpm_version"
 
     - name: Setup JDK
       uses: actions/setup-java@v4

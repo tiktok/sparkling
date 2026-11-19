@@ -56,8 +56,19 @@ runs:
         PRERELEASE: ${{ inputs.is_rc == 'true' }}
       run: |
         title="Release ${TAG}"
-        # `gh release view` also finds draft releases for this tag.
-        if gh release view "$TAG" > /dev/null 2>&1; then
+        # `gh release view` also finds draft releases for this tag. Only
+        # "release not found" means it is missing; any other error (auth,
+        # network, API) fails the step instead of creating a duplicate.
+        if view_err=$(gh release view "$TAG" --json tagName 2>&1 > /dev/null); then
+          release_exists=true
+        elif [[ "$view_err" == *"release not found"* ]]; then
+          release_exists=false
+        else
+          echo "::error::Failed to look up release $TAG: $view_err"
+          exit 1
+        fi
+
+        if [ "$release_exists" = true ]; then
           echo "Release $TAG exists; updating it and regenerating its notes."
           notes_file="${RUNNER_TEMP}/release-notes-${TAG}.md"
           gh api "repos/${GH_REPO}/releases/generate-notes" \

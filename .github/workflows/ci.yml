@@ -192,7 +192,8 @@ jobs:
             echo "::error::pnpm $actual from package.json packageManager does not match PNPM_VERSION $PNPM_VERSION"
             exit 1
           fi
-          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+          store_path=$(pnpm store path --silent)
+          echo "PNPM_STORE_PATH=$store_path" >> "$GITHUB_ENV"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -244,7 +245,8 @@ jobs:
             echo "::error::pnpm $actual from package.json packageManager does not match PNPM_VERSION $PNPM_VERSION"
             exit 1
           fi
-          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+          store_path=$(pnpm store path --silent)
+          echo "PNPM_STORE_PATH=$store_path" >> "$GITHUB_ENV"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -306,7 +308,8 @@ jobs:
             echo "::error::pnpm $actual from package.json packageManager does not match PNPM_VERSION $PNPM_VERSION"
             exit 1
           fi
-          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+          store_path=$(pnpm store path --silent)
+          echo "PNPM_STORE_PATH=$store_path" >> "$GITHUB_ENV"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -384,7 +387,8 @@ jobs:
             echo "::error::pnpm $actual from package.json packageManager does not match PNPM_VERSION $PNPM_VERSION"
             exit 1
           fi
-          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+          store_path=$(pnpm store path --silent)
+          echo "PNPM_STORE_PATH=$store_path" >> "$GITHUB_ENV"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -442,7 +446,8 @@ jobs:
             echo "::error::pnpm $actual from package.json packageManager does not match PNPM_VERSION $PNPM_VERSION"
             exit 1
           fi
-          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+          store_path=$(pnpm store path --silent)
+          echo "PNPM_STORE_PATH=$store_path" >> "$GITHUB_ENV"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
