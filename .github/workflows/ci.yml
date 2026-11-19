@@ -134,8 +134,13 @@ jobs:
               pathspecs+=(":(glob)$pattern")
             done < <(printf '%s\n' "$filters" | sed -n "s/^${name}: //p")
 
-            if [ "$match_all" = true ] \
-              || [ -n "$(git diff --name-only "$base" HEAD -- "${pathspecs[@]}")" ]; then
+            # Standalone assignment so a failing git diff aborts the step
+            # under `bash -e` instead of silently reading as "no changes".
+            matched_files=""
+            if [ "$match_all" != true ]; then
+              matched_files=$(git diff --name-only "$base" HEAD -- "${pathspecs[@]}")
+            fi
+            if [ "$match_all" = true ] || [ -n "$matched_files" ]; then
               echo "$name=true" >> "$GITHUB_OUTPUT"
               changes+=("\"$name\"")
             else
