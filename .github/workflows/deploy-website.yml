@@ -31,9 +31,24 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       # pnpm/action-setup is not on the org's allowed-actions list, so install
-      # pnpm through Corepack using the version pinned in package.json.
-      - name: Enable Corepack
-        run: corepack enable
+      # pnpm through Corepack using the version pinned in package.json, and
+      # cache the pnpm store with the same key as ci.yml so both reuse it.
+      - name: Setup pnpm
+        shell: bash
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          corepack enable
+          echo "pnpm $(pnpm --version)"
+          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-${{ runner.os }}-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
