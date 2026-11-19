@@ -51,67 +51,101 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Replaces dorny/paths-filter, which is not on the tiktok org's
+      # allowed-actions list. Each `name: pattern` line below is one filter;
+      # patterns use git's `:(glob)` pathspec syntax (`**` crosses directories,
+      # dotfiles match), equivalent to the previous picomatch filters.
       - name: Paths filter
         id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            create_sparkling_app:
-              - 'packages/create-sparkling-app/**'
-            sparkling_app_cli:
-              - 'packages/sparkling-app-cli/**'
-            sparkling_method_cli:
-              - 'packages/sparkling-method-cli/**'
-            sparkling_method:
-              - 'packages/sparkling-method/**'
-            sparkling_router:
-              - 'packages/methods/sparkling-router/**'
-            sparkling_storage:
-              - 'packages/methods/sparkling-storage/**'
-            sparkling_sdk:
-              - 'packages/sparkling-sdk/**'
-            sparkling_debug_tool:
-              - 'packages/sparkling-debug-tool/**'
-            sparkling_navigation:
-              - 'packages/methods/sparkling-navigation/**'
-            sparkling_media:
-              - 'packages/methods/sparkling-media/**'
-            playground:
-              - 'packages/playground/**'
-            app_template:
-              - 'template/sparkling-app-template/**'
-            shared:
-              - 'packages/common/**'
-            tooling:
-              - 'package.json'
-              - 'pnpm-lock.yaml'
-              - 'pnpm-workspace.yaml'
-              - 'tsconfig.json'
-              - 'eslint.config.js'
-              - '.npmrc'
-              - '.prettierrc'
-              - 'Gemfile'
-              - 'scripts/**'
-              - 'packages/methods/ios-unit-tests/**'
-              - '.github/workflows/**'
-            ios_swift:
-              - 'packages/**/*.swift'
-              - 'template/**/*.swift'
-              - '.swift-format'
-            clang:
-              - 'packages/**/*.m'
-              - 'packages/**/*.mm'
-              - 'packages/**/*.cpp'
-              - 'template/**/*.m'
-              - 'template/**/*.mm'
-              - 'template/**/*.cpp'
-              - '.clang-format'
-            android_kotlin:
-              - 'packages/**/*.kt'
-              - 'packages/**/*.kts'
-              - 'template/**/*.kt'
-              - 'template/**/*.kts'
-              - '.editorconfig'
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+
+          filters=$(cat <<'FILTERS'
+          create_sparkling_app: packages/create-sparkling-app/**
+          sparkling_app_cli: packages/sparkling-app-cli/**
+          sparkling_method_cli: packages/sparkling-method-cli/**
+          sparkling_method: packages/sparkling-method/**
+          sparkling_router: packages/methods/sparkling-router/**
+          sparkling_storage: packages/methods/sparkling-storage/**
+          sparkling_sdk: packages/sparkling-sdk/**
+          sparkling_debug_tool: packages/sparkling-debug-tool/**
+          sparkling_navigation: packages/methods/sparkling-navigation/**
+          sparkling_media: packages/methods/sparkling-media/**
+          playground: packages/playground/**
+          app_template: template/sparkling-app-template/**
+          shared: packages/common/**
+          tooling: package.json
+          tooling: pnpm-lock.yaml
+          tooling: pnpm-workspace.yaml
+          tooling: tsconfig.json
+          tooling: eslint.config.js
+          tooling: .npmrc
+          tooling: .prettierrc
+          tooling: Gemfile
+          tooling: scripts/**
+          tooling: packages/methods/ios-unit-tests/**
+          tooling: .github/workflows/**
+          ios_swift: packages/**/*.swift
+          ios_swift: template/**/*.swift
+          ios_swift: .swift-format
+          clang: packages/**/*.m
+          clang: packages/**/*.mm
+          clang: packages/**/*.cpp
+          clang: template/**/*.m
+          clang: template/**/*.mm
+          clang: template/**/*.cpp
+          clang: .clang-format
+          android_kotlin: packages/**/*.kt
+          android_kotlin: packages/**/*.kts
+          android_kotlin: template/**/*.kt
+          android_kotlin: template/**/*.kts
+          android_kotlin: .editorconfig
+          FILTERS
+          )
+
+          case "$EVENT_NAME" in
+            pull_request) base="$PR_BASE_SHA" ;;
+            push) base="$PUSH_BEFORE_SHA" ;;
+            *) base="" ;;
+          esac
+
+          # No usable base (manual dispatch, first push of a branch, or a
+          # force-push whose old head is gone): treat every filter as changed.
+          match_all=false
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ] \
+            || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            echo "No usable base commit (event=$EVENT_NAME base=${base:-<none>}); marking all filters as changed."
+            match_all=true
+          else
+            echo "Changed files ($base..HEAD):"
+            git diff --name-only "$base" HEAD | sed 's/^/  /'
+          fi
+
+          names=$(printf '%s\n' "$filters" | sed 's/:.*//' | awk '!seen[$0]++')
+          changes=()
+          for name in $names; do
+            pathspecs=()
+            while IFS= read -r pattern; do
+              pathspecs+=(":(glob)$pattern")
+            done < <(printf '%s\n' "$filters" | sed -n "s/^${name}: //p")
+
+            if [ "$match_all" = true ] \
+              || [ -n "$(git diff --name-only "$base" HEAD -- "${pathspecs[@]}")" ]; then
+              echo "$name=true" >> "$GITHUB_OUTPUT"
+              changes+=("\"$name\"")
+            else
+              echo "$name=false" >> "$GITHUB_OUTPUT"
+            fi
+          done
+
+          changes_json="[$(IFS=,; echo "${changes[*]:-}")]"
+          echo "changes=$changes_json" >> "$GITHUB_OUTPUT"
+          echo "Matched filters: $changes_json"
 
   unit-tests:
     name: TypeScript unit tests
