@@ -76,7 +76,8 @@ runs:
         # A pre-created draft stays unpublished after `gh release edit`, and
         # its asset URLs return 404 until it is published. Publish it only
         # after every zip has been uploaded, before the pods are pushed.
-        if [ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" = "true" ]; then
+        is_draft=$(gh release view "$TAG" --json isDraft --jq .isDraft)
+        if [ "$is_draft" = "true" ]; then
           echo "Release $TAG is a draft; publishing it."
           gh release edit "$TAG" --draft=false --target "$TARGET_SHA"
         fi
