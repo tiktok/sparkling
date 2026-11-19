@@ -178,7 +178,8 @@ jobs:
         run: |
           corepack enable
           corepack install --global "pnpm@${PNPM_VERSION}"
-          echo "pnpm $(pnpm --version)"
+          pnpm_version=$(pnpm --version)
+          echo "pnpm $pnpm_version"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -253,7 +254,8 @@ jobs:
         run: |
           corepack enable
           corepack install --global "pnpm@${PNPM_VERSION}"
-          echo "pnpm $(pnpm --version)"
+          pnpm_version=$(pnpm --version)
+          echo "pnpm $pnpm_version"
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -335,7 +337,8 @@ jobs:
         run: |
           corepack enable
           corepack install --global "pnpm@${PNPM_VERSION}"
-          echo "pnpm $(pnpm --version)"
+          pnpm_version=$(pnpm --version)
+          echo "pnpm $pnpm_version"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

@@ -39,8 +39,10 @@ jobs:
           COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
         run: |
           corepack enable
-          echo "pnpm $(pnpm --version)"
-          echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+          pnpm_version=$(pnpm --version)
+          echo "pnpm $pnpm_version"
+          store_path=$(pnpm store path --silent)
+          echo "PNPM_STORE_PATH=$store_path" >> "$GITHUB_ENV"
 
       - name: Cache pnpm store
         uses: actions/cache@v4
