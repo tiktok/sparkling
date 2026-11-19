@@ -162,10 +162,16 @@ jobs:
           npm install -g "npm@${NPM_VERSION}"
           echo "✅ npm version: $(npm --version)"
 
+      # pnpm/action-setup is not on the tiktok org's allowed-actions list, so
+      # install pnpm through Corepack instead.
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        shell: bash
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          corepack enable
+          corepack install --global "pnpm@${PNPM_VERSION}"
+          echo "pnpm $(pnpm --version)"
 
       - name: Install dependencies
         run: |
@@ -421,10 +427,16 @@ jobs:
           npm install -g "npm@${NPM_VERSION}"
           echo "✅ npm version: $(npm --version)"
 
+      # pnpm/action-setup is not on the tiktok org's allowed-actions list, so
+      # install pnpm through Corepack instead.
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        shell: bash
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          corepack enable
+          corepack install --global "pnpm@${PNPM_VERSION}"
+          echo "pnpm $(pnpm --version)"
 
       - name: Install dependencies
         run: |
