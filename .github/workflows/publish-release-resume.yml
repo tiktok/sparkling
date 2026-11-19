@@ -169,10 +169,16 @@ jobs:
       - name: Pin npm to ${{ env.NPM_VERSION }}
         run: npm install -g "npm@${NPM_VERSION}"
 
+      # pnpm/action-setup is not on the tiktok org's allowed-actions list, so
+      # install pnpm through Corepack instead.
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        shell: bash
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          corepack enable
+          corepack install --global "pnpm@${PNPM_VERSION}"
+          echo "pnpm $(pnpm --version)"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -238,10 +244,16 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      # pnpm/action-setup is not on the tiktok org's allowed-actions list, so
+      # install pnpm through Corepack instead.
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        shell: bash
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          corepack enable
+          corepack install --global "pnpm@${PNPM_VERSION}"
+          echo "pnpm $(pnpm --version)"
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -314,10 +326,16 @@ jobs:
       - name: Pin npm to ${{ env.NPM_VERSION }}
         run: npm install -g "npm@${NPM_VERSION}"
 
+      # pnpm/action-setup is not on the tiktok org's allowed-actions list, so
+      # install pnpm through Corepack instead.
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
+        shell: bash
+        env:
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          corepack enable
+          corepack install --global "pnpm@${PNPM_VERSION}"
+          echo "pnpm $(pnpm --version)"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

@@ -30,8 +30,20 @@ runs:
         java-version: '17'
         distribution: 'temurin'
 
+    # android-actions/setup-android is not on the tiktok org's allowed-actions
+    # list. GitHub-hosted ubuntu runners ship the Android SDK preinstalled
+    # (ANDROID_HOME), so expose its tools on PATH and accept the licenses.
     - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+      shell: bash
+      run: |
+        if [ -z "${ANDROID_HOME:-}" ] || [ ! -d "$ANDROID_HOME" ]; then
+          echo "::error::ANDROID_HOME is not set; expected a GitHub-hosted runner with the Android SDK preinstalled"
+          exit 1
+        fi
+        echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+        echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+        echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+        (yes || true) | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null
 
     - name: Cache Gradle
       uses: actions/cache@v4

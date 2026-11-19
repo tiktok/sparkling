@@ -40,18 +40,29 @@ runs:
         echo "Artifacts:"
         ls -lh dist/ios/
 
+    # ncipollo/release-action is not on the tiktok org's allowed-actions list,
+    # so use the gh CLI preinstalled on GitHub-hosted runners. Same behavior:
+    # create the release (with generated notes) or update it if it exists,
+    # then upload the zips, replacing assets with the same name.
     - name: Upload iOS zip assets to GitHub Release
-      uses: ncipollo/release-action@v1
-      with:
-        tag: ${{ inputs.version }}
-        name: Release ${{ inputs.version }}
-        commit: ${{ github.sha }}
-        token: ${{ inputs.github_token }}
-        prerelease: ${{ inputs.is_rc == 'true' }}
-        generateReleaseNotes: true
-        artifacts: dist/ios/*.zip
-        replacesArtifacts: true
-        allowUpdates: true
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        GH_REPO: ${{ github.repository }}
+        TAG: ${{ inputs.version }}
+        TARGET_SHA: ${{ github.sha }}
+        PRERELEASE: ${{ inputs.is_rc == 'true' }}
+      run: |
+        title="Release ${TAG}"
+        if gh release view "$TAG" > /dev/null 2>&1; then
+          echo "Release $TAG exists; updating it."
+          gh release edit "$TAG" --title "$title" --prerelease="$PRERELEASE"
+        else
+          echo "Creating release $TAG at $TARGET_SHA."
+          gh release create "$TAG" --title "$title" --target "$TARGET_SHA" \
+            --generate-notes --prerelease="$PRERELEASE"
+        fi
+        gh release upload "$TAG" dist/ios/*.zip --clobber
 
     - name: Publish pods to CocoaPods trunk
       shell: bash
