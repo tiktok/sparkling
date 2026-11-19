@@ -41,9 +41,11 @@ runs:
         ls -lh dist/ios/
 
     # ncipollo/release-action is not on the tiktok org's allowed-actions list,
-    # so use the gh CLI preinstalled on GitHub-hosted runners. Same behavior:
-    # create the release (with generated notes) or update it if it exists,
-    # then upload the zips, replacing assets with the same name.
+    # so use the gh CLI preinstalled on GitHub-hosted runners, matching its
+    # behavior: create the release with generated notes, or update an
+    # existing (possibly draft) release and regenerate its notes; upload the
+    # zips, replacing assets with the same name; and make sure the release is
+    # published before the podspecs that point at these assets are pushed.
     - name: Upload iOS zip assets to GitHub Release
       shell: bash
       env:
@@ -54,15 +56,30 @@ runs:
         PRERELEASE: ${{ inputs.is_rc == 'true' }}
       run: |
         title="Release ${TAG}"
+        # `gh release view` also finds draft releases for this tag.
         if gh release view "$TAG" > /dev/null 2>&1; then
-          echo "Release $TAG exists; updating it."
-          gh release edit "$TAG" --title "$title" --prerelease="$PRERELEASE"
+          echo "Release $TAG exists; updating it and regenerating its notes."
+          notes_file="${RUNNER_TEMP}/release-notes-${TAG}.md"
+          gh api "repos/${GH_REPO}/releases/generate-notes" \
+            -f tag_name="$TAG" -f target_commitish="$TARGET_SHA" \
+            --jq .body > "$notes_file"
+          gh release edit "$TAG" --title "$title" --target "$TARGET_SHA" \
+            --prerelease="$PRERELEASE" --notes-file "$notes_file"
         else
           echo "Creating release $TAG at $TARGET_SHA."
           gh release create "$TAG" --title "$title" --target "$TARGET_SHA" \
             --generate-notes --prerelease="$PRERELEASE"
         fi
+
         gh release upload "$TAG" dist/ios/*.zip --clobber
+
+        # A pre-created draft stays unpublished after `gh release edit`, and
+        # its asset URLs return 404 until it is published. Publish it only
+        # after every zip has been uploaded, before the pods are pushed.
+        if [ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" = "true" ]; then
+          echo "Release $TAG is a draft; publishing it."
+          gh release edit "$TAG" --draft=false --target "$TARGET_SHA"
+        fi
 
     - name: Publish pods to CocoaPods trunk
       shell: bash
